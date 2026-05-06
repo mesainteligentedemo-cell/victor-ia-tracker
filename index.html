@@ -161,6 +161,13 @@ tr:hover td{background:var(--amber3)}
 .feed-obs{font-size:11px;color:var(--amber);font-style:italic;margin-top:2px}
 .feed-meta{font-size:10px;color:var(--bone2);margin-top:2px}
 .feed-cost{font-size:11px;color:var(--green);font-weight:700;margin-top:2px}
+.feed-pricing-row{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
+.feed-price-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.feed-price-tag.cost{color:#f97316;background:rgba(249,115,22,.1)}
+.feed-price-tag.price{color:#22c55e;background:rgba(34,197,94,.1)}
+.feed-price-tag.margin{color:#FFAA17;background:rgba(255,170,23,.1)}
+.feed-price-tag em{font-style:normal;opacity:.7}
+.feed-price-sep{color:rgba(245,241,232,.2);font-size:12px}
 .feed-sw{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
 .feed-sw-tag{background:var(--amber3);border:1px solid rgba(255,170,23,.2);color:var(--amber);font-size:10px;padding:1px 6px;border-radius:8px}
 
@@ -775,19 +782,25 @@ function minsToLabel(mins){
   return m>0?`${h}h ${m}m`:`${h}h`;
 }
 function secsToHoursDecimal(s){return s/3600;}
-// Real software cost/month from FINANZAS — 176h laboral/mes (22 días × 8h)
+// Costo mensual real de cada herramienta — 176h laborales/mes (22d × 8h)
 const SW_COST_MAP={
   claude:2501.39, higgsfield:2267.77, elevenlabs:1734.05, adobe:1611.29,
   ghl:1046.71, hubspot:368.50, openrouter:187.98, canva:330.00,
   ltx:0, runway:0, midjourney:600, figma:400, gsuite:350, n8n:300,
   vercel:163.66, seedance:200, capcut:150, vscode:0, airtable:0, blotato:0,
 };
+// COSTO DE PRODUCCIÓN = solo software/API (proporcional al tiempo usado)
 function costForEntry(e){
   const h=durToSecs(e)/3600;
-  const labor=h*settings.rate;
-  const swCost=(e.sw||[]).reduce((s,id)=>s+((SW_COST_MAP[id]||0)/176)*h,0);
-  return Math.round(labor+swCost);
+  return Math.round((e.sw||[]).reduce((s,id)=>s+((SW_COST_MAP[id]||0)/176)*h,0));
 }
+// PRECIO DE VENTA = tarifa pública × horas (lo que se cobra al cliente)
+function priceForEntry(e){
+  const h=durToSecs(e)/3600;
+  return Math.round(h*settings.rate);
+}
+// MARGEN BRUTO = precio venta - costo producción
+function marginForEntry(e){return priceForEntry(e)-costForEntry(e);}
 
 // ===== PERIOD FILTER =====
 let activePeriod = 'today';
@@ -1032,6 +1045,9 @@ function calcKPIs(entries){
   const cliH={};entries.forEach(e=>{if(e.client) cliH[e.client]=(cliH[e.client]||0)+durToSecs(e)/3600;});
   const topClient=Object.entries(cliH).sort((a,b)=>b[1]-a[1])[0];
   const totalCost=entries.reduce((a,e)=>a+costForEntry(e),0);
+  const totalPrice=entries.reduce((a,e)=>a+priceForEntry(e),0);
+  const totalMargin=totalPrice-totalCost;
+  const marginRate=totalPrice>0?Math.round(totalMargin/totalPrice*100):0;
   // Prompt engineering metrics
   const withPrompts=entries.filter(e=>e.promptCount>0);
   const totalPrompts=withPrompts.reduce((a,e)=>a+(e.promptCount||1),0);
@@ -1047,7 +1063,7 @@ function calcKPIs(entries){
   });
   const promptAvgByCat=Object.entries(promptByCat).map(([k,v])=>([k,v.sum/v.n])).sort((a,b)=>b[1]-a[1]);
   const worstPromptEntries=[...withPrompts].sort((a,b)=>(b.promptCount||1)-(a.promptCount||1)).slice(0,10);
-  return {total,totalSecs,totalHours,days,avgHoursPerDay,avgActionsPerDay,peakHour,compRate,reworkRate,costMXN,costUSD,prompts,deploys,streak,topProject,topClient,totalCost,avgPrompts,oneShotRate,promptScore,promptByCat,promptAvgByCat,worstPromptEntries,withPromptsLen:withPrompts.length};
+  return {total,totalSecs,totalHours,days,avgHoursPerDay,avgActionsPerDay,peakHour,compRate,reworkRate,costMXN,costUSD,prompts,deploys,streak,topProject,topClient,totalCost,totalPrice,totalMargin,marginRate,avgPrompts,oneShotRate,promptScore,promptByCat,promptAvgByCat,worstPromptEntries,withPromptsLen:withPrompts.length};
 }
 
 // ===== DASHBOARD =====
@@ -1076,15 +1092,22 @@ function renderDashboard(){
       <div class="tstat"><div class="tv" style="color:${todayKPIs.oneShotRate>=70?'var(--green)':todayKPIs.oneShotRate>=40?'var(--amber)':'var(--red)'}">${todayKPIs.oneShotRate}%</div><div class="tl">1-Shot Rate</div></div>
     </div>
 
-    ${activePeriod!=='all'?`<div style="font-size:11px;color:var(--bone2);margin-bottom:12px">Mostrando: <strong style="color:var(--amber)">${periodLabel}</strong> — ${filteredEntries.length} entradas · ${secsToHMS(pKPIs.totalSecs)} · $${pKPIs.totalCost.toLocaleString()} MXN</div>`:''}
+    ${activePeriod!=='all'?`<div style="font-size:11px;color:var(--bone2);margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <span>Mostrando: <strong style="color:var(--amber)">${periodLabel}</strong> · ${filteredEntries.length} entradas · ${secsToHMS(pKPIs.totalSecs)}</span>
+      <span style="color:#f97316;font-weight:700">💰 Costo: $${pKPIs.totalCost.toLocaleString()}</span>
+      <span style="color:#22c55e;font-weight:700">💵 Venta: $${pKPIs.totalPrice.toLocaleString()}</span>
+      <span style="color:var(--amber);font-weight:700">📈 Margen: $${pKPIs.totalMargin.toLocaleString()} (${pKPIs.marginRate}%)</span>
+    </div>`:''}
 
     <div class="kpi-grid">
-      <div class="kpi-card hero"><div class="kpi-label">Total acciones</div><div class="kpi-val">${pKPIs.total}</div><div class="kpi-sub">${pKPIs.days} días</div><div class="kpi-trend">📋</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Total acciones</div><div class="kpi-val">${pKPIs.total}</div><div class="kpi-sub">${pKPIs.days} días activos</div><div class="kpi-trend">📋</div></div>
       <div class="kpi-card hero"><div class="kpi-label">Tiempo total</div><div class="kpi-val" style="font-size:20px">${secsToHMS(pKPIs.totalSecs)}</div><div class="kpi-sub">${pKPIs.avgHoursPerDay.toFixed(1)}h prom/día</div><div class="kpi-trend">⏱</div></div>
-      <div class="kpi-card hero"><div class="kpi-label">Valor generado</div><div class="kpi-val">$${(pKPIs.costMXN/1000).toFixed(1)}k</div><div class="kpi-sub">MXN · $${pKPIs.costUSD} USD</div><div class="kpi-trend">💰</div></div>
+      <div class="kpi-card hero" style="border-color:#f97316"><div class="kpi-label" style="color:#f97316">Costo producción</div><div class="kpi-val" style="color:#f97316">$${(pKPIs.totalCost/1000).toFixed(1)}k</div><div class="kpi-sub">MXN · software/APIs</div><div class="kpi-trend">💰</div></div>
+      <div class="kpi-card hero" style="border-color:#22c55e"><div class="kpi-label" style="color:#22c55e">Precio de venta</div><div class="kpi-val" style="color:#22c55e">$${(pKPIs.totalPrice/1000).toFixed(1)}k</div><div class="kpi-sub">MXN · ${settings.rate}/h × ${pKPIs.totalHours.toFixed(0)}h</div><div class="kpi-trend">💵</div></div>
+      <div class="kpi-card hero" style="border-color:var(--amber)"><div class="kpi-label" style="color:var(--amber)">Margen bruto</div><div class="kpi-val" style="color:var(--amber)">$${(pKPIs.totalMargin/1000).toFixed(1)}k</div><div class="kpi-sub">${pKPIs.marginRate}% del precio venta</div><div class="kpi-trend">${pKPIs.marginRate>=70?'🚀':pKPIs.marginRate>=50?'✅':'⚠'}</div></div>
       <div class="kpi-card hero"><div class="kpi-label">Completado</div><div class="kpi-val">${pKPIs.compRate}%</div><div class="kpi-sub">${filteredEntries.filter(e=>e.status==='Completado').length} de ${pKPIs.total}</div><div class="kpi-trend">✅</div></div>
       <div class="kpi-card hero"><div class="kpi-label">Retrabajo</div><div class="kpi-val">${pKPIs.reworkRate}%</div><div class="kpi-sub">${filteredEntries.filter(e=>e.rework).length} entradas</div><div class="kpi-trend">${pKPIs.reworkRate>15?'⚠':'👍'}</div></div>
-      <div class="kpi-card hero"><div class="kpi-label">Prom. acción</div><div class="kpi-val" style="font-size:20px">${pKPIs.total?secsToHMS(Math.round(pKPIs.totalSecs/pKPIs.total)):'0s'}</div><div class="kpi-sub">por entrada</div><div class="kpi-trend">📊</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Prom. por acción</div><div class="kpi-val" style="font-size:20px">${pKPIs.total?secsToHMS(Math.round(pKPIs.totalSecs/pKPIs.total)):'0s'}</div><div class="kpi-sub">duración media</div><div class="kpi-trend">📊</div></div>
     </div>
 
     <div class="summary-grid">
@@ -1298,6 +1321,9 @@ function renderFeed(entries){
   return sorted.map(e=>{
     const swTags=(e.sw||[]).map(id=>{const s=SOFTWARE.find(x=>x.id===id);return s?`<span class="feed-sw-tag">${s.name}</span>`:''}).join('');
     const cost=costForEntry(e);
+    const price=priceForEntry(e);
+    const margin=price-cost;
+    const marginPct=price>0?Math.round(margin/price*100):0;
     const pc=e.promptCount||0;
     const pcClass=pc===0?'':pc===1?'prompt-1':pc<=3?'prompt-2':pc<=6?'prompt-3':'prompt-high';
     const pcLabel=pc===0?'':pc===1?'1-shot ✨':pc<=3?`${pc} prompts`:pc<=6?`${pc} prompts ⚠`:` ${pc} prompts 🔴`;
@@ -1313,8 +1339,12 @@ function renderFeed(entries){
           ${e.obs?`<div class="feed-obs">💬 ${e.obs}</div>`:''}
           ${e.promptWinner?`<div class="prompt-winner">🏆 Prompt: ${e.promptWinner.slice(0,120)}${e.promptWinner.length>120?'…':''}</div>`:''}
           <div class="feed-meta">${e.dateKey} · ${e.cat} · ${e.project||''} · <strong>${secsToHMS(durToSecs(e))}</strong> · ${e.status}</div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
-            <div class="feed-cost">$${cost.toLocaleString()} MXN</div>
+          <div class="feed-pricing-row">
+            <span class="feed-price-tag cost" title="Costo producción (software/APIs)">💰 $${cost.toLocaleString()}</span>
+            <span class="feed-price-sep">→</span>
+            <span class="feed-price-tag price" title="Precio de venta al cliente">💵 $${price.toLocaleString()}</span>
+            <span class="feed-price-sep">→</span>
+            <span class="feed-price-tag margin" title="Margen bruto (${marginPct}%)">📈 $${margin.toLocaleString()} <em>(${marginPct}%)</em></span>
             ${pc?`<span class="prompt-badge ${pcClass}">🎯 ${pcLabel}</span>`:''}
           </div>
           ${swTags?`<div class="feed-sw">${swTags}</div>`:''}
@@ -2437,7 +2467,8 @@ function renderReportes(){
                 <span class="rep-tl-cat" style="color:${col}">${e.cat}</span>
                 ${e.project?`<span class="rep-tl-proj">${e.project}</span>`:''}
                 <span class="rep-tl-dur">${secsToHMS(durToSecs(e))}</span>
-                <span class="rep-tl-cost">$${costForEntry(e).toLocaleString()} MXN</span>
+                <span class="rep-tl-cost" title="Costo producción">💰$${costForEntry(e).toLocaleString()}</span>
+                <span style="font-size:10px;color:#22c55e;font-weight:700" title="Precio venta">💵$${priceForEntry(e).toLocaleString()}</span>
                 <span class="rep-tl-status" style="color:${sCol}">${e.status}</span>
                 ${e.rework?'<span class="rep-tl-rework">↺ retrabajo</span>':''}
                 ${e.promptCount>0?`<span style="font-size:10px;color:#3b82f6">${e.promptCount} prompt${e.promptCount>1?'s':''}</span>`:''}
