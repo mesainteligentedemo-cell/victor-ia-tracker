@@ -195,6 +195,45 @@ tr:hover td{background:var(--amber3)}
 .fl-fb-label{font-size:10px;color:var(--bone2);margin-bottom:8px;font-weight:600}
 .fl-fb-sublabel{font-size:10px;color:rgba(245,241,232,.35);margin-top:6px;font-style:italic}
 .fl-footer{font-size:10px;color:rgba(245,241,232,.3);margin-top:14px;text-align:center;letter-spacing:.3px}
+/* REPORTES TAB */
+.rep-dept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-bottom:8px}
+.rep-dept-card{background:var(--surface2);border:1px solid rgba(245,241,232,.08);border-radius:10px;padding:14px;border-top:2px solid var(--dc,#FFAA17)}
+.rep-dept-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.rep-dept-name{font-size:12px;font-weight:800;letter-spacing:.2px}
+.rep-dept-pct{font-size:11px;font-weight:700;color:var(--bone2)}
+.rep-dept-bar{height:4px;background:rgba(245,241,232,.08);border-radius:2px;margin-bottom:10px;overflow:hidden}
+.rep-dept-bar-fill{height:100%;border-radius:2px;transition:width .4s}
+.rep-dept-stats{display:flex;gap:12px;font-size:10px;color:var(--bone2);margin-bottom:10px;font-weight:600}
+.rep-dept-actions{display:flex;flex-direction:column;gap:4px}
+.rep-dept-action{display:grid;grid-template-columns:72px 1fr auto;gap:6px;align-items:center;font-size:10px;padding:4px 0;border-top:1px solid rgba(245,241,232,.05)}
+.rep-da-date{color:rgba(245,241,232,.4);font-family:monospace;font-size:9px}
+.rep-da-desc{color:var(--bone2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rep-da-dur{color:var(--amber);font-weight:700;white-space:nowrap}
+.rep-dept-more{font-size:10px;color:rgba(245,241,232,.3);text-align:center;padding-top:4px}
+/* Daily reports */
+.rep-daily{display:flex;flex-direction:column;gap:16px}
+.rep-day-card{background:var(--surface2);border:1px solid rgba(245,241,232,.08);border-radius:10px;overflow:hidden}
+.rep-day-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(245,241,232,.04);flex-wrap:wrap;gap:8px}
+.rep-day-date{display:flex;flex-direction:column;gap:2px}
+.rep-day-label{font-size:13px;font-weight:800;color:var(--bone);text-transform:capitalize}
+.rep-day-key{font-size:10px;color:var(--bone2);font-family:monospace}
+.rep-day-totals{display:flex;gap:12px;flex-wrap:wrap}
+.rep-day-stat{font-size:11px;font-weight:700;color:var(--amber);background:rgba(255,170,23,.1);padding:3px 8px;border-radius:4px}
+.rep-day-timeline{padding:0 16px 12px}
+.rep-timeline-row{display:grid;grid-template-columns:44px 10px 1fr;gap:8px;align-items:start;padding:10px 0;border-bottom:1px solid rgba(245,241,232,.05)}
+.rep-timeline-row:last-child{border-bottom:none}
+.rep-tl-time{font-size:11px;font-family:monospace;color:rgba(245,241,232,.5);padding-top:2px;text-align:right}
+.rep-tl-dot{width:10px;height:10px;border-radius:50%;margin-top:3px;flex-shrink:0}
+.rep-tl-body{flex:1;min-width:0}
+.rep-tl-desc{font-size:12px;font-weight:600;color:var(--bone);line-height:1.4;margin-bottom:4px}
+.rep-tl-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.rep-tl-cat{font-size:10px;font-weight:700}
+.rep-tl-proj{font-size:10px;color:rgba(245,241,232,.4)}
+.rep-tl-dur{font-size:10px;font-weight:700;color:var(--amber)}
+.rep-tl-cost{font-size:10px;color:var(--green)}
+.rep-tl-status{font-size:10px;font-weight:600}
+.rep-tl-rework{font-size:10px;color:#ef4444;font-weight:700}
+.rep-tl-obs{font-size:10px;color:rgba(245,241,232,.45);margin-top:4px;font-style:italic}
 /* Flow modal */
 .fl-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;align-items:center;justify-content:center;padding:20px}
 .fl-modal-box{background:var(--surface);border:1px solid var(--amber);border-radius:12px;padding:24px;min-width:280px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto}
@@ -369,6 +408,7 @@ tr:hover td{background:var(--amber3)}
   <button class="tab-btn" onclick="setTab('organigrama')">🏢 Organigrama</button>
   <button class="tab-btn" onclick="setTab('software')">🛠 Software & APIs</button>
   <button class="tab-btn" onclick="setTab('entradas')">📋 Entradas</button>
+  <button class="tab-btn" onclick="setTab('reportes')">📑 Reportes</button>
 </div>
 
 <!-- MAIN -->
@@ -448,6 +488,7 @@ tr:hover td{background:var(--amber3)}
     <div id="view-organigrama" class="hidden"></div>
     <div id="view-software" class="hidden"></div>
     <div id="view-entradas" class="hidden"></div>
+    <div id="view-reportes" class="hidden"></div>
   </div>
 </div>
 
@@ -943,18 +984,18 @@ function setTab(tab){
   });
   document.querySelectorAll('#content > div').forEach(d=>d.classList.add('hidden'));
   document.getElementById('view-'+tab).classList.remove('hidden');
-  const showSb=sidebarVisible&&(tab==='entradas'||tab==='analytics');
+  const showSb=sidebarVisible&&(tab==='entradas'||tab==='analytics'||tab==='reportes');
   document.getElementById('sidebar').classList.toggle('hidden',!showSb);
   destroyCharts();
   renderCurrentView();
 }
 function toggleSidebar(){
   sidebarVisible=!sidebarVisible;
-  const showSb=sidebarVisible&&(currentTab==='entradas'||currentTab==='analytics');
+  const showSb=sidebarVisible&&(currentTab==='entradas'||currentTab==='analytics'||currentTab==='reportes');
   document.getElementById('sidebar').classList.toggle('hidden',!showSb);
 }
 function renderCurrentView(){
-  const renders={dashboard:renderDashboard,analytics:renderAnalytics,finanzas:renderFinanzas,organigrama:renderOrganigrama,software:renderSoftware,entradas:renderEntradas};
+  const renders={dashboard:renderDashboard,analytics:renderAnalytics,finanzas:renderFinanzas,organigrama:renderOrganigrama,software:renderSoftware,entradas:renderEntradas,reportes:renderReportes};
   const fn=renders[currentTab];if(fn) fn();
 }
 
@@ -2314,6 +2355,125 @@ const DEPTS = [
     color:'#84cc16'
   },
 ];
+
+// ===== REPORTES =====
+function renderReportes(){
+  const el=document.getElementById('view-reportes');
+  const entries=filteredEntries;
+
+  const catColors={'Desarrollo':'#3b82f6','Video':'#c084fc','IA/Automatización':'#FFAA17','Marketing':'#ec4899',
+    'Diseño':'#a855f7','Operaciones':'#22c55e','Reunión':'#14b8a6','Investigación':'#f97316','Sin categoría':'#6b7280'};
+
+  // Group by dept
+  const byDept={};
+  entries.forEach(e=>{const d=e.cat||'Sin categoría';if(!byDept[d])byDept[d]=[];byDept[d].push(e);});
+  const depts=Object.entries(byDept).sort((a,b)=>b[1].reduce((s,e)=>s+durToSecs(e),0)-a[1].reduce((s,e)=>s+durToSecs(e),0));
+
+  // Group by date
+  const byDate={};
+  entries.forEach(e=>{if(!byDate[e.dateKey])byDate[e.dateKey]=[];byDate[e.dateKey].push(e);});
+  const dates=Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+
+  const totalH=entries.reduce((s,e)=>s+durToSecs(e),0)/3600;
+  const totalCost=entries.reduce((s,e)=>s+costForEntry(e),0);
+
+  const deptCards=depts.map(([dept,dE])=>{
+    const dH=dE.reduce((s,e)=>s+durToSecs(e),0)/3600;
+    const dC=dE.reduce((s,e)=>s+costForEntry(e),0);
+    const pct=totalH>0?Math.round(dH/totalH*100):0;
+    const col=catColors[dept]||'#6b7280';
+    const sorted=[...dE].sort((a,b)=>b.dateKey.localeCompare(a.dateKey)||(b.hora||'').localeCompare(a.hora||''));
+    return `<div class="rep-dept-card" style="--dc:${col}">
+      <div class="rep-dept-header">
+        <div class="rep-dept-name" style="color:${col}">${dept}</div>
+        <div class="rep-dept-pct">${pct}%</div>
+      </div>
+      <div class="rep-dept-bar"><div class="rep-dept-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="rep-dept-stats">
+        <span>⏱ ${dH.toFixed(1)}h</span>
+        <span>💵 $${dC.toLocaleString()}</span>
+        <span>📌 ${dE.length} acc.</span>
+      </div>
+      <div class="rep-dept-actions">
+        ${sorted.slice(0,5).map(e=>`<div class="rep-dept-action">
+          <span class="rep-da-date">${e.dateKey}</span>
+          <span class="rep-da-desc" title="${e.desc}">${e.desc.slice(0,48)}${e.desc.length>48?'…':''}</span>
+          <span class="rep-da-dur">${secsToHMS(durToSecs(e))}</span>
+        </div>`).join('')}
+        ${sorted.length>5?`<div class="rep-dept-more">+${sorted.length-5} acciones más</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  const dailyReports=dates.slice(0,21).map(date=>{
+    const dE=[...byDate[date]].sort((a,b)=>(a.hora||'').localeCompare(b.hora||''));
+    const dH=dE.reduce((s,e)=>s+durToSecs(e),0)/3600;
+    const dC=dE.reduce((s,e)=>s+costForEntry(e),0);
+    let dayLabel='';
+    try{dayLabel=new Date(date+'T12:00:00').toLocaleDateString('es-MX',{weekday:'long',day:'2-digit',month:'short',year:'numeric'});}catch(x){dayLabel=date;}
+    return `<div class="rep-day-card">
+      <div class="rep-day-header">
+        <div class="rep-day-date">
+          <span class="rep-day-label">${dayLabel}</span>
+          <span class="rep-day-key">${date}</span>
+        </div>
+        <div class="rep-day-totals">
+          <span class="rep-day-stat">⏱ ${dH.toFixed(1)}h</span>
+          <span class="rep-day-stat">💵 $${dC.toLocaleString()}</span>
+          <span class="rep-day-stat">📌 ${dE.length} acciones</span>
+          ${dE.filter(e=>e.rework).length>0?`<span class="rep-day-stat" style="color:#ef4444;background:rgba(239,68,68,.1)">↺ ${dE.filter(e=>e.rework).length} retrabajo</span>`:''}
+        </div>
+      </div>
+      <div class="rep-day-timeline">
+        ${dE.map(e=>{
+          const col=catColors[e.cat]||'#6b7280';
+          const sCol=e.status==='Completado'?'#22c55e':e.status==='En progreso'?'#FFAA17':'#6b7280';
+          return `<div class="rep-timeline-row">
+            <div class="rep-tl-time">${e.hora||'——'}</div>
+            <div class="rep-tl-dot" style="background:${col}"></div>
+            <div class="rep-tl-body">
+              <div class="rep-tl-desc">${e.desc}</div>
+              <div class="rep-tl-meta">
+                <span class="rep-tl-cat" style="color:${col}">${e.cat}</span>
+                ${e.project?`<span class="rep-tl-proj">${e.project}</span>`:''}
+                <span class="rep-tl-dur">${secsToHMS(durToSecs(e))}</span>
+                <span class="rep-tl-cost">$${costForEntry(e).toLocaleString()} MXN</span>
+                <span class="rep-tl-status" style="color:${sCol}">${e.status}</span>
+                ${e.rework?'<span class="rep-tl-rework">↺ retrabajo</span>':''}
+                ${e.promptCount>0?`<span style="font-size:10px;color:#3b82f6">${e.promptCount} prompt${e.promptCount>1?'s':''}</span>`:''}
+              </div>
+              ${e.obs?`<div class="rep-tl-obs">💬 ${e.obs}</div>`:''}
+              ${e.result?`<div class="rep-tl-obs" style="color:#86efac">✅ ${e.result}</div>`:''}
+              ${e.why?`<div class="rep-tl-obs" style="color:var(--bone2)">❓ ${e.why}</div>`:''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`<div style="padding:16px 20px;max-width:1200px;margin:0 auto">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+      <h2 style="font-size:16px;font-weight:800;color:var(--bone);margin:0">📑 Reportes — Victor IA</h2>
+      <div style="font-size:11px;color:var(--bone2);background:rgba(255,170,23,.1);border:1px solid rgba(255,170,23,.3);border-radius:6px;padding:4px 10px">
+        ${entries.length} acciones · ${totalH.toFixed(1)}h · $${totalCost.toLocaleString()} MXN
+      </div>
+    </div>
+
+    <div class="section-title">📁 Por Departamento / Área</div>
+    <div class="rep-dept-grid">${deptCards||'<div style="color:var(--bone2);padding:20px">Sin datos</div>'}</div>
+
+    <div class="section-title" style="margin-top:24px">
+      📅 Reportes Diarios
+      <span style="font-size:10px;color:var(--bone2);font-weight:400;margin-left:8px">
+        ${dates.length} días · mostrando ${Math.min(dates.length,21)}
+      </span>
+    </div>
+    <div class="rep-daily">
+      ${dailyReports||'<div style="color:var(--bone2);padding:20px;text-align:center">No hay entradas en el período seleccionado</div>'}
+    </div>
+  </div>`;
+}
 
 function renderOrganigrama(){
   // Calcular horas por categoría desde seed data
