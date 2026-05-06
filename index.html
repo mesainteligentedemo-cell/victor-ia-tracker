@@ -734,9 +734,18 @@ function minsToLabel(mins){
   return m>0?`${h}h ${m}m`:`${h}h`;
 }
 function secsToHoursDecimal(s){return s/3600;}
+// Real software cost/month from FINANZAS — 176h laboral/mes (22 días × 8h)
+const SW_COST_MAP={
+  claude:2501.39, higgsfield:2267.77, elevenlabs:1734.05, adobe:1611.29,
+  ghl:1046.71, hubspot:368.50, openrouter:187.98, canva:330.00,
+  ltx:0, runway:0, midjourney:600, figma:400, gsuite:350, n8n:300,
+  vercel:163.66, seedance:200, capcut:150, vscode:0, airtable:0, blotato:0,
+};
 function costForEntry(e){
   const h=durToSecs(e)/3600;
-  return Math.round(h*settings.rate);
+  const labor=h*settings.rate;
+  const swCost=(e.sw||[]).reduce((s,id)=>s+((SW_COST_MAP[id]||0)/176)*h,0);
+  return Math.round(labor+swCost);
 }
 
 // ===== PERIOD FILTER =====
@@ -2454,6 +2463,13 @@ function renderOrganigrama(){
 
 // ===== INIT =====
 init();
+
+// ===== SERVICE WORKER (offline support) =====
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
