@@ -168,6 +168,11 @@ tr:hover td{background:var(--amber3)}
 .feed-price-tag.margin{color:#FFAA17;background:rgba(255,170,23,.1)}
 .feed-price-tag em{font-style:normal;opacity:.7}
 .feed-price-sep{color:rgba(245,241,232,.2);font-size:12px}
+/* CLIENT MODE — hides internal cost data */
+body.client-mode .internal-only{display:none!important}
+body.client-mode #client-mode-btn{background:var(--amber);color:#000;font-weight:800}
+.client-mode-banner{display:none;background:rgba(255,170,23,.15);border:1px solid var(--amber);color:var(--amber);font-size:11px;font-weight:700;text-align:center;padding:6px;letter-spacing:.5px}
+body.client-mode .client-mode-banner{display:block}
 .feed-sw{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
 .feed-sw-tag{background:var(--amber3);border:1px solid rgba(255,170,23,.2);color:var(--amber);font-size:10px;padding:1px 6px;border-radius:8px}
 
@@ -241,6 +246,19 @@ tr:hover td{background:var(--amber3)}
 .rep-tl-status{font-size:10px;font-weight:600}
 .rep-tl-rework{font-size:10px;color:#ef4444;font-weight:700}
 .rep-tl-obs{font-size:10px;color:rgba(245,241,232,.45);margin-top:4px;font-style:italic}
+/* Project phase breakdown in Reportes */
+.rep-project-card{background:var(--surface2);border:1px solid rgba(245,241,232,.08);border-radius:10px;padding:14px}
+.rep-project-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.rep-project-name{font-size:13px;font-weight:800;color:var(--bone)}
+.rep-project-stats{display:flex;gap:8px;flex-wrap:wrap;font-size:10px;font-weight:700}
+.rep-phase-list{display:flex;flex-direction:column;gap:5px}
+.rep-phase-row{display:grid;grid-template-columns:90px 1fr 44px 72px 72px;gap:8px;align-items:center;font-size:10px}
+.rep-phase-name{font-weight:700;font-size:10px}
+.rep-phase-bar-wrap{background:rgba(245,241,232,.06);border-radius:2px;height:4px;overflow:hidden}
+.rep-phase-bar{height:100%;border-radius:2px;transition:width .3s}
+.rep-phase-h{color:var(--amber);font-weight:700;text-align:right}
+.rep-phase-cost{color:#f97316;text-align:right}
+.rep-phase-price{color:#22c55e;text-align:right}
 /* Flow modal */
 .fl-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;align-items:center;justify-content:center;padding:20px}
 .fl-modal-box{background:var(--surface);border:1px solid var(--amber);border-radius:12px;padding:24px;min-width:280px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto}
@@ -384,9 +402,12 @@ tr:hover td{background:var(--amber3)}
     <button onclick="openAdd()">+ Entrada</button>
     <button onclick="exportCSV()">Export CSV</button>
     <button onclick="toggleSidebar()">⧉ Filtros</button>
+    <button id="client-mode-btn" onclick="toggleClientMode()" title="Modo cliente: oculta costos internos, solo muestra precio público">👁 Modo Cliente</button>
     <button onclick="showSettings()">⚙ Config</button>
   </div>
 </div>
+
+<div class="client-mode-banner">👁 MODO CLIENTE ACTIVO — Solo se muestran precios de venta (costos internos ocultos)</div>
 
 <!-- PERIOD BAR -->
 <div id="period-bar">
@@ -579,6 +600,17 @@ tr:hover td{background:var(--amber3)}
         <label>Cliente</label>
         <input type="text" id="e-client" list="clients-list" placeholder="Victor IA, Costa Negra...">
         <datalist id="clients-list"></datalist>
+      </div>
+      <div class="form-group">
+        <label>Fase del proyecto</label>
+        <select id="e-phase">
+          <option value="">— sin fase —</option>
+          <option value="Ideación">💡 Ideación / Estrategia</option>
+          <option value="Creativo">🎨 Diseño / Creativo</option>
+          <option value="Ejecución">⚙️ Ejecución / Desarrollo</option>
+          <option value="Revisión">🔍 Revisión / QA</option>
+          <option value="Entrega">🚀 Entrega / Deploy</option>
+        </select>
       </div>
       <div class="form-group">
         <label>Prioridad</label>
@@ -1102,9 +1134,9 @@ function renderDashboard(){
     <div class="kpi-grid">
       <div class="kpi-card hero"><div class="kpi-label">Total acciones</div><div class="kpi-val">${pKPIs.total}</div><div class="kpi-sub">${pKPIs.days} días activos</div><div class="kpi-trend">📋</div></div>
       <div class="kpi-card hero"><div class="kpi-label">Tiempo total</div><div class="kpi-val" style="font-size:20px">${secsToHMS(pKPIs.totalSecs)}</div><div class="kpi-sub">${pKPIs.avgHoursPerDay.toFixed(1)}h prom/día</div><div class="kpi-trend">⏱</div></div>
-      <div class="kpi-card hero" style="border-color:#f97316"><div class="kpi-label" style="color:#f97316">Costo producción</div><div class="kpi-val" style="color:#f97316">$${(pKPIs.totalCost/1000).toFixed(1)}k</div><div class="kpi-sub">MXN · software/APIs</div><div class="kpi-trend">💰</div></div>
+      <div class="kpi-card hero internal-only" style="border-color:#f97316"><div class="kpi-label" style="color:#f97316">Costo producción</div><div class="kpi-val" style="color:#f97316">$${(pKPIs.totalCost/1000).toFixed(1)}k</div><div class="kpi-sub">MXN · software/APIs</div><div class="kpi-trend">💰</div></div>
       <div class="kpi-card hero" style="border-color:#22c55e"><div class="kpi-label" style="color:#22c55e">Precio de venta</div><div class="kpi-val" style="color:#22c55e">$${(pKPIs.totalPrice/1000).toFixed(1)}k</div><div class="kpi-sub">MXN · ${settings.rate}/h × ${pKPIs.totalHours.toFixed(0)}h</div><div class="kpi-trend">💵</div></div>
-      <div class="kpi-card hero" style="border-color:var(--amber)"><div class="kpi-label" style="color:var(--amber)">Margen bruto</div><div class="kpi-val" style="color:var(--amber)">$${(pKPIs.totalMargin/1000).toFixed(1)}k</div><div class="kpi-sub">${pKPIs.marginRate}% del precio venta</div><div class="kpi-trend">${pKPIs.marginRate>=70?'🚀':pKPIs.marginRate>=50?'✅':'⚠'}</div></div>
+      <div class="kpi-card hero internal-only" style="border-color:var(--amber)"><div class="kpi-label" style="color:var(--amber)">Margen bruto</div><div class="kpi-val" style="color:var(--amber)">$${(pKPIs.totalMargin/1000).toFixed(1)}k</div><div class="kpi-sub">${pKPIs.marginRate}% del precio venta</div><div class="kpi-trend">${pKPIs.marginRate>=70?'🚀':pKPIs.marginRate>=50?'✅':'⚠'}</div></div>
       <div class="kpi-card hero"><div class="kpi-label">Completado</div><div class="kpi-val">${pKPIs.compRate}%</div><div class="kpi-sub">${filteredEntries.filter(e=>e.status==='Completado').length} de ${pKPIs.total}</div><div class="kpi-trend">✅</div></div>
       <div class="kpi-card hero"><div class="kpi-label">Retrabajo</div><div class="kpi-val">${pKPIs.reworkRate}%</div><div class="kpi-sub">${filteredEntries.filter(e=>e.rework).length} entradas</div><div class="kpi-trend">${pKPIs.reworkRate>15?'⚠':'👍'}</div></div>
       <div class="kpi-card hero"><div class="kpi-label">Prom. por acción</div><div class="kpi-val" style="font-size:20px">${pKPIs.total?secsToHMS(Math.round(pKPIs.totalSecs/pKPIs.total)):'0s'}</div><div class="kpi-sub">duración media</div><div class="kpi-trend">📊</div></div>
@@ -1340,11 +1372,11 @@ function renderFeed(entries){
           ${e.promptWinner?`<div class="prompt-winner">🏆 Prompt: ${e.promptWinner.slice(0,120)}${e.promptWinner.length>120?'…':''}</div>`:''}
           <div class="feed-meta">${e.dateKey} · ${e.cat} · ${e.project||''} · <strong>${secsToHMS(durToSecs(e))}</strong> · ${e.status}</div>
           <div class="feed-pricing-row">
-            <span class="feed-price-tag cost" title="Costo producción (software/APIs)">💰 $${cost.toLocaleString()}</span>
-            <span class="feed-price-sep">→</span>
-            <span class="feed-price-tag price" title="Precio de venta al cliente">💵 $${price.toLocaleString()}</span>
-            <span class="feed-price-sep">→</span>
-            <span class="feed-price-tag margin" title="Margen bruto (${marginPct}%)">📈 $${margin.toLocaleString()} <em>(${marginPct}%)</em></span>
+            <span class="feed-price-tag cost internal-only" title="Costo producción (software/APIs)">💰 $${cost.toLocaleString()}</span>
+            <span class="feed-price-sep internal-only">→</span>
+            <span class="feed-price-tag price" title="Precio de venta al cliente">💵 $${price.toLocaleString()} MXN</span>
+            <span class="feed-price-sep internal-only">→</span>
+            <span class="feed-price-tag margin internal-only" title="Margen bruto (${marginPct}%)">📈 $${margin.toLocaleString()} <em>(${marginPct}%)</em></span>
             ${pc?`<span class="prompt-badge ${pcClass}">🎯 ${pcLabel}</span>`:''}
           </div>
           ${swTags?`<div class="feed-sw">${swTags}</div>`:''}
@@ -1829,6 +1861,7 @@ function openEdit(id){
   document.getElementById('e-status').value=e.status||'Completado';
   document.getElementById('e-priority').value=e.priority||'Alta';
   document.getElementById('e-rework').value=e.rework?'1':'0';
+  document.getElementById('e-phase').value=e.phase||'';
   document.getElementById('e-notes').value=e.notes||'';
   document.getElementById('e-prompt-count').value=e.promptCount||1;
   document.getElementById('e-prompt-cat').value=e.promptCat||'';
@@ -1864,6 +1897,7 @@ function saveEntry(){
     status:document.getElementById('e-status').value,
     priority:document.getElementById('e-priority').value,
     rework:document.getElementById('e-rework').value==='1'?1:0,
+    phase:document.getElementById('e-phase').value||'',
     notes:document.getElementById('e-notes').value.trim(),
     promptCount,
     promptCat:document.getElementById('e-prompt-cat').value||'',
@@ -2483,18 +2517,76 @@ function renderReportes(){
     </div>`;
   }).join('');
 
+  // ---- Project cost breakdown by phase ----
+  const byProject={};
+  entries.forEach(e=>{
+    const p=e.project||'Sin proyecto';
+    if(!byProject[p]) byProject[p]={entries:[],phases:{}};
+    byProject[p].entries.push(e);
+    const ph=e.phase||'Sin fase';
+    if(!byProject[p].phases[ph]) byProject[p].phases[ph]=[];
+    byProject[p].phases[ph].push(e);
+  });
+  const phaseOrder=['Ideación','Creativo','Ejecución','Revisión','Entrega','Sin fase'];
+  const phaseColors={Ideación:'#f97316',Creativo:'#a855f7',Ejecución:'#3b82f6',Revisión:'#14b8a6',Entrega:'#22c55e','Sin fase':'#6b7280'};
+  const projectReports=Object.entries(byProject).sort((a,b)=>{
+    const ah=a[1].entries.reduce((s,e)=>s+durToSecs(e),0);
+    const bh=b[1].entries.reduce((s,e)=>s+durToSecs(e),0);
+    return bh-ah;
+  }).map(([proj,data])=>{
+    const pH=data.entries.reduce((s,e)=>s+durToSecs(e),0)/3600;
+    const pCost=data.entries.reduce((s,e)=>s+costForEntry(e),0);
+    const pPrice=data.entries.reduce((s,e)=>s+priceForEntry(e),0);
+    const pMargin=pPrice-pCost;
+    const pMgRate=pPrice>0?Math.round(pMargin/pPrice*100):0;
+    const phaseRows=phaseOrder.filter(ph=>data.phases[ph]).map(ph=>{
+      const phE=data.phases[ph];
+      const phH=phE.reduce((s,e)=>s+durToSecs(e),0)/3600;
+      const phCost=phE.reduce((s,e)=>s+costForEntry(e),0);
+      const phPrice=phE.reduce((s,e)=>s+priceForEntry(e),0);
+      const phPct=pH>0?Math.round(phH/pH*100):0;
+      const col=phaseColors[ph]||'#6b7280';
+      return `<div class="rep-phase-row">
+        <span class="rep-phase-name" style="color:${col}">${ph}</span>
+        <span class="rep-phase-bar-wrap"><span class="rep-phase-bar" style="width:${phPct}%;background:${col}"></span></span>
+        <span class="rep-phase-h">${phH.toFixed(1)}h</span>
+        <span class="rep-phase-cost internal-only">💰$${phCost.toLocaleString()}</span>
+        <span class="rep-phase-price">💵$${phPrice.toLocaleString()}</span>
+      </div>`;
+    }).join('');
+    return `<div class="rep-project-card">
+      <div class="rep-project-header">
+        <span class="rep-project-name">${proj}</span>
+        <div class="rep-project-stats">
+          <span>${pH.toFixed(1)}h · ${data.entries.length} acc.</span>
+          <span class="internal-only" style="color:#f97316">💰 $${pCost.toLocaleString()}</span>
+          <span style="color:#22c55e">💵 $${pPrice.toLocaleString()}</span>
+          <span class="internal-only" style="color:var(--amber)">📈 ${pMgRate}% margen</span>
+        </div>
+      </div>
+      ${phaseRows?`<div class="rep-phase-list">${phaseRows}</div>`:'<div style="font-size:10px;color:rgba(245,241,232,.3);padding:8px 0">Sin fases registradas — agrega fase en cada entrada</div>'}
+    </div>`;
+  }).join('');
+
   el.innerHTML=`<div style="padding:16px 20px;max-width:1200px;margin:0 auto">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
       <h2 style="font-size:16px;font-weight:800;color:var(--bone);margin:0">📑 Reportes — Victor IA</h2>
       <div style="font-size:11px;color:var(--bone2);background:rgba(255,170,23,.1);border:1px solid rgba(255,170,23,.3);border-radius:6px;padding:4px 10px">
-        ${entries.length} acciones · ${totalH.toFixed(1)}h · $${totalCost.toLocaleString()} MXN
+        ${entries.length} acciones · ${totalH.toFixed(1)}h
+        <span class="internal-only"> · 💰 $${totalCost.toLocaleString()} costo</span>
+        · 💵 $${entries.reduce((s,e)=>s+priceForEntry(e),0).toLocaleString()} venta
       </div>
     </div>
 
     <div class="section-title">📁 Por Departamento / Área</div>
     <div class="rep-dept-grid">${deptCards||'<div style="color:var(--bone2);padding:20px">Sin datos</div>'}</div>
 
-    <div class="section-title" style="margin-top:24px">
+    <div class="section-title" style="margin-top:24px">🗂 Por Proyecto (con desglose por fase)</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
+      ${projectReports||'<div style="color:var(--bone2);padding:20px;text-align:center">Sin proyectos en el período</div>'}
+    </div>
+
+    <div class="section-title">
       📅 Reportes Diarios
       <span style="font-size:10px;color:var(--bone2);font-weight:400;margin-left:8px">
         ${dates.length} días · mostrando ${Math.min(dates.length,21)}
@@ -2650,6 +2742,14 @@ function renderOrganigrama(){
       </div>
     </div>
   `;
+}
+
+// ===== CLIENT MODE =====
+let clientMode=false;
+function toggleClientMode(){
+  clientMode=!clientMode;
+  document.body.classList.toggle('client-mode',clientMode);
+  renderCurrentView();
 }
 
 // ===== INIT =====
