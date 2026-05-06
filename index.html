@@ -1,0 +1,2459 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Victor IA — Performance Tracker v3</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0E12;--surface:#111820;--surface2:#161e28;--bone:rgba(245,241,232,0.92);
+  --bone2:rgba(245,241,232,0.55);--bone3:rgba(245,241,232,0.15);
+  --amber:#FFAA17;--amber2:rgba(255,170,23,0.15);--amber3:rgba(255,170,23,0.08);
+  --green:#22c55e;--red:#ef4444;--blue:#3b82f6;--purple:#a855f7;
+  --border:rgba(245,241,232,0.08);--radius:10px;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--bone);min-height:100vh;font-size:14px}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;outline:none;font-family:inherit}
+input,select,textarea{font-family:inherit;font-size:14px;outline:none}
+
+/* TOPBAR */
+#topbar{display:flex;align-items:center;gap:12px;padding:0 20px;height:54px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;flex-wrap:wrap}
+#topbar h1{font-size:15px;font-weight:700;letter-spacing:.5px;color:var(--amber);white-space:nowrap}
+#topbar .badge{background:var(--amber2);border:1px solid var(--amber);color:var(--amber);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700}
+#topbar .spacer{flex:1}
+#topbar .topbar-btns{display:flex;gap:8px;flex-wrap:wrap}
+#topbar .topbar-btns button{background:var(--surface2);border:1px solid var(--border);color:var(--bone2);padding:6px 14px;border-radius:6px;font-size:12px;transition:all .2s}
+#topbar .topbar-btns button:hover{border-color:var(--amber);color:var(--amber)}
+
+/* PERIOD SELECTOR */
+#period-bar{display:flex;align-items:center;gap:8px;padding:8px 20px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:54px;z-index:99;flex-wrap:wrap}
+#period-bar .period-label{font-size:11px;color:var(--bone2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-right:4px}
+.period-btn{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;background:transparent;border:1px solid var(--border);color:var(--bone2);transition:all .2s}
+.period-btn:hover{border-color:var(--amber);color:var(--amber)}
+.period-btn.active{background:var(--amber2);border-color:var(--amber);color:var(--amber)}
+#period-custom{display:none;gap:8px;align-items:center}
+#period-custom.show{display:flex}
+#period-custom input{background:var(--surface2);border:1px solid var(--border);color:var(--bone);padding:4px 8px;border-radius:6px;font-size:11px}
+#period-custom button{background:var(--amber);color:#000;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700}
+#period-summary{font-size:11px;color:var(--bone2);margin-left:auto}
+
+/* TABS */
+#tabs{display:flex;gap:2px;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:102px;z-index:98}
+.tab-btn{padding:10px 18px;font-size:13px;font-weight:600;color:var(--bone2);background:transparent;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab-btn:hover{color:var(--bone)}
+.tab-btn.active{color:var(--amber);border-bottom-color:var(--amber)}
+
+/* LAYOUT */
+#main{display:flex;min-height:calc(100vh - 152px)}
+#sidebar{width:280px;min-width:280px;background:var(--surface);border-right:1px solid var(--border);padding:16px;overflow-y:auto;max-height:calc(100vh - 152px);position:sticky;top:152px}
+#sidebar.hidden{display:none}
+#content{flex:1;padding:20px;overflow-y:auto;max-height:calc(100vh - 152px)}
+
+/* SIDEBAR */
+.sidebar-title{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--amber);text-transform:uppercase;margin-bottom:10px}
+.filter-group{margin-bottom:14px}
+.filter-group label{display:block;font-size:11px;color:var(--bone2);margin-bottom:4px;font-weight:600}
+.filter-group input,.filter-group select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--bone);padding:6px 10px;border-radius:6px;font-size:12px}
+.filter-group input:focus,.filter-group select:focus{border-color:var(--amber)}
+.filter-group input[type=range]{padding:0;height:24px}
+.range-val{font-size:11px;color:var(--amber);text-align:center;margin-top:2px}
+.filter-actions{display:flex;gap:6px;margin-top:4px}
+.filter-actions button{flex:1;padding:6px;border-radius:6px;font-size:11px;font-weight:700}
+.btn-apply{background:var(--amber);color:#000}
+.btn-clear{background:var(--surface2);border:1px solid var(--border);color:var(--bone2)}
+
+/* CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative;overflow:hidden}
+.kpi-card.hero{border-color:rgba(255,170,23,0.3)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--amber);opacity:0}
+.kpi-card.hero::before{opacity:1}
+.kpi-label{font-size:10px;color:var(--bone2);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+.kpi-val{font-size:26px;font-weight:800;color:var(--amber);line-height:1}
+.kpi-sub{font-size:11px;color:var(--bone2);margin-top:4px}
+.kpi-trend{position:absolute;top:14px;right:14px;font-size:18px}
+
+/* SECTION HEADERS */
+.section-title{font-size:12px;font-weight:700;letter-spacing:1px;color:var(--amber);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* CHARTS */
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:20px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.chart-card h3{font-size:12px;color:var(--bone2);font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+.chart-wrap{position:relative;height:200px}
+.chart-wrap canvas{max-height:200px}
+
+/* BARS */
+.bar-list{display:flex;flex-direction:column;gap:8px}
+.bar-item{display:flex;align-items:center;gap:10px}
+.bar-label{min-width:110px;font-size:12px;color:var(--bone2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:6px;background:var(--bone3);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;background:var(--amber);border-radius:3px;transition:width .4s}
+.bar-val{min-width:50px;text-align:right;font-size:12px;color:var(--bone);font-weight:600}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;margin-bottom:20px}
+table{width:100%;border-collapse:collapse}
+th{padding:8px 10px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--bone2);text-transform:uppercase;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap}
+th:hover{color:var(--amber)}
+td{padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+tr:hover td{background:var(--amber3)}
+.tag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;margin:1px}
+.tag-dev{background:rgba(59,130,246,.2);color:#93c5fd}
+.tag-mkt{background:rgba(168,85,247,.2);color:#d8b4fe}
+.tag-des{background:rgba(34,197,94,.2);color:#86efac}
+.tag-ai{background:rgba(255,170,23,.2);color:var(--amber)}
+.tag-ops{background:rgba(239,68,68,.2);color:#fca5a5}
+.tag-vid{background:rgba(20,184,166,.2);color:#5eead4}
+.badge-status{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.s-done{background:rgba(34,197,94,.15);color:var(--green)}
+.s-prog{background:rgba(59,130,246,.15);color:var(--blue)}
+.s-rev{background:rgba(239,68,68,.15);color:var(--red)}
+.pagination{display:flex;align-items:center;gap:8px;justify-content:flex-end;padding:8px 0;flex-wrap:wrap}
+.pagination button{background:var(--surface2);border:1px solid var(--border);color:var(--bone2);padding:4px 10px;border-radius:6px;font-size:12px}
+.pagination button:hover:not(:disabled){border-color:var(--amber);color:var(--amber)}
+.pagination button:disabled{opacity:.35}
+.pagination span{font-size:12px;color:var(--bone2)}
+.sort-icon{font-size:10px;margin-left:3px}
+
+/* HEATMAP */
+.heatmap-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px}
+.hm-cell{height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--bone2)}
+.hm-0{background:var(--bone3)}
+.hm-1{background:rgba(255,170,23,.25)}
+.hm-2{background:rgba(255,170,23,.45)}
+.hm-3{background:rgba(255,170,23,.65)}
+.hm-4{background:rgba(255,170,23,.85)}
+.hm-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+.hm-day{text-align:center;font-size:9px;color:var(--bone2)}
+
+/* SOFTWARE TABLE */
+.sw-table{width:100%;border-collapse:collapse;margin-bottom:20px}
+.sw-table th{padding:8px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--amber);text-transform:uppercase;border-bottom:1px solid var(--border)}
+.sw-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px}
+.sw-table tr:hover td{background:var(--amber3)}
+.sw-type{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.type-api{background:rgba(59,130,246,.2);color:#93c5fd}
+.type-saas{background:rgba(34,197,94,.2);color:#86efac}
+.type-free{background:rgba(245,241,232,.1);color:var(--bone2)}
+.cost-bar-mini{height:4px;background:var(--bone3);border-radius:2px;margin-top:4px;overflow:hidden}
+.cost-bar-fill{height:100%;background:var(--amber);border-radius:2px}
+
+/* DASHBOARD */
+.today-bar{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.today-bar .tstat{display:flex;flex-direction:column;min-width:80px}
+.today-bar .tstat .tv{font-size:22px;font-weight:800;color:var(--amber);line-height:1}
+.today-bar .tstat .tl{font-size:10px;color:var(--bone2);font-weight:700;text-transform:uppercase}
+.today-divider{width:1px;height:36px;background:var(--border)}
+
+/* FEED */
+.feed-list{display:flex;flex-direction:column;gap:0}
+.feed-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.feed-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);margin-top:5px;flex-shrink:0}
+.feed-dot.rework{background:var(--red)}
+.feed-time{font-size:11px;color:var(--bone2);white-space:nowrap;min-width:42px}
+.feed-body{flex:1}
+.feed-desc{font-size:13px;color:var(--bone);margin-bottom:2px}
+.feed-obs{font-size:11px;color:var(--amber);font-style:italic;margin-top:2px}
+.feed-meta{font-size:10px;color:var(--bone2);margin-top:2px}
+.feed-cost{font-size:11px;color:var(--green);font-weight:700;margin-top:2px}
+.feed-sw{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.feed-sw-tag{background:var(--amber3);border:1px solid rgba(255,170,23,.2);color:var(--amber);font-size:10px;padding:1px 6px;border-radius:8px}
+
+/* PROMPT ENGINEERING */
+.prompt-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:800;margin-top:3px}
+.prompt-1{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.prompt-2{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
+.prompt-3{background:rgba(255,170,23,.15);color:var(--amber);border:1px solid rgba(255,170,23,.3)}
+.prompt-high{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.prompt-winner{font-size:10px;color:var(--blue);font-style:italic;margin-top:3px;padding:4px 8px;background:rgba(59,130,246,.06);border-left:2px solid var(--blue);border-radius:0 4px 4px 0}
+.prompt-section{margin-top:16px;padding:14px;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:var(--radius)}
+.prompt-section h4{font-size:11px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.peff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:12px}
+.peff-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.peff-val{font-size:22px;font-weight:800;line-height:1;margin-bottom:2px}
+.peff-label{font-size:9px;color:var(--bone2);font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+
+/* FLOWCHART HTML */
+.fl-outer{background:var(--surface2);border-radius:var(--radius);padding:20px}
+.fl-heading{font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--bone);text-transform:uppercase;margin-bottom:16px}
+.fl-section-title{font-size:9px;color:var(--bone2);letter-spacing:.3px;text-transform:uppercase;font-weight:700;margin-bottom:8px;padding-left:2px}
+.fl-pipe-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fl-card{background:color-mix(in srgb,var(--fc,#FFAA17) 12%,transparent);border:1.5px solid var(--fc,#FFAA17);border-radius:10px;padding:10px 14px;cursor:pointer;text-align:left;min-width:100px;transition:all .2s;color:inherit;font-family:inherit;flex-shrink:0}
+.fl-card:hover{background:color-mix(in srgb,var(--fc,#FFAA17) 26%,transparent);transform:translateY(-2px);box-shadow:0 4px 18px rgba(0,0,0,.35)}
+.fl-card-title{font-size:11px;font-weight:700;color:var(--fc,#FFAA17);line-height:1.3}
+.fl-card-sub{font-size:10px;color:var(--bone2);margin-top:3px}
+.fl-pipe-arrow{color:rgba(245,241,232,.3);font-size:20px;flex-shrink:0;line-height:1;user-select:none}
+.fl-divider{display:flex;gap:8px;flex-wrap:wrap;padding:10px 0;border-top:1px dashed rgba(245,241,232,.1);border-bottom:1px dashed rgba(245,241,232,.1);margin:14px 0}
+.fl-divider-badge{font-size:10px;color:var(--bone2);background:rgba(245,241,232,.05);border-radius:4px;padding:3px 8px}
+.fl-feedback-row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.fl-fb-group{flex:1;min-width:200px}
+.fl-fb-label{font-size:10px;color:var(--bone2);margin-bottom:8px;font-weight:600}
+.fl-fb-sublabel{font-size:10px;color:rgba(245,241,232,.35);margin-top:6px;font-style:italic}
+.fl-footer{font-size:10px;color:rgba(245,241,232,.3);margin-top:14px;text-align:center;letter-spacing:.3px}
+/* Flow modal */
+.fl-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;align-items:center;justify-content:center;padding:20px}
+.fl-modal-box{background:var(--surface);border:1px solid var(--amber);border-radius:12px;padding:24px;min-width:280px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto}
+.fl-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px}
+.fl-modal-title-text{font-size:14px;font-weight:800;color:var(--amber)}
+.fl-modal-close{background:none;border:1px solid rgba(245,241,232,.3);color:var(--bone);border-radius:4px;padding:2px 10px;cursor:pointer;font-size:13px}
+.fl-modal-close:hover{background:rgba(245,241,232,.1)}
+.fl-modal-row{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid rgba(245,241,232,.07);flex-wrap:wrap}
+.fl-modal-key{font-size:11px;color:var(--bone2);flex-shrink:0}
+.fl-modal-val{font-size:11px;color:var(--bone);font-weight:700;text-align:right;flex:1}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;padding:24px}
+.modal h2{font-size:16px;font-weight:800;color:var(--amber);margin-bottom:20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid .full{grid-column:1/-1}
+.form-group label{display:block;font-size:11px;color:var(--bone2);font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--bone);padding:8px 12px;border-radius:6px}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--amber)}
+.form-group textarea{resize:vertical;min-height:70px}
+.sw-checkboxes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-height:180px;overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px}
+.sw-cb-item{display:flex;align-items:center;gap:6px;cursor:pointer;padding:4px;border-radius:4px}
+.sw-cb-item:hover{background:var(--amber3)}
+.sw-cb-item input[type=checkbox]{accent-color:var(--amber);width:14px;height:14px;flex-shrink:0}
+.sw-cb-item label{font-size:11px;color:var(--bone);cursor:pointer}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.btn-save{background:var(--amber);color:#000;padding:8px 24px;border-radius:6px;font-weight:800;font-size:13px}
+.btn-cancel{background:var(--surface2);border:1px solid var(--border);color:var(--bone2);padding:8px 20px;border-radius:6px;font-size:13px}
+
+/* DUR INPUT ROW */
+.dur-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.dur-row input{text-align:center}
+.dur-hint{font-size:10px;color:var(--bone2);text-align:center;margin-top:2px}
+
+/* CHATBOT */
+#chatbot-btn{position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--amber);color:#000;font-size:22px;display:flex;align-items:center;justify-content:center;z-index:900;box-shadow:0 4px 20px rgba(255,170,23,.4);transition:transform .2s}
+#chatbot-btn:hover{transform:scale(1.1)}
+#chatbot-panel{position:fixed;bottom:86px;right:24px;width:360px;max-height:500px;background:var(--surface);border:1px solid var(--border);border-radius:12px;z-index:900;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+#chatbot-panel.hidden{display:none}
+#chat-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+#chat-header h3{font-size:13px;font-weight:700;color:var(--amber)}
+#chat-close{background:transparent;color:var(--bone2);font-size:18px}
+#chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;max-height:320px}
+.chat-msg{padding:8px 12px;border-radius:8px;font-size:12px;max-width:85%;line-height:1.5}
+.chat-msg.user{background:var(--amber2);color:var(--bone);align-self:flex-end;margin-left:auto}
+.chat-msg.bot{background:var(--surface2);color:var(--bone);align-self:flex-start}
+.chat-msg.system{background:transparent;color:var(--bone2);font-style:italic;font-size:11px;text-align:center;align-self:center}
+#chat-quick{display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;border-top:1px solid var(--border)}
+#chat-quick button{background:var(--amber3);border:1px solid rgba(255,170,23,.2);color:var(--amber);padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600;cursor:pointer}
+#chat-input-row{display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--border)}
+#chat-input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--bone);padding:7px 10px;border-radius:6px;font-size:12px}
+#chat-input:focus{border-color:var(--amber)}
+#chat-send{background:var(--amber);color:#000;padding:7px 12px;border-radius:6px;font-weight:700;font-size:12px}
+
+/* SUMMARY PANEL */
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.summary-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.summary-panel h3{font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.top-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
+.top-item:last-child{border:none}
+.top-name{font-size:12px;color:var(--bone)}
+.top-val{font-size:12px;color:var(--amber);font-weight:700}
+
+/* EXPORT */
+.export-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.export-row button{background:var(--surface);border:1px solid var(--border);color:var(--bone2);padding:6px 14px;border-radius:6px;font-size:12px}
+.export-row button:hover{border-color:var(--amber);color:var(--amber)}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  #sidebar{display:none}
+  #topbar{height:auto;padding:10px 12px;gap:8px}
+  #topbar h1{font-size:13px}
+  #topbar .topbar-btns{gap:6px}
+  #topbar .topbar-btns button{padding:5px 10px;font-size:11px}
+  #period-bar{padding:6px 12px;gap:6px;top:auto;position:relative}
+  .period-btn{padding:4px 10px;font-size:10px}
+  #period-summary{display:none}
+  #tabs{top:0;position:relative;padding:0 8px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .tab-btn{padding:8px 12px;font-size:11px;white-space:nowrap}
+  #main{flex-direction:column}
+  #content{padding:12px;max-height:none}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .kpi-card{padding:10px}
+  .kpi-val{font-size:20px}
+  .chart-grid{grid-template-columns:1fr}
+  .summary-grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  #chatbot-panel{width:calc(100vw - 24px);right:12px;bottom:76px}
+  #chatbot-btn{width:46px;height:46px;bottom:16px;right:16px;font-size:18px}
+  .sw-checkboxes{grid-template-columns:repeat(2,1fr)}
+  .dur-row{grid-template-columns:1fr 1fr}
+  .today-bar{gap:10px}
+  .today-bar .tstat .tv{font-size:18px}
+  .today-divider{display:none}
+  .modal{padding:16px}
+  .modal-overlay{padding:10px}
+  .chart-card{padding:12px}
+  .sw-table{font-size:11px}
+  .sw-table th,.sw-table td{padding:6px 8px}
+  table{font-size:11px}
+  th,td{padding:6px 6px}
+  /* Hide less important columns on mobile */
+  .hide-mobile{display:none}
+  .bar-label{min-width:80px;font-size:11px}
+  /* Finanzas y Organigrama responsive */
+  #view-finanzas [style*="grid-template-columns:1fr 1fr"],
+  #view-organigrama [style*="grid-template-columns:1fr 1fr"],
+  #view-organigrama [style*="grid-template-columns:repeat(3,1fr)"]{
+    display:block!important
+  }
+  #view-finanzas > div[style*="grid-template-columns"],
+  #view-organigrama > div[style*="grid-template-columns"]{
+    display:flex!important;flex-direction:column!important
+  }
+  .heatmap-grid{grid-template-columns:repeat(7,1fr);gap:2px}
+  .hm-cell{height:22px;font-size:8px}
+}
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  #topbar .topbar-btns button:not(:first-child):not(:last-child){display:none}
+  .period-btn{padding:3px 8px;font-size:10px}
+}
+@media(min-width:769px) and (max-width:1024px){
+  .kpi-grid{grid-template-columns:repeat(3,1fr)}
+  #sidebar{width:240px;min-width:240px}
+  .chart-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <h1>⚡ Victor IA Tracker</h1>
+  <span class="badge">v3</span>
+  <div class="spacer"></div>
+  <div class="topbar-btns">
+    <button onclick="openAdd()">+ Entrada</button>
+    <button onclick="exportCSV()">Export CSV</button>
+    <button onclick="toggleSidebar()">⧉ Filtros</button>
+    <button onclick="showSettings()">⚙ Config</button>
+  </div>
+</div>
+
+<!-- PERIOD BAR -->
+<div id="period-bar">
+  <span class="period-label">Período:</span>
+  <button class="period-btn" onclick="setPeriod('hour')">Esta hora</button>
+  <button class="period-btn active" onclick="setPeriod('today')">Hoy</button>
+  <button class="period-btn" onclick="setPeriod('week')">Esta semana</button>
+  <button class="period-btn" onclick="setPeriod('month')">Este mes</button>
+  <button class="period-btn" onclick="setPeriod('year')">Este año</button>
+  <button class="period-btn" onclick="setPeriod('all')">Todo</button>
+  <button class="period-btn" onclick="setPeriod('custom')">Rango custom</button>
+  <div id="period-custom">
+    <input type="date" id="period-from">
+    <span style="color:var(--bone2);font-size:11px">→</span>
+    <input type="date" id="period-to">
+    <button onclick="applyCustomPeriod()">Aplicar</button>
+  </div>
+  <span id="period-summary"></span>
+</div>
+
+<!-- TABS -->
+<div id="tabs">
+  <button class="tab-btn active" onclick="setTab('dashboard')">📊 Dashboard</button>
+  <button class="tab-btn" onclick="setTab('analytics')">📈 Analytics</button>
+  <button class="tab-btn" onclick="setTab('finanzas')">💼 Finanzas</button>
+  <button class="tab-btn" onclick="setTab('organigrama')">🏢 Organigrama</button>
+  <button class="tab-btn" onclick="setTab('software')">🛠 Software & APIs</button>
+  <button class="tab-btn" onclick="setTab('entradas')">📋 Entradas</button>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="sidebar">
+    <div class="sidebar-title">Filtros avanzados</div>
+    <div class="filter-group">
+      <label>Buscar texto</label>
+      <input type="text" id="f-search" placeholder="Descripción, obs, notas...">
+    </div>
+    <div class="filter-group">
+      <label>Categoría</label>
+      <select id="f-cat">
+        <option value="">Todas</option>
+        <option>Desarrollo</option>
+        <option>Marketing</option>
+        <option>Diseño</option>
+        <option>IA/Automatización</option>
+        <option>Video</option>
+        <option>Operaciones</option>
+        <option>Ventas/CRM</option>
+        <option>Reunión</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Proyecto</label>
+      <select id="f-project"><option value="">Todos</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Cliente</label>
+      <select id="f-client"><option value="">Todos</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Estado</label>
+      <select id="f-status">
+        <option value="">Todos</option>
+        <option>Completado</option>
+        <option>En progreso</option>
+        <option>Revisión</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Prioridad</label>
+      <select id="f-priority">
+        <option value="">Todas</option>
+        <option>Alta</option>
+        <option>Media</option>
+        <option>Baja</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Duración mínima: <span id="dur-min-val">0m</span></label>
+      <input type="range" id="f-dur-min" min="0" max="480" step="5" value="0" oninput="document.getElementById('dur-min-val').textContent=minsToLabel(+this.value)">
+    </div>
+    <div class="filter-group">
+      <label>Retrabajo</label>
+      <select id="f-rework">
+        <option value="">Todos</option>
+        <option value="1">Sí</option>
+        <option value="0">No</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Software usado</label>
+      <select id="f-sw"><option value="">Cualquiera</option></select>
+    </div>
+    <div class="filter-actions">
+      <button class="btn-apply" onclick="applyFilters()">Aplicar</button>
+      <button class="btn-clear" onclick="clearFilters()">Limpiar</button>
+    </div>
+  </div>
+
+  <div id="content">
+    <div id="view-dashboard"></div>
+    <div id="view-analytics" class="hidden"></div>
+    <div id="view-finanzas" class="hidden"></div>
+    <div id="view-organigrama" class="hidden"></div>
+    <div id="view-software" class="hidden"></div>
+    <div id="view-entradas" class="hidden"></div>
+  </div>
+</div>
+
+<!-- ENTRY MODAL -->
+<div class="modal-overlay hidden" id="entry-modal">
+  <div class="modal">
+    <h2 id="modal-title">Nueva Entrada</h2>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Descripción *</label>
+        <input type="text" id="e-desc" placeholder="¿Qué se hizo?">
+      </div>
+      <div class="form-group full">
+        <label>¿Por qué se hizo? (motivación / contexto)</label>
+        <textarea id="e-why" rows="2" placeholder="Por qué era necesario hacerlo, qué lo disparó..."></textarea>
+      </div>
+      <div class="form-group full">
+        <label>¿Para qué se hizo? (objetivo)</label>
+        <textarea id="e-forwhat" rows="2" placeholder="Qué se buscaba lograr con esta acción..."></textarea>
+      </div>
+      <div class="form-group full">
+        <label>¿Qué se logró? (resultado real)</label>
+        <textarea id="e-result" rows="2" placeholder="Qué quedó hecho, qué se entregó, qué cambió..."></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Observaciones y mejoras posibles (lenguaje libre)</label>
+        <textarea id="e-obs" rows="2" placeholder="Dificultades, contexto coloquial, qué mejoraría la próxima vez..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="e-date">
+      </div>
+      <div class="form-group">
+        <label>Hora inicio</label>
+        <input type="time" id="e-hora">
+      </div>
+      <div class="form-group full">
+        <label>Duración</label>
+        <div class="dur-row">
+          <div>
+            <input type="number" id="e-dur-h" min="0" max="23" value="1" placeholder="0">
+            <div class="dur-hint">Horas</div>
+          </div>
+          <div>
+            <input type="number" id="e-dur-m" min="0" max="59" value="0" placeholder="0">
+            <div class="dur-hint">Minutos</div>
+          </div>
+          <div>
+            <input type="number" id="e-dur-s" min="0" max="59" value="0" placeholder="0">
+            <div class="dur-hint">Segundos</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Categoría</label>
+        <select id="e-cat">
+          <option>Desarrollo</option>
+          <option>Marketing</option>
+          <option>Diseño</option>
+          <option>IA/Automatización</option>
+          <option>Video</option>
+          <option>Operaciones</option>
+          <option>Ventas/CRM</option>
+          <option>Reunión</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select id="e-status">
+          <option>Completado</option>
+          <option>En progreso</option>
+          <option>Revisión</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Proyecto</label>
+        <input type="text" id="e-project" list="projects-list" placeholder="Victor IA, Costa Negra...">
+        <datalist id="projects-list"></datalist>
+      </div>
+      <div class="form-group">
+        <label>Cliente</label>
+        <input type="text" id="e-client" list="clients-list" placeholder="Victor IA, Costa Negra...">
+        <datalist id="clients-list"></datalist>
+      </div>
+      <div class="form-group">
+        <label>Prioridad</label>
+        <select id="e-priority">
+          <option>Alta</option>
+          <option>Media</option>
+          <option>Baja</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>¿Retrabajo?</label>
+        <select id="e-rework">
+          <option value="0">No</option>
+          <option value="1">Sí</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Software / Herramientas usadas</label>
+        <div class="sw-checkboxes" id="sw-checkboxes"></div>
+      </div>
+      <div class="form-group">
+        <label>🎯 Prompts necesarios para resultado perfecto</label>
+        <input type="number" id="e-prompt-count" min="1" max="200" value="1" placeholder="1">
+      </div>
+      <div class="form-group">
+        <label>Categoría del prompt</label>
+        <select id="e-prompt-cat">
+          <option value="">— automático por categoría —</option>
+          <option value="imagen">Imagen (Midjourney, Higgsfield...)</option>
+          <option value="video">Video (LTX, Runway, Seedance...)</option>
+          <option value="codigo">Código (Claude, GPT...)</option>
+          <option value="copy">Copy / Texto</option>
+          <option value="flujo">Flujo / Automatización (n8n...)</option>
+          <option value="datos">Análisis de datos</option>
+          <option value="diseno">Diseño (Figma, Canva...)</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>✅ Prompt ganador / definitivo (el que funcionó)</label>
+        <textarea id="e-prompt-winner" rows="3" placeholder="Escribe o pega aquí el prompt exacto que dio el mejor resultado. Esto alimenta el análisis de prompt engineering..."></textarea>
+      </div>
+      <div class="form-group full">
+        <label>📝 Notas del proceso de prompting (qué mejoró, qué no funcionó)</label>
+        <textarea id="e-prompt-notes" rows="2" placeholder="Qué cambios hiciste entre intentos, qué falló primero, qué técnica funcionó..."></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Notas técnicas</label>
+        <textarea id="e-notes" rows="2" placeholder="Detalles técnicos, links, referencias..."></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('entry-modal')">Cancelar</button>
+      <button class="btn-save" onclick="saveEntry()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay hidden" id="settings-modal">
+  <div class="modal">
+    <h2>⚙ Configuración</h2>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Tarifa por hora (MXN)</label>
+        <input type="number" id="s-rate" value="500" min="1">
+      </div>
+      <div class="form-group full">
+        <label>Meta horas/día</label>
+        <input type="number" id="s-goal-h" value="8" step="0.5" min="1">
+      </div>
+      <div class="form-group full">
+        <label>Meta acciones/día</label>
+        <input type="number" id="s-goal-a" value="15" min="1">
+      </div>
+      <div class="form-group full">
+        <label>OpenRouter API Key</label>
+        <input type="password" id="s-apikey" placeholder="sk-or-...">
+      </div>
+      <div class="form-group full">
+        <label>Modelo chatbot</label>
+        <select id="s-model">
+          <option value="google/gemini-flash-1.5">Gemini Flash 1.5 (rápido)</option>
+          <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
+          <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+          <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('settings-modal')">Cancelar</button>
+      <button class="btn-save" onclick="saveSettings()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHATBOT -->
+<button id="chatbot-btn" onclick="toggleChat()">🤖</button>
+<div id="chatbot-panel" class="hidden">
+  <div id="chat-header">
+    <h3>🤖 Asistente Victor IA</h3>
+    <button id="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div id="chat-msgs">
+    <div class="chat-msg system">Hola Victor. Pregúntame lo que quieras sobre el desempeño de la empresa.</div>
+  </div>
+  <div id="chat-quick">
+    <button onclick="quickQ('¿Cómo vamos hoy?')">Hoy</button>
+    <button onclick="quickQ('¿Cuáles son los proyectos más rentables?')">Proyectos</button>
+    <button onclick="quickQ('¿Cuánto se ha invertido en software este mes?')">Software</button>
+    <button onclick="quickQ('¿Qué categoría consume más tiempo?')">Categorías</button>
+    <button onclick="quickQ('¿Cuál es el ROI general?')">ROI</button>
+    <button onclick="quickQ('¿En qué se ha hecho retrabajo?')">Retrabajo</button>
+  </div>
+  <div id="chat-input-row">
+    <input id="chat-input" placeholder="Pregunta algo..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button id="chat-send" onclick="sendChat()">↑</button>
+  </div>
+</div>
+
+<script>
+// ===== SOFTWARE CATALOG =====
+const SOFTWARE = [
+  {id:'claude',name:'Claude AI',type:'API',cat:'IA/Automatización',cost:1500},
+  {id:'midjourney',name:'Midjourney',type:'SaaS',cat:'Creatividad',cost:600},
+  {id:'higgsfield',name:'Higgsfield AI',type:'API',cat:'Video',cost:900},
+  {id:'ltx',name:'LTX Studio',type:'SaaS',cat:'Video',cost:500},
+  {id:'runway',name:'Runway ML',type:'SaaS',cat:'Video',cost:800},
+  {id:'elevenlabs',name:'ElevenLabs',type:'API',cat:'Audio',cost:400},
+  {id:'adobe',name:'Adobe CC',type:'SaaS',cat:'Diseño',cost:1200},
+  {id:'hubspot',name:'HubSpot',type:'SaaS',cat:'CRM',cost:2500},
+  {id:'ghl',name:'GoHighLevel',type:'SaaS',cat:'CRM',cost:1800},
+  {id:'n8n',name:'n8n',type:'SaaS',cat:'Automatización',cost:300},
+  {id:'openrouter',name:'OpenRouter',type:'API',cat:'IA',cost:200},
+  {id:'vercel',name:'Vercel',type:'SaaS',cat:'DevOps',cost:400},
+  {id:'blotato',name:'Blotato',type:'SaaS',cat:'Social Media',cost:300},
+  {id:'airtable',name:'Airtable',type:'SaaS',cat:'Operaciones',cost:500},
+  {id:'canva',name:'Canva Pro',type:'SaaS',cat:'Diseño',cost:250},
+  {id:'gsuite',name:'Google Workspace',type:'SaaS',cat:'Operaciones',cost:350},
+  {id:'figma',name:'Figma',type:'SaaS',cat:'Diseño',cost:400},
+  {id:'seedance',name:'Seedance',type:'API',cat:'Video',cost:200},
+  {id:'capcut',name:'CapCut Pro',type:'SaaS',cat:'Video',cost:150},
+  {id:'vscode',name:'VS Code',type:'Free',cat:'Dev',cost:0},
+];
+
+// ===== SEED DATA =====
+// dur stored as decimal hours internally; durSec is optional precise seconds
+const SEED = [
+  {id:'s001',dateKey:'2026-05-01',hora:'09:00',desc:'Briefing inicial Costa Negra — levantamiento de requerimientos',cat:'Reunión',project:'Costa Negra',client:'Costa Negra',status:'Completado',priority:'Alta',dur:1.5,durSec:5400,tags:[],rework:0,obs:'Llamada larga, el cliente quería muchas funcionalidades. Hubo que establecer expectativas.',notes:'HubSpot landing + inventario + SEO',sw:['hubspot','claude']},
+  {id:'s002',dateKey:'2026-05-01',hora:'10:30',desc:'Diseño wireframe sitio Costa Negra en Figma',cat:'Diseño',project:'Costa Negra',client:'Costa Negra',status:'Completado',priority:'Alta',dur:2,durSec:7200,tags:[],rework:0,obs:'Fluido, el cliente había mandado referencias claras de lujo.',notes:'Dark luxury aesthetic, móvil first',sw:['figma','claude']},
+  {id:'s003',dateKey:'2026-05-01',hora:'13:00',desc:'Maquetación HTML/CSS landing page Costa Negra',cat:'Desarrollo',project:'Costa Negra',client:'Costa Negra',status:'Completado',priority:'Alta',dur:3,durSec:10800,tags:[],rework:0,obs:'Tailwind + Next.js, sin frameworks de terceros pa no complicar el deploy.',notes:'',sw:['vscode','claude','vercel']},
+  {id:'s004',dateKey:'2026-05-01',hora:'16:30',desc:'Copywriting sección hero + about Costa Negra',cat:'Marketing',project:'Costa Negra',client:'Costa Negra',status:'Completado',priority:'Media',dur:1,durSec:3600,tags:[],rework:0,obs:'Claude me ayudó a redactar en tono lujo. Quedó bien.',notes:'',sw:['claude']},
+  {id:'s005',dateKey:'2026-05-01',hora:'17:30',desc:'Integración HubSpot forms Costa Negra',cat:'Desarrollo',project:'Costa Negra',client:'Costa Negra',status:'Completado',priority:'Alta',dur:1.5,durSec:5400,tags:[],rework:0,obs:'',notes:'HubSpot embedded form con custom CSS',sw:['hubspot','vscode']},
+  {id:'s006',dateKey:'2026-05-02',hora:'09:00',desc:'Investigación competencia LATIVA — benchmark IA LATAM',cat:'Operaciones',project:'LATIVA',client:'LATIVA',status:'Completado',priority:'Alta',dur:2,durSec:7200,tags:[],rework:0,obs:'Tardé más de lo esperado porque hay poca info pública de competidores en LATAM.',notes:'',sw:['claude','gsuite']},
+  {id:'s007',dateKey:'2026-05-02',hora:'11:00',desc:'Script video LATIVA V1 — narrativa principal',cat:'Video',project:'LATIVA',client:'LATIVA',status:'Completado',priority:'Alta',dur:1.5,durSec:5400,tags:[],rework:0,obs:'Primer intento, Claude lo hizo en 10 min. Tuve que refinar el tono.',notes:'',sw:['claude','elevenlabs']},
+  {id:'s008',dateKey:'2026-05-02',hora:'12:30',desc:'Generación voiceover LATIVA V1 con ElevenLabs',cat:'Video',project:'LATIVA',client:'LATIVA',status:'Completado',priority:'Alta',dur:0.75,durSec:2700,tags:[],rework:0,obs:'La voz quedó increíble. ElevenLabs es de las mejores inversiones.',notes:'Voz Victor personalizada',sw:['elevenlabs']},
+  {id:'s009',dateKey:'2026-05-02',hora:'13:15',desc:'Generación video LATIVA con Higgsfield — 12 clips',cat:'Video',project:'LATIVA',client:'LATIVA',status:'Completado',priority:'Alta',dur:1.5,durSec:5400,tags:[],rework:1,obs:'Algunos clips no quedaron bien, tuve que rehacer 4 de ellos. Cuesta créditos extra.',notes:'Retrabajo: ajuste de prompts clips 3,5,7,11',sw:['higgsfield','claude']},
+  {id:'s010',dateKey:'2026-05-02',hora:'15:00',desc:'Edición video LATIVA V1 en CapCut',cat:'Video',project:'LATIVA',client:'LATIVA',status:'Completado',priority:'Alta',dur:2,durSec:7200,tags:[],rework:0,obs:'',notes:'Sync audio con clips, transiciones smooth',sw:['capcut']},
+  {id:'s011',dateKey:'2026-05-02',hora:'17:00',desc:'Review interna LATIVA V1 + ajustes menores',cat:'Operaciones',project:'LATIVA',client:'LATIVA',status:'Completado',priority:'Media',dur:0.5,durSec:1800,tags:[],rework:0,obs:'',notes:'',sw:['gsuite']},
+  {id:'s012',dateKey:'2026-05-03',hora:'09:00',desc:'Sesión de skills Victor IA — creación organigrama IA',cat:'IA/Automatización',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:3,durSec:10800,tags:[],rework:0,obs:'Esto fue intenso. Creé 12 skills en Claude Code. La cadena de mando quedó clara.',notes:'interprete→optimizador→gerente→directores',sw:['claude','vscode']},
+  {id:'s013',dateKey:'2026-05-03',hora:'12:00',desc:'Diseño sistema de memoria de sesiones Claude Code',cat:'IA/Automatización',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:1.5,durSec:5400,tags:[],rework:0,obs:'',notes:'punto-de-parada.md + checkpoints automáticos',sw:['claude','vscode']},
+  {id:'s014',dateKey:'2026-05-03',hora:'13:30',desc:'Construcción dashboard BI Victor IA — spec y maquetación',cat:'Desarrollo',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:2.5,durSec:9000,tags:[],rework:0,obs:'Next.js + Recharts. Tardé en elegir stack pero quedó bien.',notes:'',sw:['vscode','claude','vercel']},
+  {id:'s015',dateKey:'2026-05-03',hora:'16:00',desc:'Registro finanzas empresa — presupuesto Jul25-May26',cat:'Operaciones',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:1,durSec:3600,tags:[],rework:0,obs:'Números duros. Cuentas por cobrar $27,970 — hay que cobrar esto ya.',notes:'',sw:['claude','gsuite']},
+  {id:'s016',dateKey:'2026-05-03',hora:'17:00',desc:'Registro apps y licencias activas en memory',cat:'Operaciones',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Media',dur:0.5,durSec:1800,tags:[],rework:0,obs:'',notes:'apps.md con todos los costos',sw:['claude']},
+  {id:'s017',dateKey:'2026-05-04',hora:'09:00',desc:'Prompts imágenes Victor IA — marble bas-relief',cat:'Diseño',project:'Victor IA',client:'Victor IA',status:'En progreso',priority:'Media',dur:1.5,durSec:5400,tags:[],rework:0,obs:'Pasé tiempo buscando el look exacto de los bas-reliefs. Los prompts quedaron perfectos.',notes:'8 prompts: iris, villa aérea, manos, mural',sw:['claude','midjourney']},
+  {id:'s018',dateKey:'2026-05-04',hora:'10:30',desc:'Prompts video Seedance 2.0 — escenas cinematográficas',cat:'Video',project:'Victor IA',client:'Victor IA',status:'En progreso',priority:'Media',dur:1,durSec:3600,tags:[],rework:0,obs:'',notes:'4 prompts: ciudad noche, oficina IA, drone playa, CEO look',sw:['claude','seedance']},
+  {id:'s019',dateKey:'2026-05-04',hora:'11:30',desc:'Video header Victor IA website — kinetic typography iris',cat:'Video',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:2,durSec:7200,tags:[],rework:1,obs:'La animación del ojo tardó. Tuve que rehacer el timing del loader SVG.',notes:'Loader SVG + scroll canvas 241 frames',sw:['vscode','claude','figma']},
+  {id:'s020',dateKey:'2026-05-04',hora:'13:30',desc:'Deploy Victor IA website a Vercel',cat:'Desarrollo',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:0.5,durSec:1800,tags:[],rework:0,obs:'',notes:'victor-ia-website.vercel.app',sw:['vercel','vscode']},
+  {id:'s021',dateKey:'2026-05-04',hora:'14:00',desc:'SEO on-page Victor IA website — meta tags, schema, og',cat:'Marketing',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Media',dur:1,durSec:3600,tags:[],rework:0,obs:'',notes:'',sw:['claude','vscode']},
+  {id:'s022',dateKey:'2026-05-04',hora:'15:00',desc:'Configuración n8n — investigación flujos automatización',cat:'IA/Automatización',project:'Victor IA',client:'Victor IA',status:'En progreso',priority:'Media',dur:1.5,durSec:5400,tags:[],rework:0,obs:'No arranqué todavía los flujos, solo mapeé qué se necesita.',notes:'Pendiente: reporte diario, leads, checkpoints',sw:['n8n','claude']},
+  {id:'s023',dateKey:'2026-05-04',hora:'16:30',desc:'Influence IA website — deploy Vercel final',cat:'Desarrollo',project:'Influence IA',client:'Influence IA',status:'Completado',priority:'Media',dur:1,durSec:3600,tags:[],rework:0,obs:'',notes:'influence-ia-awards-2027.vercel.app',sw:['vercel','vscode']},
+  {id:'s024',dateKey:'2026-05-05',hora:'09:00',desc:'Sesión grande skills Victor IA — 16 skills nuevos',cat:'IA/Automatización',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:4,durSec:14400,tags:[],rework:0,obs:'La sesión más productiva de skills hasta ahora. El gerente-ia quedó brutal.',notes:'Directors: CEO,CTO,CCO,CMO,CSO,CXO,CFO,CDGO,CISO,CIO,CHRO,CQO',sw:['claude','vscode']},
+  {id:'s025',dateKey:'2026-05-05',hora:'13:00',desc:'Dashboard BI módulos Financiero, Proveedores, Interacciones',cat:'Desarrollo',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:2.5,durSec:9000,tags:[],rework:0,obs:'Recharts cuesta trabajo ajustar responsive. Pero quedó.',notes:'9 módulos total',sw:['vscode','claude']},
+  {id:'s026',dateKey:'2026-05-05',hora:'15:30',desc:'Deploy dashboard BI a Vercel',cat:'Desarrollo',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:0.5,durSec:1800,tags:[],rework:0,obs:'',notes:'victor-ia-dashboard.vercel.app',sw:['vercel','vscode']},
+  {id:'s027',dateKey:'2026-05-05',hora:'16:00',desc:'Organigrama Victor IA — flujos cruzados y loop aprendizaje',cat:'IA/Automatización',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:1.5,durSec:5400,tags:[],rework:0,obs:'El loop de aprendizaje fue idea mía. Que los errores se retroalimenten a todos los skills.',notes:'',sw:['claude','vscode']},
+  {id:'s028',dateKey:'2026-05-05',hora:'17:30',desc:'Auditor IA — protocolo broadcast aprendizajes',cat:'IA/Automatización',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Media',dur:0.5,durSec:1800,tags:[],rework:0,obs:'',notes:'bitacora-errores.md',sw:['claude','vscode']},
+  {id:'s029',dateKey:'2026-05-06',hora:'00:00',desc:'Sitio Web Victor IA — rewrite arquitectura loader iris',cat:'Desarrollo',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:1.5,durSec:5400,tags:[],rework:1,obs:'Tuvimos que reescribir la arquitectura porque la pantalla negra inicial era demasiado larga.',notes:'',sw:['vscode','claude']},
+  {id:'s030',dateKey:'2026-05-06',hora:'01:30',desc:'CTA NLP final Victor IA website',cat:'Marketing',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:0.5,durSec:1800,tags:[],rework:0,obs:'La frase final quedó brutal: "Cada día que pasa, tu competencia avanza. ¿Cuándo empezamos?"',notes:'',sw:['claude']},
+  {id:'s031',dateKey:'2026-05-06',hora:'02:00',desc:'Generación video Higgsfield — clips campaña Victor IA',cat:'Video',project:'Victor IA',client:'Victor IA',status:'En progreso',priority:'Media',dur:1.5,durSec:5400,tags:[],rework:0,obs:'Los créditos de Higgsfield se gastan rápido. Hay que optimizar los prompts.',notes:'',sw:['higgsfield','claude']},
+  {id:'s032',dateKey:'2026-05-06',hora:'03:30',desc:'Prompts Seedance 2.0 V2 — refinamiento escenas',cat:'Video',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Media',dur:0.75,durSec:2700,tags:[],rework:0,obs:'',notes:'',sw:['claude','seedance']},
+  {id:'s033',dateKey:'2026-05-06',hora:'04:30',desc:'Performance Tracker v2 — rewrite completo 14 KPIs',cat:'Desarrollo',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:3,durSec:10800,tags:[],rework:0,obs:'Esto tomó toda la mañana pero quedó increíble. 85KB de HTML puro.',notes:'Chart.js + localStorage + filtros + chatbot',sw:['vscode','claude']},
+  {id:'s034',dateKey:'2026-05-06',hora:'07:30',desc:'Integración chatbot OpenRouter en tracker',cat:'IA/Automatización',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:1,durSec:3600,tags:[],rework:1,obs:'El primer intento falló porque el contexto era muy grande. Hubo que optimizar.',notes:'Contexto dinámico 50+ entradas',sw:['vscode','claude','openrouter']},
+  {id:'s035',dateKey:'2026-05-06',hora:'08:30',desc:'Deploy Performance Tracker v2 a Vercel',cat:'Desarrollo',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:0.25,durSec:900,tags:[],rework:0,obs:'',notes:'victor-ia-tracker.vercel.app',sw:['vercel']},
+  {id:'s036',dateKey:'2026-05-06',hora:'08:45',desc:'Performance Tracker v3 — tabs + Software catalog + feed coloquial',cat:'Desarrollo',project:'Victor IA',client:'Victor IA',status:'Completado',priority:'Alta',dur:2,durSec:7200,tags:[],rework:0,obs:'El v3 es la versión enterprise. Dashboard con feed coloquial, analytics, software tracking.',notes:'4 tabs: Dashboard/Analytics/Software/Entradas — 78KB',sw:['vscode','claude']},
+];
+
+// ===== HELPERS: DURATION =====
+function secsToHMS(secs){
+  const h=Math.floor(secs/3600),m=Math.floor((secs%3600)/60),s=secs%60;
+  if(h>0) return `${h}h ${m}m ${s>0?s+'s':''}`.trim();
+  if(m>0) return `${m}m ${s>0?s+'s':''}`.trim();
+  return `${s}s`;
+}
+function durToSecs(e){
+  if(e.durSec!=null) return e.durSec;
+  return Math.round(e.dur*3600);
+}
+function minsToLabel(mins){
+  if(mins<60) return mins+'m';
+  const h=Math.floor(mins/60),m=mins%60;
+  return m>0?`${h}h ${m}m`:`${h}h`;
+}
+function secsToHoursDecimal(s){return s/3600;}
+function costForEntry(e){
+  const h=durToSecs(e)/3600;
+  return Math.round(h*settings.rate);
+}
+
+// ===== PERIOD FILTER =====
+let activePeriod = 'today';
+let periodFrom = '';
+let periodTo = '';
+
+function getPeriodRange(period){
+  const now = new Date();
+  const pad = n=>String(n).padStart(2,'0');
+  const fmt = d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const today = fmt(now);
+  switch(period){
+    case 'hour': {
+      // entries within the current hour (by dateKey + hora)
+      return {type:'hour', h:now.getHours()};
+    }
+    case 'today': return {type:'range',from:today,to:today};
+    case 'week': {
+      const dow=now.getDay();
+      const mon=new Date(now); mon.setDate(now.getDate()-dow+1);
+      const sun=new Date(mon); sun.setDate(mon.getDate()+6);
+      return {type:'range',from:fmt(mon),to:fmt(sun)};
+    }
+    case 'month': {
+      const from=`${now.getFullYear()}-${pad(now.getMonth()+1)}-01`;
+      const last=new Date(now.getFullYear(),now.getMonth()+1,0);
+      return {type:'range',from,to:fmt(last)};
+    }
+    case 'year': {
+      return {type:'range',from:`${now.getFullYear()}-01-01`,to:`${now.getFullYear()}-12-31`};
+    }
+    case 'custom': return {type:'range',from:periodFrom,to:periodTo};
+    default: return {type:'all'};
+  }
+}
+
+function filterByPeriod(entries, period){
+  const range = getPeriodRange(period);
+  if(range.type==='all') return entries;
+  if(range.type==='hour'){
+    return entries.filter(e=>{
+      const today=new Date().toISOString().split('T')[0];
+      const h=parseInt((e.hora||'00:00').split(':')[0]);
+      return e.dateKey===today && h===range.h;
+    });
+  }
+  return entries.filter(e=>e.dateKey>=range.from && e.dateKey<=range.to);
+}
+
+function setPeriod(p){
+  activePeriod=p;
+  document.querySelectorAll('.period-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'([^']+)'/);
+    b.classList.toggle('active',m&&m[1]===p);
+  });
+  document.getElementById('period-custom').classList.toggle('show',p==='custom');
+  applyAllFilters();
+  updatePeriodSummary();
+}
+function applyCustomPeriod(){
+  periodFrom=document.getElementById('period-from').value;
+  periodTo=document.getElementById('period-to').value;
+  activePeriod='custom';
+  applyAllFilters();
+  updatePeriodSummary();
+}
+function updatePeriodSummary(){
+  const labels={hour:`Hora actual (${new Date().getHours()}:00)`,today:'Hoy',week:'Esta semana',month:'Este mes',year:'Este año',all:'Todo el período',custom:'Rango custom'};
+  let txt=labels[activePeriod]||activePeriod;
+  if(activePeriod==='custom'&&periodFrom&&periodTo) txt=`${periodFrom} → ${periodTo}`;
+  const el=document.getElementById('period-summary');
+  if(el) el.textContent=`📅 ${txt} — ${filteredEntries.length} entradas`;
+}
+
+// ===== STATE =====
+let settings = {rate:500,goalH:8,goalA:15,apiKey:'',model:'google/gemini-flash-1.5'};
+let customEntries = [];
+let allEntries = [];
+let periodFiltered = [];  // after period filter
+let filteredEntries = []; // after both period + sidebar filters
+let currentTab = 'dashboard';
+let editingId = null;
+let sortCol = 'dateKey';
+let sortDir = -1;
+let page = 0;
+const PAGE_SIZE = 20;
+let charts = {};
+let chatHistory = [];
+let sidebarVisible = true;
+
+function rebuildAllEntries(){
+  const customIds=new Set(customEntries.map(e=>e.id));
+  allEntries=[...SEED.filter(e=>!customIds.has(e.id)),...customEntries];
+}
+
+// ===== INIT =====
+function init(){
+  loadSettings();
+  loadCustomEntries();
+  rebuildAllEntries();
+  populateFilterDropdowns();
+  populateSWFilter();
+  buildSWCheckboxes();
+  populateDatalistOptions();
+  applyAllFilters();
+  updatePeriodSummary();
+  // Default sidebar hidden on mobile
+  if(window.innerWidth<768) sidebarVisible=false;
+}
+
+function loadSettings(){
+  try{const s=localStorage.getItem('vit_settings');if(s) settings={...settings,...JSON.parse(s)};}catch(e){}
+}
+function loadCustomEntries(){
+  try{const c=localStorage.getItem('vit_entries');if(c) customEntries=JSON.parse(c);}catch(e){}
+}
+function saveCustomEntries(){localStorage.setItem('vit_entries',JSON.stringify(customEntries));}
+function saveSettingsData(){localStorage.setItem('vit_settings',JSON.stringify(settings));}
+
+function applyAllFilters(){
+  // 1. period
+  periodFiltered = filterByPeriod(allEntries, activePeriod);
+  // 2. sidebar filters
+  const search=document.getElementById('f-search')?.value?.toLowerCase()||'';
+  const cat=document.getElementById('f-cat')?.value||'';
+  const project=document.getElementById('f-project')?.value||'';
+  const client=document.getElementById('f-client')?.value||'';
+  const status=document.getElementById('f-status')?.value||'';
+  const priority=document.getElementById('f-priority')?.value||'';
+  const durMinMins=parseFloat(document.getElementById('f-dur-min')?.value)||0;
+  const durMinSecs=durMinMins*60;
+  const rework=document.getElementById('f-rework')?.value||'';
+  const sw=document.getElementById('f-sw')?.value||'';
+  filteredEntries = periodFiltered.filter(e=>{
+    if(search && !e.desc.toLowerCase().includes(search) && !(e.notes||'').toLowerCase().includes(search) && !(e.obs||'').toLowerCase().includes(search)) return false;
+    if(cat && e.cat!==cat) return false;
+    if(project && e.project!==project) return false;
+    if(client && e.client!==client) return false;
+    if(status && e.status!==status) return false;
+    if(priority && e.priority!==priority) return false;
+    if(durMinSecs>0 && durToSecs(e)<durMinSecs) return false;
+    if(rework!=='' && String(e.rework)!==rework) return false;
+    if(sw && !(e.sw||[]).includes(sw)) return false;
+    return true;
+  });
+  page=0;
+  renderCurrentView();
+  updatePeriodSummary();
+}
+
+function populateFilterDropdowns(){
+  const projects=[...new Set(allEntries.map(e=>e.project).filter(Boolean))].sort();
+  const clients=[...new Set(allEntries.map(e=>e.client).filter(Boolean))].sort();
+  const fp=document.getElementById('f-project');
+  const fc=document.getElementById('f-client');
+  if(!fp||!fc) return;
+  const curP=fp.value,curC=fc.value;
+  while(fp.options.length>1) fp.remove(1);
+  while(fc.options.length>1) fc.remove(1);
+  projects.forEach(p=>{const o=document.createElement('option');o.value=o.textContent=p;fp.appendChild(o);});
+  clients.forEach(c=>{const o=document.createElement('option');o.value=o.textContent=c;fc.appendChild(o);});
+  fp.value=curP;fc.value=curC;
+}
+function populateSWFilter(){
+  const sel=document.getElementById('f-sw');
+  SOFTWARE.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.name;sel.appendChild(o);});
+}
+function buildSWCheckboxes(){
+  const container=document.getElementById('sw-checkboxes');
+  container.innerHTML='';
+  SOFTWARE.forEach(s=>{
+    const div=document.createElement('div');div.className='sw-cb-item';
+    div.innerHTML=`<input type="checkbox" id="sw-${s.id}" value="${s.id}"><label for="sw-${s.id}">${s.name}</label>`;
+    container.appendChild(div);
+  });
+}
+function populateDatalistOptions(){
+  const projects=[...new Set(allEntries.map(e=>e.project).filter(Boolean))].sort();
+  const clients=[...new Set(allEntries.map(e=>e.client).filter(Boolean))].sort();
+  const pl=document.getElementById('projects-list');
+  const cl=document.getElementById('clients-list');
+  if(!pl||!cl) return;
+  pl.innerHTML='';cl.innerHTML='';
+  projects.forEach(p=>{const o=document.createElement('option');o.value=p;pl.appendChild(o);});
+  clients.forEach(c=>{const o=document.createElement('option');o.value=c;cl.appendChild(o);});
+}
+
+// ===== TABS =====
+function setTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'([^']+)'/);
+    b.classList.toggle('active',m&&m[1]===tab);
+  });
+  document.querySelectorAll('#content > div').forEach(d=>d.classList.add('hidden'));
+  document.getElementById('view-'+tab).classList.remove('hidden');
+  const showSb=sidebarVisible&&(tab==='entradas'||tab==='analytics');
+  document.getElementById('sidebar').classList.toggle('hidden',!showSb);
+  destroyCharts();
+  renderCurrentView();
+}
+function toggleSidebar(){
+  sidebarVisible=!sidebarVisible;
+  const showSb=sidebarVisible&&(currentTab==='entradas'||currentTab==='analytics');
+  document.getElementById('sidebar').classList.toggle('hidden',!showSb);
+}
+function renderCurrentView(){
+  const renders={dashboard:renderDashboard,analytics:renderAnalytics,finanzas:renderFinanzas,organigrama:renderOrganigrama,software:renderSoftware,entradas:renderEntradas};
+  const fn=renders[currentTab];if(fn) fn();
+}
+
+// ===== KPIs =====
+function calcKPIs(entries){
+  const total=entries.length;
+  const totalSecs=entries.reduce((a,e)=>a+durToSecs(e),0);
+  const totalHours=totalSecs/3600;
+  const dates=[...new Set(entries.map(e=>e.dateKey))];
+  const days=dates.length||1;
+  const avgHoursPerDay=totalHours/days;
+  const avgActionsPerDay=total/days;
+  const hourCounts={};
+  entries.forEach(e=>{const h=parseInt((e.hora||'0:0').split(':')[0]);hourCounts[h]=(hourCounts[h]||0)+1;});
+  const peakHour=Object.entries(hourCounts).sort((a,b)=>b[1]-a[1])[0];
+  const done=entries.filter(e=>e.status==='Completado').length;
+  const compRate=total?Math.round(done/total*100):0;
+  const rw=entries.filter(e=>e.rework).length;
+  const reworkRate=total?Math.round(rw/total*100):0;
+  const costMXN=totalHours*settings.rate;
+  const costUSD=(costMXN/17).toFixed(0);
+  const prompts=entries.filter(e=>e.cat==='IA/Automatización').length;
+  const deploys=entries.filter(e=>(e.tags||[]).includes('dev')&&e.status==='Completado').length;
+  // streak from today backwards
+  let streak=0;
+  const check=new Date();
+  while(streak<365){
+    const dk=check.toISOString().split('T')[0];
+    if(allEntries.some(e=>e.dateKey===dk)){streak++;check.setDate(check.getDate()-1);}
+    else break;
+  }
+  const projH={};entries.forEach(e=>{if(e.project) projH[e.project]=(projH[e.project]||0)+durToSecs(e)/3600;});
+  const topProject=Object.entries(projH).sort((a,b)=>b[1]-a[1])[0];
+  const cliH={};entries.forEach(e=>{if(e.client) cliH[e.client]=(cliH[e.client]||0)+durToSecs(e)/3600;});
+  const topClient=Object.entries(cliH).sort((a,b)=>b[1]-a[1])[0];
+  const totalCost=entries.reduce((a,e)=>a+costForEntry(e),0);
+  // Prompt engineering metrics
+  const withPrompts=entries.filter(e=>e.promptCount>0);
+  const totalPrompts=withPrompts.reduce((a,e)=>a+(e.promptCount||1),0);
+  const avgPrompts=withPrompts.length?totalPrompts/withPrompts.length:1;
+  const oneShotCount=withPrompts.filter(e=>e.promptCount===1).length;
+  const oneShotRate=withPrompts.length?Math.round(oneShotCount/withPrompts.length*100):100;
+  const promptScore=Math.max(0,Math.round(100-(avgPrompts-1)*20)); // 1 prompt=100, 6 prompts=0
+  const promptByCat={};
+  withPrompts.forEach(e=>{
+    const k=e.promptCat||e.cat||'Sin categoría';
+    if(!promptByCat[k]) promptByCat[k]={sum:0,n:0};
+    promptByCat[k].sum+=e.promptCount||1;promptByCat[k].n++;
+  });
+  const promptAvgByCat=Object.entries(promptByCat).map(([k,v])=>([k,v.sum/v.n])).sort((a,b)=>b[1]-a[1]);
+  const worstPromptEntries=[...withPrompts].sort((a,b)=>(b.promptCount||1)-(a.promptCount||1)).slice(0,10);
+  return {total,totalSecs,totalHours,days,avgHoursPerDay,avgActionsPerDay,peakHour,compRate,reworkRate,costMXN,costUSD,prompts,deploys,streak,topProject,topClient,totalCost,avgPrompts,oneShotRate,promptScore,promptByCat,promptAvgByCat,worstPromptEntries,withPromptsLen:withPrompts.length};
+}
+
+// ===== DASHBOARD =====
+function renderDashboard(){
+  const today=new Date().toISOString().split('T')[0];
+  const todayE=allEntries.filter(e=>e.dateKey===today);
+  const allKPIs=calcKPIs(allEntries);
+  const todayKPIs=calcKPIs(todayE);
+  const periodLabel=['Esta hora','Hoy','Esta semana','Este mes','Este año','Todo el tiempo','Rango custom'][['hour','today','week','month','year','all','custom'].indexOf(activePeriod)];
+  const pKPIs=calcKPIs(filteredEntries);
+
+  document.getElementById('view-dashboard').innerHTML=`
+    <div class="today-bar">
+      <div class="tstat"><div class="tv">${todayE.length}</div><div class="tl">Acciones hoy</div></div>
+      <div class="today-divider"></div>
+      <div class="tstat"><div class="tv">${secsToHMS(todayKPIs.totalSecs)}</div><div class="tl">Tiempo hoy</div></div>
+      <div class="today-divider"></div>
+      <div class="tstat"><div class="tv">${todayKPIs.compRate}%</div><div class="tl">Completado</div></div>
+      <div class="today-divider"></div>
+      <div class="tstat"><div class="tv">${allKPIs.streak}🔥</div><div class="tl">Racha (días)</div></div>
+      <div class="today-divider"></div>
+      <div class="tstat"><div class="tv">$${todayKPIs.totalCost.toLocaleString()}</div><div class="tl">Valor hoy (MXN)</div></div>
+      <div class="today-divider"></div>
+      <div class="tstat"><div class="tv" style="color:${todayKPIs.oneShotRate>=70?'var(--green)':todayKPIs.oneShotRate>=40?'var(--amber)':'var(--red)'}">${todayKPIs.avgPrompts.toFixed(1)}</div><div class="tl">Prom. Prompts</div></div>
+      <div class="today-divider"></div>
+      <div class="tstat"><div class="tv" style="color:${todayKPIs.oneShotRate>=70?'var(--green)':todayKPIs.oneShotRate>=40?'var(--amber)':'var(--red)'}">${todayKPIs.oneShotRate}%</div><div class="tl">1-Shot Rate</div></div>
+    </div>
+
+    ${activePeriod!=='all'?`<div style="font-size:11px;color:var(--bone2);margin-bottom:12px">Mostrando: <strong style="color:var(--amber)">${periodLabel}</strong> — ${filteredEntries.length} entradas · ${secsToHMS(pKPIs.totalSecs)} · $${pKPIs.totalCost.toLocaleString()} MXN</div>`:''}
+
+    <div class="kpi-grid">
+      <div class="kpi-card hero"><div class="kpi-label">Total acciones</div><div class="kpi-val">${pKPIs.total}</div><div class="kpi-sub">${pKPIs.days} días</div><div class="kpi-trend">📋</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Tiempo total</div><div class="kpi-val" style="font-size:20px">${secsToHMS(pKPIs.totalSecs)}</div><div class="kpi-sub">${pKPIs.avgHoursPerDay.toFixed(1)}h prom/día</div><div class="kpi-trend">⏱</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Valor generado</div><div class="kpi-val">$${(pKPIs.costMXN/1000).toFixed(1)}k</div><div class="kpi-sub">MXN · $${pKPIs.costUSD} USD</div><div class="kpi-trend">💰</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Completado</div><div class="kpi-val">${pKPIs.compRate}%</div><div class="kpi-sub">${filteredEntries.filter(e=>e.status==='Completado').length} de ${pKPIs.total}</div><div class="kpi-trend">✅</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Retrabajo</div><div class="kpi-val">${pKPIs.reworkRate}%</div><div class="kpi-sub">${filteredEntries.filter(e=>e.rework).length} entradas</div><div class="kpi-trend">${pKPIs.reworkRate>15?'⚠':'👍'}</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Prom. acción</div><div class="kpi-val" style="font-size:20px">${pKPIs.total?secsToHMS(Math.round(pKPIs.totalSecs/pKPIs.total)):'0s'}</div><div class="kpi-sub">por entrada</div><div class="kpi-trend">📊</div></div>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-panel">
+        <h3>Top proyectos</h3>
+        ${getTopProjects(filteredEntries,5).map(([p,h])=>`<div class="top-item"><span class="top-name">${p}</span><span class="top-val">${secsToHMS(Math.round(h*3600))}</span></div>`).join('')}
+      </div>
+      <div class="summary-panel">
+        <h3>Top categorías</h3>
+        ${getTopCats(filteredEntries,5).map(([c,h])=>`<div class="top-item"><span class="top-name">${c}</span><span class="top-val">${secsToHMS(Math.round(h*3600))}</span></div>`).join('')}
+      </div>
+      <div class="summary-panel">
+        <h3>Software más usado</h3>
+        ${getTopSW(filteredEntries,5).map(([id,n])=>{const sw=SOFTWARE.find(s=>s.id===id);return`<div class="top-item"><span class="top-name">${sw?sw.name:id}</span><span class="top-val">${n} usos</span></div>`;}).join('')}
+      </div>
+      <div class="summary-panel">
+        <h3>Clientes</h3>
+        ${getTopClients(filteredEntries,5).map(([c,h])=>`<div class="top-item"><span class="top-name">${c}</span><span class="top-val">${secsToHMS(Math.round(h*3600))}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="section-title">🔀 Flujo de información — Victor IA</div>
+    <div class="chart-card" style="margin-bottom:20px;padding:0;overflow:hidden">
+      ${buildFlowSVG(filteredEntries)}
+    </div>
+
+    <div class="section-title">Bitácora de actividad</div>
+    <div class="feed-list">${renderFeed(filteredEntries)}</div>
+  `;
+}
+
+function buildFlowSVG(entries){
+  initFlowModal();
+  const kpis=calcKPIs(entries);
+  const topCats=getTopCats(entries,3);
+  const rworkEntries=entries.filter(e=>e.rework);
+
+  window._fnData={
+    input:{
+      title:'📥 Entrada — Tareas & Prompts',
+      rows:[
+        ['Total registrado',`${kpis.total} acciones`],
+        ['Período',entries.length?`${entries[entries.length-1]?.dateKey||'—'} → ${entries[0]?.dateKey||'—'}`:'—'],
+        ['Categorías activas',topCats.map(c=>c[0]).join(', ')||'—'],
+        ['Horas totales',`${kpis.totalHours.toFixed(1)}h`],
+        ['Costo acumulado',`$${kpis.totalCost.toLocaleString()} MXN`],
+      ]
+    },
+    pe:{
+      title:'🎯 Prompt Engineering',
+      rows:[
+        ['Prompt Score',`${kpis.promptScore}/100 ${kpis.promptScore>=80?'🟢':kpis.promptScore>=60?'🟡':kpis.promptScore>0?'🔴':'—'}`],
+        ['1-Shot Rate',`${kpis.oneShotRate}% (meta ≥ 70%)`],
+        ['Prompts por acción (prom.)',`${kpis.avgPrompts.toFixed(1)}`],
+        ['Acciones con 1 prompt',`${Math.round(kpis.total*(kpis.oneShotRate/100))} de ${kpis.total}`],
+        ['Estado',kpis.promptScore>=80?'Excelente eficiencia ✓':kpis.promptScore>=60?'Mejorable — revisar skills':kpis.promptScore>0?'Crítico — optimizar prompts':'Sin datos de prompts aún'],
+      ]
+    },
+    ia:{
+      title:'🤖 IA / Proceso',
+      rows:[
+        ['Total acciones',`${kpis.total}`],
+        ['Horas producidas',`${kpis.totalHours.toFixed(1)}h`],
+        ['Costo total',`$${kpis.totalCost.toLocaleString()} MXN`],
+        ['Top categoría',topCats[0]?`${topCats[0][0]} (${topCats[0][1].toFixed(1)}h)`:'—'],
+        ['Tasa de retrabajo',`${kpis.reworkRate}% · ${rworkEntries.length} acciones`],
+        ['Costo por hora',`$${kpis.totalHours>0?Math.round(kpis.totalCost/kpis.totalHours):0}/h MXN`],
+      ]
+    },
+    review:{
+      title:'✅ Revisión & Calidad',
+      rows:[
+        ['Tasa de aprobación',`${kpis.compRate}%`],
+        ['Acciones completadas',`${Math.round(kpis.total*kpis.compRate/100)}`],
+        ['Acciones en progreso',`${kpis.total-Math.round(kpis.total*kpis.compRate/100)}`],
+        ['Con retrabajo',`${rworkEntries.length} (${kpis.reworkRate}%)`],
+        ['Calidad',kpis.compRate>=80?'Alta ✓':kpis.compRate>=60?'Media':'Baja — revisar flujo'],
+      ]
+    },
+    output:{
+      title:'📤 Output / Entregables',
+      rows:[
+        ['Acciones completadas',`${Math.round(kpis.total*kpis.compRate/100)}`],
+        ['Costo total acumulado',`$${kpis.totalCost.toLocaleString()} MXN`],
+        ['Horas producidas',`${kpis.totalHours.toFixed(1)}h`],
+        ['Eficiencia ($/h)',`$${kpis.totalHours>0?Math.round(kpis.totalCost/kpis.totalHours):0} MXN/h`],
+        ['Proyectos activos',`${[...new Set(entries.map(e=>e.project).filter(Boolean))].length}`],
+      ]
+    },
+    rework:{
+      title:'🔄 Retrabajo',
+      rows:[
+        ['Tasa de retrabajo',`${kpis.reworkRate}% (meta < 20%)`],
+        ['Acciones con retrabajo',`${rworkEntries.length}`],
+        ['Tiempo extra estimado',`~${(kpis.totalHours*kpis.reworkRate/100).toFixed(1)}h`],
+        ['Estado',kpis.reworkRate<15?'Saludable ✓':kpis.reworkRate<30?'Mejorable':'Alto — revisar calidad de prompts'],
+      ]
+    },
+    analytics:{
+      title:'📊 Analytics & Datos',
+      rows:[
+        ['Fuente principal','Victor IA Tracker (este sistema)'],
+        ['Fuente secundaria','Auditor IA · protocolo diario 15 min'],
+        ['Acciones con métricas de prompt',`${kpis.withPromptsLen||0} de ${kpis.total}`],
+        ['Ciclo de revisión','Diario · cada sesión activa'],
+        ['Señales de alarma','Prompt Score < 60 · retrabajo > 30% · costo > presupuesto'],
+      ]
+    },
+    mejora:{
+      title:'📈 Mejora Continua de Skills',
+      rows:[
+        ['Protocolo','Auditor IA → detecta patrones → edita SKILL.md'],
+        ['Loop','Analytics → detección → edit → verificación → mejora'],
+        ['Meta Prompt Score','≥ 80/100 en 30 días'],
+        ['Meta 1-Shot Rate','≥ 70%'],
+        ['Registro','auditor-ia/bitacora-mejoras.md'],
+      ]
+    },
+  };
+
+  function card(id,c){
+    const d=window._fnData[id];
+    const label=d.title.split('—')[0].trim();
+    return `<button class="fl-card" style="--fc:${c}" onclick="showFlowModal('${id}')">
+      <div class="fl-card-title">${label}</div>
+      <div class="fl-card-sub">${d.rows[0][1]}</div>
+    </button>`;
+  }
+
+  return `
+<div class="fl-outer">
+  <div class="fl-heading">Flujo de Información — Victor IA</div>
+
+  <div class="fl-section-title">Pipeline Principal</div>
+  <div class="fl-pipe-row">
+    ${card('input','#FFAA17')}
+    <div class="fl-pipe-arrow">→</div>
+    ${card('pe','#3b82f6')}
+    <div class="fl-pipe-arrow">→</div>
+    ${card('ia','#c084fc')}
+    <div class="fl-pipe-arrow">→</div>
+    ${card('review','#22c55e')}
+    <div class="fl-pipe-arrow">→</div>
+    ${card('output','#22c55e')}
+  </div>
+
+  <div class="fl-divider">
+    <span class="fl-divider-badge">↕ IA ↔ Retrabajo hasta aprobado</span>
+    <span class="fl-divider-badge">📤 Output → mide → Analytics</span>
+    <span class="fl-divider-badge">📈 Mejora → actualiza Prompt Eng.</span>
+  </div>
+
+  <div class="fl-section-title">Loop de Calidad & Mejora Continua</div>
+  <div class="fl-feedback-row">
+    <div class="fl-fb-group">
+      <div class="fl-fb-label">⚠ Retrabajo — flujo condicional (si error en IA)</div>
+      ${card('rework','#ef4444')}
+      <div class="fl-fb-sublabel">↩ reintenta en IA hasta que Revisión apruebe</div>
+    </div>
+    <div class="fl-fb-group" style="flex:2;min-width:280px">
+      <div class="fl-fb-label">🔁 Loop de mejora continua — Output → Analytics → Mejora → Prompt Eng.</div>
+      <div class="fl-pipe-row">
+        ${card('analytics','#14b8a6')}
+        <div class="fl-pipe-arrow">→</div>
+        ${card('mejora','#f97316')}
+        <div class="fl-pipe-arrow" style="color:#3b82f6">→</div>
+        <span style="font-size:11px;color:#3b82f6;align-self:center;font-weight:700;line-height:1.4">↑ actualiza<br>Prompt Eng.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="fl-footer">Clic en cualquier nodo para ver análisis completo del componente</div>
+</div>`;
+}
+
+function initFlowModal(){
+  if(document.getElementById('fl-modal')) return;
+  const m=document.createElement('div');
+  m.id='fl-modal';
+  m.className='fl-modal-backdrop';
+  m.style.cssText='display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;align-items:center;justify-content:center;padding:20px';
+  m.onclick=function(e){if(e.target===m)closeFlowModal();};
+  m.innerHTML=`<div class="fl-modal-box">
+    <div class="fl-modal-header">
+      <span id="fl-modal-title" class="fl-modal-title-text"></span>
+      <button onclick="closeFlowModal()" class="fl-modal-close">✕</button>
+    </div>
+    <div id="fl-modal-body" class="fl-modal-body"></div>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+function showFlowModal(id){
+  const d=window._fnData&&window._fnData[id];
+  if(!d) return;
+  document.getElementById('fl-modal-title').textContent=d.title;
+  document.getElementById('fl-modal-body').innerHTML=d.rows.map(([k,v])=>
+    `<div class="fl-modal-row"><span class="fl-modal-key">${k}</span><span class="fl-modal-val">${v}</span></div>`
+  ).join('');
+  const m=document.getElementById('fl-modal');
+  m.style.display='flex';
+}
+
+function closeFlowModal(){
+  const m=document.getElementById('fl-modal');
+  if(m) m.style.display='none';
+}
+
+function renderFeed(entries){
+  const sorted=[...entries].sort((a,b)=>b.dateKey.localeCompare(a.dateKey)||(b.hora||'').localeCompare(a.hora||'')).slice(0,40);
+  return sorted.map(e=>{
+    const swTags=(e.sw||[]).map(id=>{const s=SOFTWARE.find(x=>x.id===id);return s?`<span class="feed-sw-tag">${s.name}</span>`:''}).join('');
+    const cost=costForEntry(e);
+    const pc=e.promptCount||0;
+    const pcClass=pc===0?'':pc===1?'prompt-1':pc<=3?'prompt-2':pc<=6?'prompt-3':'prompt-high';
+    const pcLabel=pc===0?'':pc===1?'1-shot ✨':pc<=3?`${pc} prompts`:pc<=6?`${pc} prompts ⚠`:` ${pc} prompts 🔴`;
+    return `
+      <div class="feed-item">
+        <div class="feed-dot ${e.rework?'rework':''}"></div>
+        <div class="feed-time">${e.hora||'--:--'}</div>
+        <div class="feed-body">
+          <div class="feed-desc">${e.desc}</div>
+          ${e.why?`<div class="feed-obs" style="color:var(--bone2)">❓ <em>Por qué:</em> ${e.why}</div>`:''}
+          ${e.forwhat?`<div class="feed-obs" style="color:#86efac">🎯 <em>Para qué:</em> ${e.forwhat}</div>`:''}
+          ${e.result?`<div class="feed-obs" style="color:var(--blue)">✅ <em>Logrado:</em> ${e.result}</div>`:''}
+          ${e.obs?`<div class="feed-obs">💬 ${e.obs}</div>`:''}
+          ${e.promptWinner?`<div class="prompt-winner">🏆 Prompt: ${e.promptWinner.slice(0,120)}${e.promptWinner.length>120?'…':''}</div>`:''}
+          <div class="feed-meta">${e.dateKey} · ${e.cat} · ${e.project||''} · <strong>${secsToHMS(durToSecs(e))}</strong> · ${e.status}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
+            <div class="feed-cost">$${cost.toLocaleString()} MXN</div>
+            ${pc?`<span class="prompt-badge ${pcClass}">🎯 ${pcLabel}</span>`:''}
+          </div>
+          ${swTags?`<div class="feed-sw">${swTags}</div>`:''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function getTopProjects(entries,n){
+  const h={};entries.forEach(e=>{if(e.project) h[e.project]=(h[e.project]||0)+durToSecs(e)/3600;});
+  return Object.entries(h).sort((a,b)=>b[1]-a[1]).slice(0,n);
+}
+function getTopCats(entries,n){
+  const h={};entries.forEach(e=>{if(e.cat) h[e.cat]=(h[e.cat]||0)+durToSecs(e)/3600;});
+  return Object.entries(h).sort((a,b)=>b[1]-a[1]).slice(0,n);
+}
+function getTopSW(entries,n){
+  const h={};entries.forEach(e=>{(e.sw||[]).forEach(id=>{h[id]=(h[id]||0)+1;});});
+  return Object.entries(h).sort((a,b)=>b[1]-a[1]).slice(0,n);
+}
+function getTopClients(entries,n){
+  const h={};entries.forEach(e=>{if(e.client) h[e.client]=(h[e.client]||0)+durToSecs(e)/3600;});
+  return Object.entries(h).sort((a,b)=>b[1]-a[1]).slice(0,n);
+}
+
+// ===== ANALYTICS =====
+function renderAnalytics(){
+  const kpis=calcKPIs(filteredEntries);
+  document.getElementById('view-analytics').innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">Total acciones</div><div class="kpi-val">${kpis.total}</div><div class="kpi-sub">${kpis.days} días</div></div>
+      <div class="kpi-card"><div class="kpi-label">Tiempo total</div><div class="kpi-val" style="font-size:20px">${secsToHMS(kpis.totalSecs)}</div><div class="kpi-sub">${secsToHMS(Math.round(kpis.totalSecs/kpis.days))}/día prom</div></div>
+      <div class="kpi-card"><div class="kpi-label">Acciones/día</div><div class="kpi-val">${kpis.avgActionsPerDay.toFixed(1)}</div><div class="kpi-sub">meta: ${settings.goalA}/día</div></div>
+      <div class="kpi-card"><div class="kpi-label">Hora pico</div><div class="kpi-val">${kpis.peakHour?kpis.peakHour[0]+':00':'--'}</div><div class="kpi-sub">${kpis.peakHour?kpis.peakHour[1]+' acciones':''}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Completado</div><div class="kpi-val">${kpis.compRate}%</div><div class="kpi-sub">${filteredEntries.filter(e=>e.status==='Completado').length} entradas</div></div>
+      <div class="kpi-card"><div class="kpi-label">Retrabajo</div><div class="kpi-val">${kpis.reworkRate}%</div><div class="kpi-sub">${filteredEntries.filter(e=>e.rework).length} entradas</div></div>
+      <div class="kpi-card"><div class="kpi-label">Valor MXN</div><div class="kpi-val">$${(kpis.costMXN/1000).toFixed(1)}k</div><div class="kpi-sub">$${kpis.costUSD} USD</div></div>
+      <div class="kpi-card"><div class="kpi-label">Prom/acción</div><div class="kpi-val" style="font-size:18px">${kpis.total?secsToHMS(Math.round(kpis.totalSecs/kpis.total)):'—'}</div><div class="kpi-sub">duración promedio</div></div>
+      <div class="kpi-card"><div class="kpi-label">Costo/acción</div><div class="kpi-val" style="font-size:18px">$${kpis.total?Math.round(kpis.totalCost/kpis.total).toLocaleString():'0'}</div><div class="kpi-sub">MXN promedio</div></div>
+      <div class="kpi-card"><div class="kpi-label">Prompts IA</div><div class="kpi-val">${kpis.prompts}</div><div class="kpi-sub">acciones IA/Auto</div></div>
+      <div class="kpi-card"><div class="kpi-label">Racha activa</div><div class="kpi-val">${kpis.streak}🔥</div><div class="kpi-sub">días consecutivos</div></div>
+      <div class="kpi-card"><div class="kpi-label">Meta horas/día</div><div class="kpi-val">${kpis.avgHoursPerDay>=settings.goalH?'✅':'⚠'}</div><div class="kpi-sub">${kpis.avgHoursPerDay.toFixed(1)}/${settings.goalH}h</div></div>
+      <div class="kpi-card" style="border-color:rgba(59,130,246,.3)"><div class="kpi-label">Prompt Score</div><div class="kpi-val" style="color:${kpis.promptScore>=80?'var(--green)':kpis.promptScore>=50?'var(--amber)':'var(--red)'}">${kpis.promptScore}</div><div class="kpi-sub">${kpis.avgPrompts.toFixed(1)} prom · ${kpis.oneShotRate}% 1-shot</div></div>
+      <div class="kpi-card"><div class="kpi-label">Top proyecto</div><div class="kpi-val" style="font-size:13px">${kpis.topProject?kpis.topProject[0]:'--'}</div><div class="kpi-sub">${kpis.topProject?secsToHMS(Math.round(kpis.topProject[1]*3600)):''}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Top cliente</div><div class="kpi-val" style="font-size:13px">${kpis.topClient?kpis.topClient[0]:'--'}</div><div class="kpi-sub">${kpis.topClient?secsToHMS(Math.round(kpis.topClient[1]*3600)):''}</div></div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card"><h3>Distribución por categoría</h3><div class="chart-wrap"><canvas id="ch-cat"></canvas></div></div>
+      <div class="chart-card"><h3>Actividad por hora del día</h3><div class="chart-wrap"><canvas id="ch-hour"></canvas></div></div>
+      <div class="chart-card" style="grid-column:1/-1"><h3>Tiempo + acciones por día</h3><div class="chart-wrap" style="height:220px"><canvas id="ch-daily"></canvas></div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="chart-card"><h3>Tiempo por proyecto</h3><div class="bar-list" id="bars-project"></div></div>
+      <div class="chart-card"><h3>Tiempo por cliente</h3><div class="bar-list" id="bars-client"></div></div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:20px">
+      <h3>Top acciones por duración individual</h3>
+      <div class="bar-list" id="bars-hours"></div>
+    </div>
+
+    <div class="section-title">Mapa de calor semanal</div>
+    <div class="chart-card" style="margin-bottom:20px"><div id="heatmap-container"></div></div>
+
+    <div class="section-title">🎯 Prompt Engineering — Análisis de eficiencia</div>
+    ${renderPromptAnalytics(filteredEntries)}
+  `;
+  buildCharts(filteredEntries);
+  buildBars(filteredEntries);
+  buildHeatmap(filteredEntries);
+  buildPromptChart(filteredEntries);
+}
+
+function renderPromptAnalytics(entries){
+  const kpis=calcKPIs(entries);
+  const pScore=kpis.promptScore;
+  const scoreColor=pScore>=80?'var(--green)':pScore>=50?'var(--amber)':'var(--red)';
+  // Distribution buckets
+  const wp=entries.filter(e=>e.promptCount>0);
+  const b1=wp.filter(e=>e.promptCount===1).length;
+  const b2=wp.filter(e=>e.promptCount>=2&&e.promptCount<=3).length;
+  const b3=wp.filter(e=>e.promptCount>=4&&e.promptCount<=6).length;
+  const b4=wp.filter(e=>e.promptCount>=7).length;
+  const tot=wp.length||1;
+  // Prompt winners library
+  const winners=entries.filter(e=>e.promptWinner&&e.promptCount>0).sort((a,b)=>(a.promptCount||99)-(b.promptCount||99)).slice(0,8);
+  // Trend: last 7 days avg prompts
+  const last7=[...Array(7)].map((_,i)=>{
+    const d=new Date();d.setDate(d.getDate()-i);
+    const dk=d.toISOString().split('T')[0];
+    const dayE=entries.filter(e=>e.dateKey===dk&&e.promptCount>0);
+    return {dk:dk.slice(5),avg:dayE.length?dayE.reduce((a,e)=>a+(e.promptCount||1),0)/dayE.length:null,n:dayE.length};
+  }).reverse();
+
+  return `
+  <div class="peff-grid">
+    <div class="peff-card"><div class="peff-val" style="color:${scoreColor}">${pScore}</div><div class="peff-label">Prompt Score (0-100)</div></div>
+    <div class="peff-card"><div class="peff-val" style="color:var(--bone)">${kpis.avgPrompts.toFixed(1)}</div><div class="peff-label">Prompts Prom/Acción</div></div>
+    <div class="peff-card"><div class="peff-val" style="color:var(--green)">${kpis.oneShotRate}%</div><div class="peff-label">1-Shot Rate ✨</div></div>
+    <div class="peff-card"><div class="peff-val" style="color:var(--bone2)">${wp.length}</div><div class="peff-label">Acciones medidas</div></div>
+    <div class="peff-card"><div class="peff-val" style="color:var(--amber)">${wp.reduce((a,e)=>a+(e.promptCount||1),0)}</div><div class="peff-label">Prompts totales</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <div class="chart-card">
+      <h3>Distribución de intentos</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${[['1 prompt (✨ 1-shot)',b1,'var(--green)'],['2-3 prompts (👍 eficiente)',b2,'var(--blue)'],['4-6 prompts (⚠ mejorable)',b3,'var(--amber)'],['7+ prompts (🔴 proceso roto)',b4,'var(--red)']].map(([l,n,c])=>`
+          <div class="bar-item">
+            <div class="bar-label" style="color:${c}">${l}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/tot*100)}%;background:${c}"></div></div>
+            <div class="bar-val" style="color:${c}">${n} (${Math.round(n/tot*100)}%)</div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Prompts promedio por categoría</h3>
+      <div class="bar-list">
+        ${kpis.promptAvgByCat.slice(0,8).map(([cat,avg])=>{
+          const c=avg<=1.5?'var(--green)':avg<=3?'var(--amber)':'var(--red)';
+          return `<div class="bar-item">
+            <div class="bar-label">${cat}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,avg/10*100)}%;background:${c}"></div></div>
+            <div class="bar-val" style="color:${c}">${avg.toFixed(1)} avg</div>
+          </div>`;
+        }).join('')||'<div style="color:var(--bone2);font-size:12px">Sin datos suficientes</div>'}
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <div class="chart-card">
+      <h3>Tendencia 7 días — Prompts promedio</h3>
+      <div class="chart-wrap"><canvas id="ch-prompt-trend"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>🔴 Top acciones con más prompts (a mejorar)</h3>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${kpis.worstPromptEntries.slice(0,5).map(e=>`
+          <div style="padding:6px 10px;background:var(--surface2);border-radius:6px;border-left:3px solid ${(e.promptCount||1)>=7?'var(--red)':'var(--amber)'}">
+            <div style="font-size:11px;font-weight:700;color:var(--bone)">${e.desc.slice(0,50)}${e.desc.length>50?'…':''}</div>
+            <div style="font-size:10px;color:var(--bone2)">${e.cat} · ${e.dateKey}</div>
+            <div style="font-size:10px;color:${(e.promptCount||1)>=7?'var(--red)':'var(--amber)'}">🎯 ${e.promptCount||1} prompts${e.promptNotes?' — '+e.promptNotes.slice(0,40):''}</div>
+          </div>
+        `).join('')||'<div style="color:var(--bone2);font-size:12px">Sin datos suficientes</div>'}
+      </div>
+    </div>
+  </div>
+
+  ${winners.length?`
+  <div class="chart-card" style="margin-bottom:16px">
+    <h3>🏆 Biblioteca de Prompts Ganadores (1-shot y mejores)</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px">
+      ${winners.map(e=>`
+        <div style="padding:10px;background:var(--surface2);border-radius:8px;border:1px solid rgba(59,130,246,.2)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+            <span class="prompt-badge ${e.promptCount===1?'prompt-1':e.promptCount<=3?'prompt-2':'prompt-3'}">🎯 ${e.promptCount} prompt${e.promptCount>1?'s':''}</span>
+            <span style="font-size:10px;color:var(--bone2)">${e.cat} · ${e.dateKey}</span>
+          </div>
+          <div style="font-size:11px;color:var(--bone);margin-bottom:4px;font-weight:700">${e.desc.slice(0,50)}</div>
+          <div style="font-size:11px;color:var(--blue);font-style:italic;line-height:1.4">"${e.promptWinner.slice(0,200)}${e.promptWinner.length>200?'…':''}"</div>
+          ${e.promptNotes?`<div style="font-size:10px;color:var(--bone2);margin-top:4px">📝 ${e.promptNotes.slice(0,80)}</div>`:''}
+        </div>
+      `).join('')}
+    </div>
+  </div>`:''}
+  `;
+}
+
+function buildPromptChart(entries){
+  const last7=[...Array(7)].map((_,i)=>{
+    const d=new Date();d.setDate(d.getDate()-i);
+    const dk=d.toISOString().split('T')[0];
+    const dayE=entries.filter(e=>e.dateKey===dk&&e.promptCount>0);
+    return {label:dk.slice(5),avg:dayE.length?+(dayE.reduce((a,e)=>a+(e.promptCount||1),0)/dayE.length).toFixed(2):null};
+  }).reverse();
+  const ctx=document.getElementById('ch-prompt-trend');
+  if(!ctx) return;
+  charts['ch-prompt-trend']=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:last7.map(d=>d.label),
+      datasets:[{
+        label:'Prompts prom',
+        data:last7.map(d=>d.avg),
+        borderColor:'#3b82f6',
+        backgroundColor:'rgba(59,130,246,.1)',
+        fill:true,tension:0.3,pointRadius:4,
+        spanGaps:true
+      },{
+        label:'Meta (≤3)',
+        data:last7.map(()=>3),
+        borderColor:'rgba(34,197,94,.5)',
+        borderDash:[4,4],pointRadius:0,fill:false
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'rgba(245,241,232,.7)',font:{size:10}}}},scales:{x:{ticks:{color:'rgba(245,241,232,.5)',font:{size:9}},grid:{color:'rgba(245,241,232,.05)'}},y:{min:0,ticks:{color:'rgba(245,241,232,.5)',font:{size:9}},grid:{color:'rgba(245,241,232,.05)'}}}}
+  });
+}
+
+function buildCharts(entries){
+  const colors=['#FFAA17','#3b82f6','#22c55e','#a855f7','#ef4444','#14b8a6','#f97316','#ec4899'];
+  const catData={};
+  entries.forEach(e=>{catData[e.cat]=(catData[e.cat]||0)+durToSecs(e)/3600;});
+  const catCtx=document.getElementById('ch-cat');
+  if(catCtx){
+    charts['ch-cat']=new Chart(catCtx,{type:'doughnut',data:{labels:Object.keys(catData),datasets:[{data:Object.values(catData).map(v=>v.toFixed(2)),backgroundColor:colors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'rgba(245,241,232,.7)',font:{size:10},boxWidth:10}}}}});
+  }
+  const hourData=Array(24).fill(0);
+  entries.forEach(e=>{const h=parseInt((e.hora||'0:0').split(':')[0]);if(h>=0&&h<24) hourData[h]++;});
+  const hourCtx=document.getElementById('ch-hour');
+  if(hourCtx){
+    charts['ch-hour']=new Chart(hourCtx,{type:'bar',data:{labels:Array.from({length:24},(_,i)=>i+':00'),datasets:[{data:hourData,backgroundColor:'rgba(255,170,23,.6)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'rgba(245,241,232,.5)',font:{size:9}},grid:{color:'rgba(245,241,232,.05)'}},y:{ticks:{color:'rgba(245,241,232,.5)',font:{size:9}},grid:{color:'rgba(245,241,232,.05)'}}}}});
+  }
+  const dateMap={};
+  entries.forEach(e=>{
+    if(!dateMap[e.dateKey]) dateMap[e.dateKey]={actions:0,secs:0};
+    dateMap[e.dateKey].actions++;
+    dateMap[e.dateKey].secs+=durToSecs(e);
+  });
+  const sortedDates=Object.keys(dateMap).sort();
+  const dailyCtx=document.getElementById('ch-daily');
+  if(dailyCtx){
+    charts['ch-daily']=new Chart(dailyCtx,{type:'bar',data:{labels:sortedDates.map(d=>d.slice(5)),datasets:[{label:'Acciones',data:sortedDates.map(d=>dateMap[d].actions),backgroundColor:'rgba(255,170,23,.6)',borderRadius:3,yAxisID:'y'},{label:'Horas',data:sortedDates.map(d=>(dateMap[d].secs/3600).toFixed(2)),type:'line',borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',fill:true,tension:0.3,pointRadius:3,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index'},plugins:{legend:{labels:{color:'rgba(245,241,232,.7)',font:{size:10}}}},scales:{x:{ticks:{color:'rgba(245,241,232,.5)',font:{size:9}},grid:{color:'rgba(245,241,232,.05)'}},y:{ticks:{color:'rgba(245,241,232,.5)',font:{size:9}},grid:{color:'rgba(245,241,232,.05)'}},y1:{position:'right',ticks:{color:'rgba(59,130,246,.7)',font:{size:9}},grid:{display:false}}}}});
+  }
+}
+
+function buildBars(entries){
+  function fillBar(id,data,fmt){
+    const el=document.getElementById(id);if(!el)return;
+    const max=Math.max(...data.map(d=>d[1]),0.01);
+    el.innerHTML=data.slice(0,8).map(([l,v])=>`<div class="bar-item"><div class="bar-label">${l}</div><div class="bar-track"><div class="bar-fill" style="width:${v/max*100}%"></div></div><div class="bar-val">${fmt(v)}</div></div>`).join('');
+  }
+  const projH={},cliH={};
+  entries.forEach(e=>{
+    if(e.project) projH[e.project]=(projH[e.project]||0)+durToSecs(e);
+    if(e.client) cliH[e.client]=(cliH[e.client]||0)+durToSecs(e);
+  });
+  fillBar('bars-project',Object.entries(projH).sort((a,b)=>b[1]-a[1]),v=>secsToHMS(v));
+  fillBar('bars-client',Object.entries(cliH).sort((a,b)=>b[1]-a[1]),v=>secsToHMS(v));
+  const hoursEl=document.getElementById('bars-hours');
+  if(hoursEl){
+    const byDur=[...entries].sort((a,b)=>durToSecs(b)-durToSecs(a)).slice(0,8);
+    const max=durToSecs(byDur[0]||{durSec:1});
+    hoursEl.innerHTML=byDur.map(e=>`<div class="bar-item"><div class="bar-label" title="${e.desc}">${e.desc.slice(0,28)}</div><div class="bar-track"><div class="bar-fill" style="width:${durToSecs(e)/max*100}%"></div></div><div class="bar-val">${secsToHMS(durToSecs(e))}</div></div>`).join('');
+  }
+}
+
+function buildHeatmap(entries){
+  const el=document.getElementById('heatmap-container');if(!el)return;
+  const today=new Date();
+  const days=[];
+  for(let i=41;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);days.push(d.toISOString().split('T')[0]);}
+  const dayCounts={};entries.forEach(e=>{dayCounts[e.dateKey]=(dayCounts[e.dateKey]||0)+1;});
+  const startDow=new Date(days[0]).getDay();
+  const cells=[];
+  for(let i=0;i<startDow;i++) cells.push('<div></div>');
+  days.forEach(d=>{
+    const c=dayCounts[d]||0;
+    const lvl=c===0?0:c<3?1:c<6?2:c<10?3:4;
+    cells.push(`<div class="hm-cell hm-${lvl}" title="${d}: ${c} acciones">${c||''}</div>`);
+  });
+  const dayNames=['D','L','M','X','J','V','S'];
+  el.innerHTML=`<div class="hm-days">${dayNames.map(d=>`<div class="hm-day">${d}</div>`).join('')}</div><div class="heatmap-grid">${cells.join('')}</div><div style="font-size:11px;color:var(--bone2);margin-top:8px">Últimas 6 semanas — ${entries.length} entradas en período</div>`;
+}
+
+function destroyCharts(){
+  Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});
+  charts={};
+}
+
+// ===== SOFTWARE VIEW =====
+function renderSoftware(){
+  const swHours={},swUses={};
+  allEntries.forEach(e=>{(e.sw||[]).forEach(id=>{swHours[id]=(swHours[id]||0)+durToSecs(e)/3600;swUses[id]=(swUses[id]||0)+1;});});
+  const totalHours=allEntries.reduce((a,e)=>a+durToSecs(e)/3600,0)||1;
+  function allocCost(sw){
+    if(sw.cost===0) return 0;
+    return Math.round(sw.cost*((swHours[sw.id]||0)/totalHours));
+  }
+  const totalMonthlyCost=SOFTWARE.reduce((a,s)=>a+s.cost,0);
+  const totalAllocated=SOFTWARE.reduce((a,s)=>a+allocCost(s),0);
+
+  document.getElementById('view-software').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px">
+      <div class="kpi-card hero"><div class="kpi-label">Gasto mensual total</div><div class="kpi-val">$${(totalMonthlyCost/1000).toFixed(1)}k</div><div class="kpi-sub">MXN/mes en licencias</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">APIs activas</div><div class="kpi-val">${SOFTWARE.filter(s=>s.type==='API').length}</div><div class="kpi-sub">${SOFTWARE.filter(s=>s.type==='SaaS').length} SaaS · ${SOFTWARE.filter(s=>s.type==='Free').length} free</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Costo asignado</div><div class="kpi-val">$${(totalAllocated/1000).toFixed(1)}k</div><div class="kpi-sub">basado en horas de uso</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Herramientas usadas</div><div class="kpi-val">${Object.keys(swUses).length}</div><div class="kpi-sub">de ${SOFTWARE.length} registradas</div></div>
+    </div>
+
+    <div class="section-title">Catálogo completo</div>
+    <div class="table-wrap">
+      <table class="sw-table">
+        <thead>
+          <tr>
+            <th>Herramienta</th><th>Tipo</th><th>Categoría</th><th>Costo/mes</th>
+            <th>Tiempo de uso</th><th>Usos</th><th>Costo asignado</th><th>% gasto</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${SOFTWARE.sort((a,b)=>b.cost-a.cost).map(sw=>{
+            const h=swHours[sw.id]||0;
+            const u=swUses[sw.id]||0;
+            const alloc=allocCost(sw);
+            const pct=sw.cost>0?Math.round(sw.cost/totalMonthlyCost*100):0;
+            return `<tr>
+              <td><strong>${sw.name}</strong></td>
+              <td><span class="sw-type type-${sw.type.toLowerCase()}">${sw.type}</span></td>
+              <td style="color:var(--bone2)">${sw.cat}</td>
+              <td style="color:var(--amber);font-weight:700">${sw.cost>0?'$'+sw.cost.toLocaleString():'—'}</td>
+              <td>${h>0?secsToHMS(Math.round(h*3600)):'<span style="color:var(--bone3)">—</span>'}</td>
+              <td>${u>0?u:'<span style="color:var(--bone3)">—</span>'}</td>
+              <td style="color:var(--green)">${alloc>0?'$'+alloc.toLocaleString():'—'}</td>
+              <td>${pct>0?`<div>${pct}%</div><div class="cost-bar-mini"><div class="cost-bar-fill" style="width:${pct}%"></div></div>`:'—'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card"><h3>Tiempo por herramienta</h3><div class="bar-list" id="sw-bar-hours"></div></div>
+      <div class="chart-card"><h3>Distribución costo mensual</h3><div class="chart-wrap"><canvas id="ch-sw-cost"></canvas></div></div>
+    </div>
+  `;
+
+  const swBarEl=document.getElementById('sw-bar-hours');
+  const swWith=[...SOFTWARE].filter(s=>swHours[s.id]>0).sort((a,b)=>(swHours[b.id]||0)-(swHours[a.id]||0));
+  const maxH=Math.max(...swWith.map(s=>swHours[s.id]),0.01);
+  if(swBarEl) swBarEl.innerHTML=swWith.map(s=>`<div class="bar-item"><div class="bar-label">${s.name}</div><div class="bar-track"><div class="bar-fill" style="width:${swHours[s.id]/maxH*100}%"></div></div><div class="bar-val">${secsToHMS(Math.round(swHours[s.id]*3600))}</div></div>`).join('');
+
+  const paidSW=SOFTWARE.filter(s=>s.cost>0);
+  const costCtx=document.getElementById('ch-sw-cost');
+  if(costCtx){
+    const colors=['#FFAA17','#3b82f6','#22c55e','#a855f7','#ef4444','#14b8a6','#f97316','#ec4899','#84cc16','#f59e0b'];
+    charts['ch-sw-cost']=new Chart(costCtx,{type:'doughnut',data:{labels:paidSW.map(s=>s.name),datasets:[{data:paidSW.map(s=>s.cost),backgroundColor:colors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'rgba(245,241,232,.7)',font:{size:9},boxWidth:8}}}}});
+  }
+}
+
+// ===== ENTRADAS VIEW =====
+function renderEntradas(){
+  const sorted=[...filteredEntries].sort((a,b)=>{
+    const av=a[sortCol]??'',bv=b[sortCol]??'';
+    if(sortCol==='dur') return sortDir*(durToSecs(b)-durToSecs(a));
+    return sortDir*(av>bv?1:av<bv?-1:0);
+  });
+  const totalPages=Math.ceil(sorted.length/PAGE_SIZE);
+  if(page>=totalPages) page=Math.max(0,totalPages-1);
+  const pageEntries=sorted.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE);
+
+  const catTag=cat=>{const m={Desarrollo:'dev',Marketing:'mkt',Diseño:'des','IA/Automatización':'ai',Video:'vid',Operaciones:'ops','Ventas/CRM':'mkt',Reunión:'ops'};return`<span class="tag tag-${m[cat]||'ops'}">${cat}</span>`;};
+  const statusBadge=s=>{const m={Completado:'done','En progreso':'prog',Revisión:'rev'};return`<span class="badge-status s-${m[s]||'prog'}">${s}</span>`;};
+  const swBadges=(sw=[])=>sw.map(id=>{const s=SOFTWARE.find(x=>x.id===id);return s?`<span class="feed-sw-tag">${s.name}</span>`:''}).join('');
+
+  document.getElementById('view-entradas').innerHTML=`
+    <div class="export-row">
+      <button onclick="exportCSV()">📥 Export CSV</button>
+      <span style="font-size:12px;color:var(--bone2)">${filteredEntries.length} entradas · ${secsToHMS(filteredEntries.reduce((a,e)=>a+durToSecs(e),0))} · $${filteredEntries.reduce((a,e)=>a+costForEntry(e),0).toLocaleString()} MXN</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable('dateKey')">Fecha${sortCol==='dateKey'?sortDir>0?' ▲':' ▼':''}</th>
+            <th onclick="sortTable('hora')">Hora</th>
+            <th onclick="sortTable('desc')">Descripción</th>
+            <th onclick="sortTable('cat')">Categoría</th>
+            <th onclick="sortTable('project')">Proyecto</th>
+            <th onclick="sortTable('dur')">Duración</th>
+            <th>Costo</th>
+            <th onclick="sortTable('status')">Estado</th>
+            <th>Software</th>
+            <th>Por qué / Para qué / Logro</th>
+            <th>Obs</th>
+            <th>RW</th>
+            <th>✏</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${pageEntries.map(e=>`
+            <tr>
+              <td style="white-space:nowrap">${e.dateKey}</td>
+              <td>${e.hora||'—'}</td>
+              <td style="max-width:200px;word-break:break-word">${e.desc}</td>
+              <td>${catTag(e.cat)}</td>
+              <td style="color:var(--bone2);white-space:nowrap">${e.project||'—'}</td>
+              <td style="color:var(--amber);font-weight:700;white-space:nowrap">${secsToHMS(durToSecs(e))}</td>
+              <td style="color:var(--green);white-space:nowrap">$${costForEntry(e).toLocaleString()}</td>
+              <td>${statusBadge(e.status)}</td>
+              <td style="max-width:120px">${swBadges(e.sw)}</td>
+              <td style="max-width:180px;font-size:10px;line-height:1.6">
+                ${e.why?`<div><span style="color:var(--bone2)">❓</span> ${e.why.slice(0,40)}${e.why.length>40?'...':''}</div>`:''}
+                ${e.forwhat?`<div><span style="color:#86efac">🎯</span> ${e.forwhat.slice(0,40)}${e.forwhat.length>40?'...':''}</div>`:''}
+                ${e.result?`<div><span style="color:var(--blue)">✅</span> ${e.result.slice(0,40)}${e.result.length>40?'...':''}</div>`:''}
+              </td>
+              <td style="max-width:120px;font-size:11px;color:var(--amber);font-style:italic">${(e.obs||'').slice(0,35)+(e.obs&&e.obs.length>35?'...':'')}</td>
+              <td style="text-align:center">${e.rework?'<span style="color:var(--red)">⚠</span>':'—'}</td>
+              <td><button onclick="openEdit('${e.id}')" style="background:var(--surface2);border:1px solid var(--border);color:var(--bone2);padding:3px 8px;border-radius:4px;font-size:11px">✏</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <button onclick="goPage(0)" ${page===0?'disabled':''}>«</button>
+      <button onclick="goPage(${page-1})" ${page===0?'disabled':''}>‹ Ant</button>
+      <span>Pág ${page+1} de ${totalPages||1}</span>
+      <button onclick="goPage(${page+1})" ${page>=totalPages-1?'disabled':''}>Sig ›</button>
+      <button onclick="goPage(${totalPages-1})" ${page>=totalPages-1?'disabled':''}>»</button>
+    </div>
+  `;
+}
+
+function sortTable(col){
+  if(sortCol===col) sortDir*=-1;
+  else{sortCol=col;sortDir=-1;}
+  renderEntradas();
+}
+function goPage(p){page=p;renderEntradas();}
+
+// ===== FILTERS =====
+function applyFilters(){applyAllFilters();}
+function clearFilters(){
+  ['f-search','f-dur-min'].forEach(id=>{const el=document.getElementById(id);if(el) el.value=id==='f-dur-min'?'0':'';});
+  document.getElementById('dur-min-val').textContent='0m';
+  ['f-cat','f-project','f-client','f-status','f-priority','f-rework','f-sw'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
+  applyAllFilters();
+}
+
+// ===== ENTRY MODAL =====
+function openAdd(){
+  editingId=null;
+  document.getElementById('modal-title').textContent='Nueva Entrada';
+  const today=new Date().toISOString().split('T')[0];
+  const now=new Date().toTimeString().slice(0,5);
+  document.getElementById('e-desc').value='';
+  document.getElementById('e-why').value='';
+  document.getElementById('e-forwhat').value='';
+  document.getElementById('e-result').value='';
+  document.getElementById('e-obs').value='';
+  document.getElementById('e-date').value=today;
+  document.getElementById('e-hora').value=now;
+  document.getElementById('e-dur-h').value='1';
+  document.getElementById('e-dur-m').value='0';
+  document.getElementById('e-dur-s').value='0';
+  document.getElementById('e-cat').value='Desarrollo';
+  document.getElementById('e-project').value='';
+  document.getElementById('e-client').value='';
+  document.getElementById('e-status').value='Completado';
+  document.getElementById('e-priority').value='Alta';
+  document.getElementById('e-rework').value='0';
+  document.getElementById('e-notes').value='';
+  document.getElementById('e-prompt-count').value='1';
+  document.getElementById('e-prompt-cat').value='';
+  document.getElementById('e-prompt-winner').value='';
+  document.getElementById('e-prompt-notes').value='';
+  document.querySelectorAll('#sw-checkboxes input[type=checkbox]').forEach(cb=>cb.checked=false);
+  showModal('entry-modal');
+}
+function openEdit(id){
+  const e=allEntries.find(x=>x.id===id);if(!e)return;
+  editingId=id;
+  document.getElementById('modal-title').textContent='Editar Entrada';
+  document.getElementById('e-desc').value=e.desc||'';
+  document.getElementById('e-why').value=e.why||'';
+  document.getElementById('e-forwhat').value=e.forwhat||'';
+  document.getElementById('e-result').value=e.result||'';
+  document.getElementById('e-obs').value=e.obs||'';
+  document.getElementById('e-date').value=e.dateKey||'';
+  document.getElementById('e-hora').value=e.hora||'';
+  const secs=durToSecs(e);
+  document.getElementById('e-dur-h').value=Math.floor(secs/3600);
+  document.getElementById('e-dur-m').value=Math.floor((secs%3600)/60);
+  document.getElementById('e-dur-s').value=secs%60;
+  document.getElementById('e-cat').value=e.cat||'Desarrollo';
+  document.getElementById('e-project').value=e.project||'';
+  document.getElementById('e-client').value=e.client||'';
+  document.getElementById('e-status').value=e.status||'Completado';
+  document.getElementById('e-priority').value=e.priority||'Alta';
+  document.getElementById('e-rework').value=e.rework?'1':'0';
+  document.getElementById('e-notes').value=e.notes||'';
+  document.getElementById('e-prompt-count').value=e.promptCount||1;
+  document.getElementById('e-prompt-cat').value=e.promptCat||'';
+  document.getElementById('e-prompt-winner').value=e.promptWinner||'';
+  document.getElementById('e-prompt-notes').value=e.promptNotes||'';
+  document.querySelectorAll('#sw-checkboxes input[type=checkbox]').forEach(cb=>{cb.checked=(e.sw||[]).includes(cb.value);});
+  showModal('entry-modal');
+}
+function saveEntry(){
+  const desc=document.getElementById('e-desc').value.trim();
+  if(!desc){alert('La descripción es obligatoria');return;}
+  const h=parseInt(document.getElementById('e-dur-h').value)||0;
+  const m=parseInt(document.getElementById('e-dur-m').value)||0;
+  const s=parseInt(document.getElementById('e-dur-s').value)||0;
+  const totalSecs=h*3600+m*60+s;
+  if(totalSecs<=0){alert('La duración debe ser mayor a 0');return;}
+  const sw=[...document.querySelectorAll('#sw-checkboxes input[type=checkbox]:checked')].map(cb=>cb.value);
+  const promptCount=Math.max(1,parseInt(document.getElementById('e-prompt-count').value)||1);
+  const entry={
+    id:editingId||'c'+Date.now(),
+    dateKey:document.getElementById('e-date').value,
+    hora:document.getElementById('e-hora').value,
+    desc,
+    why:document.getElementById('e-why').value.trim(),
+    forwhat:document.getElementById('e-forwhat').value.trim(),
+    result:document.getElementById('e-result').value.trim(),
+    obs:document.getElementById('e-obs').value.trim(),
+    cat:document.getElementById('e-cat').value,
+    dur:totalSecs/3600,
+    durSec:totalSecs,
+    project:document.getElementById('e-project').value.trim(),
+    client:document.getElementById('e-client').value.trim(),
+    status:document.getElementById('e-status').value,
+    priority:document.getElementById('e-priority').value,
+    rework:document.getElementById('e-rework').value==='1'?1:0,
+    notes:document.getElementById('e-notes').value.trim(),
+    promptCount,
+    promptCat:document.getElementById('e-prompt-cat').value||'',
+    promptWinner:document.getElementById('e-prompt-winner').value.trim(),
+    promptNotes:document.getElementById('e-prompt-notes').value.trim(),
+    sw,tags:[],
+  };
+  if(editingId){
+    const idx=customEntries.findIndex(e=>e.id===editingId);
+    if(idx>=0) customEntries[idx]=entry; else customEntries.push(entry);
+  } else {
+    customEntries.push(entry);
+  }
+  saveCustomEntries();
+  rebuildAllEntries();
+  populateFilterDropdowns();
+  populateDatalistOptions();
+  applyAllFilters();
+  closeModal('entry-modal');
+}
+
+// ===== SETTINGS =====
+function showSettings(){
+  document.getElementById('s-rate').value=settings.rate;
+  document.getElementById('s-goal-h').value=settings.goalH;
+  document.getElementById('s-goal-a').value=settings.goalA;
+  document.getElementById('s-apikey').value=settings.apiKey;
+  document.getElementById('s-model').value=settings.model;
+  showModal('settings-modal');
+}
+function saveSettings(){
+  settings.rate=parseFloat(document.getElementById('s-rate').value)||500;
+  settings.goalH=parseFloat(document.getElementById('s-goal-h').value)||8;
+  settings.goalA=parseInt(document.getElementById('s-goal-a').value)||15;
+  settings.apiKey=document.getElementById('s-apikey').value.trim();
+  settings.model=document.getElementById('s-model').value;
+  saveSettingsData();
+  closeModal('settings-modal');
+  applyAllFilters();
+}
+
+// ===== MODALS =====
+function showModal(id){document.getElementById(id).classList.remove('hidden');}
+function closeModal(id){document.getElementById(id).classList.add('hidden');}
+document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m) m.classList.add('hidden');});});
+
+// ===== EXPORT =====
+function exportCSV(){
+  const headers=['ID','Fecha','Hora','Descripción','Por qué','Para qué','Qué se logró','Observaciones','Categoría','Proyecto','Cliente','Duración (H:M:S)','Duración (seg)','Costo MXN','Estado','Prioridad','Software','Retrabajo','Prompts Necesarios','Categoría Prompt','Prompt Ganador','Notas Prompting','Notas'];
+  const rows=filteredEntries.map(e=>[
+    e.id,e.dateKey,e.hora||'',
+    `"${(e.desc||'').replace(/"/g,'""')}"`,
+    `"${(e.why||'').replace(/"/g,'""')}"`,
+    `"${(e.forwhat||'').replace(/"/g,'""')}"`,
+    `"${(e.result||'').replace(/"/g,'""')}"`,
+    `"${(e.obs||'').replace(/"/g,'""')}"`,
+    e.cat,e.project||'',e.client||'',
+    secsToHMS(durToSecs(e)),durToSecs(e),costForEntry(e),
+    e.status,e.priority||'',
+    (e.sw||[]).join('|'),e.rework?1:0,
+    e.promptCount||1,e.promptCat||'',
+    `"${(e.promptWinner||'').replace(/"/g,'""')}"`,
+    `"${(e.promptNotes||'').replace(/"/g,'""')}"`,
+    `"${(e.notes||'').replace(/"/g,'""')}"`
+  ]);
+  const csv=[headers,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
+  a.download='victor-ia-tracker-'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+}
+
+// ===== CHATBOT =====
+function toggleChat(){document.getElementById('chatbot-panel').classList.toggle('hidden');}
+function quickQ(q){document.getElementById('chat-input').value=q;sendChat();}
+async function sendChat(){
+  const input=document.getElementById('chat-input');
+  const q=input.value.trim();if(!q)return;
+  if(!settings.apiKey){addChatMsg('bot','⚠ Configura tu OpenRouter API key en ⚙ Config.');return;}
+  input.value='';
+  addChatMsg('user',q);
+  const typing=addChatMsg('bot','<em>Pensando...</em>');
+  chatHistory.push({role:'user',content:q});
+  if(chatHistory.length>12) chatHistory=chatHistory.slice(-12);
+  try{
+    const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+settings.apiKey,'Content-Type':'application/json','HTTP-Referer':'https://victor-ia-tracker.vercel.app','X-Title':'Victor IA Tracker'},
+      body:JSON.stringify({model:settings.model,messages:[{role:'system',content:buildChatContext()},...chatHistory],max_tokens:1024})
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const reply=data.choices[0].message.content;
+    typing.innerHTML=reply.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    chatHistory.push({role:'assistant',content:reply});
+  }catch(err){typing.innerHTML='❌ '+err.message;}
+}
+function addChatMsg(role,text){
+  const msgs=document.getElementById('chat-msgs');
+  const div=document.createElement('div');div.className='chat-msg '+role;div.innerHTML=text;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;return div;
+}
+function buildChatContext(){
+  const kpis=calcKPIs(allEntries);
+  const topP=getTopProjects(allEntries,3).map(([p,h])=>`${p}:${secsToHMS(Math.round(h*3600))}`).join(', ');
+  const topC=getTopCats(allEntries,3).map(([c,h])=>`${c}:${secsToHMS(Math.round(h*3600))}`).join(', ');
+  const topSW=getTopSW(allEntries,5).map(([id,n])=>{const s=SOFTWARE.find(x=>x.id===id);return`${s?s.name:id}:${n}usos`;}).join(', ');
+  const reworks=allEntries.filter(e=>e.rework).map(e=>`"${e.desc.slice(0,40)}"`).join(', ');
+  const recent=allEntries.slice(-10).map(e=>`[${e.dateKey} ${e.hora}] ${e.cat}: ${e.desc.slice(0,50)} (${secsToHMS(durToSecs(e))}, $${costForEntry(e)} MXN)${e.why?' | PorQué:'+e.why.slice(0,30):''}${e.result?' | Logrado:'+e.result.slice(0,30):''}${e.obs?' | Obs:'+e.obs.slice(0,30):''}`).join('\n');
+  const swCosts=SOFTWARE.filter(s=>s.cost>0).map(s=>`${s.name}:$${s.cost}/mes`).join(', ');
+  const pkpis=calcKPIs(allEntries);
+  const promptAnalysis=pkpis.promptAvgByCat.slice(0,5).map(([k,v])=>`${k}:${v.toFixed(1)} avg`).join(', ');
+  const topWinners=allEntries.filter(e=>e.promptWinner&&e.promptCount===1).slice(-3).map(e=>`[${e.cat}] "${e.promptWinner.slice(0,60)}"`).join('; ');
+  return `Eres el asistente de performance de Victor IA, agencia de IA en México. Tienes acceso completo a los datos de productividad. Responde en español, formal o coloquial según te lo pidan.
+
+MÉTRICAS GLOBALES:
+- Total acciones: ${kpis.total} en ${kpis.days} días
+- Tiempo total: ${secsToHMS(kpis.totalSecs)} | Prom/día: ${secsToHMS(Math.round(kpis.totalSecs/kpis.days))}
+- Prom por acción: ${secsToHMS(Math.round(kpis.totalSecs/kpis.total))}
+- Costo/acción prom: $${Math.round(kpis.totalCost/kpis.total)} MXN
+- Valor generado total: $${kpis.totalCost.toLocaleString()} MXN
+- Completado: ${kpis.compRate}% | Retrabajo: ${kpis.reworkRate}%
+- Racha: ${kpis.streak} días | Tarifa: $${settings.rate}/h
+
+TOP PROYECTOS: ${topP}
+TOP CATEGORÍAS: ${topC}
+SOFTWARE MÁS USADO: ${topSW}
+RETRABAJOS: ${reworks||'ninguno'}
+
+COSTOS SOFTWARE/MES:
+${swCosts}
+
+PROMPT ENGINEERING:
+- Score global: ${pkpis.promptScore}/100 | Prompts prom: ${pkpis.avgPrompts.toFixed(1)} | 1-Shot rate: ${pkpis.oneShotRate}%
+- Por categoría: ${promptAnalysis||'sin datos'}
+- Prompts 1-shot recientes: ${topWinners||'ninguno registrado'}
+
+ÚLTIMAS 10 ACCIONES:
+${recent}
+
+Responde con datos concretos, insights y recomendaciones accionables.`;
+}
+
+// ===== DATOS FINANCIEROS (fuente: Google Sheets — actualizado 2026-05-06) =====
+const FINANZAS = {
+  periodo: 'Jul 2025 – May 2026',
+  fuenteDatos: 'Google Sheets — actualizado 2026-05-06',
+  // INGRESOS COBRADOS REALES
+  ingresos: [
+    {concepto:'Anticipo Samir El Sharkawi — Sep', categoria:'Servicios IA', monto:10000, mes:'2025-09'},
+    {concepto:'Anticipo Samir El Sharkawi — Oct', categoria:'Servicios IA', monto:15000, mes:'2025-10'},
+    {concepto:'Roes & Co — Anticipo Nov', categoria:'Servicios IA', monto:12909.48, mes:'2025-11'},
+    {concepto:'Roes & Co — Mensualidad Dic', categoria:'Retainer mensual', monto:14000, mes:'2025-12'},
+    {concepto:'Roes & Co — Mensualidad Ene', categoria:'Retainer mensual', monto:21000, mes:'2026-01'},
+    {concepto:'Roes & Co — Mensualidad Feb', categoria:'Retainer mensual', monto:15000, mes:'2026-02'},
+    {concepto:'Roes & Co — Mensualidad Mar', categoria:'Retainer mensual', monto:15000, mes:'2026-03'},
+    {concepto:'Roes & Co — Mensualidad Abr', categoria:'Retainer mensual', monto:15000, mes:'2026-04'},
+  ],
+  // GASTOS MENSUALES RECURRENTES ACTUALES (basado en últimos meses del sheet)
+  gastosMensuales: [
+    {concepto:'Claude Code / Anthropic', categoria:'Software IA', monto:2501.39},
+    {concepto:'Higgsfield AI', categoria:'Software Video', monto:2267.77},
+    {concepto:'ElevenLabs Agentes con Voz', categoria:'Software Audio', monto:1734.05},
+    {concepto:'Adobe Creative Cloud', categoria:'Software Diseño', monto:1611.29},
+    {concepto:'GHL / Nokodo / The Nucleo', categoria:'CRM/Marketing', monto:1046.71},
+    {concepto:'Hosting + Dominio + SSL', categoria:'Infraestructura', monto:490.99},
+    {concepto:'HubSpot (Victorius)', categoria:'CRM/Marketing', monto:368.50},
+    {concepto:'ChatGPT Pro', categoria:'Software IA', monto:413.39},
+    {concepto:'Perplexity Pro', categoria:'Software IA', monto:349.90},
+    {concepto:'OpenRouter', categoria:'Software IA', monto:187.98},
+    {concepto:'Canva Pro', categoria:'Software Diseño', monto:330.00},
+    {concepto:'Nord VPN', categoria:'Infraestructura', monto:179.80},
+    {concepto:'LTX Studio (activo)', categoria:'Software Video', monto:0},
+    {concepto:'Runway ML (activo)', categoria:'Software Video', monto:0},
+  ],
+  // GASTOS HISTÓRICOS / ÚNICOS (del sheet)
+  gastosUnicos: [
+    {concepto:'ASUS Laptop Zenbook Duo OLED 32GB/2TB', categoria:'Hardware', monto:33599.20, fecha:'2025-07'},
+    {concepto:'Escritorio + Silla oficina', categoria:'Hardware', monto:2898.55, fecha:'2025-07'},
+    {concepto:'Mouse + Mouse Pad + Mochila', categoria:'Hardware', monto:706.00, fecha:'2025-07'},
+    {concepto:'Notario / Constitución empresa', categoria:'Legal', monto:24894.24, fecha:'2025-08'},
+    {concepto:'Nómina Pablo Solar (Jul-Sep)', categoria:'Nómina', monto:44350.00, fecha:'2025-07'},
+    {concepto:'Amedia Social — Seguidores/ADS Meta', categoria:'Marketing', monto:15000, fecha:'2025-11'},
+    {concepto:'Programador HubSpot externo', categoria:'Servicios externos', monto:4050, fecha:'2025-07'},
+    {concepto:'India N8N Soporte (total pagado)', categoria:'Servicios externos', monto:24096.17, fecha:'2025-09'},
+    {concepto:'Nokodo — Configuración inicial', categoria:'CRM/Marketing', monto:18475.40, fecha:'2026-01'},
+    {concepto:'HeyGen (total pagado 3 meses)', categoria:'Software Video', monto:5511.47, fecha:'2025-09'},
+    {concepto:'Apify (total pagado)', categoria:'Software IA', monto:2849.08, fecha:'2025-09'},
+    {concepto:'Zapier automatizaciones (total)', categoria:'Software Automatización', monto:2782.17, fecha:'2025-07'},
+    {concepto:'Gamma (presentaciones)', categoria:'Software IA', monto:1050, fecha:'2025-09'},
+    {concepto:'Jotform formularios', categoria:'Software Marketing', monto:2728.40, fecha:'2025-09'},
+    {concepto:'Manus IA (un mes)', categoria:'Software IA', monto:3747, fecha:'2025-10'},
+    {concepto:'Google Cloud Platform', categoria:'Infraestructura', monto:1415.08, fecha:'2025-10'},
+    {concepto:'Airtable', categoria:'Software Gestión', monto:2282.78, fecha:'2025-10'},
+    {concepto:'Blotato (6 meses)', categoria:'Software Marketing', monto:1069.93, fecha:'2025-09'},
+    {concepto:'Retell AI', categoria:'Software Audio', monto:222, fecha:'2025-11'},
+    {concepto:'Hailuo (video)', categoria:'Software Video', monto:3340.07, fecha:'2025-11'},
+    {concepto:'Opus Clips', categoria:'Software Video', monto:331.18, fecha:'2026-01'},
+    {concepto:'CRM GHL — Pago inicial', categoria:'CRM/Marketing', monto:1296, fecha:'2025-11'},
+    {concepto:'LTX Studio (6 meses)', categoria:'Software Video', monto:2339.25, fecha:'2025-07'},
+    {concepto:'Runway ML (varios meses)', categoria:'Software Video', monto:6586.29, fecha:'2025-07'},
+    {concepto:'VidIQ YouTube', categoria:'Software Marketing', monto:315.52, fecha:'2025-07'},
+    {concepto:'Template Website Victorius', categoria:'Diseño', monto:1519.63, fecha:'2025-07'},
+    {concepto:'EBW General varios meses', categoria:'Infraestructura', monto:192.99, fecha:'2025-09'},
+  ],
+  // CUENTAS POR COBRAR (del sheet)
+  porCobrar: [
+    {cliente:'Samir El Sharkawi', monto:15900, diasVencido:45, prioridad:'Alta'},
+    {cliente:'Roes & Co', monto:12909.48, diasVencido:30, prioridad:'Alta'},
+    {cliente:'Rohan Goyal', monto:12070.72, diasVencido:20, prioridad:'Media'},
+  ],
+  // CUENTAS POR PAGAR (del sheet)
+  porPagar: [
+    {proveedor:'Andrés Mateos (préstamo + 20% rendimiento)', monto:286003.14, diasVencido:90, prioridad:'Alta'},
+    {proveedor:'Pablo Solar — Nómina Oct-May', monto:120000, diasVencido:60, prioridad:'Alta'},
+    {proveedor:'The Nucleo Agencia Madrid', monto:19315.21, diasVencido:30, prioridad:'Media'},
+  ],
+  // DEUDA ANDRÉS: $11,916.81/mes × 24 meses · Pagados: 3 · Restante: $250,252.70
+  deudaAndres: {pagoMensual:11916.81, mesesPagados:3, pendiente:250252.70, totalConIntereses:286003.14},
+  saldoCaja: 1248.48,
+  tipoCambio: 18.67,
+  totalEgresosHistorico: 288997.24, // TOTAL acumulado Jul25-May26 según Google Sheet
+};
+
+// ===== RENDER FINANZAS =====
+function renderFinanzas(){
+  const totalIngresos = FINANZAS.ingresos.reduce((a,i)=>a+i.monto,0);
+  const totalMensual = FINANZAS.gastosMensuales.reduce((a,g)=>a+g.monto,0);
+  const meses = 11;
+  const totalSoftware = totalMensual * meses;
+  const totalUnicos = FINANZAS.gastosUnicos.reduce((a,g)=>a+g.monto,0);
+  const totalEgresos = totalSoftware + totalUnicos;
+  const utilidadNeta = totalIngresos - totalEgresos;
+  const margenNeto = totalIngresos > 0 ? (utilidadNeta / totalIngresos * 100).toFixed(1) : 0;
+  const totalPorCobrar = FINANZAS.porCobrar.reduce((a,c)=>a+c.monto,0);
+  const totalPorPagar = FINANZAS.porPagar.reduce((a,p)=>a+p.monto,0);
+  // Balance
+  const activoCirculante = FINANZAS.saldoCaja + totalPorCobrar;
+  const activoFijo = 33599.20 + 4004.55;
+  const totalActivos = activoCirculante + activoFijo;
+  const totalPasivos = totalPorPagar;
+  const capitalContable = totalActivos - totalPasivos;
+  // Por categoría
+  const gastoCatMes = {};
+  FINANZAS.gastosMensuales.forEach(g=>{gastoCatMes[g.categoria]=(gastoCatMes[g.categoria]||0)+g.monto;});
+
+  const moneyMX = n => '$'+Math.abs(n).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const moneyK = n => (n>=0?'':'−')+'$'+(Math.abs(n)/1000).toFixed(1)+'k';
+  const colorNum = n => n>=0?'color:var(--green)':'color:var(--red)';
+
+  document.getElementById('view-finanzas').innerHTML = `
+    <!-- RESUMEN EJECUTIVO CEO -->
+    <div class="kpi-grid" style="margin-bottom:20px">
+      <div class="kpi-card hero"><div class="kpi-label">Ingresos acumulados</div><div class="kpi-val" style="font-size:20px">${moneyK(totalIngresos)}</div><div class="kpi-sub">Jul 2025 – May 2026</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Egresos totales</div><div class="kpi-val" style="font-size:20px;color:var(--red)">${moneyK(totalEgresos)}</div><div class="kpi-sub">Software + operativos</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Resultado neto</div><div class="kpi-val" style="font-size:20px;${colorNum(utilidadNeta)}">${moneyK(utilidadNeta)}</div><div class="kpi-sub">Margen: ${margenNeto}%</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Saldo en caja</div><div class="kpi-val" style="font-size:20px;color:var(--red)">${moneyMX(FINANZAS.saldoCaja)}</div><div class="kpi-sub">MXN disponible hoy</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Por cobrar</div><div class="kpi-val" style="font-size:20px;color:var(--blue)">${moneyK(totalPorCobrar)}</div><div class="kpi-sub">${FINANZAS.porCobrar.length} clientes</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Por pagar</div><div class="kpi-val" style="font-size:20px;color:var(--red)">${moneyK(totalPorPagar)}</div><div class="kpi-sub">${FINANZAS.porPagar.length} proveedores</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Gasto mensual recurrente</div><div class="kpi-val" style="font-size:20px;color:var(--amber)">${moneyK(totalMensual)}</div><div class="kpi-sub">Solo software/infra</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Punto de equilibrio</div><div class="kpi-val" style="font-size:20px">$26.6k</div><div class="kpi-sub">Desde mes 4 — TC: $${FINANZAS.tipoCambio} MXN/USD</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Gasto histórico total</div><div class="kpi-val" style="font-size:20px;color:var(--red)">${moneyK(FINANZAS.totalEgresosHistorico)}</div><div class="kpi-sub">Jul 25–May 26 · Google Sheets ✓</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Deuda Andrés Mateos</div><div class="kpi-val" style="font-size:20px;color:var(--red)">${moneyK(FINANZAS.deudaAndres.pendiente)}</div><div class="kpi-sub">Restante · ${FINANZAS.deudaAndres.mesesPagados} de 24 pagados · $${FINANZAS.deudaAndres.pagoMensual.toLocaleString()}/mes</div></div>
+    </div>
+    <div style="font-size:10px;color:var(--bone2);margin-bottom:16px;padding:6px 10px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:6px">
+      📊 Datos sincronizados desde <strong style="color:var(--blue)">Google Sheets — ${FINANZAS.fuenteDatos}</strong> · Los montos en USD se convierten a MXN al tipo de cambio de $${FINANZAS.tipoCambio}
+    </div>
+
+    <!-- ESTADO DE RESULTADOS -->
+    <div class="section-title">Estado de Resultados — ${FINANZAS.periodo}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="chart-card">
+        <h3>Ingresos</h3>
+        ${FINANZAS.ingresos.map(i=>`
+          <div class="top-item">
+            <span class="top-name" style="font-size:12px">${i.concepto}</span>
+            <span class="top-val">${moneyMX(i.monto)}</span>
+          </div>
+        `).join('')}
+        <div class="top-item" style="border-top:1px solid var(--amber);margin-top:8px;padding-top:8px">
+          <span class="top-name" style="font-weight:700;color:var(--bone)">TOTAL INGRESOS</span>
+          <span class="top-val" style="font-size:14px">${moneyMX(totalIngresos)}</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Egresos operativos</h3>
+        <div class="top-item"><span class="top-name">Software/APIs (${meses} meses)</span><span class="top-val" style="color:var(--red)">${moneyMX(totalSoftware)}</span></div>
+        ${FINANZAS.gastosUnicos.map(g=>`
+          <div class="top-item">
+            <span class="top-name" style="font-size:11px">${g.concepto}</span>
+            <span class="top-val" style="color:var(--red);font-size:12px">${moneyMX(g.monto)}</span>
+          </div>
+        `).join('')}
+        <div class="top-item" style="border-top:1px solid var(--red);margin-top:8px;padding-top:8px">
+          <span class="top-name" style="font-weight:700;color:var(--bone)">TOTAL EGRESOS</span>
+          <span class="top-val" style="color:var(--red);font-size:14px">${moneyMX(totalEgresos)}</span>
+        </div>
+        <div class="top-item" style="border-top:2px solid var(--amber);margin-top:8px;padding-top:8px">
+          <span class="top-name" style="font-weight:800;color:var(--amber)">UTILIDAD NETA</span>
+          <span class="top-val" style="${colorNum(utilidadNeta)};font-size:16px;font-weight:800">${moneyMX(utilidadNeta)}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BALANCE GENERAL -->
+    <div class="section-title">Balance General — Mayo 2026</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="chart-card">
+        <h3 style="color:var(--green)">ACTIVOS</h3>
+        <div style="font-size:11px;color:var(--bone2);margin-bottom:8px;font-weight:700">Activo Circulante</div>
+        <div class="top-item"><span class="top-name">Caja y bancos</span><span class="top-val" style="color:var(--green)">${moneyMX(FINANZAS.saldoCaja)}</span></div>
+        <div class="top-item"><span class="top-name">Cuentas por cobrar</span><span class="top-val" style="color:var(--green)">${moneyMX(totalPorCobrar)}</span></div>
+        <div class="top-item"><span class="top-name" style="font-weight:700">Total Circulante</span><span class="top-val" style="color:var(--green)">${moneyMX(activoCirculante)}</span></div>
+        <div style="font-size:11px;color:var(--bone2);margin:12px 0 8px;font-weight:700">Activo Fijo</div>
+        <div class="top-item"><span class="top-name">Equipo de cómputo</span><span class="top-val" style="color:var(--green)">${moneyMX(33599.20)}</span></div>
+        <div class="top-item"><span class="top-name">Mobiliario</span><span class="top-val" style="color:var(--green)">${moneyMX(4004.55)}</span></div>
+        <div class="top-item"><span class="top-name" style="font-weight:700">Total Fijo</span><span class="top-val" style="color:var(--green)">${moneyMX(activoFijo)}</span></div>
+        <div class="top-item" style="border-top:2px solid var(--green);margin-top:8px;padding-top:8px">
+          <span class="top-name" style="font-weight:800;color:var(--bone)">TOTAL ACTIVOS</span>
+          <span class="top-val" style="color:var(--green);font-size:15px;font-weight:800">${moneyMX(totalActivos)}</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3 style="color:var(--red)">PASIVOS + CAPITAL</h3>
+        <div style="font-size:11px;color:var(--bone2);margin-bottom:8px;font-weight:700">Pasivos</div>
+        ${FINANZAS.porPagar.map(p=>`<div class="top-item"><span class="top-name" style="font-size:11px">${p.proveedor}</span><span class="top-val" style="color:var(--red)">${moneyMX(p.monto)}</span></div>`).join('')}
+        <div class="top-item"><span class="top-name" style="font-weight:700">Total Pasivos</span><span class="top-val" style="color:var(--red)">${moneyMX(totalPasivos)}</span></div>
+        <div style="font-size:11px;color:var(--bone2);margin:12px 0 8px;font-weight:700">Capital Contable</div>
+        <div class="top-item"><span class="top-name">Capital contable</span><span class="top-val" style="${colorNum(capitalContable)}">${moneyMX(capitalContable)}</span></div>
+        <div class="top-item" style="border-top:2px solid var(--red);margin-top:8px;padding-top:8px">
+          <span class="top-name" style="font-weight:800;color:var(--bone)">TOTAL PAS+CAP</span>
+          <span class="top-val" style="color:var(--bone);font-size:15px;font-weight:800">${moneyMX(totalPasivos+capitalContable)}</span>
+        </div>
+        <div style="font-size:10px;color:var(--red);margin-top:12px;padding:8px;background:rgba(239,68,68,.08);border-radius:6px">
+          ⚠️ Capital negativo: los pasivos superan los activos. Prioridad: cobrar cuentas pendientes y negociar deuda con Andrés Mateos.
+        </div>
+      </div>
+    </div>
+
+    <!-- FLUJO DE EFECTIVO -->
+    <div class="section-title">Flujo de Efectivo Proyectado</div>
+    <div class="chart-card" style="margin-bottom:20px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <div>
+          <div style="font-size:11px;color:var(--bone2);font-weight:700;margin-bottom:10px">ENTRADAS</div>
+          <div class="top-item"><span class="top-name">Ingresos cobrados</span><span class="top-val" style="color:var(--green)">${moneyMX(totalIngresos)}</span></div>
+          <div class="top-item"><span class="top-name">Por cobrar (pendiente)</span><span class="top-val" style="color:var(--blue)">${moneyMX(totalPorCobrar)}</span></div>
+          <div class="top-item" style="border-top:1px solid var(--border);padding-top:8px"><span class="top-name" style="font-weight:700">Total posible</span><span class="top-val" style="color:var(--green)">${moneyMX(totalIngresos+totalPorCobrar)}</span></div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--bone2);font-weight:700;margin-bottom:10px">SALIDAS</div>
+          <div class="top-item"><span class="top-name">Egresos realizados</span><span class="top-val" style="color:var(--red)">${moneyMX(totalEgresos)}</span></div>
+          <div class="top-item"><span class="top-name">Deudas pendientes</span><span class="top-val" style="color:var(--red)">${moneyMX(totalPorPagar)}</span></div>
+          <div class="top-item" style="border-top:1px solid var(--border);padding-top:8px"><span class="top-name" style="font-weight:700">Total salidas</span><span class="top-val" style="color:var(--red)">${moneyMX(totalEgresos+totalPorPagar)}</span></div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--bone2);font-weight:700;margin-bottom:10px">POSICIÓN NETA</div>
+          <div class="top-item"><span class="top-name">Saldo actual caja</span><span class="top-val">${moneyMX(FINANZAS.saldoCaja)}</span></div>
+          <div class="top-item"><span class="top-name">Si cobras todo</span><span class="top-val" style="color:var(--green)">${moneyMX(FINANZAS.saldoCaja+totalPorCobrar)}</span></div>
+          <div class="top-item"><span class="top-name">Gasto mensual recurrente</span><span class="top-val" style="color:var(--red)">${moneyMX(totalMensual)}</span></div>
+          <div class="top-item" style="border-top:1px solid var(--amber);padding-top:8px">
+            <span class="top-name" style="font-weight:700">Meses de runway</span>
+            <span class="top-val" style="color:var(--amber);font-size:15px">${((FINANZAS.saldoCaja+totalPorCobrar)/totalMensual).toFixed(1)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BALANZA DE COMPROBACIÓN -->
+    <div class="section-title">Balanza de Comprobación</div>
+    <div class="table-wrap" style="margin-bottom:20px">
+      <table>
+        <thead><tr>
+          <th>Cuenta</th><th>Tipo</th><th>Debe</th><th>Haber</th><th>Saldo</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>Caja y Bancos</td><td><span class="badge-status s-done">Activo</span></td><td style="color:var(--green)">${moneyMX(FINANZAS.saldoCaja)}</td><td>—</td><td style="color:var(--green)">${moneyMX(FINANZAS.saldoCaja)}</td></tr>
+          <tr><td>Cuentas por Cobrar</td><td><span class="badge-status s-done">Activo</span></td><td style="color:var(--green)">${moneyMX(totalPorCobrar)}</td><td>—</td><td style="color:var(--green)">${moneyMX(totalPorCobrar)}</td></tr>
+          <tr><td>Equipo de Cómputo</td><td><span class="badge-status s-done">Activo</span></td><td style="color:var(--green)">${moneyMX(33599.20)}</td><td>—</td><td style="color:var(--green)">${moneyMX(33599.20)}</td></tr>
+          <tr><td>Mobiliario</td><td><span class="badge-status s-done">Activo</span></td><td style="color:var(--green)">${moneyMX(4004.55)}</td><td>—</td><td style="color:var(--green)">${moneyMX(4004.55)}</td></tr>
+          <tr><td>Cuentas por Pagar — Andrés Mateos</td><td><span class="badge-status s-rev">Pasivo</span></td><td>—</td><td style="color:var(--red)">${moneyMX(286003.14)}</td><td style="color:var(--red)">(${moneyMX(286003.14)})</td></tr>
+          <tr><td>Cuentas por Pagar — Pablo Solar</td><td><span class="badge-status s-rev">Pasivo</span></td><td>—</td><td style="color:var(--red)">${moneyMX(60000)}</td><td style="color:var(--red)">(${moneyMX(60000)})</td></tr>
+          <tr><td>Cuentas por Pagar — The Nucleo</td><td><span class="badge-status s-rev">Pasivo</span></td><td>—</td><td style="color:var(--red)">${moneyMX(19315.21)}</td><td style="color:var(--red)">(${moneyMX(19315.21)})</td></tr>
+          <tr><td>Ingresos por Servicios</td><td><span class="badge-status s-prog">Resultado</span></td><td>—</td><td style="color:var(--blue)">${moneyMX(totalIngresos)}</td><td style="color:var(--blue)">${moneyMX(totalIngresos)}</td></tr>
+          <tr><td>Gastos de Operación</td><td><span class="badge-status s-prog">Resultado</span></td><td style="color:var(--red)">${moneyMX(totalEgresos)}</td><td>—</td><td style="color:var(--red)">(${moneyMX(totalEgresos)})</td></tr>
+          <tr style="background:var(--amber3)"><td style="font-weight:800">TOTALES</td><td>—</td><td style="font-weight:800;color:var(--green)">${moneyMX(FINANZAS.saldoCaja+totalPorCobrar+33599.20+4004.55+totalEgresos)}</td><td style="font-weight:800;color:var(--red)">${moneyMX(totalPasivos+totalIngresos)}</td><td style="font-weight:800;color:var(--amber)">${moneyMX(capitalContable)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- GASTOS MENSUALES BREAKDOWN -->
+    <div class="section-title">Gastos Mensuales Recurrentes — ${moneyMX(totalMensual)}/mes</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="chart-card">
+        <h3>Detalle por herramienta</h3>
+        ${[...FINANZAS.gastosMensuales].sort((a,b)=>b.monto-a.monto).map(g=>{
+          const pct=Math.round(g.monto/totalMensual*100);
+          return `<div class="bar-item" style="margin-bottom:6px">
+            <div class="bar-label">${g.concepto}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+            <div class="bar-val">${moneyMX(g.monto)}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="chart-card">
+        <h3>Por categoría</h3>
+        ${Object.entries(gastoCatMes).sort((a,b)=>b[1]-a[1]).map(([cat,monto])=>{
+          const pct=Math.round(monto/totalMensual*100);
+          return `<div class="bar-item" style="margin-bottom:8px">
+            <div class="bar-label">${cat}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+            <div class="bar-val">${moneyMX(monto)} (${pct}%)</div>
+          </div>`;
+        }).join('')}
+        <div style="font-size:11px;color:var(--bone2);margin-top:12px">💡 Equivalente en USD: <strong style="color:var(--amber)">\$${(totalMensual/FINANZAS.tipoCambio).toFixed(0)}/mes</strong> al ${FINANZAS.tipoCambio} MXN/USD</div>
+      </div>
+    </div>
+
+    <!-- CUENTAS POR COBRAR Y PAGAR -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="chart-card">
+        <h3 style="color:var(--green)">Cuentas por Cobrar — ${moneyMX(totalPorCobrar)}</h3>
+        ${FINANZAS.porCobrar.map(c=>`
+          <div class="top-item">
+            <div>
+              <div style="font-size:12px;font-weight:700">${c.cliente}</div>
+              <div style="font-size:10px;color:${c.diasVencido>30?'var(--red)':'var(--bone2)'}">${c.diasVencido} días ${c.diasVencido>30?'⚠️ VENCIDO':'pendientes'}</div>
+            </div>
+            <span class="top-val" style="color:var(--green)">${moneyMX(c.monto)}</span>
+          </div>
+        `).join('')}
+        <div style="font-size:11px;color:var(--amber);margin-top:10px;padding:8px;background:var(--amber3);border-radius:6px">
+          💡 Acción: contactar esta semana. Con este ingreso se cubre ${((totalPorCobrar)/totalMensual).toFixed(1)} meses de gastos recurrentes.
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3 style="color:var(--red)">Cuentas por Pagar — ${moneyMX(totalPorPagar)}</h3>
+        ${FINANZAS.porPagar.map(p=>`
+          <div class="top-item">
+            <div>
+              <div style="font-size:12px;font-weight:700">${p.proveedor}</div>
+              <div style="font-size:10px;color:${p.diasVencido>60?'var(--red)':'var(--bone2)'}">${p.diasVencido} días ${p.diasVencido>60?'🚨 URGENTE':'pendientes'}</div>
+            </div>
+            <span class="top-val" style="color:var(--red)">${moneyMX(p.monto)}</span>
+          </div>
+        `).join('')}
+        <div style="font-size:11px;color:var(--red);margin-top:10px;padding:8px;background:rgba(239,68,68,.08);border-radius:6px">
+          🚨 Deuda Andrés Mateos representa el ${Math.round(286003.14/totalPorPagar*100)}% del pasivo total. Negociar plan de pago urgente.
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ===== DATOS ORGANIGRAMA =====
+const DEPTS = [
+  {
+    id:'ceo', nombre:'Dirección General', director:'Victor (CEO)', skill:'director-general',
+    headcount:1, descripcion:'Visión estratégica, toma de decisiones ejecutivas, relaciones clave',
+    responsabilidades:['Estrategia general de la empresa','Cierre de contratos grandes (>$50k)','Relaciones con inversores y socios','Aprobación final de proyectos estratégicos'],
+    kpis:['Revenue total','NPS promedio clientes','% objetivo cumplidos','Horas en alta prioridad'],
+    catEntry:'Reunión', necesidades:['Más tiempo para visión estratégica','Delegar operaciones al CTO/COO','Sistema de reporte semanal automático'],
+    color:'#FFAA17'
+  },
+  {
+    id:'cto', nombre:'Tecnología', director:'CTO (IA)',skill:'director-tecnologia',
+    headcount:1, descripcion:'Arquitectura técnica, desarrollo de productos, infraestructura IA',
+    responsabilidades:['Desarrollo de dashboards y herramientas internas','Infraestructura Vercel/GCP','Skills y agentes de IA','Decisiones de stack tecnológico'],
+    kpis:['Deploys exitosos','Uptime sistemas','Tiempo de resolución de bugs','Cobertura de tests'],
+    catEntry:'Desarrollo', necesidades:['CI/CD pipeline automatizado','Testing antes de deploy','Documentación técnica de sistemas'],
+    color:'#3b82f6'
+  },
+  {
+    id:'cco', nombre:'Creativo', director:'CCO (IA)',skill:'director-creativo',
+    headcount:1, descripcion:'Producción visual y de contenido: video, diseño, fotografía IA',
+    responsabilidades:['Generación de video con Higgsfield/LTX/Runway','Imágenes con Midjourney','Diseño en Figma y Canva','Identidad visual de clientes'],
+    kpis:['Assets producidos/semana','Tiempo por clip de video','Tasa de aprobación cliente','Calidad promedio (feedback)'],
+    catEntry:'Diseño', necesidades:['Template library de estilos aprobados','Batch generation para reducir iteraciones','Reference library por cliente'],
+    color:'#a855f7'
+  },
+  {
+    id:'cmo', nombre:'Marketing', director:'CMO (IA)',skill:'director-marketing',
+    headcount:1, descripcion:'Estrategia de contenido, redes sociales, SEO, campañas pagadas',
+    responsabilidades:['Calendario de contenido semanal','Posts y copywriting para clientes','SEO on-page y técnico','Análisis de métricas sociales'],
+    kpis:['Engagement rate promedio','Seguidores ganados/mes','Tráfico orgánico','CTR campañas'],
+    catEntry:'Marketing', necesidades:['Content calendar en Airtable','Blotato para programación masiva','Reportes automáticos de analytics'],
+    color:'#22c55e'
+  },
+  {
+    id:'cso', nombre:'Ventas', director:'CSO (IA)',skill:'director-ventas',
+    headcount:1, descripcion:'Pipeline de ventas, demos, propuestas, cierre de nuevos clientes',
+    responsabilidades:['Calificar leads entrantes','Preparar y dar demos','Enviar propuestas comerciales','Follow-up y negociación'],
+    kpis:['Leads en pipeline','Tasa de cierre (%)','Ticket promedio','Tiempo de cierre (días)'],
+    catEntry:'Ventas/CRM', necesidades:['CRM actualizado diariamente','Script de demo estandarizado','Propuestas en template Canva/Gamma'],
+    color:'#f97316'
+  },
+  {
+    id:'cxo', nombre:'Clientes', director:'CXO (IA)',skill:'director-clientes',
+    headcount:1, descripcion:'Gestión de cuentas activas, satisfacción y retención de clientes',
+    responsabilidades:['Onboarding de nuevos clientes','Seguimiento semanal de proyectos activos','Resolución de problemas y cambios de scope','Renovaciones y upsells'],
+    kpis:['NPS por cliente','Churn rate','Tiempo de respuesta','Proyectos entregados a tiempo'],
+    catEntry:'Operaciones', necesidades:['Dashboard de estado por cliente','Alertas automáticas de vencimientos','Template de reporte mensual para cliente'],
+    color:'#14b8a6'
+  },
+  {
+    id:'cfo', nombre:'Administración/Finanzas', director:'CFO (IA)',skill:'director-administrativo',
+    headcount:1, descripcion:'Finanzas, contabilidad, legal, compras y cumplimiento',
+    responsabilidades:['Control de gastos y licencias','Facturación y cobranza','Gestión de contratos','Nómina y pagos a proveedores'],
+    kpis:['Flujo de caja','Días de cobro promedio','Gastos vs presupuesto','Deuda activa'],
+    catEntry:'Operaciones', necesidades:['Sistema contable automatizado','Alertas de vencimiento de facturas','Reporte financiero semanal automático'],
+    color:'#ef4444'
+  },
+  {
+    id:'cdgo', nombre:'Datos y Crecimiento', director:'CDGO (IA)',skill:'director-datos-crecimiento',
+    headcount:1, descripcion:'Analytics, growth hacking, experimentos, insights de datos',
+    responsabilidades:['Análisis de métricas de performance','A/B testing de contenido y funnels','Reportes de crecimiento mensual','Identificar oportunidades de optimización'],
+    kpis:['Experimentos activos','Uplift medido','KPIs tracked','Insights accionados'],
+    catEntry:'IA/Automatización', necesidades:['Dashboard BI conectado a datos reales','Tracking automatizado de métricas','Cultura de decisiones basadas en datos'],
+    color:'#84cc16'
+  },
+];
+
+function renderOrganigrama(){
+  // Calcular horas por categoría desde seed data
+  const horasCat = {};
+  allEntries.forEach(e=>{
+    if(e.cat) horasCat[e.cat]=(horasCat[e.cat]||0)+durToSecs(e)/3600;
+  });
+  // Mapear categorías a departamentos
+  const catToDept = {
+    'Desarrollo':'cto','Reunión':'ceo','Diseño':'cco','Marketing':'cmo',
+    'Video':'cco','Operaciones':'cfo','Ventas/CRM':'cso','IA/Automatización':'cdgo'
+  };
+  const deptHoras = {};
+  allEntries.forEach(e=>{
+    const d=catToDept[e.cat];
+    if(d) deptHoras[d]=(deptHoras[d]||0)+durToSecs(e)/3600;
+  });
+  const totalHoras = Object.values(deptHoras).reduce((a,b)=>a+b,0)||1;
+  const maxHoras = Math.max(...Object.values(deptHoras),0.01);
+  const topDept = DEPTS.find(d=>d.id===Object.entries(deptHoras).sort((a,b)=>b[1]-a[1])[0]?.[0]);
+
+  // Flujo de trabajo desde las entradas
+  const flujos = [];
+  const proyectoMap = {};
+  allEntries.forEach(e=>{
+    const d=catToDept[e.cat]||'ceo';
+    if(!proyectoMap[e.project||'General']) proyectoMap[e.project||'General']=[];
+    proyectoMap[e.project||'General'].push({dept:d,desc:e.desc,dur:e.dur,date:e.dateKey});
+  });
+
+  document.getElementById('view-organigrama').innerHTML = `
+    <!-- RESUMEN EJECUTIVO -->
+    <div class="kpi-grid" style="margin-bottom:20px">
+      <div class="kpi-card hero"><div class="kpi-label">Departamentos activos</div><div class="kpi-val">${DEPTS.length}</div><div class="kpi-sub">En estructura actual</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Dept. más activo</div><div class="kpi-val" style="font-size:16px">${topDept?topDept.nombre:'—'}</div><div class="kpi-sub">${deptHoras[topDept?.id]?secsToHMS(Math.round(deptHoras[topDept.id]*3600)):''}</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Total horas registradas</div><div class="kpi-val">${secsToHMS(Math.round(totalHoras*3600))}</div><div class="kpi-sub">Todos los departamentos</div></div>
+      <div class="kpi-card hero"><div class="kpi-label">Proyectos activos</div><div class="kpi-val">${Object.keys(proyectoMap).length}</div><div class="kpi-sub">Con actividad registrada</div></div>
+    </div>
+
+    <!-- CARGA POR DEPARTAMENTO -->
+    <div class="section-title">Distribución de carga de trabajo</div>
+    <div class="chart-card" style="margin-bottom:20px">
+      ${DEPTS.map(d=>{
+        const h=deptHoras[d.id]||0;
+        const pct=Math.round(h/totalHoras*100);
+        const entries=allEntries.filter(e=>catToDept[e.cat]===d.id);
+        return `
+          <div class="bar-item" style="margin-bottom:10px">
+            <div style="min-width:150px;font-size:12px">
+              <span style="color:${d.color};font-weight:700">${d.nombre}</span>
+              <div style="font-size:10px;color:var(--bone2)">${d.director}</div>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${d.color}"></div></div>
+            <div class="bar-val">${secsToHMS(Math.round(h*3600))} (${pct}%)</div>
+            <div style="min-width:60px;text-align:right;font-size:11px;color:var(--bone2)">${entries.length} acc.</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <!-- TARJETAS DE DEPARTAMENTOS -->
+    <div class="section-title">Estructura por departamento</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-bottom:20px">
+      ${DEPTS.map(d=>{
+        const h=deptHoras[d.id]||0;
+        const entries=allEntries.filter(e=>catToDept[e.cat]===d.id);
+        const reworks=entries.filter(e=>e.rework).length;
+        const costDept=entries.reduce((a,e)=>a+costForEntry(e),0);
+        const reworkRate=entries.length?Math.round(reworks/entries.length*100):0;
+        return `
+          <div class="chart-card" style="border-left:3px solid ${d.color}">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <div>
+                <div style="font-size:14px;font-weight:800;color:${d.color}">${d.nombre}</div>
+                <div style="font-size:11px;color:var(--bone2)">${d.director}</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:18px;font-weight:800;color:var(--amber)">${secsToHMS(Math.round(h*3600))}</div>
+                <div style="font-size:10px;color:var(--bone2)">${entries.length} acciones · $${costDept.toLocaleString()} MXN</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--bone2);margin-bottom:10px">${d.descripcion}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+              <div>
+                <div style="font-size:10px;color:var(--bone2);font-weight:700;margin-bottom:4px">RESPONSABILIDADES</div>
+                ${d.responsabilidades.map(r=>`<div style="font-size:10px;color:var(--bone);margin-bottom:2px">• ${r}</div>`).join('')}
+              </div>
+              <div>
+                <div style="font-size:10px;color:var(--bone2);font-weight:700;margin-bottom:4px">KPIs DEL ÁREA</div>
+                ${d.kpis.map(k=>`<div style="font-size:10px;color:var(--bone2);margin-bottom:2px">→ ${k}</div>`).join('')}
+              </div>
+            </div>
+            ${reworks>0?`<div style="font-size:10px;color:var(--red);margin-bottom:8px">⚠️ ${reworks} retrabajos (${reworkRate}%) en este departamento</div>`:''}
+            <div style="font-size:10px;color:var(--bone2);font-weight:700;margin-bottom:4px">PARA MEJORAR:</div>
+            ${d.necesidades.map(n=>`<div style="font-size:10px;color:var(--amber);margin-bottom:2px">💡 ${n}</div>`).join('')}
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <!-- FLUJO DE TRABAJO POR PROYECTO -->
+    <div class="section-title">Flujo de trabajo por proyecto</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:20px">
+      ${Object.entries(proyectoMap).sort((a,b)=>b[1].length-a[1].length).slice(0,6).map(([proj,acts])=>{
+        const deptsFlujo=[...new Set(acts.map(a=>a.dept))];
+        const totalH=acts.reduce((a,e)=>a+e.dur,0);
+        const cost=acts.reduce((a,e)=>a+Math.round(e.dur*settings.rate),0);
+        return `
+          <div class="chart-card">
+            <div style="font-size:13px;font-weight:800;color:var(--bone);margin-bottom:8px">${proj}</div>
+            <div style="font-size:11px;color:var(--bone2);margin-bottom:10px">${acts.length} acciones · ${totalH.toFixed(1)}h · $${cost.toLocaleString()} MXN</div>
+            <div style="font-size:10px;color:var(--bone2);font-weight:700;margin-bottom:6px">FLUJO DE DEPARTAMENTOS:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">
+              ${deptsFlujo.map((did,i)=>{
+                const dept=DEPTS.find(d=>d.id===did);
+                return dept?`<span style="background:${dept.color}20;border:1px solid ${dept.color}40;color:${dept.color};font-size:10px;padding:2px 8px;border-radius:10px">${dept.nombre}</span>${i<deptsFlujo.length-1?'<span style="color:var(--bone2);font-size:10px;align-self:center">→</span>':''}`:''
+              }).join('')}
+            </div>
+            <div style="font-size:10px;color:var(--bone2)">Última acción: ${acts.sort((a,b)=>b.date.localeCompare(a.date))[0]?.desc?.slice(0,50)}...</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <!-- ANÁLISIS: QUÉ NECESITA CADA DEPARTAMENTO -->
+    <div class="section-title">Análisis de necesidades por área</div>
+    <div class="chart-card" style="margin-bottom:20px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+        ${DEPTS.map(d=>{
+          const h=deptHoras[d.id]||0;
+          const pct=Math.round(h/totalHoras*100);
+          const isBusiest=h===maxHoras;
+          return `
+            <div style="padding:12px;background:var(--surface2);border-radius:8px;border:1px solid ${isBusiest?d.color:'var(--border)'}">
+              <div style="font-size:12px;font-weight:700;color:${d.color};margin-bottom:4px">
+                ${isBusiest?'🔥 ':''} ${d.nombre} ${isBusiest?'— MÁS CARGADO':''}
+              </div>
+              <div style="font-size:10px;color:var(--bone2);margin-bottom:8px">${pct}% del tiempo total · ${secsToHMS(Math.round(h*3600))}</div>
+              ${d.necesidades.map(n=>`<div style="font-size:11px;color:var(--amber);margin-bottom:3px">→ ${n}</div>`).join('')}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ===== INIT =====
+init();
+</script>
+</body>
+</html>
