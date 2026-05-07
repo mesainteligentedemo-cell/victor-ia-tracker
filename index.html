@@ -794,7 +794,8 @@ body.tab-reportes   .tab-btn.active::after{background:linear-gradient(90deg,#f97
 <!-- TOPBAR -->
 <div id="topbar">
   <h1>⚡ Victor IA Tracker</h1>
-  <span class="badge">v5.10</span>
+  <span class="badge">v5.11</span>
+  <span id="auto-live-indicator" title="Auto-tracking activo — Claude Code está registrando actividad en tiempo real" style="display:none;background:#22c55e22;border:1px solid #22c55e;color:#22c55e;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;animation:pulse 2s infinite">🔴 Live</span>
   <div class="spacer"></div>
   <div class="topbar-btns">
     <button onclick="openAdd()">+ Entrada</button>
@@ -1589,6 +1590,7 @@ function renderTabPeriodHeader(tabId,entries){
 // ===== STATE =====
 let settings = {rate:500,goalH:8,goalA:15,apiKey:'',geminiKey:'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',elevenLabsKey:'sk_e0efba7c54bde483b034296d0cc240d572bd1714740f14e1',voiceId:'EXAVITQu4vr4xnSDxMaL',model:'openai/gpt-4o-mini'};
 let customEntries = [];
+let autoEntries   = [];   // cargados desde n8n cada 60 min
 let allEntries = [];
 let periodFiltered = [];  // after period filter
 let filteredEntries = []; // after both period + sidebar filters
@@ -1605,7 +1607,13 @@ let sidebarVisible = true;
 
 function rebuildAllEntries(){
   const customIds=new Set(customEntries.map(e=>e.id));
-  allEntries=[...SEED.filter(e=>!customIds.has(e.id)),...customEntries];
+  const autoIds=new Set(autoEntries.map(e=>e.id));
+  // Custom > Auto > SEED (sin duplicados)
+  allEntries=[
+    ...SEED.filter(e=>!customIds.has(e.id)&&!autoIds.has(e.id)),
+    ...autoEntries,
+    ...customEntries
+  ];
 }
 
 // ===== INIT =====
@@ -1621,8 +1629,35 @@ function init(){
   updatePeriodSummary();
   updateProjectBar();
   document.body.classList.add('tab-dashboard');
-  // Default sidebar hidden on mobile
   if(window.innerWidth<768) sidebarVisible=false;
+  // Auto-tracking: carga entradas desde n8n y refresca cada 60 min
+  loadAutoEntries();
+  setInterval(loadAutoEntries, 60*60*1000);
+}
+
+async function loadAutoEntries(){
+  const N8N_AUTO='https://n8n.srv1013903.hstgr.cloud/webhook/auto-tracker';
+  try{
+    const res=await fetch(N8N_AUTO,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'read'})
+    });
+    if(!res.ok) return;
+    const data=await res.json();
+    const fresh=(data.entries||[]).filter(e=>e&&e.id&&e.dateKey);
+    if(!fresh.length) return;
+    autoEntries=fresh;
+    rebuildAllEntries();
+    applyAllFilters();
+    // Indicador "🔴 Live" en el título si hay auto-entries de hoy
+    const today=localDate();
+    const todayAuto=autoEntries.filter(e=>e.dateKey===today);
+    const ind=document.getElementById('auto-live-indicator');
+    if(ind) ind.style.display=todayAuto.length?'inline':'none';
+  }catch(e){
+    // Falla silenciosa — el tracker funciona igual sin auto-entries
+  }
 }
 
 function loadSettings(){
