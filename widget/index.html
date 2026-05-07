@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asistente Victor IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@1,9..144,300..500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --warm:#F8F7F5;--warm2:#F0EEE9;--ink:#0E0F12;--ink2:rgba(14,15,18,0.5);
+    --ink3:rgba(14,15,18,0.1);--green:#16a34a;--red:#ef4444;--radius:16px;
+  }
+  body{background:transparent;font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden;}
+
+  /* ── TRIGGER ─────────────────────────────────────────────── */
+  #via-trigger{
+    position:fixed;bottom:24px;right:24px;z-index:99998;
+    display:flex;align-items:center;gap:11px;
+    background:var(--ink);border:none;
+    border-radius:50px;padding:10px 20px 10px 10px;
+    cursor:pointer;box-shadow:0 8px 32px rgba(14,15,18,0.32);
+    transition:all .25s ease;user-select:none;
+  }
+  #via-trigger:hover{box-shadow:0 14px 44px rgba(14,15,18,0.42);transform:translateY(-2px);}
+  #via-trigger .via-orb{
+    width:36px;height:36px;border-radius:8px;overflow:hidden;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  #via-trigger .via-orb img{width:36px;height:36px;display:block;}
+  #via-trigger .via-label{color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.25px;white-space:nowrap;}
+  #via-trigger .via-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse-dot 2s infinite;flex-shrink:0;}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.55;transform:scale(1.3);}}
+
+  /* ── PANEL ───────────────────────────────────────────────── */
+  #via-panel{
+    position:fixed;bottom:88px;right:24px;z-index:99999;
+    width:370px;max-height:600px;
+    background:var(--warm);
+    border:1px solid var(--ink3);border-radius:var(--radius);
+    box-shadow:0 32px 80px rgba(14,15,18,0.14),0 4px 16px rgba(14,15,18,0.06);
+    display:flex;flex-direction:column;overflow:hidden;
+    opacity:0;transform:translateY(14px) scale(.97);pointer-events:none;
+    transition:opacity .3s ease,transform .3s ease;
+  }
+  #via-panel.via-open{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
+
+  /* Header */
+  .via-header{
+    padding:16px 18px 14px;
+    background:var(--ink);
+    display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+  }
+  .via-header-left{display:flex;align-items:center;gap:12px;}
+  .via-logo{
+    width:34px;height:34px;border-radius:7px;overflow:hidden;flex-shrink:0;
+  }
+  .via-logo img{width:34px;height:34px;display:block;}
+  .via-title{color:#fff;font-size:13px;font-weight:700;letter-spacing:.1px;}
+  .via-subtitle{color:rgba(255,255,255,0.4);font-size:10px;margin-top:1px;letter-spacing:.2px;}
+  .via-status-badge{
+    display:flex;align-items:center;gap:5px;
+    background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+    border-radius:20px;padding:4px 10px;
+  }
+  .via-status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse-dot 2s infinite;}
+  .via-status-text{color:rgba(255,255,255,0.6);font-size:10px;font-weight:600;letter-spacing:.2px;}
+  .via-close{
+    width:26px;height:26px;border-radius:7px;border:none;cursor:pointer;
+    background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.45);font-size:13px;
+    display:flex;align-items:center;justify-content:center;transition:all .2s;margin-left:6px;
+  }
+  .via-close:hover{background:rgba(239,68,68,0.18);color:#ef4444;}
+
+  /* Waveform */
+  .via-voice-area{
+    padding:14px 18px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;
+    flex-shrink:0;background:var(--warm2);border-bottom:1px solid var(--ink3);
+  }
+  canvas#via-canvas{width:100%;height:48px;border-radius:6px;}
+  .via-state-label{
+    font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;
+    color:var(--ink2);transition:color .3s;
+  }
+  .via-state-label.listening{color:var(--ink);}
+  .via-state-label.speaking{color:var(--ink);}
+  .via-state-label.thinking{color:var(--ink2);}
+
+  /* Transcript */
+  .via-transcript{
+    flex:1;overflow-y:auto;padding:14px 14px 10px;display:flex;flex-direction:column;gap:10px;
+    min-height:100px;max-height:240px;
+  }
+  .via-transcript::-webkit-scrollbar{width:2px;}
+  .via-transcript::-webkit-scrollbar-thumb{background:var(--ink3);border-radius:2px;}
+  .via-msg{display:flex;flex-direction:column;gap:3px;animation:msg-in .22s ease forwards;}
+  @keyframes msg-in{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  .via-msg.user{align-items:flex-end;}
+  .via-msg.agent{align-items:flex-start;}
+  .via-msg-label{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink2);}
+  .via-msg-bubble{
+    max-width:86%;padding:8px 13px;border-radius:12px;
+    font-size:12.5px;line-height:1.55;color:var(--ink);
+  }
+  .via-msg.user .via-msg-bubble{background:var(--ink);color:#fff;border-bottom-right-radius:3px;}
+  .via-msg.agent .via-msg-bubble{background:var(--warm2);border:1px solid var(--ink3);border-bottom-left-radius:3px;}
+  .via-msg.system{align-items:center;}
+  .via-msg.system .via-msg-bubble{
+    background:rgba(22,163,74,0.07);border:1px solid rgba(22,163,74,0.2);
+    border-radius:10px;font-size:12px;color:#16a34a;text-align:left;
+  }
+  .via-placeholder{color:var(--ink2);font-size:12px;font-style:italic;text-align:center;padding:18px 0;font-family:'Fraunces',Georgia,serif;}
+
+  /* Footer */
+  .via-footer{
+    padding:10px 12px;border-top:1px solid var(--ink3);
+    display:flex;flex-direction:column;gap:8px;flex-shrink:0;background:var(--warm);
+  }
+  .via-text-row{display:flex;gap:8px;align-items:center;}
+  #via-text-input{
+    flex:1;padding:9px 13px;border-radius:9px;border:1.5px solid var(--ink3);
+    background:var(--warm2);color:var(--ink);font-family:'Space Grotesk',sans-serif;
+    font-size:12.5px;outline:none;transition:border-color .2s;
+  }
+  #via-text-input:focus{border-color:var(--ink);}
+  #via-text-input::placeholder{color:var(--ink2);}
+  #via-send-btn{
+    width:36px;height:36px;border-radius:9px;border:none;cursor:pointer;flex-shrink:0;
+    background:var(--ink);display:flex;align-items:center;justify-content:center;
+    transition:all .2s;
+  }
+  #via-send-btn:hover{background:#1a1b1f;transform:scale(1.05);}
+  #via-send-btn svg{width:14px;height:14px;fill:white;}
+  .via-btn-row{display:flex;gap:8px;}
+  #via-main-btn{
+    flex:1;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;
+    font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.2px;
+    display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s ease;
+  }
+  #via-main-btn.idle{background:var(--ink);color:#fff;}
+  #via-main-btn.idle:hover{background:#1a1b1f;}
+  #via-main-btn.active{background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.25);color:var(--red);}
+  #via-main-btn svg{width:15px;height:15px;fill:currentColor;flex-shrink:0;}
+  .via-powered{font-size:9px;color:var(--ink2);opacity:.35;text-align:center;padding:4px 0 6px;letter-spacing:.3px;font-family:'Fraunces',serif;}
+
+  /* ── POPUP CONTACTO ──────────────────────────────────────── */
+  #via-contact-overlay{
+    position:fixed;inset:0;z-index:100000;
+    background:rgba(14,15,18,0.5);backdrop-filter:blur(4px);
+    display:none;align-items:center;justify-content:center;padding:16px;
+  }
+  #via-contact-overlay.show{display:flex;}
+  #via-contact-modal{
+    background:var(--warm);border-radius:18px;padding:28px 24px;width:100%;max-width:360px;
+    box-shadow:0 32px 80px rgba(14,15,18,0.2);
+    animation:modal-in .28s cubic-bezier(.34,1.56,.64,1) forwards;
+    border:1px solid var(--ink3);
+  }
+  @keyframes modal-in{from{opacity:0;transform:scale(.93)translateY(10px);}to{opacity:1;transform:none;}}
+  .via-modal-title{
+    font-family:'Fraunces',Georgia,serif;font-size:20px;font-style:italic;color:var(--ink);
+    margin-bottom:4px;font-weight:400;
+  }
+  .via-modal-sub{font-size:12px;color:var(--ink2);margin-bottom:20px;line-height:1.5;}
+  .via-field{margin-bottom:14px;}
+  .via-field label{display:block;font-size:10px;font-weight:700;color:var(--ink2);letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px;}
+  .via-field input{
+    width:100%;padding:10px 14px;border-radius:9px;border:1.5px solid var(--ink3);
+    background:var(--warm2);color:var(--ink);font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;
+    transition:border-color .2s;
+  }
+  .via-field input:focus{border-color:var(--ink);}
+  .via-field input::placeholder{color:var(--ink2);}
+  .via-modal-btns{display:flex;gap:10px;margin-top:20px;}
+  #via-contact-submit{
+    flex:1;padding:12px;border-radius:10px;border:none;cursor:pointer;
+    background:var(--ink);color:#fff;font-family:'Space Grotesk',sans-serif;
+    font-size:13px;font-weight:700;transition:all .2s;
+  }
+  #via-contact-submit:hover{background:#1a1b1f;}
+  #via-contact-cancel{
+    padding:12px 16px;border-radius:10px;border:1.5px solid var(--ink3);cursor:pointer;
+    background:transparent;color:var(--ink2);font-family:'Space Grotesk',sans-serif;
+    font-size:13px;font-weight:600;transition:all .2s;
+  }
+  #via-contact-cancel:hover{border-color:var(--ink);color:var(--ink);}
+
+  @media(max-width:768px){
+    #via-panel{
+      position:fixed;inset:0;width:100%;height:100dvh;
+      border-radius:0;max-height:none;
+    }
+    #via-trigger{right:16px;bottom:16px;}
+    #via-trigger.via-panel-open{display:none;}
+    .via-transcript{max-height:none;flex:1;}
+  }
+</style>
+</head>
+<body>
+
+<!-- Trigger flotante -->
+<button id="via-trigger" onclick="viaToggle()">
+  <div class="via-orb">
+    <img src="https://victor-ia-website.vercel.app/favicon-32x32.png" alt="VICTOR IA">
+  </div>
+  <span class="via-label">Habla con nosotros</span>
+  <div class="via-dot"></div>
+</button>
+
+<!-- Panel principal -->
+<div id="via-panel">
+  <div class="via-header">
+    <div class="via-header-left">
+      <div class="via-logo">
+        <img src="https://victor-ia-website.vercel.app/favicon-32x32.png" alt="VI">
+      </div>
+      <div>
+        <div class="via-title">Asistente Victor IA</div>
+        <div class="via-subtitle">Inteligencia Artificial · México</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div class="via-status-badge" id="via-status-badge">
+        <div class="via-status-dot"></div>
+        <span class="via-status-text" id="via-status-text">Listo</span>
+      </div>
+      <button class="via-close" onclick="viaToggle()">✕</button>
+    </div>
+  </div>
+
+  <div class="via-voice-area">
+    <canvas id="via-canvas"></canvas>
+    <div class="via-state-label" id="via-state-label">Presiona para iniciar</div>
+  </div>
+
+  <div class="via-transcript" id="via-transcript">
+    <div class="via-placeholder" id="via-placeholder">Inicia una conversación de voz o escribe un mensaje.</div>
+  </div>
+
+  <div class="via-footer">
+    <div class="via-text-row">
+      <input type="text" id="via-text-input" placeholder="Escribe un mensaje..." autocomplete="off"
+        onkeydown="if(event.key==='Enter') viaSendText()">
+      <button id="via-send-btn" onclick="viaSendText()" title="Enviar">
+        <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+      </button>
+    </div>
+    <div class="via-btn-row">
+      <button id="via-main-btn" class="idle" onclick="viaToggleConversation()">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M5.5 10.5A6.5 6.5 0 0 0 12 17a6.5 6.5 0 0 0 6.5-6.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        <span id="via-btn-label">Iniciar conversación</span>
+      </button>
+    </div>
+  </div>
+  <div class="via-powered">Powered by Victor IA</div>
+</div>
+
+<!-- Popup de contacto -->
+<div id="via-contact-overlay">
+  <div id="via-contact-modal">
+    <div class="via-modal-title">Un placer conocerte</div>
+    <div class="via-modal-sub">Déjanos tus datos para darte seguimiento personalizado.</div>
+    <div class="via-field">
+      <label>Nombre completo</label>
+      <input type="text" id="via-cf-nombre" placeholder="Tu nombre y apellido">
+    </div>
+    <div class="via-field">
+      <label>Correo electrónico</label>
+      <input type="email" id="via-cf-email" placeholder="correo@empresa.com">
+    </div>
+    <div class="via-field">
+      <label>WhatsApp</label>
+      <input type="tel" id="via-cf-whatsapp" placeholder="+52 984 000 0000">
+    </div>
+    <div class="via-modal-btns">
+      <button id="via-contact-submit" onclick="viaSubmitContact()">Enviar información</button>
+      <button id="via-contact-cancel" onclick="viaCloseContact()">Ahora no</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@11labs/client/dist/lib.umd.js"></script>
+<script>
+const _urlParams = new URLSearchParams(location.search);
+const VIA_CONFIG = {
+  agentId: _urlParams.get('agent') || window.VIA_AGENT_ID || 'AGENT_ID_AQUI',
+  n8nWebhook: 'https://n8n.srv1013903.hstgr.cloud/webhook/elevenlabs-conv',
+  sourceUrl: decodeURIComponent(_urlParams.get('source') || ''),
+  pageTitle: decodeURIComponent(_urlParams.get('page_title') || ''),
+};
+
+let viaConversation = null;
+let viaActive = false;
+let viaOpen = false;
+let viaAnimFrame = null;
+let viaAnalyser = null;
+let viaAudioCtx = null;
+let viaMode = 'idle';
+let viaContactShown = (function(){
+  try{
+    const k='via_mem_'+(new URLSearchParams(location.search).get('agent')||'default');
+    const m=JSON.parse(localStorage.getItem(k)||'null');
+    return !!(m&&m.nombre&&(m.email||m.whatsapp));
+  }catch(e){return false;}
+})();
+let viaChannel = null;
+let viaConvStartTime = null;
+let viaSessionStart = null;
+let viaTranscriptLog = [];
+let viaConversationId = null;
+let viaTracking = {};
+let viaSilenceTimer1 = null;
+let viaSilenceTimer2 = null;
+
+window.addEventListener('message', function(e){
+  if(e.data && e.data.type === 'VIA_TRACKING') viaTracking = e.data;
+});
+
+const VIA_MEM_KEY = 'via_mem_' + (VIA_CONFIG.agentId || 'default');
+
+function viaMemLoad(){
+  try { return JSON.parse(localStorage.getItem(VIA_MEM_KEY)) || null; }
+  catch(e){ return null; }
+}
+
+function viaMemSave(patch){
+  const mem = viaMemLoad() || {};
+  const updated = Object.assign({}, mem, patch, {
+    last_visit: new Date().toISOString(),
+    visit_count: (mem.visit_count || 0) + 1
+  });
+  localStorage.setItem(VIA_MEM_KEY, JSON.stringify(updated));
+  return updated;
+}
+
+function viaMemBuildContext(mem){
+  if(!mem) return 'NUEVO VISITANTE: Es la primera vez que interactúa. Preséntate con entusiasmo.';
+  const visits = mem.visit_count || 1;
+  const nombre = mem.nombre || '';
+  const fecha = mem.last_visit ? new Date(mem.last_visit).toLocaleDateString('es-MX', {day:'numeric',month:'long'}) : '';
+  const resumen = mem.resumen || '';
+  return `VISITANTE RECURRENTE: ${nombre ? 'Se llama ' + nombre + '.' : ''} Ha visitado ${visits} vez(veces). Última visita: ${fecha}. Resumen de su última interacción: "${resumen || 'sin datos previos'}". Salúdalo por su nombre desde el primer mensaje, recuérdale lo que hablaron y pregunta si quiere continuar ese proceso o te puede ayudar en algo más.`;
+}
+
+function viaToggle(){
+  viaOpen = !viaOpen;
+  if(viaOpen && !viaSessionStart){
+    viaSessionStart = Date.now();
+    const mem = viaMemLoad();
+    if(mem && mem.nombre){
+      const fecha = mem.last_visit ? new Date(mem.last_visit).toLocaleDateString('es-MX',{day:'numeric',month:'long'}) : '';
+      const resumenCorto = mem.resumen ? mem.resumen.substring(0,120) + (mem.resumen.length > 120 ? '…' : '') : '';
+      const visitasText = mem.visit_count > 1 ? ` · Visita #${mem.visit_count + 1}` : '';
+      let msg = `¡Bienvenido de vuelta, <b>${mem.nombre}</b>${visitasText}!`;
+      if(resumenCorto) msg += `<br><span style="opacity:.6;font-size:12px;">Última vez: ${resumenCorto}</span>`;
+      setTimeout(()=>viaAddMessage('agent', msg), 300);
+    }
+  }
+  document.getElementById('via-panel').classList.toggle('via-open', viaOpen);
+  document.getElementById('via-trigger').classList.toggle('via-panel-open', viaOpen);
+  if(window.parent !== window){
+    window.parent.postMessage({type:'VIA_RESIZE', height: viaOpen ? 700 : 110, open: viaOpen}, '*');
+  }
+}
+
+function viaSetStatus(text, color='#16a34a'){
+  const badge = document.getElementById('via-status-badge');
+  const dot = badge.querySelector('.via-status-dot');
+  document.getElementById('via-status-text').textContent = text;
+  dot.style.background = color;
+  dot.style.boxShadow = `0 0 6px ${color}`;
+}
+
+function viaSetMode(mode){
+  viaMode = mode;
+  const label = document.getElementById('via-state-label');
+  label.className = 'via-state-label ' + (mode === 'idle' ? '' : mode);
+  const labels = {
+    idle:'Presiona para iniciar', listening:'Escuchando...',
+    speaking:'Hablando...', thinking:'Procesando...', connecting:'Conectando...'
+  };
+  label.textContent = labels[mode] || mode;
+}
+
+function viaAddMessage(role, text){
+  const container = document.getElementById('via-transcript');
+  const ph = document.getElementById('via-placeholder');
+  if(ph) ph.remove();
+  const msg = document.createElement('div');
+  msg.className = `via-msg ${role}`;
+  msg.innerHTML = `<div class="via-msg-label">${role==='user'?'Tú':'Asistente'}</div><div class="via-msg-bubble">${text}</div>`;
+  container.appendChild(msg);
+  container.scrollTop = container.scrollHeight;
+  viaTranscriptLog.push({role, text, t: new Date().toISOString()});
+  if(role === 'agent' && !viaContactShown){
+    const lower = text.toLowerCase();
+    if(lower.includes('nombre') && (lower.includes('correo') || lower.includes('whatsapp') || lower.includes('email'))){
+      setTimeout(viaOpenContact, 600);
+    }
+  }
+}
+
+function viaSendText(){
+  if(!viaConvStartTime){ viaConvStartTime = Date.now(); viaChannel = viaChannel || 'texto'; }
+  const input = document.getElementById('via-text-input');
+  const text = input.value.trim();
+  if(!text) return;
+  viaAddMessage('user', text);
+  input.value = '';
+  if(viaConversation && viaConversation.sendFeedback){
+    try { viaConversation.sendFeedback(text); } catch(e){}
+  }
+}
+
+function viaSetBtn(active){
+  const btn = document.getElementById('via-main-btn');
+  btn.className = active ? 'active' : 'idle';
+  btn.innerHTML = active
+    ? `<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg><span id="via-btn-label">Finalizar</span>`
+    : `<svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M5.5 10.5A6.5 6.5 0 0 0 12 17a6.5 6.5 0 0 0 6.5-6.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><span id="via-btn-label">Iniciar conversación</span>`;
+}
+
+function viaDrawWave(){
+  const canvas = document.getElementById('via-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * devicePixelRatio;
+  canvas.height = canvas.offsetHeight * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  ctx.clearRect(0,0,W,H);
+
+  if(viaMode==='idle'||!viaActive){
+    ctx.beginPath();ctx.strokeStyle='rgba(14,15,18,0.15)';ctx.lineWidth=1;
+    ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke();
+    viaAnimFrame = requestAnimationFrame(viaDrawWave);return;
+  }
+  let data = null;
+  if(viaAnalyser){const b=new Uint8Array(viaAnalyser.frequencyBinCount);viaAnalyser.getByteTimeDomainData(b);data=b;}
+  const t=Date.now()/1000;
+  const color = '#0E0F12';
+  const bars=40, barW=W/bars;
+  for(let i=0;i<bars;i++){
+    let amp;
+    if(data){const idx=Math.floor(i*data.length/bars);amp=(data[idx]-128)/128;}
+    else{const f=(i%5+1)*.8;amp=Math.sin(t*f*3+i*.4)*(viaMode==='thinking'?.12:.32);}
+    const h=Math.abs(amp)*(H*.85)+2, x=i*barW+barW*.2, bw=barW*.6;
+    const alpha=.2+Math.abs(amp)*.75;
+    const grad=ctx.createLinearGradient(0,H/2-h/2,0,H/2+h/2);
+    grad.addColorStop(0,`${color}00`);
+    grad.addColorStop(.3,`${color}${Math.round(alpha*255).toString(16).padStart(2,'0')}`);
+    grad.addColorStop(.7,`${color}${Math.round(alpha*255).toString(16).padStart(2,'0')}`);
+    grad.addColorStop(1,`${color}00`);
+    ctx.fillStyle=grad;ctx.beginPath();
+    ctx.roundRect(x,H/2-h/2,bw,h,bw/2);ctx.fill();
+  }
+  viaAnimFrame=requestAnimationFrame(viaDrawWave);
+}
+
+async function viaToggleConversation(){
+  viaActive ? await viaEndConversation() : await viaStartConversation();
+}
+
+async function viaStartConversation(){
+  if(VIA_CONFIG.agentId==='AGENT_ID_AQUI'){
+    viaAddMessage('agent','⚠️ Agent ID no configurado.');return;
+  }
+  viaSetStatus('Conectando...','#888');viaSetMode('connecting');viaSetBtn(true);
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    viaAudioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const source = viaAudioCtx.createMediaStreamSource(stream);
+    viaAnalyser = viaAudioCtx.createAnalyser();viaAnalyser.fftSize=256;
+    source.connect(viaAnalyser);
+    const EL = window.client||window.ElevenLabs||window.ElevenLabsClient;
+    if(!EL||!EL.Conversation) throw new Error('SDK no cargado');
+    viaChannel = 'voz'; viaConvStartTime = Date.now();
+    const _mem = viaMemLoad();
+    const _dynVars = {
+      contexto_usuario: viaMemBuildContext(_mem),
+      nombre_usuario: _mem?.nombre || '',
+      es_recurrente: _mem ? 'true' : 'false'
+    };
+    viaConversation = await EL.Conversation.startSession({
+      agentId: VIA_CONFIG.agentId,
+      dynamicVariables: _dynVars,
+      onConnect:()=>{
+        viaActive=true;
+        viaSetStatus('En línea','#16a34a');viaSetMode('listening');
+        viaConversationId = viaConversation ? viaConversation.getId() : null;
+        viaResetSilence();
+        if(window.parent!==window) window.parent.postMessage({type:'VIA_GET_TRACKING'},'*');
+      },
+      onDisconnect:()=>{
+        viaActive=false;viaSetStatus('Listo','#16a34a');viaSetMode('idle');viaSetBtn(false);
+        viaClearSilence();
+        if(viaTranscriptLog.length > 0){
+          const msgs = viaTranscriptLog.slice(-10).map(m=>`${m.role==='agent'?'Asistente':'Usuario'}: ${m.text}`).join(' | ');
+          viaMemSave({ resumen: msgs.substring(0, 600) });
+        }
+      },
+      onMessage:({source,message})=>{
+        if(!message||!message.trim()) return;
+        const role = source==='ai'?'agent':'user';
+        viaAddMessage(role, message);
+        viaResetSilence();
+        if(role==='agent'){
+          const lower = message.toLowerCase();
+          if(VIA_FAREWELL.some(kw=>lower.includes(kw))){
+            viaClearSilence();
+            setTimeout(viaEndConversation, 3000);
+          }
+        }
+      },
+      onModeChange:({mode})=>{
+        if(mode.listeningToUser)viaSetMode('listening');
+        else if(mode.agentSpeaking)viaSetMode('speaking');
+        else viaSetMode('thinking');
+      },
+      onError:(err)=>{console.error(err);viaSetStatus('Error','#ef4444');}
+    });
+  }catch(err){
+    console.error(err);viaSetStatus('Error','#ef4444');viaSetMode('idle');viaSetBtn(false);
+    if(err.name==='NotAllowedError')
+      viaAddMessage('agent','Permite el acceso al micrófono en tu navegador e intenta de nuevo.');
+    else
+      viaAddMessage('agent','No se pudo conectar: '+(err.message||err));
+  }
+}
+
+async function viaEndConversation(){
+  viaClearSilence();
+  if(viaConversation){try{await viaConversation.endSession();}catch(e){}viaConversation=null;}
+  if(viaAudioCtx){try{viaAudioCtx.close();}catch(e){}viaAudioCtx=null;}
+  viaAnalyser=null;viaActive=false;
+  viaSetStatus('Listo','#16a34a');viaSetMode('idle');viaSetBtn(false);
+}
+
+const VIA_FAREWELL = ['hasta luego','adiós','adios','hasta pronto','fue todo','no necesito nada más','no necesito nada mas','que tengas','con mucho gusto','fue un placer','nos vemos','bye'];
+
+function viaResetSilence(){
+  clearTimeout(viaSilenceTimer1);
+  clearTimeout(viaSilenceTimer2);
+  if(!viaActive) return;
+  viaSilenceTimer1 = setTimeout(()=>{
+    if(viaActive) viaAddMessage('agent','¿Sigues ahí? Si necesitas algo más, aquí estoy.');
+  }, 60000);
+  viaSilenceTimer2 = setTimeout(()=>{
+    if(viaActive){
+      viaAddMessage('agent','Parece que ya terminamos. ¡Hasta pronto!');
+      setTimeout(viaEndConversation, 2500);
+    }
+  }, 120000);
+}
+
+function viaClearSilence(){
+  clearTimeout(viaSilenceTimer1);
+  clearTimeout(viaSilenceTimer2);
+}
+
+function viaOpenContact(){
+  const mem = viaMemLoad();
+  if(mem && mem.nombre && (mem.email || mem.whatsapp)){
+    viaContactShown = true;
+    const lines = [];
+    if(mem.nombre)   lines.push(`<b>Nombre:</b> ${mem.nombre}`);
+    if(mem.email)    lines.push(`<b>Correo:</b> ${mem.email}`);
+    if(mem.whatsapp) lines.push(`<b>WhatsApp:</b> ${mem.whatsapp}`);
+    viaAddMessage('system',`✅ Ya tenemos tus datos:<br>${lines.join('<br>')}`);
+    return;
+  }
+  viaContactShown = true;
+  document.getElementById('via-contact-overlay').classList.add('show');
+  if(window.parent!==window)
+    window.parent.postMessage({type:'VIA_RESIZE',height:700,open:true},'*');
+}
+
+function viaCloseContact(){
+  document.getElementById('via-contact-overlay').classList.remove('show');
+}
+
+function viaSubmitContact(){
+  const nombre  = document.getElementById('via-cf-nombre').value.trim();
+  const email   = document.getElementById('via-cf-email').value.trim();
+  const whatsapp= document.getElementById('via-cf-whatsapp').value.trim();
+  if(!nombre&&!email&&!whatsapp){return;}
+  const now = Date.now();
+  const duracion_seg = viaConvStartTime ? Math.round((now - viaConvStartTime) / 1000) : null;
+  const tiempo_sesion_seg = viaSessionStart ? Math.round((now - viaSessionStart) / 1000) : null;
+  viaMemSave({ nombre, email, whatsapp });
+  const transcriptTexto = viaTranscriptLog.map(m=>`[${m.role==='agent'?'Asistente':'Usuario'}] ${m.text}`).join('\n');
+  const tracking = viaTracking || {};
+  fetch(VIA_CONFIG.n8nWebhook, {
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      type:'contact_form',
+      nombre, email, whatsapp,
+      canal: viaChannel || 'desconocido',
+      elevenlabs_conversation_id: viaConversationId,
+      source_url: VIA_CONFIG.sourceUrl || tracking.url,
+      page_title: VIA_CONFIG.pageTitle || tracking.title,
+      slug: tracking.slug,
+      duracion_conversacion_seg: duracion_seg,
+      tiempo_sesion_seg: tiempo_sesion_seg,
+      tiempo_en_pagina_seg: tracking.timeOnPage,
+      scroll_depth_pct: tracking.scrollDepth,
+      clicks: tracking.clicks,
+      visita_num: (viaMemLoad()?.visit_count || 1),
+      transcript: transcriptTexto,
+      ts: new Date().toISOString()
+    })
+  }).catch(()=>{});
+  const infoLines = [];
+  if(nombre) infoLines.push(`<b>Nombre:</b> ${nombre}`);
+  if(email)  infoLines.push(`<b>Correo:</b> ${email}`);
+  if(whatsapp) infoLines.push(`<b>WhatsApp:</b> ${whatsapp}`);
+  viaAddMessage('system', `✅ Información enviada:<br>${infoLines.join('<br>')}`);
+  viaCloseContact();
+}
+
+window.addEventListener('DOMContentLoaded',()=>{ viaDrawWave(); });
+window.addEventListener('beforeunload', viaEndConversation);
+</script>
+</body>
+</html>
