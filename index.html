@@ -887,6 +887,7 @@ body.tab-reportes   .tab-btn.active::after{background:linear-gradient(90deg,#f97
   <span class="period-label">Período:</span>
   <button class="period-btn" onclick="setPeriod('hour')">Esta hora</button>
   <button class="period-btn active" onclick="setPeriod('today')">Hoy</button>
+  <button class="period-btn" onclick="setPeriod('yesterday')">Ayer</button>
   <button class="period-btn" onclick="setPeriod('week')">Esta semana</button>
   <button class="period-btn" onclick="setPeriod('month')">Este mes</button>
   <button class="period-btn" onclick="setPeriod('year')">Este año</button>
@@ -1456,6 +1457,11 @@ function getPeriodRange(period){
       return {type:'hour', h:now.getHours()};
     }
     case 'today': return {type:'range',from:today,to:today};
+    case 'yesterday': {
+      const yest=new Date(now); yest.setDate(now.getDate()-1);
+      const y=fmt(yest);
+      return {type:'range',from:y,to:y};
+    }
     case 'week': {
       const dow=now.getDay();
       const mon=new Date(now); mon.setDate(now.getDate()-dow+1);
@@ -1506,7 +1512,7 @@ function applyCustomPeriod(){
   updatePeriodSummary();
 }
 function updatePeriodSummary(){
-  const labels={hour:`Hora actual (${new Date().getHours()}:00)`,today:'Hoy',week:'Esta semana',month:'Este mes',year:'Este año',all:'Todo el período',custom:'Rango custom'};
+  const labels={hour:`Hora actual (${new Date().getHours()}:00)`,today:'Hoy',yesterday:'Ayer',week:'Esta semana',month:'Este mes',year:'Este año',all:'Todo el período',custom:'Rango custom'};
   let txt=labels[activePeriod]||activePeriod;
   if(activePeriod==='custom'&&periodFrom&&periodTo) txt=`${periodFrom} → ${periodTo}`;
   const el=document.getElementById('period-summary');
@@ -1538,7 +1544,7 @@ function updateProjectBar(){
 }
 
 function getPeriodLabel(){
-  const labels={hour:`Hora actual (${new Date().getHours()}:00)`,today:'Hoy',week:'Esta semana',month:'Este mes',year:'Este año',all:'Todo el período',custom:'Rango custom'};
+  const labels={hour:`Hora actual (${new Date().getHours()}:00)`,today:'Hoy',yesterday:'Ayer',week:'Esta semana',month:'Este mes',year:'Este año',all:'Todo el período',custom:'Rango custom'};
   if(activePeriod==='custom'&&periodFrom&&periodTo) return `${periodFrom} → ${periodTo}`;
   return labels[activePeriod]||activePeriod;
 }
