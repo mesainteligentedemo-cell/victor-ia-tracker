@@ -16,7 +16,7 @@
     if(mob && open){
       iframe.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:none;z-index:2147483647;background:transparent;pointer-events:all;touch-action:auto;';
     } else if(mob){
-      iframe.style.cssText = 'position:fixed;bottom:0;left:0;right:0;width:100%;height:110px;border:none;z-index:2147483647;background:transparent;pointer-events:all;touch-action:auto;transition:height .3s ease;';
+      iframe.style.cssText = 'position:fixed;bottom:0;right:0;width:70px;height:70px;border:none;z-index:2147483647;background:transparent;pointer-events:all;touch-action:auto;transition:none;';
     } else {
       iframe.style.cssText = 'position:fixed;bottom:0;right:0;width:420px;height:'+(open?'700':'110')+'px;border:none;z-index:2147483647;background:transparent;pointer-events:all;touch-action:auto;transition:height .3s ease;';
     }
