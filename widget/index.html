@@ -735,7 +735,7 @@ function viaSubmitForm(){
   if(proyecto) infoLines.push(`<b>Proyecto:</b> ${proyecto}`);
   viaAddMessage('system', `✅ Información enviada:<br>${infoLines.join('<br>')}`);
   viaCloseContact();
-  if(viaCurrentFormType === 'agenda') window.open('/agenda', '_blank');
+  if(viaCurrentFormType === 'agenda') window.open(VIA_CONFIG.agendaUrl, '_blank');
 }
 
 function viaShowWhatsApp(agentMsg){
