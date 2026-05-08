@@ -475,8 +475,16 @@ async function viaStartConversation(){
   }
   viaSetStatus('Conectando...','#888');viaSetMode('connecting');viaSetBtn(true);
   try{
-    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: {ideal: true},
+        noiseSuppression: {ideal: true},
+        autoGainControl: {ideal: true},
+        channelCount: 1
+      }
+    });
     viaAudioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(viaAudioCtx.state === 'suspended') await viaAudioCtx.resume();
     const source = viaAudioCtx.createMediaStreamSource(stream);
     viaAnalyser = viaAudioCtx.createAnalyser();viaAnalyser.fftSize=256;
     source.connect(viaAnalyser);
@@ -492,6 +500,7 @@ async function viaStartConversation(){
     viaConversation = await EL.Conversation.startSession({
       agentId: VIA_CONFIG.agentId,
       dynamicVariables: _dynVars,
+      userStream: stream,
       onConnect:()=>{
         viaActive=true;
         viaSetStatus('En línea','#16a34a');viaSetMode('listening');
@@ -521,9 +530,11 @@ async function viaStartConversation(){
         viaResetSilence();
         if(role==='agent'){
           const lower = message.toLowerCase();
-          if(VIA_FAREWELL.some(kw=>lower.includes(kw))){
+          // Solo cierra si la despedida está al final del mensaje (evita falsos positivos a mitad de conversación)
+          const msgTail = lower.slice(-90);
+          if(VIA_FAREWELL.some(kw=>msgTail.includes(kw))){
             viaClearSilence();
-            setTimeout(viaEndConversation, 3000);
+            setTimeout(viaEndConversation, 5000);
           }
           // Auto-trigger form based on agent intent keywords
           if(!viaContactShown){
@@ -561,7 +572,14 @@ async function viaEndConversation(){
   viaSetStatus('Listo','#16a34a');viaSetMode('idle');viaSetBtn(false);
 }
 
-const VIA_FAREWELL = ['hasta luego','adiós','adios','hasta pronto','fue todo','no necesito nada más','no necesito nada mas','que tengas','con mucho gusto','fue un placer','nos vemos','bye'];
+// Solo frases inequívocas de cierre; se valida que aparezcan en los últimos 80 chars del mensaje
+const VIA_FAREWELL = [
+  'hasta luego','adiós','adios','hasta pronto',
+  'hasta la próxima','hasta la proxima',
+  'no necesito nada más','no necesito nada mas',
+  'fue un placer atenderte','fue un gusto atenderte',
+  'que tengas un excelente','que tengas un buen'
+];
 
 function viaResetSilence(){
   clearTimeout(viaSilenceTimer1);
