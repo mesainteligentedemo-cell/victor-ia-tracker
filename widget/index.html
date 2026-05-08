@@ -291,10 +291,12 @@
 <script>
 const _urlParams = new URLSearchParams(location.search);
 const VIA_CONFIG = {
-  agentId: _urlParams.get('agent') || window.VIA_AGENT_ID || 'AGENT_ID_AQUI',
-  n8nWebhook: 'https://n8n.srv1013903.hstgr.cloud/webhook/elevenlabs-conv',
-  sourceUrl: decodeURIComponent(_urlParams.get('source') || ''),
-  pageTitle: decodeURIComponent(_urlParams.get('page_title') || ''),
+  agentId:      _urlParams.get('agent') || window.VIA_AGENT_ID || 'AGENT_ID_AQUI',
+  n8nWebhook:   'https://n8n.srv1013903.hstgr.cloud/webhook/elevenlabs-conv',
+  sourceUrl:    decodeURIComponent(_urlParams.get('source') || ''),
+  pageTitle:    decodeURIComponent(_urlParams.get('page_title') || ''),
+  whatsappNum:  _urlParams.get('wa') || '5219842353159',
+  agendaUrl:    _urlParams.get('cal') || 'https://victor-ia-website.vercel.app/agenda',
 };
 
 let viaConversation = null;
@@ -501,10 +503,17 @@ async function viaStartConversation(){
       agentId: VIA_CONFIG.agentId,
       dynamicVariables: _dynVars,
       userStream: stream,
-      onConnect:()=>{
+      onConnect:(evt)=>{
         viaActive=true;
         viaSetStatus('En línea','#16a34a');viaSetMode('listening');
-        viaConversationId = viaConversation ? viaConversation.getId() : null;
+        // Intentar obtener Conv. ID del parámetro del callback primero
+        viaConversationId = (evt && (evt.conversationId || evt.conversation_id)) || null;
+        // Fallback: esperar a que viaConversation se asigne (el await resuelve después del callback)
+        setTimeout(()=>{
+          if(!viaConversationId && viaConversation){
+            try{ viaConversationId = viaConversation.getId ? viaConversation.getId() : (viaConversation.conversationId || null); }catch(e){}
+          }
+        }, 400);
         viaResetSilence();
         if(window.parent!==window) window.parent.postMessage({type:'VIA_GET_TRACKING'},'*');
       },
@@ -536,7 +545,7 @@ async function viaStartConversation(){
             viaClearSilence();
             setTimeout(viaEndConversation, 5000);
           }
-          // Auto-trigger form based on agent intent keywords
+          // Auto-trigger actions based on agent intent
           if(!viaContactShown){
             if(/agend|videollamada|llamada\s|cita\s|diagn[oó]stico|reuni[oó]n/i.test(lower)){
               setTimeout(()=>viaShowForm('agenda'), 1200);
@@ -545,6 +554,10 @@ async function viaStartConversation(){
             } else if(/d[eé]jame\s+tus\s+datos|comp[aá]rteme\s+tu|cu[eé]ntame\s+m[aá]s\s+de\s+tu\s+empresa|datos\s+de\s+contacto|te\s+contactamos|darte\s+seguimiento/i.test(lower)){
               setTimeout(()=>viaShowForm('contacto'), 1200);
             }
+          }
+          // WhatsApp deep-link (independiente de si ya mostró el form)
+          if(/por whatsapp|v[ií]a whatsapp|continua(r|mos) por whatsapp|escr[ií]benos|manda(r|nos) (un )?whatsapp/i.test(lower)){
+            setTimeout(()=>viaShowWhatsApp(message), 1000);
           }
         }
       },
@@ -623,7 +636,7 @@ const VIA_FORMS = {
       {id:'via-cf-whatsapp',type:'tel',   label:'WhatsApp',              placeholder:'+52 984 000 0000'},
     ],
     submit: 'Guardar mis datos →',
-    extra: {url: '/agenda', label: '📅  Elegir fecha y hora en el calendario'}
+    extra: {url: VIA_CONFIG.agendaUrl, label: '📅  Elegir fecha y hora →'}
   },
   cotizacion: {
     title: 'Cuéntanos tu proyecto',
@@ -723,6 +736,21 @@ function viaSubmitForm(){
   viaAddMessage('system', `✅ Información enviada:<br>${infoLines.join('<br>')}`);
   viaCloseContact();
   if(viaCurrentFormType === 'agenda') window.open('/agenda', '_blank');
+}
+
+function viaShowWhatsApp(agentMsg){
+  const mem = viaMemLoad();
+  const nombre = (mem && mem.nombre) ? `Me llamo ${mem.nombre}. ` : '';
+  const topico = viaTranscriptLog.filter(m=>m.role==='user').slice(-2).map(m=>m.text).join(' ').substring(0,120);
+  const preMsg = encodeURIComponent(`Hola equipo Victor IA 👋 ${nombre}Acabo de hablar con su asistente de IA${topico ? ' sobre: ' + topico : ''}. Me gustaría continuar la conversación.`);
+  const wa = `https://wa.me/${VIA_CONFIG.whatsappNum}?text=${preMsg}`;
+  const btn = `<a href="${wa}" target="_blank" rel="noopener"
+    style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;
+    background:#25D366;color:#fff;font-weight:700;font-size:12.5px;text-decoration:none;margin-top:6px;">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.112 1.523 5.837L.057 23.988l6.305-1.454A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.894a9.88 9.88 0 01-5.031-1.373l-.361-.214-3.741.862.936-3.617-.235-.373A9.885 9.885 0 012.106 12c0-5.461 4.433-9.894 9.894-9.894 5.46 0 9.893 4.433 9.893 9.894 0 5.46-4.433 9.894-9.893 9.894z"/></svg>
+    Continuar por WhatsApp
+  </a>`;
+  viaAddMessage('system', `¡Perfecto! Puedes escribirnos directamente:<br>${btn}`);
 }
 
 function viaAutoSendReturning(mem){
