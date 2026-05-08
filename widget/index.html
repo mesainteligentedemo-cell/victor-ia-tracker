@@ -319,6 +319,7 @@ let viaConversationId = null;
 let viaTracking = {};
 let viaSilenceTimer1 = null;
 let viaSilenceTimer2 = null;
+let viaFormSubmitted = false;
 
 window.addEventListener('message', function(e){
   if(e.data && e.data.type === 'VIA_TRACKING') viaTracking = e.data;
@@ -505,6 +506,13 @@ async function viaStartConversation(){
           const msgs = viaTranscriptLog.slice(-10).map(m=>`${m.role==='agent'?'Asistente':'Usuario'}: ${m.text}`).join(' | ');
           viaMemSave({ resumen: msgs.substring(0, 600) });
         }
+        // Clientes frecuentes: auto-enviar con datos guardados si no llenaron el form
+        if(!viaFormSubmitted && viaTranscriptLog.length > 0){
+          const _mem = viaMemLoad();
+          if(_mem && _mem.nombre && (_mem.email || _mem.whatsapp)){
+            viaAutoSendReturning(_mem);
+          }
+        }
       },
       onMessage:({source,message})=>{
         if(!message||!message.trim()) return;
@@ -664,12 +672,14 @@ function viaSubmitForm(){
   const duracion_seg = viaConvStartTime ? Math.round((now - viaConvStartTime) / 1000) : null;
   const tiempo_sesion_seg = viaSessionStart ? Math.round((now - viaSessionStart) / 1000) : null;
   viaMemSave({ nombre, email, whatsapp });
+  viaFormSubmitted = true;
   const transcriptTexto = viaTranscriptLog.map(m=>`[${m.role==='agent'?'Asistente':'Usuario'}] ${m.text}`).join('\n');
   const tracking = viaTracking || {};
   fetch(VIA_CONFIG.n8nWebhook, {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
-      type: 'form_' + viaCurrentFormType,
+      type: 'contact_form',
+      form_type: viaCurrentFormType,
       nombre, email, whatsapp, empresa, proyecto,
       canal: viaChannel || 'desconocido',
       elevenlabs_conversation_id: viaConversationId,
@@ -695,6 +705,35 @@ function viaSubmitForm(){
   viaAddMessage('system', `✅ Información enviada:<br>${infoLines.join('<br>')}`);
   viaCloseContact();
   if(viaCurrentFormType === 'agenda') window.open('/agenda', '_blank');
+}
+
+function viaAutoSendReturning(mem){
+  const now = Date.now();
+  const duracion_seg = viaConvStartTime ? Math.round((now - viaConvStartTime) / 1000) : null;
+  const transcriptTexto = viaTranscriptLog.map(m=>`[${m.role==='agent'?'Asistente':'Usuario'}] ${m.text}`).join('\n');
+  const tracking = viaTracking || {};
+  fetch(VIA_CONFIG.n8nWebhook, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      type: 'contact_form',
+      form_type: 'returning',
+      nombre: mem.nombre || '',
+      email: mem.email || '',
+      whatsapp: mem.whatsapp || '',
+      canal: viaChannel || 'voz',
+      elevenlabs_conversation_id: viaConversationId,
+      source_url: VIA_CONFIG.sourceUrl || tracking.url,
+      page_title: VIA_CONFIG.pageTitle || tracking.title,
+      slug: tracking.slug,
+      duracion_conversacion_seg: duracion_seg,
+      tiempo_en_pagina_seg: tracking.timeOnPage,
+      scroll_depth_pct: tracking.scrollDepth,
+      visita_num: mem.visit_count || 1,
+      transcript: transcriptTexto,
+      ts: new Date().toISOString(),
+      es_recurrente: true
+    })
+  }).catch(()=>{});
 }
 
 window.addEventListener('DOMContentLoaded',()=>{ viaDrawWave(); });
