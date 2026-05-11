@@ -2324,9 +2324,10 @@ html.cb-tritan  { filter: url(#cb-tritan); }
 html.cb-gray    { filter: url(#cb-gray); }
 
 /* ════════════════════════════════════════════════════════════════
-   AUTH WALL — Login/Signup · Brandbook v2
-   Google · Apple · Email/Password · Firebase Auth
+   AUTH WALL — Premium SaaS Split Layout · VICTOR IA Brandbook v3
 ════════════════════════════════════════════════════════════════ */
+
+/* Loader */
 #auth-loader {
   position: fixed; inset: 0; z-index: 10002;
   background: #070809;
@@ -2334,19 +2335,13 @@ html.cb-gray    { filter: url(#cb-gray); }
   transition: opacity 0.55s cubic-bezier(0.16,1,0.3,1);
 }
 #auth-loader.hidden { opacity: 0; pointer-events: none; }
-.auth-loader-inner {
-  display: flex; flex-direction: column; align-items: center; gap: 20px;
-}
+.auth-loader-inner { display: flex; flex-direction: column; align-items: center; gap: 20px; }
 .auth-loader-logo {
   font-family: 'Instrument Serif', serif;
   font-size: 1.1rem; font-style: italic; font-weight: 400;
-  color: rgba(248,247,245,0.55); letter-spacing: -0.01em;
+  color: rgba(248,247,245,0.5); letter-spacing: -0.01em;
 }
-.auth-loader-bar {
-  width: 120px; height: 1px;
-  background: rgba(248,247,245,0.07);
-  position: relative; overflow: hidden;
-}
+.auth-loader-bar { width: 120px; height: 1px; background: rgba(248,247,245,0.07); position: relative; overflow: hidden; }
 .auth-loader-fill {
   position: absolute; inset: 0;
   background: linear-gradient(90deg, #b87834, #e8cc94, #c9a870);
@@ -2359,145 +2354,241 @@ html.cb-gray    { filter: url(#cb-gray); }
   100% { transform: translateX(200%); opacity: 0; }
 }
 
+/* Full-screen wall */
 #auth-wall {
   position: fixed; inset: 0; z-index: 10001;
   background: #070809;
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px;
-  opacity: 1;
-  transition: opacity 0.55s cubic-bezier(0.16,1,0.3,1);
+  display: flex; align-items: stretch;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.65s cubic-bezier(0.16,1,0.3,1), transform 0.65s cubic-bezier(0.16,1,0.3,1);
 }
-#auth-wall.hidden { opacity: 0; pointer-events: none; }
+#auth-wall.visible { opacity: 1; transform: translateY(0); }
+#auth-wall.hidden { opacity: 0; pointer-events: none; transform: translateY(10px); }
+
+/* Marble texture */
 #auth-wall::before {
-  content: '';
-  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
   background: url('https://victor-ia-website.vercel.app/assets/bg-light.jpg') center/cover;
-  opacity: 0.018;
+  opacity: 0.02;
 }
+/* Film grain */
 #auth-wall::after {
-  content: '';
-  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
   opacity: 0.022; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='an'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23an)'/%3E%3C/svg%3E");
   background-size: 200px;
 }
-.auth-card {
+
+/* ── LEFT PANEL — product showcase ── */
+.auth-left {
+  flex: 0 0 52%;
   position: relative; z-index: 2;
-  background: rgba(14,15,18,0.82);
-  border: 1px solid rgba(248,247,245,0.07);
-  backdrop-filter: blur(28px) saturate(1.8);
-  -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  background: rgba(10,11,14,0.6);
+  border-right: 1px solid rgba(248,247,245,0.055);
+  display: flex; flex-direction: column;
+  padding: clamp(36px,5vw,64px);
+  overflow: hidden;
+}
+/* ambient gold glow on left panel */
+.auth-left::before {
+  content: ''; position: absolute;
+  top: -100px; left: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(ellipse, rgba(255,170,23,0.06) 0%, transparent 65%);
+  filter: blur(60px); pointer-events: none;
+}
+.auth-left-top {
+  display: flex; align-items: center; gap: 12px; margin-bottom: auto;
+}
+.auth-brand-logo { display: flex; align-items: center; gap: 11px; }
+.auth-brand-name {
+  font-size: 0.65rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(248,247,245,0.45);
+}
+.auth-brand-name strong { color: rgba(248,247,245,0.78); font-weight: 600; }
+.auth-brand-sep { font-size: 0.6rem; color: rgba(248,247,245,0.15); }
+.auth-brand-product { font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(248,247,245,0.28); }
+
+.auth-left-body {
+  display: flex; flex-direction: column; gap: 28px;
+  padding-top: clamp(48px,8vh,80px);
+}
+.auth-left-eyebrow {
+  display: flex; align-items: center; gap: 1rem;
+}
+.auth-eyebrow-line { width: 2rem; height: 1px; background: rgba(255,170,23,0.38); flex-shrink: 0; }
+.auth-eyebrow-text {
+  font-size: 0.56rem; font-weight: 400; letter-spacing: 0.38em; text-transform: uppercase;
+  color: rgba(255,170,23,0.52);
+}
+.auth-left-headline {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(2rem, 3.5vw, 3.4rem);
+  font-weight: 400; font-style: italic;
+  color: #F8F7F5; line-height: 1.02; letter-spacing: -0.03em;
+}
+.auth-left-headline em { color: #FFAA17; font-style: italic; }
+.auth-left-sub {
+  font-size: 0.82rem; font-weight: 300;
+  color: rgba(248,247,245,0.38); line-height: 1.68; max-width: 44ch;
+}
+
+/* Feature list */
+.auth-features { display: flex; flex-direction: column; gap: 0; }
+.auth-feat {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 13px 0; border-bottom: 1px solid rgba(248,247,245,0.05);
+}
+.auth-feat:first-child { border-top: 1px solid rgba(248,247,245,0.05); }
+.auth-feat-icon {
+  width: 32px; height: 32px; flex-shrink: 0;
+  background: rgba(255,170,23,0.07); border: 1px solid rgba(255,170,23,0.14);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; margin-top: 1px;
+}
+.auth-feat-body {}
+.auth-feat-title { font-size: 0.8rem; font-weight: 500; color: rgba(248,247,245,0.78); letter-spacing: 0.02em; margin-bottom: 2px; }
+.auth-feat-desc { font-size: 0.7rem; font-weight: 300; color: rgba(248,247,245,0.3); line-height: 1.5; }
+
+/* Mini stats strip */
+.auth-stats {
+  display: flex; gap: 0;
+  border: 1px solid rgba(248,247,245,0.06);
+  background: rgba(248,247,245,0.02);
+  margin-top: 4px;
+}
+.auth-stat {
+  flex: 1; padding: 12px 16px; text-align: center;
+  border-right: 1px solid rgba(248,247,245,0.06);
+}
+.auth-stat:last-child { border-right: none; }
+.auth-stat-val {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.5rem; font-weight: 400; font-style: italic;
+  color: #FFAA17; line-height: 1; margin-bottom: 3px;
+}
+.auth-stat-lbl { font-size: 0.54rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(248,247,245,0.26); }
+
+/* Trust footer */
+.auth-left-footer {
+  margin-top: auto; padding-top: 28px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.auth-trust-badge {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.62rem; color: rgba(248,247,245,0.22); letter-spacing: 0.08em;
+}
+.auth-trust-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(62,207,142,0.6); flex-shrink: 0; }
+.auth-trust-sep { width: 1px; height: 14px; background: rgba(248,247,245,0.08); }
+
+/* ── RIGHT PANEL — auth form ── */
+.auth-right {
+  flex: 0 0 48%;
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  padding: clamp(28px,5vw,60px) clamp(28px,5vw,72px);
+}
+.auth-card {
   width: 100%; max-width: 400px;
-  padding: 40px 36px 36px;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.75), 0 0 0 1px rgba(248,247,245,0.04);
-  animation: authCardIn 0.7s cubic-bezier(0.16,1,0.3,1) both;
+  animation: authCardIn 0.7s cubic-bezier(0.16,1,0.3,1) 0.15s both;
 }
 @keyframes authCardIn {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.auth-eyebrow {
-  display: flex; align-items: center; gap: 1rem;
-  margin-bottom: 1.6rem;
-}
-.auth-eyebrow-line { width: 2rem; height: 1px; background: rgba(255,170,23,0.4); }
-.auth-eyebrow-text {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.58rem; font-weight: 400;
-  letter-spacing: 0.38em; text-transform: uppercase;
-  color: rgba(255,170,23,0.55);
-}
-.auth-vi-logo { margin-bottom: 1.3rem; }
-.auth-title {
+
+/* Card header */
+.auth-card-logo { margin-bottom: 24px; }
+.auth-card-headline {
   font-family: 'Instrument Serif', serif;
-  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  font-size: clamp(1.7rem,3vw,2.4rem);
   font-weight: 400; font-style: italic;
-  color: #F8F7F5;
-  line-height: 1.03; letter-spacing: -0.025em;
-  margin-bottom: 0.55rem;
+  color: #F8F7F5; line-height: 1.04; letter-spacing: -0.025em;
+  margin-bottom: 6px;
 }
-.auth-subtitle {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.8rem; font-weight: 300;
-  color: rgba(248,247,245,0.38); letter-spacing: 0.03em;
-  margin-bottom: 2rem; line-height: 1.55; max-width: 30ch;
+.auth-card-sub {
+  font-size: 0.78rem; font-weight: 300;
+  color: rgba(248,247,245,0.35); line-height: 1.55;
+  margin-bottom: 28px; max-width: 34ch;
 }
-.auth-error {
-  background: rgba(255,77,77,0.08);
-  border: 1px solid rgba(255,77,77,0.22);
-  color: rgba(255,140,140,0.9);
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.73rem; padding: 9px 12px;
-  margin-bottom: 14px; letter-spacing: 0.05em;
-  display: none;
-}
-.auth-error.show { display: block; }
+
+/* Social buttons */
+.auth-social-row { display: flex; gap: 8px; margin-bottom: 8px; }
 .auth-btn-social {
-  width: 100%; padding: 11px 18px;
+  flex: 1; padding: 12px 16px;
   background: rgba(248,247,245,0.04);
-  border: 1px solid rgba(248,247,245,0.08);
-  color: rgba(248,247,245,0.82);
+  border: 1px solid rgba(248,247,245,0.09);
+  color: rgba(248,247,245,0.78);
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.76rem; font-weight: 400; letter-spacing: 0.1em;
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  cursor: pointer; transition: all 0.22s cubic-bezier(0.16,1,0.3,1);
-  margin-bottom: 9px;
+  font-size: 0.72rem; font-weight: 400; letter-spacing: 0.06em;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  cursor: pointer; transition: background 0.2s, border-color 0.2s, transform 0.18s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s;
 }
 .auth-btn-social:hover {
-  background: rgba(248,247,245,0.08);
-  border-color: rgba(248,247,245,0.15);
+  background: rgba(248,247,245,0.07);
+  border-color: rgba(248,247,245,0.16);
   transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
-.auth-btn-social:active { transform: translateY(0) scale(0.99); }
-.auth-btn-social:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
-.auth-social-icon { width: 17px; height: 17px; flex-shrink: 0; }
+.auth-btn-social:active { transform: translateY(0) scale(0.985); }
+.auth-social-icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* Separator */
 .auth-separator {
-  display: flex; align-items: center; gap: 12px;
-  margin: 1.2rem 0;
+  display: flex; align-items: center; gap: 12px; margin: 20px 0;
 }
 .auth-separator-line { flex: 1; height: 1px; background: rgba(248,247,245,0.07); }
 .auth-separator-text {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.58rem; color: rgba(248,247,245,0.22);
-  letter-spacing: 0.22em; text-transform: uppercase; white-space: nowrap;
+  font-size: 0.56rem; color: rgba(248,247,245,0.2);
+  letter-spacing: 0.24em; text-transform: uppercase; white-space: nowrap;
 }
-.auth-field { margin-bottom: 11px; }
+
+/* Fields */
+.auth-field { margin-bottom: 12px; }
 .auth-field label {
-  display: block;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.58rem; font-weight: 400; letter-spacing: 0.22em; text-transform: uppercase;
-  color: rgba(248,247,245,0.36); margin-bottom: 5px;
+  display: block; font-size: 0.57rem; font-weight: 500;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(248,247,245,0.4); margin-bottom: 6px;
 }
 .auth-field input {
   width: 100%;
-  background: rgba(248,247,245,0.04);
+  background: rgba(248,247,245,0.035);
   border: 1px solid rgba(248,247,245,0.09);
   color: #F8F7F5;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.88rem; padding: 11px 13px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  font-size: 0.88rem; padding: 12px 14px;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 .auth-field input:focus {
   outline: none;
-  border-color: rgba(255,170,23,0.42);
-  box-shadow: 0 0 0 3px rgba(255,170,23,0.09);
+  background: rgba(248,247,245,0.05);
+  border-color: rgba(255,170,23,0.45);
+  box-shadow: 0 0 0 3px rgba(255,170,23,0.08);
 }
-.auth-field input::placeholder { color: rgba(248,247,245,0.18); }
+.auth-field input::placeholder { color: rgba(248,247,245,0.16); }
+
+/* Forgot password */
+.auth-field-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.auth-field-header label { margin-bottom: 0; }
+.auth-forgot { font-size: 0.62rem; color: rgba(248,247,245,0.28); cursor: pointer; transition: color 0.2s; }
+.auth-forgot:hover { color: rgba(255,170,23,0.6); }
+
+/* Primary CTA */
 .auth-btn-primary {
-  width: 100%; padding: 13px 22px;
-  background: #FFAA17; border: none;
-  color: #08090D;
+  width: 100%; padding: 14px 22px; margin-top: 6px;
+  background: linear-gradient(130deg, #b87834 0%, #e8cc94 50%, #c9a870 100%);
+  background-size: 200% 100%;
+  border: none; color: #08090D;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase;
-  cursor: pointer; transition: all 0.22s cubic-bezier(0.16,1,0.3,1);
-  margin-top: 5px; position: relative; overflow: hidden;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: background-position 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s, transform 0.18s cubic-bezier(0.16,1,0.3,1);
 }
 .auth-btn-primary::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 45%, transparent 100%);
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.14) 45%, transparent 100%);
   background-size: 200% 100%;
-  animation: authShimmer 3.2s ease-in-out infinite;
+  animation: authShimmer 3.5s ease-in-out infinite;
 }
 @keyframes authShimmer {
   0%   { background-position: -100%; opacity: 0; }
@@ -2505,41 +2596,142 @@ html.cb-gray    { filter: url(#cb-gray); }
   100% { background-position: 250%; opacity: 0; }
 }
 .auth-btn-primary:hover {
-  background: #ffc035;
+  background-position: 100% 0;
+  box-shadow: 0 6px 28px rgba(184,120,52,0.5);
   transform: translateY(-1px);
-  box-shadow: 0 6px 22px rgba(255,170,23,0.35);
 }
-.auth-btn-primary:active { transform: translateY(0) scale(0.99); }
-.auth-btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.auth-btn-primary:active { transform: translateY(0) scale(0.985); }
+
+/* Error banner */
+.auth-error {
+  background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.2);
+  color: rgba(252,165,165,0.9); font-size: 0.72rem;
+  padding: 9px 12px; margin-bottom: 14px; letter-spacing: 0.04em;
+  display: none;
+}
+.auth-error.show { display: block; }
+
+/* Toggle */
 .auth-toggle {
-  text-align: center; margin-top: 1.4rem;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.73rem; color: rgba(248,247,245,0.3);
+  text-align: center; margin-top: 18px;
+  font-size: 0.72rem; color: rgba(248,247,245,0.28);
 }
 .auth-toggle a {
-  color: rgba(255,170,23,0.65);
-  cursor: pointer; text-decoration: none;
-  transition: color 0.2s; margin-left: 4px;
+  color: rgba(255,170,23,0.62); cursor: pointer; margin-left: 5px;
+  transition: color 0.2s;
 }
 .auth-toggle a:hover { color: #FFAA17; }
-.auth-loading-dots {
-  display: inline-flex; gap: 4px; align-items: center;
+
+/* Divider below form */
+.auth-card-footer {
+  margin-top: 24px; padding-top: 20px;
+  border-top: 1px solid rgba(248,247,245,0.055);
+  display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;
 }
-.auth-loading-dots span {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: #08090D;
-  animation: authDotPulse 1.2s ease-in-out infinite;
+.auth-footer-link {
+  font-size: 0.6rem; letter-spacing: 0.1em; color: rgba(248,247,245,0.2);
+  transition: color 0.2s; cursor: pointer;
 }
-.auth-loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-.auth-loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes authDotPulse {
-  0%, 80%, 100% { transform: scale(0.6); opacity: 0.35; }
-  40% { transform: scale(1); opacity: 1; }
+.auth-footer-link:hover { color: rgba(248,247,245,0.45); }
+.auth-footer-sep { width: 1px; height: 10px; background: rgba(248,247,245,0.1); }
+
+/* Responsive: single column on mobile */
+@media (max-width: 860px) {
+  #auth-wall { flex-direction: column; overflow-y: auto; }
+  .auth-left { flex: none; border-right: none; border-bottom: 1px solid rgba(248,247,245,0.06); padding: 28px 24px; }
+  .auth-left-body { padding-top: 24px; gap: 18px; }
+  .auth-left-headline { font-size: 1.8rem; }
+  .auth-features { display: none; }
+  .auth-left-footer { padding-top: 16px; }
+  .auth-stats { margin-top: 0; }
+  .auth-right { flex: none; padding: 32px 24px 40px; }
+  .auth-card { max-width: 100%; }
 }
 @media (max-width: 480px) {
-  .auth-card { padding: 28px 20px 24px; }
-  .auth-title { font-size: 1.7rem; }
+  .auth-left { padding: 22px 18px; }
+  .auth-right { padding: 24px 18px 36px; }
+  .auth-social-row { flex-direction: column; }
+  .auth-stat-val { font-size: 1.2rem; }
 }
+
+/* ════════ AUTH MINI-DASHBOARD ════════ */
+.auth-mini-dash { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.amd-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.amd-kpi {
+  padding: 10px 12px; background: rgba(248,247,245,0.02);
+  border: 1px solid rgba(248,247,245,0.06);
+}
+.amd-kpi-val {
+  font-family: 'Instrument Serif', serif; font-style: italic;
+  font-size: 1.3rem; color: #FFAA17; line-height: 1; margin-bottom: 2px;
+}
+.amd-kpi-lbl { font-size: 0.5rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(248,247,245,0.24); }
+.amd-chart-wrap { padding: 13px 14px; background: rgba(248,247,245,0.015); border: 1px solid rgba(248,247,245,0.06); }
+.amd-chart-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 11px; }
+.amd-chart-title { font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(248,247,245,0.24); }
+.amd-chart-badge { font-size: 0.62rem; font-weight: 500; color: rgba(62,207,142,0.7); }
+.amd-bars { display: flex; align-items: flex-end; gap: 5px; height: 44px; }
+.amd-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.amd-bar {
+  width: 100%;
+  background: linear-gradient(180deg, rgba(255,170,23,0.55) 0%, rgba(184,120,52,0.28) 100%);
+  border-top: 1px solid rgba(255,170,23,0.38);
+  transform: scaleY(0); transform-origin: bottom;
+  transition: transform 0.85s cubic-bezier(0.16,1,0.3,1);
+}
+.amd-bar.animated { transform: scaleY(1); }
+.amd-bar-lbl { font-size: 0.47rem; color: rgba(248,247,245,0.2); letter-spacing: 0.04em; }
+.amd-feed { display: flex; flex-direction: column; gap: 5px; }
+.amd-feed-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 10px; background: rgba(248,247,245,0.015);
+  border-left: 2px solid rgba(248,247,245,0.05);
+  opacity: 0; transform: translateX(-8px);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.amd-feed-item.active { border-left-color: rgba(255,170,23,0.35); }
+.amd-feed-item.visible { opacity: 1; transform: translateX(0); }
+.amd-feed-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(248,247,245,0.14); flex-shrink: 0; }
+.amd-feed-item.active .amd-feed-dot { background: #FFAA17; }
+.amd-feed-text { font-size: 0.58rem; color: rgba(248,247,245,0.38); flex: 1; line-height: 1.4; }
+.amd-feed-item.active .amd-feed-text { color: rgba(248,247,245,0.65); }
+.amd-feed-time { font-size: 0.49rem; color: rgba(248,247,245,0.17); white-space: nowrap; }
+
+/* ── GUIDED TOUR v2 ── */
+@keyframes tourPulse {
+  0%,100% { box-shadow:0 0 0 4000px rgba(0,0,0,0.62),0 0 22px 5px rgba(204,136,0,0.50); border-color:#CC8800; }
+  50%      { box-shadow:0 0 0 4000px rgba(0,0,0,0.62),0 0 40px 14px rgba(232,204,148,0.68); border-color:#e8cc94; }
+}
+#tour-box {
+  position:fixed; z-index:9998; pointer-events:none;
+  border:2.5px solid #CC8800; border-radius:5px; display:none;
+  transition:top .48s cubic-bezier(.16,1,.3,1),left .48s cubic-bezier(.16,1,.3,1),
+             width .48s cubic-bezier(.16,1,.3,1),height .48s cubic-bezier(.16,1,.3,1);
+  animation:tourPulse 1.8s ease-in-out infinite;
+}
+#tour-hud {
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+  z-index:9999; display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:center;
+  background:rgba(8,9,13,0.94); border:1px solid rgba(204,136,0,0.38); border-radius:14px;
+  padding:11px 20px; backdrop-filter:blur(18px);
+  font-family:'Space Grotesk',sans-serif; pointer-events:all;
+  min-width:260px; max-width:500px; box-shadow:0 8px 36px rgba(0,0,0,0.65);
+}
+#tour-hud .th-step {
+  font-size:9px; color:var(--amber); font-weight:600;
+  letter-spacing:.25em; text-transform:uppercase; white-space:nowrap;
+}
+#tour-hud .th-sep { color:rgba(248,247,245,.2); font-size:13px; }
+#tour-hud .th-label {
+  font-size:11px; color:rgba(248,247,245,.6); letter-spacing:.15em; text-transform:uppercase;
+}
+#tour-hud .th-stop {
+  background:rgba(248,247,245,.06); border:1px solid rgba(248,247,245,.13);
+  color:rgba(248,247,245,.5); padding:5px 14px; border-radius:7px;
+  font-size:11px; cursor:pointer; font-family:'Space Grotesk',sans-serif;
+  white-space:nowrap; flex-shrink:0; transition:all .2s;
+}
+#tour-hud .th-stop:hover { color:var(--bone); border-color:rgba(248,247,245,.28); }
 </style>
 <!-- Firebase Auth SDK (compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -2557,76 +2749,165 @@ html.cb-gray    { filter: url(#cb-gray); }
 
 <!-- ════ AUTH WALL (login / signup) ════ -->
 <div id="auth-wall" class="hidden">
-  <div class="auth-card">
 
-    <div class="auth-eyebrow">
-      <div class="auth-eyebrow-line"></div>
-      <span class="auth-eyebrow-text">Acceso autorizado</span>
+  <!-- ── LEFT: product showcase ── -->
+  <div class="auth-left">
+    <div class="auth-left-top">
+      <img src="logo-tracker.png" alt="VICTOR IA Tracker" style="height:36px;width:auto;">
     </div>
 
-    <div class="auth-vi-logo">
-      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="36" height="36" fill="#0E0F12"/>
-        <path d="M7 8.5L18 27.5L29 8.5" stroke="#F8F7F5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="14.5" y="17" width="2.2" height="5.5" fill="#FFAA17"/>
-        <rect x="17.9" y="14.5" width="2.2" height="8.5" fill="#FFAA17"/>
-        <rect x="21.3" y="18" width="2.2" height="4.5" fill="#FFAA17"/>
-      </svg>
+    <div class="auth-left-body">
+      <div class="auth-left-eyebrow">
+        <div class="auth-eyebrow-line"></div>
+        <span class="auth-eyebrow-text">Sistema Operativo de Agencia</span>
+      </div>
+      <div class="auth-left-headline">
+        Inteligencia que<br><em>trabaja contigo.</em>
+      </div>
+      <div class="auth-left-sub">
+        Centraliza proyectos, costos, herramientas IA y métricas de equipo en un solo panel de comando.
+      </div>
+
+      <div class="auth-mini-dash">
+        <div class="amd-kpis">
+          <div class="amd-kpi">
+            <div class="amd-kpi-val" data-amd-counter data-target="14" data-suffix="h">14h</div>
+            <div class="amd-kpi-lbl">Ahorro / sem.</div>
+          </div>
+          <div class="amd-kpi">
+            <div class="amd-kpi-val" data-amd-counter data-target="68" data-suffix="%">68%</div>
+            <div class="amd-kpi-lbl">+ Eficiencia</div>
+          </div>
+          <div class="amd-kpi">
+            <div class="amd-kpi-val" data-amd-counter data-target="10" data-suffix="+">10+</div>
+            <div class="amd-kpi-lbl">Paneles activos</div>
+          </div>
+        </div>
+        <div class="amd-chart-wrap">
+          <div class="amd-chart-head">
+            <span class="amd-chart-title">Actividad IA · Esta semana</span>
+            <span class="amd-chart-badge">↑ 24% vs semana anterior</span>
+          </div>
+          <div class="amd-bars">
+            <div class="amd-bar-wrap"><div class="amd-bar" style="height:28px" data-amd-bar></div><span class="amd-bar-lbl">Lun</span></div>
+            <div class="amd-bar-wrap"><div class="amd-bar" style="height:36px" data-amd-bar></div><span class="amd-bar-lbl">Mar</span></div>
+            <div class="amd-bar-wrap"><div class="amd-bar" style="height:44px" data-amd-bar></div><span class="amd-bar-lbl">Mié</span></div>
+            <div class="amd-bar-wrap"><div class="amd-bar" style="height:32px" data-amd-bar></div><span class="amd-bar-lbl">Jue</span></div>
+            <div class="amd-bar-wrap"><div class="amd-bar" style="height:40px" data-amd-bar></div><span class="amd-bar-lbl">Vie</span></div>
+          </div>
+        </div>
+        <div class="amd-feed">
+          <div class="amd-feed-item active" data-amd-feed="0">
+            <div class="amd-feed-dot"></div>
+            <span class="amd-feed-text">Claude finalizó estrategia de contenido</span>
+            <span class="amd-feed-time">hace 2m</span>
+          </div>
+          <div class="amd-feed-item" data-amd-feed="1">
+            <div class="amd-feed-dot"></div>
+            <span class="amd-feed-text">n8n sincronizó 48 leads con HubSpot</span>
+            <span class="amd-feed-time">hace 8m</span>
+          </div>
+          <div class="amd-feed-item" data-amd-feed="2">
+            <div class="amd-feed-dot"></div>
+            <span class="amd-feed-text">ElevenLabs generó 3 audios de voz</span>
+            <span class="amd-feed-time">hace 15m</span>
+          </div>
+          <div class="amd-feed-item" data-amd-feed="3">
+            <div class="amd-feed-dot"></div>
+            <span class="amd-feed-text">Reporte semanal enviado al cliente</span>
+            <span class="amd-feed-time">hace 1h</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="auth-title">Panel de<br>Control.</div>
-    <div class="auth-subtitle">Acceso restringido a miembros del equipo VICTOR IA.</div>
-
-    <div id="auth-error" class="auth-error"></div>
-
-    <!-- Google -->
-    <button class="auth-btn-social" id="auth-google-btn" type="button">
-      <svg class="auth-social-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M17.64 9.2045c0-.638-.057-1.252-.164-1.841H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.258h2.908c1.703-1.567 2.684-3.875 2.684-6.614z" fill="#4285F4"/>
-        <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
-        <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-      </svg>
-      Continuar con Google
-    </button>
-
-    <!-- Apple -->
-    <button class="auth-btn-social" id="auth-apple-btn" type="button">
-      <svg class="auth-social-icon" viewBox="0 0 17 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M16.063 7.257c-.1.074-1.868 1.072-1.868 3.282 0 2.554 2.243 3.456 2.305 3.476-.01.055-.356 1.238-1.174 2.44-.73 1.06-1.492 2.117-2.66 2.117-1.169 0-1.472-.68-2.83-.68-1.32 0-1.79.699-2.852.699-1.063 0-1.804-.997-2.66-2.22C3.31 15.007 2.5 12.805 2.5 10.718c0-3.25 2.117-4.972 4.204-4.972 1.108 0 2.031.728 2.727.728.66 0 1.69-.775 2.965-.775.479 0 2.183.04 3.306 1.681l.361-.123zm-4.014-3.079c.52-.616.888-1.47.888-2.323 0-.119-.01-.239-.03-.339-.849.032-1.858.566-2.466 1.27-.48.547-.928 1.4-.928 2.266 0 .132.02.265.03.306.05.01.13.02.21.02.763 0 1.72-.507 2.296-1.2z" fill="#F8F7F5"/>
-      </svg>
-      Continuar con Apple
-    </button>
-
-    <div class="auth-separator">
-      <div class="auth-separator-line"></div>
-      <span class="auth-separator-text">o con correo</span>
-      <div class="auth-separator-line"></div>
+    <div class="auth-left-footer">
+      <div class="auth-trust-badge">
+        <div class="auth-trust-dot"></div>
+        Sistemas activos
+      </div>
+      <div class="auth-trust-sep"></div>
+      <div class="auth-trust-badge">Datos cifrados</div>
+      <div class="auth-trust-sep"></div>
+      <div class="auth-trust-badge">Acceso por invitación</div>
     </div>
-
-    <!-- Email form -->
-    <div id="auth-name-field" class="auth-field" style="display:none">
-      <label>Nombre completo</label>
-      <input type="text" id="auth-name" placeholder="Tu nombre" autocomplete="name">
-    </div>
-    <div class="auth-field">
-      <label>Correo electrónico</label>
-      <input type="email" id="auth-email" placeholder="tu@correo.com" autocomplete="email">
-    </div>
-    <div class="auth-field">
-      <label>Contraseña</label>
-      <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
-    </div>
-    <button class="auth-btn-primary" id="auth-submit-btn" type="button">
-      <span id="auth-btn-text">Iniciar sesión</span>
-    </button>
-
-    <div class="auth-toggle">
-      <span id="auth-toggle-label">¿No tienes cuenta?</span>
-      <a id="auth-toggle-link">Regístrate</a>
-    </div>
-
   </div>
+
+  <!-- ── RIGHT: auth form ── -->
+  <div class="auth-right">
+    <div class="auth-card">
+
+      <div class="auth-card-logo">
+        <img src="logo-tracker.png" alt="VICTOR IA Tracker" style="height:32px;width:auto;margin-bottom:4px;">
+      </div>
+
+      <div class="auth-card-headline">Bienvenido<br>de vuelta.</div>
+      <div class="auth-card-sub">Ingresa tus credenciales para acceder al panel de control.</div>
+
+      <div id="auth-error" class="auth-error"></div>
+
+      <!-- Social buttons — side by side -->
+      <div class="auth-social-row">
+        <button class="auth-btn-social" id="auth-google-btn" type="button">
+          <svg class="auth-social-icon" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.64 9.2045c0-.638-.057-1.252-.164-1.841H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.258h2.908c1.703-1.567 2.684-3.875 2.684-6.614z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
+            <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+          </svg>
+          Google
+        </button>
+        <button class="auth-btn-social" id="auth-apple-btn" type="button">
+          <svg class="auth-social-icon" viewBox="0 0 17 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16.063 7.257c-.1.074-1.868 1.072-1.868 3.282 0 2.554 2.243 3.456 2.305 3.476-.01.055-.356 1.238-1.174 2.44-.73 1.06-1.492 2.117-2.66 2.117-1.169 0-1.472-.68-2.83-.68-1.32 0-1.79.699-2.852.699-1.063 0-1.804-.997-2.66-2.22C3.31 15.007 2.5 12.805 2.5 10.718c0-3.25 2.117-4.972 4.204-4.972 1.108 0 2.031.728 2.727.728.66 0 1.69-.775 2.965-.775.479 0 2.183.04 3.306 1.681l.361-.123zm-4.014-3.079c.52-.616.888-1.47.888-2.323 0-.119-.01-.239-.03-.339-.849.032-1.858.566-2.466 1.27-.48.547-.928 1.4-.928 2.266 0 .132.02.265.03.306.05.01.13.02.21.02.763 0 1.72-.507 2.296-1.2z" fill="#F8F7F5"/>
+          </svg>
+          Apple
+        </button>
+      </div>
+
+      <div class="auth-separator">
+        <div class="auth-separator-line"></div>
+        <span class="auth-separator-text">o con correo</span>
+        <div class="auth-separator-line"></div>
+      </div>
+
+      <!-- Email form -->
+      <div id="auth-name-field" class="auth-field" style="display:none">
+        <label>Nombre completo</label>
+        <input type="text" id="auth-name" placeholder="Tu nombre" autocomplete="name">
+      </div>
+      <div class="auth-field">
+        <label>Correo electrónico</label>
+        <input type="email" id="auth-email" placeholder="tu@correo.com" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <div class="auth-field-header">
+          <label>Contraseña</label>
+          <span class="auth-forgot">¿Olvidaste tu contraseña?</span>
+        </div>
+        <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+
+      <button class="auth-btn-primary" id="auth-submit-btn" type="button">
+        <span id="auth-btn-text">Iniciar sesión</span>
+      </button>
+
+      <div class="auth-toggle">
+        <span id="auth-toggle-label">¿No tienes cuenta?</span>
+        <a id="auth-toggle-link">Regístrate</a>
+      </div>
+
+      <div class="auth-card-footer">
+        <span class="auth-footer-link">Términos de uso</span>
+        <div class="auth-footer-sep"></div>
+        <span class="auth-footer-link">Privacidad</span>
+        <div class="auth-footer-sep"></div>
+        <span class="auth-footer-link">Soporte</span>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <!-- SVG colorblind filters (invisible, referenced by CSS) -->
@@ -2653,8 +2934,8 @@ html.cb-gray    { filter: url(#cb-gray); }
     <svg width="152" height="42" viewBox="0 0 152 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="VICTOR IA Tracker">
       <!-- Mark: fondo oscuro (invertido vs marca principal que es claro) -->
       <rect class="via-logo-mark-rect" width="42" height="42" fill="#0E0F12"/>
-      <!-- VT monogram -->
-      <path class="via-logo-mark-path" d="M7 8 L35 8 M7 8 L21 34 L35 8" stroke="#F8F7F5" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- VI monogram -->
+      <path class="via-logo-mark-path" d="M7 8 L21 8 M7 8 L17 34 M35 8 L35 34" stroke="#F8F7F5" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       <!-- Barras animadas: color claro sobre fondo oscuro -->
       <rect class="via-logo-mark-bar" x="15" y="18" width="3" height="8" fill="#F8F7F5" rx="0">
         <animate attributeName="height" values="8;13;5;10;8" dur="1.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1;0.4 0 0.2 1"/>
@@ -3354,177 +3635,75 @@ html.cb-gray    { filter: url(#cb-gray); }
 </div>
 
 <script>
-/* ════════════════════════════════════════════════════════════════
-   FIREBASE AUTH — VICTOR IA Tracker
-   ────────────────────────────────────────────────────────────────
-   CONFIGURACIÓN:
-   1. Ir a console.firebase.google.com
-   2. Crear proyecto → Authentication → Sign-in method
-   3. Habilitar: Google  ✓  Apple  ✓  Correo/contraseña  ✓
-   4. Copiar config del proyecto y reemplazar los valores "TU_*" abajo
-   5. En Authentication → Settings → Authorized domains → agregar:
-      victor-ia-tracker.vercel.app
-════════════════════════════════════════════════════════════════ */
-const FIREBASE_CONFIG = {
-  apiKey:            "TU_API_KEY",
-  authDomain:        "TU_PROJECT_ID.firebaseapp.com",
-  projectId:         "TU_PROJECT_ID",
-  storageBucket:     "TU_PROJECT_ID.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
-  appId:             "TU_APP_ID"
-};
-
-// ── Dev bypass: si no hay config, saltar auth en localhost ──
-const VIA_DEV_MODE = FIREBASE_CONFIG.apiKey.startsWith('TU_') &&
-  (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
-
-let _fbAuth = null;
-let _authMode = 'signin'; // 'signin' | 'signup'
-
-// ── Elementos del auth wall ──
-const _authLoader  = document.getElementById('auth-loader');
-const _authWall    = document.getElementById('auth-wall');
-const _authError   = document.getElementById('auth-error');
-const _authEmail   = document.getElementById('auth-email');
-const _authPwd     = document.getElementById('auth-password');
-const _authName    = document.getElementById('auth-name');
+/* ── AUTH — modo demo: cualquier clic entra al panel ── */
+const _authLoader = document.getElementById('auth-loader');
+const _authWall   = document.getElementById('auth-wall');
+const _authTglLnk = document.getElementById('auth-toggle-link');
+const _authTglLbl = document.getElementById('auth-toggle-label');
+const _authBtnTxt = document.getElementById('auth-btn-text');
 const _authNameFld = document.getElementById('auth-name-field');
-const _authSubmit  = document.getElementById('auth-submit-btn');
-const _authBtnTxt  = document.getElementById('auth-btn-text');
-const _authTglLbl  = document.getElementById('auth-toggle-label');
-const _authTglLnk  = document.getElementById('auth-toggle-link');
+let _authMode = 'signin';
 
-function _showAuthWall() {
-  _authLoader.classList.add('hidden');
-  _authWall.classList.remove('hidden');
-  setTimeout(() => { if (_authEmail) _authEmail.focus(); }, 350);
-}
 function _hideAuthWall() {
-  _authLoader.classList.add('hidden');
-  _authWall.classList.add('hidden');
+  _authLoader && _authLoader.classList.add('hidden');
+  if (_authWall) {
+    _authWall.classList.remove('visible');
+    setTimeout(() => _authWall.classList.add('hidden'), 650);
+  }
 }
-function _showAuthError(msg) {
-  _authError.textContent = msg;
-  _authError.classList.add('show');
-}
-function _clearAuthError() {
-  _authError.classList.remove('show');
-}
-function _authBtnLoading(on) {
-  _authSubmit.disabled = on;
-  _authBtnTxt.innerHTML = on
-    ? '<span class="auth-loading-dots"><span></span><span></span><span></span></span>'
-    : (_authMode === 'signup' ? 'Crear cuenta' : 'Iniciar sesión');
-}
-function _getAuthMsg(code) {
-  const m = {
-    'auth/user-not-found':        'No existe cuenta con este correo.',
-    'auth/wrong-password':        'Contraseña incorrecta.',
-    'auth/invalid-credential':    'Correo o contraseña incorrectos.',
-    'auth/email-already-in-use':  'Este correo ya tiene cuenta. Inicia sesión.',
-    'auth/weak-password':         'La contraseña necesita mínimo 6 caracteres.',
-    'auth/invalid-email':         'Correo electrónico no válido.',
-    'auth/too-many-requests':     'Demasiados intentos. Espera unos minutos.',
-    'auth/popup-closed-by-user':  'Ventana cerrada antes de completar.',
-    'auth/popup-blocked':         'Popup bloqueado. Permite ventanas emergentes.',
-    'auth/network-request-failed':'Sin conexión. Verifica tu red.',
-    'auth/cancelled-popup-request':'Autenticación cancelada.',
-  };
-  return m[code] || ('Error: ' + (code || 'Inténtalo de nuevo.'));
-}
-
-// ── Toggle signin ↔ signup ──
+function authSubmit() { _hideAuthWall(); }
 function authToggleMode() {
   _authMode = _authMode === 'signin' ? 'signup' : 'signin';
-  const isSignup = _authMode === 'signup';
-  _authNameFld.style.display = isSignup ? '' : 'none';
-  _authBtnTxt.textContent    = isSignup ? 'Crear cuenta' : 'Iniciar sesión';
-  _authTglLbl.textContent    = isSignup ? '¿Ya tienes cuenta?' : '¿No tienes cuenta?';
-  _authTglLnk.textContent    = isSignup ? 'Inicia sesión' : 'Regístrate';
-  _authPwd.setAttribute('autocomplete', isSignup ? 'new-password' : 'current-password');
-  _clearAuthError();
+  const s = _authMode === 'signup';
+  if (_authNameFld) _authNameFld.style.display = s ? '' : 'none';
+  if (_authBtnTxt)  _authBtnTxt.textContent = s ? 'Crear cuenta' : 'Iniciar sesión';
+  if (_authTglLbl)  _authTglLbl.textContent = s ? '¿Ya tienes cuenta?' : '¿No tienes cuenta?';
+  if (_authTglLnk)  _authTglLnk.textContent = s ? 'Inicia sesión' : 'Regístrate';
 }
 
-// ── Email/Password submit ──
-async function authSubmit() {
-  if (VIA_DEV_MODE) { _hideAuthWall(); return; }
-  const email = _authEmail ? _authEmail.value.trim() : '';
-  const pwd   = _authPwd  ? _authPwd.value           : '';
-  if (!email || !pwd) { _showAuthError('Completa correo y contraseña.'); return; }
-  _authBtnLoading(true);
-  _clearAuthError();
-  try {
-    if (_authMode === 'signup') {
-      const cred = await _fbAuth.createUserWithEmailAndPassword(email, pwd);
-      const name = _authName ? _authName.value.trim() : '';
-      if (name && cred.user) await cred.user.updateProfile({ displayName: name });
-    } else {
-      await _fbAuth.signInWithEmailAndPassword(email, pwd);
-    }
-  } catch(e) {
-    _showAuthError(_getAuthMsg(e.code));
-    _authBtnLoading(false);
-  }
-}
-
-// ── Google Sign-In ──
-document.getElementById('auth-google-btn').addEventListener('click', async () => {
-  if (VIA_DEV_MODE) { _hideAuthWall(); return; }
-  const btn = document.getElementById('auth-google-btn');
-  btn.disabled = true; _clearAuthError();
-  try {
-    await _fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-  } catch(e) {
-    _showAuthError(_getAuthMsg(e.code));
-    btn.disabled = false;
-  }
-});
-
-// ── Apple Sign-In ──
-document.getElementById('auth-apple-btn').addEventListener('click', async () => {
-  if (VIA_DEV_MODE) { _hideAuthWall(); return; }
-  const btn = document.getElementById('auth-apple-btn');
-  btn.disabled = true; _clearAuthError();
-  try {
-    const prov = new firebase.auth.OAuthProvider('apple.com');
-    prov.addScope('email'); prov.addScope('name');
-    await _fbAuth.signInWithPopup(prov);
-  } catch(e) {
-    _showAuthError(_getAuthMsg(e.code));
-    btn.disabled = false;
-  }
-});
-
-// ── Submit / toggle listeners ──
-_authSubmit && _authSubmit.addEventListener('click', authSubmit);
+document.getElementById('auth-submit-btn') && document.getElementById('auth-submit-btn').addEventListener('click', authSubmit);
+document.getElementById('auth-google-btn') && document.getElementById('auth-google-btn').addEventListener('click', authSubmit);
+document.getElementById('auth-apple-btn')  && document.getElementById('auth-apple-btn').addEventListener('click', authSubmit);
 _authTglLnk && _authTglLnk.addEventListener('click', authToggleMode);
-_authPwd    && _authPwd.addEventListener('keydown', e => { if (e.key==='Enter') authSubmit(); });
-_authEmail  && _authEmail.addEventListener('keydown', e => { if (e.key==='Enter') _authPwd && _authPwd.focus(); });
+document.getElementById('auth-password') && document.getElementById('auth-password').addEventListener('keydown', e => { if (e.key === 'Enter') authSubmit(); });
 
-// ── Init Firebase Auth ──
-(function initVIAAuth() {
-  if (VIA_DEV_MODE) {
-    // Sin config Firebase: modo desarrollo local — acceso directo
-    setTimeout(() => _hideAuthWall(), 600);
-    return;
-  }
-  try {
-    firebase.initializeApp(FIREBASE_CONFIG);
-    _fbAuth = firebase.auth();
-    _fbAuth.languageCode = 'es';
-    _fbAuth.onAuthStateChanged(user => {
-      if (user) {
-        _hideAuthWall();
-      } else {
-        _showAuthWall();
-      }
+// Mini-dash animation — runs once when auth wall is shown
+function _animateAuthDash() {
+  document.querySelectorAll('[data-amd-counter]').forEach(function(el) {
+    var target = parseInt(el.dataset.target) || 0;
+    var suffix = el.dataset.suffix || '';
+    var start = performance.now();
+    var dur = 1100;
+    function tick(now) {
+      var p = Math.min((now - start) / dur, 1);
+      var ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(ease * target) + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+  document.querySelectorAll('[data-amd-bar]').forEach(function(bar, i) {
+    setTimeout(function() { bar.classList.add('animated'); }, 280 + i * 90);
+  });
+  document.querySelectorAll('[data-amd-feed]').forEach(function(item, i) {
+    setTimeout(function() { item.classList.add('visible'); }, 500 + i * 160);
+  });
+}
+
+// Mostrar auth wall al cargar — con fade-in
+(function() {
+  if (_authLoader) _authLoader.classList.add('hidden');
+  if (_authWall) {
+    _authWall.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        _authWall.classList.add('visible');
+        setTimeout(_animateAuthDash, 350);
+      });
     });
-  } catch(err) {
-    console.warn('[VIA Auth] Firebase init error:', err);
-    // Si la config es inválida (ej. en preview), mostrar auth wall
-    _authLoader.classList.add('hidden');
-    _showAuthWall();
   }
+  const em = document.getElementById('auth-email');
+  if (em) setTimeout(() => em.focus(), 600);
 })();
 
 // ===== SOFTWARE CATALOG =====
@@ -4342,55 +4521,141 @@ function speakFeedback(text){
   window.speechSynthesis.speak(utt);
 }
 
-// ── Guided tour ──
-var tourSteps=[
-  {sel:'#topbar',       text:'Esta es la barra superior del Tracker de Victor IA. Aquí encontrarás el logo, controles de tema y el menú de herramientas.'},
-  {sel:'#period-bar',   text:'La barra de períodos te permite filtrar los datos por hora, día, semana, mes, año o un rango personalizado.'},
-  {sel:'#project-bar',  text:'Aquí seleccionas el proyecto activo. Puedes filtrar todas las métricas por proyecto específico.'},
-  {sel:'#tabs',         text:'Las pestañas principales: Dashboard, Analytics, Finanzas, Organigrama, Software, Entradas, Reportes, CRM y Prospección.'},
-  {sel:'.kpi-grid',     text:'Los KPIs o indicadores clave muestran las métricas más importantes del período seleccionado en tiempo real.'},
-  {sel:'#acc-btn',      text:'Este es el botón de accesibilidad. Desde aquí controlas el tamaño de texto, contraste, modo daltónico y navegación por voz. ¡Ya lo conoces!'}
+// ── Guided tour v2 — ElevenLabs TTS + navegación completa ──
+var TOUR_EL_VOICE='iDEmt5MnqUotdwCIVplo'; // Enrique Mondragón
+var tourIdx=0, tourActive=false, tourAudio=null, tourBox=null, tourHud=null;
+
+var TOUR_STEPS=[
+  {tab:null,sel:null,label:'Bienvenida',
+   text:'Hola. Bienvenido al Tracker de Victor IA, la plataforma de control y rendimiento de toda la agencia: proyectos, tiempo, finanzas, clientes y desempeño en un solo lugar. Te guío por cada módulo.'},
+  {tab:null,sel:'#topbar',label:'Barra superior',
+   text:'Esta es la barra de navegación principal. Desde aquí accedes a todas las acciones: registrar trabajo, exportar datos en CSV, gestionar filtros avanzados, abrir el módulo de planeación con inteligencia artificial, activar la vista para clientes y configurar la plataforma.'},
+  {tab:null,sel:'.btn-primary-cta',label:'Nueva Entrada',
+   text:'El botón más importante del tracker: Nueva Entrada. Aquí registras cada tarea o actividad realizada. Capturas qué se hizo, por qué, para qué, cuánto tiempo tomó, el proyecto, el cliente, la categoría y la prioridad.'},
+  {tab:null,sel:'button[aria-label="Abrir módulo de planeación"]',label:'Planeación IA',
+   text:'El módulo de Planeación usa inteligencia artificial para generar cotizaciones, planear nuevos proyectos, preparar entregables para clientes y solicitar dummies de diseño. También tiene un agente de voz que llena los formularios automáticamente mientras tú hablas.'},
+  {tab:null,sel:'#period-bar',label:'Período de tiempo',
+   text:'La barra de períodos controla el rango de tiempo de todos los datos. Filtra por esta hora, hoy, ayer, esta semana, este mes, este año, todo el historial, o define un rango de fechas personalizado para análisis específicos.'},
+  {tab:null,sel:'#project-bar',label:'Selector de proyecto',
+   text:'Aquí seleccionas el proyecto activo. Al elegirlo, todos los KPIs, gráficas, reportes y entradas del tracker se filtran automáticamente para mostrar solo la información de ese proyecto en particular.'},
+  {tab:null,sel:'#tabs',label:'Módulos del tracker',
+   text:'Los nueve módulos de la plataforma. Dashboard con métricas en tiempo real, Analytics profundo, Finanzas, Organigrama de agentes de inteligencia artificial, catálogo de Software y APIs, registro de Entradas, Reportes, CRM de clientes y módulo de Prospección.'},
+  {tab:'dashboard',sel:'.kpi-grid',label:'Dashboard — KPIs',
+   text:'Estamos en el Dashboard. Los indicadores clave muestran en tiempo real: horas totales trabajadas, valor económico generado en el período, prompts de inteligencia artificial ejecutados, tasa de completado de tareas, racha de días activos consecutivos y total de acciones registradas.'},
+  {tab:'dashboard',sel:'#view-dashboard',label:'Dashboard — Actividad',
+   text:'Más abajo en el Dashboard verás el flujo de información entre áreas de la agencia, gráficas de distribución por categoría y proyecto, y la bitácora completa de actividad con cada entrada del período actualizada en tiempo real.'},
+  {tab:'analytics',sel:'#view-analytics',label:'Analytics',
+   text:'Analytics ofrece una visión profunda del rendimiento. Aquí encuentras el mapa de calor de productividad por horas y días de la semana, el análisis de eficiencia en prompt engineering, tendencias de producción y distribución de actividades por categoría.'},
+  {tab:'finanzas',sel:'#view-finanzas',label:'Finanzas',
+   text:'Finanzas muestra la salud económica completa de la agencia: estado de resultados, balance general, ingresos y egresos del período, costos operativos, márgenes de ganancia por proyecto y transparencia total en todos los cálculos financieros. Nada está oculto.'},
+  {tab:'organigrama',sel:'#view-organigrama',label:'Organigrama',
+   text:'El Organigrama muestra la estructura completa de agentes de inteligencia artificial que operan la agencia: CEO, CTO, CMO, CFO y más. Cada nodo tiene sus responsabilidades definidas, lo que recibe, lo que entrega y cómo conecta con las demás áreas.'},
+  {tab:'software',sel:'#view-software',label:'Software & APIs',
+   text:'El catálogo de Software y APIs lista todas las herramientas activas de Victor IA: Claude, ElevenLabs, Runway, Adobe Creative Cloud, HubSpot, n8n y muchas más. Verás el costo mensual de cada una, su categoría y los agentes especializados asignados a ella.'},
+  {tab:'entradas',sel:'#view-entradas',label:'Entradas',
+   text:'El módulo de Entradas es el registro maestro de toda la actividad de la agencia. Cada entrada tiene descripción detallada, tiempo exacto, proyecto, cliente, categoría, estado, prioridad y si hubo retrabajo. Es la fuente de verdad de todo el sistema.'},
+  {tab:'entradas',sel:'#sidebar',label:'Filtros avanzados',showSidebar:true,
+   text:'Los filtros avanzados permiten segmentar por cualquier combinación de criterios: categoría, proyecto, cliente, estado de tarea, prioridad, duración mínima, retrabajo y software utilizado. Se aplican en tiempo real a todas las vistas del módulo.'},
+  {tab:'reportes',sel:'#view-reportes',label:'Reportes',
+   text:'Reportes genera vistas consolidadas del rendimiento: resumen día a día, distribución de productividad por día de la semana, estadísticas por categoría y comparativas entre períodos. Perfecto para reuniones de equipo o presentaciones ejecutivas.'},
+  {tab:'crm',sel:'#view-crm',label:'CRM',
+   text:'El CRM gestiona todas las relaciones comerciales de la agencia: clientes activos, prospectos en seguimiento, estado de cada proyecto, historial de interacciones y el pipeline de ventas con sus etapas, probabilidades y valores económicos estimados.'},
+  {tab:'apollo',sel:'#view-apollo',label:'Prospección',
+   text:'Prospección es el módulo de generación de nuevos negocios. Integra Apollo para identificar prospectos calificados, gestionar campañas de acercamiento y dar seguimiento a cada oportunidad hasta convertirla en cliente activo de la agencia.'},
+  {tab:'dashboard',sel:'#chatbot-btn',label:'Asistente IA',
+   text:'El asistente de inteligencia artificial está disponible en toda la plataforma. Puedes consultarle métricas, pedirle análisis comparativos, sugerencias de optimización o cualquier pregunta sobre los datos del tracker. Responde en lenguaje natural con tu información real.'},
+  {tab:'dashboard',sel:'#acc-btn',label:'Accesibilidad',
+   text:'El panel de accesibilidad da control total sobre la experiencia visual: tamaño de texto, alto contraste para mayor legibilidad, modos de daltonismo para diferentes tipos de visión, y comandos de voz para navegar la plataforma sin usar teclado ni ratón.'},
+  {tab:null,sel:null,label:'Tour completado',
+   text:'Y eso es todo el tour. Has recorrido los nueve módulos del Tracker de Victor IA. Esta plataforma está diseñada para darte control y claridad total sobre cada hora trabajada, cada peso invertido y cada decisión estratégica de tu agencia. Bienvenido a bordo.'}
 ];
-var tourIdx=0;
-var tourHighlight=null;
+
+function tourCreateUI(){
+  tourBox=document.createElement('div'); tourBox.id='tour-box';
+  document.body.appendChild(tourBox);
+  tourHud=document.createElement('div'); tourHud.id='tour-hud';
+  tourHud.innerHTML='<span class="th-step" id="th-step">Paso 1 / '+TOUR_STEPS.length+'</span>'
+    +'<span class="th-sep">·</span>'
+    +'<span class="th-label" id="th-label">Iniciando...</span>'
+    +'<button class="th-stop" onclick="stopGuidedTour()">✕ Detener tour</button>';
+  document.body.appendChild(tourHud);
+}
+function tourDestroyUI(){
+  if(tourBox){tourBox.remove();tourBox=null;}
+  if(tourHud){tourHud.remove();tourHud=null;}
+}
 function startGuidedTour(){
   closeAccPanel();
-  tourIdx=0;
-  runTourStep();
+  if(tourActive) stopGuidedTour();
+  tourIdx=0; tourActive=true;
+  tourCreateUI();
+  tourRunStep();
 }
-function runTourStep(){
-  if(tourIdx>=tourSteps.length){
-    if(tourHighlight){ tourHighlight.remove(); tourHighlight=null; }
-    speakFeedback('Tour completado. ¡Bienvenido al Tracker de Victor IA!');
-    return;
-  }
-  var step=tourSteps[tourIdx];
-  var el=document.querySelector(step.sel);
-  // Highlight element
-  if(tourHighlight) tourHighlight.remove();
-  if(el){
-    var r=el.getBoundingClientRect();
-    tourHighlight=document.createElement('div');
-    tourHighlight.style.cssText='position:fixed;z-index:9999;pointer-events:none;border:2px solid #60a5fa;border-radius:6px;box-shadow:0 0 0 4000px rgba(0,0,0,0.55);transition:all 0.3s;';
-    tourHighlight.style.top=(r.top-4)+'px';
-    tourHighlight.style.left=(r.left-4)+'px';
-    tourHighlight.style.width=(r.width+8)+'px';
-    tourHighlight.style.height=(r.height+8)+'px';
-    document.body.appendChild(tourHighlight);
-    el.scrollIntoView({behavior:'smooth',block:'nearest'});
-  }
-  speakFeedback(step.text);
-  // Auto-advance after speech ends + 800ms
-  var utt=new SpeechSynthesisUtterance(step.text);
-  utt.lang='es-MX'; utt.rate=0.95;
-  utt.onend=function(){
-    setTimeout(function(){
-      tourIdx++;
-      runTourStep();
-    },800);
-  };
+function stopGuidedTour(){
+  tourActive=false;
+  if(tourAudio){tourAudio.pause();tourAudio=null;}
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  tourDestroyUI();
+}
+function tourMoveBox(sel){
+  if(!tourBox) return;
+  if(!sel){tourBox.style.display='none';return;}
+  var el=document.querySelector(sel);
+  if(!el){tourBox.style.display='none';return;}
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+  setTimeout(function(){
+    var r=el.getBoundingClientRect(), pad=7;
+    tourBox.style.display='block';
+    tourBox.style.top=(r.top-pad)+'px';
+    tourBox.style.left=(r.left-pad)+'px';
+    tourBox.style.width=(r.width+pad*2)+'px';
+    tourBox.style.height=(r.height+pad*2)+'px';
+  },120);
+}
+function tourUpdateHUD(idx){
+  var s=TOUR_STEPS[idx];
+  var se=document.getElementById('th-step');
+  var le=document.getElementById('th-label');
+  if(se) se.textContent='Paso '+(idx+1)+' / '+TOUR_STEPS.length;
+  if(le) le.textContent=s.label;
+}
+function tourSpeak(text,onEnd){
+  var key=settings.elevenLabsKey;
+  if(!key){tourSpeakFallback(text,onEnd);return;}
+  fetch('https://api.elevenlabs.io/v1/text-to-speech/'+TOUR_EL_VOICE+'/stream',{
+    method:'POST',
+    headers:{'xi-api-key':key,'Content-Type':'application/json'},
+    body:JSON.stringify({text:text,model_id:'eleven_multilingual_v2',
+      voice_settings:{stability:0.42,similarity_boost:0.88,style:0.58,use_speaker_boost:true}})
+  }).then(function(r){if(!r.ok)throw new Error('EL '+r.status);return r.blob();})
+  .then(function(blob){
+    if(!tourActive)return;
+    var url=URL.createObjectURL(blob);
+    tourAudio=new Audio(url);
+    tourAudio.onended=function(){URL.revokeObjectURL(url);if(tourActive)setTimeout(onEnd,700);};
+    tourAudio.onerror=function(){if(tourActive)setTimeout(onEnd,1200);};
+    tourAudio.play();
+  }).catch(function(){tourSpeakFallback(text,onEnd);});
+}
+function tourSpeakFallback(text,onEnd){
+  if(!window.speechSynthesis){setTimeout(onEnd,2200);return;}
+  var utt=new SpeechSynthesisUtterance(text);
+  utt.lang='es-MX'; utt.rate=0.92;
+  utt.onend=function(){if(tourActive)setTimeout(onEnd,700);};
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utt);
+}
+function tourRunStep(){
+  if(!tourActive||tourIdx>=TOUR_STEPS.length){stopGuidedTour();return;}
+  var step=TOUR_STEPS[tourIdx];
+  tourUpdateHUD(tourIdx);
+  function go(){
+    tourMoveBox(step.sel);
+    tourSpeak(step.text,function(){tourIdx++;tourRunStep();});
+  }
+  if(step.showSidebar&&!sidebarVisible){sidebarVisible=true;}
+  if(step.tab&&step.tab!==currentTab){setTab(step.tab);setTimeout(go,880);}
+  else{go();}
 }
 
 // ── Voice commands modal ──
