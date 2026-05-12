@@ -4521,9 +4521,11 @@ function speakFeedback(text){
   window.speechSynthesis.speak(utt);
 }
 
-// ── Guided tour v2 — ElevenLabs TTS + navegación completa ──
+// ── Guided tour v2 — ElevenLabs TTS + pre-carga paralela + baja latencia ──
 var TOUR_EL_VOICE='iDEmt5MnqUotdwCIVplo'; // Enrique Mondragón
+var TOUR_EL_MODEL='eleven_turbo_v2_5';     // menor latencia, calidad premium
 var tourIdx=0, tourActive=false, tourAudio=null, tourBox=null, tourHud=null;
+var tourCache={};                           // {idx: Promise<blobURL|null>}
 
 var TOUR_STEPS=[
   {tab:null,sel:null,label:'Bienvenida',
@@ -4570,33 +4572,61 @@ var TOUR_STEPS=[
    text:'Y eso es todo el tour. Has recorrido los nueve módulos del Tracker de Victor IA. Esta plataforma está diseñada para darte control y claridad total sobre cada hora trabajada, cada peso invertido y cada decisión estratégica de tu agencia. Bienvenido a bordo.'}
 ];
 
+// Pre-carga un paso como Promise<blobURL|null>
+function tourPrefetch(idx){
+  if(idx<0||idx>=TOUR_STEPS.length||tourCache[idx]) return;
+  var key=settings.elevenLabsKey;
+  if(!key){tourCache[idx]=Promise.resolve(null);return;}
+  var step=TOUR_STEPS[idx];
+  tourCache[idx]=fetch('https://api.elevenlabs.io/v1/text-to-speech/'+TOUR_EL_VOICE+'/stream',{
+    method:'POST',
+    headers:{'xi-api-key':key,'Content-Type':'application/json'},
+    body:JSON.stringify({text:step.text,model_id:TOUR_EL_MODEL,
+      voice_settings:{stability:0.40,similarity_boost:0.88,style:0.52,use_speaker_boost:true}})
+  }).then(function(r){return r.ok?r.blob():Promise.reject(r.status);})
+  .then(function(b){return URL.createObjectURL(b);})
+  .catch(function(){return null;});
+}
+
 function tourCreateUI(){
-  tourBox=document.createElement('div'); tourBox.id='tour-box';
+  tourBox=document.createElement('div');tourBox.id='tour-box';
   document.body.appendChild(tourBox);
-  tourHud=document.createElement('div'); tourHud.id='tour-hud';
-  tourHud.innerHTML='<span class="th-step" id="th-step">Paso 1 / '+TOUR_STEPS.length+'</span>'
+  tourHud=document.createElement('div');tourHud.id='tour-hud';
+  tourHud.innerHTML='<span class="th-step" id="th-step">Cargando...</span>'
     +'<span class="th-sep">·</span>'
-    +'<span class="th-label" id="th-label">Iniciando...</span>'
-    +'<button class="th-stop" onclick="stopGuidedTour()">✕ Detener tour</button>';
+    +'<span class="th-label" id="th-label">Preparando audio</span>'
+    +'<button class="th-stop" onclick="stopGuidedTour()">✕ Detener</button>';
   document.body.appendChild(tourHud);
 }
 function tourDestroyUI(){
   if(tourBox){tourBox.remove();tourBox=null;}
   if(tourHud){tourHud.remove();tourHud=null;}
 }
+
 function startGuidedTour(){
   closeAccPanel();
   if(tourActive) stopGuidedTour();
-  tourIdx=0; tourActive=true;
+  tourIdx=0;tourActive=true;tourCache={};
   tourCreateUI();
-  tourRunStep();
+  // Pre-cargar todos los audios en paralelo desde el inicio
+  TOUR_STEPS.forEach(function(_,i){tourPrefetch(i);});
+  // Arrancar en cuanto el paso 0 esté listo
+  tourCache[0].then(function(){if(tourActive) tourRunStep();});
 }
+
 function stopGuidedTour(){
   tourActive=false;
   if(tourAudio){tourAudio.pause();tourAudio=null;}
   if(window.speechSynthesis) window.speechSynthesis.cancel();
+  // Liberar URLs de blob
+  Object.keys(tourCache).forEach(function(k){
+    var p=tourCache[k];
+    if(p&&p.then) p.then(function(url){if(url) URL.revokeObjectURL(url);});
+  });
+  tourCache={};
   tourDestroyUI();
 }
+
 function tourMoveBox(sel){
   if(!tourBox) return;
   if(!sel){tourBox.style.display='none';return;}
@@ -4604,14 +4634,16 @@ function tourMoveBox(sel){
   if(!el){tourBox.style.display='none';return;}
   el.scrollIntoView({behavior:'smooth',block:'nearest'});
   setTimeout(function(){
-    var r=el.getBoundingClientRect(), pad=7;
+    if(!el||!tourBox) return;
+    var r=el.getBoundingClientRect(),pad=7;
     tourBox.style.display='block';
     tourBox.style.top=(r.top-pad)+'px';
     tourBox.style.left=(r.left-pad)+'px';
     tourBox.style.width=(r.width+pad*2)+'px';
     tourBox.style.height=(r.height+pad*2)+'px';
-  },120);
+  },110);
 }
+
 function tourUpdateHUD(idx){
   var s=TOUR_STEPS[idx];
   var se=document.getElementById('th-step');
@@ -4619,42 +4651,45 @@ function tourUpdateHUD(idx){
   if(se) se.textContent='Paso '+(idx+1)+' / '+TOUR_STEPS.length;
   if(le) le.textContent=s.label;
 }
-function tourSpeak(text,onEnd){
-  var key=settings.elevenLabsKey;
-  if(!key){tourSpeakFallback(text,onEnd);return;}
-  fetch('https://api.elevenlabs.io/v1/text-to-speech/'+TOUR_EL_VOICE+'/stream',{
-    method:'POST',
-    headers:{'xi-api-key':key,'Content-Type':'application/json'},
-    body:JSON.stringify({text:text,model_id:'eleven_multilingual_v2',
-      voice_settings:{stability:0.42,similarity_boost:0.88,style:0.58,use_speaker_boost:true}})
-  }).then(function(r){if(!r.ok)throw new Error('EL '+r.status);return r.blob();})
-  .then(function(blob){
-    if(!tourActive)return;
-    var url=URL.createObjectURL(blob);
+
+// Reproduce desde caché — sin latencia si ya estaba pre-cargado
+function tourSpeakCached(idx,text,onEnd){
+  var p=tourCache[idx];
+  if(!p){tourPrefetch(idx);p=tourCache[idx];}
+  if(!p){tourSpeakFallback(text,onEnd);return;}
+  p.then(function(url){
+    if(!tourActive) return;
+    if(!url){tourSpeakFallback(text,onEnd);return;}
     tourAudio=new Audio(url);
-    tourAudio.onended=function(){URL.revokeObjectURL(url);if(tourActive)setTimeout(onEnd,700);};
-    tourAudio.onerror=function(){if(tourActive)setTimeout(onEnd,1200);};
+    tourAudio.onended=function(){
+      URL.revokeObjectURL(url);
+      delete tourCache[idx];
+      if(tourActive) setTimeout(onEnd,550);
+    };
+    tourAudio.onerror=function(){if(tourActive) tourSpeakFallback(text,onEnd);};
     tourAudio.play();
-  }).catch(function(){tourSpeakFallback(text,onEnd);});
+  });
 }
+
 function tourSpeakFallback(text,onEnd){
-  if(!window.speechSynthesis){setTimeout(onEnd,2200);return;}
+  if(!window.speechSynthesis){setTimeout(onEnd,2000);return;}
   var utt=new SpeechSynthesisUtterance(text);
-  utt.lang='es-MX'; utt.rate=0.92;
-  utt.onend=function(){if(tourActive)setTimeout(onEnd,700);};
+  utt.lang='es-MX';utt.rate=0.94;
+  utt.onend=function(){if(tourActive) setTimeout(onEnd,550);};
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utt);
 }
+
 function tourRunStep(){
   if(!tourActive||tourIdx>=TOUR_STEPS.length){stopGuidedTour();return;}
   var step=TOUR_STEPS[tourIdx];
   tourUpdateHUD(tourIdx);
   function go(){
     tourMoveBox(step.sel);
-    tourSpeak(step.text,function(){tourIdx++;tourRunStep();});
+    tourSpeakCached(tourIdx,step.text,function(){tourIdx++;tourRunStep();});
   }
   if(step.showSidebar&&!sidebarVisible){sidebarVisible=true;}
-  if(step.tab&&step.tab!==currentTab){setTab(step.tab);setTimeout(go,880);}
+  if(step.tab&&step.tab!==currentTab){setTab(step.tab);setTimeout(go,820);}
   else{go();}
 }
 
