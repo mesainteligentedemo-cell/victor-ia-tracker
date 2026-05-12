@@ -4512,6 +4512,36 @@ function handleVoiceCommand(cmd){
     closeHamMenu();
     speakFeedback('Cerrado'); return;
   }
+  // Daltonismo / colorblind
+  if(cmd.includes('deuteranopia')||cmd.includes('deuteran')||cmd.includes('rojo verde')){
+    setColorblind('deutan'); speakFeedback('Modo deuteranopía activado'); return;
+  }
+  if(cmd.includes('protanopia')||cmd.includes('protan')||cmd.includes('rojo débil')){
+    setColorblind('protan'); speakFeedback('Modo protanopía activado'); return;
+  }
+  if(cmd.includes('tritanopia')||cmd.includes('tritan')||cmd.includes('azul amarillo')){
+    setColorblind('tritan'); speakFeedback('Modo tritanopía activado'); return;
+  }
+  if(cmd.includes('escala de grises')||cmd.includes('sin color')||cmd.includes('grises')){
+    setColorblind('gray'); speakFeedback('Modo escala de grises activado'); return;
+  }
+  if(cmd.includes('sin daltonismo')||cmd.includes('visión normal')||(cmd.includes('normal')&&cmd.includes('color'))){
+    setColorblind('normal'); speakFeedback('Visión normal restaurada'); return;
+  }
+  // Tour guiado
+  if(cmd.includes('tour')||cmd.includes('recorrido')||cmd.includes('guiado')){
+    startGuidedTour(); return;
+  }
+  if(cmd.includes('detener tour')||cmd.includes('parar tour')||cmd.includes('stop tour')){
+    stopGuidedTour(); speakFeedback('Tour detenido'); return;
+  }
+  // Sin animaciones
+  if(cmd.includes('sin animaciones')||cmd.includes('quitar animaciones')){
+    setNoAnimations(true); speakFeedback('Animaciones desactivadas'); return;
+  }
+  if(cmd.includes('con animaciones')||cmd.includes('activar animaciones')){
+    setNoAnimations(false); speakFeedback('Animaciones activadas'); return;
+  }
 }
 function speakFeedback(text){
   if(!window.speechSynthesis) return;
