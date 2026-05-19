@@ -2428,10 +2428,17 @@ body.light .top-item { border-bottom-color: rgba(14,15,18,0.06); }
 /* ── Body states ── */
 body.text-lg  { font-size: 16px !important; }
 body.text-xl  { font-size: 18px !important; }
-body.text-lg  .kpi-val { font-size: 1.7rem !important; }
-body.text-xl  .kpi-val { font-size: 2rem !important; }
-body.text-lg  .kpi-label { font-size: 11px !important; }
-body.text-xl  .kpi-label { font-size: 12px !important; }
+/* Zoom #content so all px-based children scale proportionally */
+body.text-lg #content { zoom: 1.14; }
+body.text-xl #content { zoom: 1.28; }
+/* Tab buttons (outside #content) need explicit override */
+body.text-lg .tab-btn { font-size: 12px !important; }
+body.text-xl .tab-btn { font-size: 14px !important; }
+/* Sidebar labels/inputs */
+body.text-lg #sidebar label, body.text-lg #sidebar input,
+body.text-lg #sidebar select, body.text-lg #sidebar .sidebar-title { font-size: 11px !important; }
+body.text-xl #sidebar label, body.text-xl #sidebar input,
+body.text-xl #sidebar select, body.text-xl #sidebar .sidebar-title { font-size: 13px !important; }
 
 body.high-contrast {
   --bg:      #000000 !important;
@@ -2455,11 +2462,11 @@ body.no-animations *::after {
   animation: none !important;
 }
 
-/* Colorblind filter applied to html */
-html.cb-deutan  { filter: url(#cb-deutan); }
-html.cb-protan  { filter: url(#cb-protan); }
-html.cb-tritan  { filter: url(#cb-tritan); }
-html.cb-gray    { filter: url(#cb-gray); }
+/* Colorblind filter on body (NOT html — filter on html breaks position:fixed children) */
+body.cb-deutan  { filter: url(#cb-deutan); }
+body.cb-protan  { filter: url(#cb-protan); }
+body.cb-tritan  { filter: url(#cb-tritan); }
+body.cb-gray    { filter: url(#cb-gray); }
 
 /* ════════════════════════════════════════════════════════════════
    AUTH WALL — Premium SaaS Split Layout · VICTOR IA Brandbook v3
@@ -3227,8 +3234,8 @@ body.client-mode #main { margin-left: 0 !important; }
 
 </div>
 
-<!-- SVG colorblind filters (invisible, referenced by CSS) -->
-<svg id="acc-svg-filters" xmlns="http://www.w3.org/2000/svg">
+<!-- SVG colorblind filters (invisible, referenced by CSS) — excluded from body filter -->
+<svg id="acc-svg-filters" xmlns="http://www.w3.org/2000/svg" style="filter:none!important">
   <defs>
     <filter id="cb-deutan" color-interpolation-filters="linearRGB">
       <feColorMatrix type="matrix" values="0.367 0.861 -0.228 0 0  0.280 0.673  0.047 0 0  -0.012 0.043  0.969 0 0  0 0 0 1 0"/>
@@ -3461,7 +3468,7 @@ body.client-mode #main { margin-left: 0 !important; }
 </div>
 
 <!-- Voice commands modal -->
-<div id="acc-cmds-modal">
+<div id="acc-cmds-modal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="acc-cmds-box">
     <div class="acc-cmds-header">
       <span class="acc-cmds-title">🎙️ Comandos de voz</span>
@@ -4469,7 +4476,7 @@ function renderTabPeriodHeader(tabId,entries){
 }
 
 // ===== STATE =====
-let settings = {rate:500,goalH:8,goalA:15,apiKey:'',geminiKey:'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',elevenLabsKey:'sk_e0efba7c54bde483b034296d0cc240d572bd1714740f14e1',voiceId:'EXAVITQu4vr4xnSDxMaL',model:'openai/gpt-4o-mini'};
+let settings = {rate:500,goalH:8,goalA:15,apiKey:'',geminiKey:'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',elevenLabsKey:'sk_87d5a7899d6c489c94232248c4880a0c4fe317adb3701e67',voiceId:'EXAVITQu4vr4xnSDxMaL',model:'openai/gpt-4o-mini'};
 let customEntries = [];
 let autoEntries   = [];   // cargados desde n8n cada 60 min
 let allEntries = [];
@@ -4571,15 +4578,16 @@ function loadSettings(){
     // Save hardcoded defaults before merging (these should never be overwritten by empty localStorage values)
     const hardDefaults={
       geminiKey:'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',
-      elevenLabsKey:'sk_e0efba7c54bde483b034296d0cc240d572bd1714740f14e1',
+      elevenLabsKey:'sk_87d5a7899d6c489c94232248c4880a0c4fe317adb3701e67',
       voiceId:'EXAVITQu4vr4xnSDxMaL',
       model:'openai/gpt-4o-mini'
     };
     const s=localStorage.getItem('vit_settings');
     if(s) settings={...settings,...JSON.parse(s)};
-    // Restore hardcoded defaults if localStorage wiped them empty
+    // Restore hardcoded defaults if localStorage wiped them empty or has stale key
     if(!settings.geminiKey) settings.geminiKey=hardDefaults.geminiKey;
-    if(!settings.elevenLabsKey) settings.elevenLabsKey=hardDefaults.elevenLabsKey;
+    if(!settings.elevenLabsKey||settings.elevenLabsKey==='sk_e0efba7c54bde483b034296d0cc240d572bd1714740f14e1')
+      settings.elevenLabsKey=hardDefaults.elevenLabsKey;
     if(!settings.voiceId) settings.voiceId=hardDefaults.voiceId;
     if(!settings.model) settings.model=hardDefaults.model;
     // Migrate old Gemini-direct model names
@@ -4899,7 +4907,7 @@ function setNoAnimations(on){
 
 // ── Colorblind mode ──
 function setColorblind(mode){
-  var html=document.documentElement;
+  var html=document.body;
   html.classList.remove('cb-deutan','cb-protan','cb-tritan','cb-gray');
   if(mode==='deutan') html.classList.add('cb-deutan');
   else if(mode==='protan') html.classList.add('cb-protan');
@@ -4916,29 +4924,32 @@ function setColorblind(mode){
 
 // ── Voice control ──
 var accRecognition=null;
+var _accSpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
 function toggleVoiceControl(){
   if(accState.voiceActive){ stopVoiceControl(); return; }
-  var SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SpeechRec){
+  if(!_accSpeechRec){
     alert('Tu navegador no soporta reconocimiento de voz.\nUsa Chrome o Edge para esta función.');
     return;
   }
-  accRecognition=new SpeechRec();
-  accRecognition.lang='es-MX';
-  accRecognition.continuous=true;
-  accRecognition.interimResults=false;
-  accRecognition.onresult=function(e){
-    var cmd=e.results[e.results.length-1][0].transcript.toLowerCase().trim();
-    handleVoiceCommand(cmd);
-  };
-  accRecognition.onerror=function(e){
-    if(e.error==='not-allowed') alert('Permiso de micrófono denegado.');
-    stopVoiceControl();
-  };
-  accRecognition.onend=function(){
-    if(accState.voiceActive) accRecognition.start();
-  };
-  accRecognition.start();
+  function _startAccRec(){
+    accRecognition=new _accSpeechRec();
+    accRecognition.lang='es-MX';
+    accRecognition.continuous=true;
+    accRecognition.interimResults=false;
+    accRecognition.onresult=function(e){
+      var cmd=e.results[e.results.length-1][0].transcript.toLowerCase().trim();
+      handleVoiceCommand(cmd);
+    };
+    accRecognition.onerror=function(e){
+      if(e.error==='not-allowed'){ alert('Permiso de micrófono denegado.'); stopVoiceControl(); return; }
+      if(e.error!=='no-speech') stopVoiceControl();
+    };
+    accRecognition.onend=function(){
+      if(accState.voiceActive) setTimeout(_startAccRec, 80);
+    };
+    try{ accRecognition.start(); }catch(err){ console.warn('acc-voice-start:',err); }
+  }
+  _startAccRec();
   accState.voiceActive=true;
   localStorage.setItem('acc-voice','1');
   var btn=document.getElementById('acc-voice-btn');
