@@ -5802,8 +5802,8 @@ function renderFeed(entries){
           <!-- FOOTER: costos + tags -->
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:7px;padding-top:6px;border-top:1px solid rgba(255,255,255,.05)">
             <span class="internal-only" style="font-size:10px;font-weight:700;color:#f97316;background:rgba(249,115,22,.1);padding:2px 7px;border-radius:6px" title="Costo de software/APIs usado">💰 $${cost.toLocaleString()} costo</span>
-            <span style="font-size:10px;font-weight:700;color:#22c55e;background:rgba(34,197,94,.1);padding:2px 7px;border-radius:6px" title="Precio de venta al cliente">💵 $${price.toLocaleString()} venta</span>
-            <span class="internal-only" style="font-size:10px;font-weight:700;color:var(--amber);background:rgba(255,170,23,.1);padding:2px 7px;border-radius:6px" title="Margen bruto">📈 $${margin.toLocaleString()} <em style="opacity:.7">(${marginPct}%)</em></span>
+            ${(()=>{const nomPrice=Math.round(durToSecs(e)/3600*settings.rate);if(e.price!=null&&e.price===0){return`<span style="font-size:10px;font-weight:700;color:#f472b6;background:rgba(244,114,182,.12);padding:2px 7px;border-radius:6px;border:1px solid rgba(244,114,182,.25)" title="Auditoría/trabajo gratuito — 100% descuento">🎁 Sin costo <span style="text-decoration:line-through;opacity:.5;font-weight:400">$${nomPrice.toLocaleString()}</span> <em style="font-size:9px;color:#f472b6">100% desc.</em></span>`;}return`<span style="font-size:10px;font-weight:700;color:#22c55e;background:rgba(34,197,94,.1);padding:2px 7px;border-radius:6px" title="Precio de venta al cliente">💵 $${price.toLocaleString()} venta</span>`;})()}
+            ${(e.price!=null&&e.price===0)?'':`<span class="internal-only" style="font-size:10px;font-weight:700;color:var(--amber);background:rgba(255,170,23,.1);padding:2px 7px;border-radius:6px" title="Margen bruto">📈 $${margin.toLocaleString()} <em style="opacity:.7">(${marginPct}%)</em></span>`}
             ${pc?`<span class="prompt-badge ${pcClass}" style="font-size:9px">🎯 ${pcLabel}</span>`:''}
             ${actPct>0?`<span title="${secsToHMS(secs)} de ${secsToHMS(projTotal)} en ${e.project}" style="font-size:10px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,.1);padding:2px 7px;border-radius:6px;cursor:default" onclick="setProject('${(e.project||'').replace(/'/g,"\\'")}')">${actPct}% del proyecto</span>`:''}
             <span style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;align-items:center">
@@ -6181,8 +6181,8 @@ function renderAnalytics(){
               <td style="padding:7px 8px;text-align:center;color:var(--bone2);white-space:nowrap">${e.dateKey}<br>${e.hora||''}</td>
               <td style="padding:7px 8px;text-align:center;font-weight:800;color:var(--amber);white-space:nowrap">${secsToHMS(durToSecs(e))}</td>
               <td style="padding:7px 8px;text-align:right;color:#f97316;font-weight:700;white-space:nowrap internal-only">$${cost.toLocaleString()}</td>
-              <td style="padding:7px 8px;text-align:right;color:#22c55e;font-weight:700;white-space:nowrap">$${price.toLocaleString()}</td>
-              <td style="padding:7px 8px;text-align:right;font-weight:700;white-space:nowrap;color:${margin>=0?'var(--amber)':'#ef4444'}">$${margin.toLocaleString()}</td>
+              <td style="padding:7px 8px;text-align:right;font-weight:700;white-space:nowrap">${e.price!=null&&e.price===0?`<span style="color:#f472b6">🎁 Sin costo</span>`:`<span style="color:#22c55e">$${price.toLocaleString()}</span>`}</td>
+              <td style="padding:7px 8px;text-align:right;font-weight:700;white-space:nowrap;color:${e.price!=null&&e.price===0?'#f472b6':margin>=0?'var(--amber)':'#ef4444'}">${e.price!=null&&e.price===0?'—':'$'+margin.toLocaleString()}</td>
               <td style="padding:7px 8px;text-align:center;white-space:nowrap"><span style="color:${sCol};font-weight:700">${e.status}</span>${e.rework?'<br><span style="color:#ef4444;font-size:9px">↺ retrabajo</span>':''}</td>
             </tr>`;
           }).join('')}
@@ -6190,6 +6190,96 @@ function renderAnalytics(){
       </table>
       ${filteredEntries.length>50?`<div style="text-align:center;color:var(--bone2);font-size:10px;margin-top:8px">Mostrando 50 de ${filteredEntries.length} acciones. Usa los filtros para ver períodos específicos.</div>`:''}
     </div>
+
+    <!-- DESCUENTOS, CRÉDITOS Y CONDICIONES -->
+    ${(()=>{
+      const freeEntries=filteredEntries.filter(e=>e.price!=null&&e.price===0);
+      const creditEntries=filteredEntries.filter(e=>e.credit||e.credito);
+      if(freeEntries.length===0&&creditEntries.length===0) return '';
+      // Calcular valor nominal donado (lo que SE HUBIERA cobrado)
+      const totalDonado=freeEntries.reduce((s,e)=>s+Math.round(durToSecs(e)/3600*settings.rate),0);
+      const totalHDonado=freeEntries.reduce((s,e)=>s+durToSecs(e),0);
+      // Breakdown por proyecto
+      const byProj={};
+      freeEntries.forEach(e=>{
+        const p=e.project||'General';
+        if(!byProj[p]) byProj[p]={h:0,nomVal:0,entries:[]};
+        byProj[p].h+=durToSecs(e)/3600;
+        byProj[p].nomVal+=Math.round(durToSecs(e)/3600*settings.rate);
+        byProj[p].entries.push(e);
+      });
+      return `
+      <div class="section-title">🎁 Descuentos, Créditos & Condiciones Comerciales</div>
+      <div class="chart-card" style="margin-bottom:20px">
+        <!-- KPIs descuentos -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px">
+          <div style="padding:14px;background:var(--surface2);border-radius:8px;border:1px solid rgba(244,114,182,.3);text-align:center">
+            <div style="font-size:22px;font-weight:800;color:#f472b6">$${totalDonado.toLocaleString()}</div>
+            <div style="font-size:11px;font-weight:700;color:var(--bone);margin-top:4px">Valor donado (sin costo)</div>
+            <div style="font-size:10px;color:var(--bone2);margin-top:2px">${secsToHMS(totalHDonado)} de trabajo gratuito</div>
+          </div>
+          <div style="padding:14px;background:var(--surface2);border-radius:8px;border:1px solid rgba(244,114,182,.3);text-align:center">
+            <div style="font-size:22px;font-weight:800;color:#f472b6">${freeEntries.length}</div>
+            <div style="font-size:11px;font-weight:700;color:var(--bone);margin-top:4px">Acciones con 100% desc.</div>
+            <div style="font-size:10px;color:var(--bone2);margin-top:2px">Auditorías, demos, lead magnets</div>
+          </div>
+          <div style="padding:14px;background:var(--surface2);border-radius:8px;border:1px solid rgba(244,114,182,.3);text-align:center">
+            <div style="font-size:22px;font-weight:800;color:#f472b6">${Object.keys(byProj).length}</div>
+            <div style="font-size:11px;font-weight:700;color:var(--bone);margin-top:4px">Proyectos beneficiados</div>
+            <div style="font-size:10px;color:var(--bone2);margin-top:2px">${Object.keys(byProj).join(' · ')}</div>
+          </div>
+          <div style="padding:14px;background:var(--surface2);border-radius:8px;border:1px solid rgba(255,170,23,.3);text-align:center">
+            <div style="font-size:22px;font-weight:800;color:var(--amber)">${filteredEntries.length>0?Math.round(totalDonado/(filteredEntries.reduce((s,e)=>s+Math.round(durToSecs(e)/3600*settings.rate),0)||1)*100):0}%</div>
+            <div style="font-size:11px;font-weight:700;color:var(--bone);margin-top:4px">Del revenue total donado</div>
+            <div style="font-size:10px;color:var(--bone2);margin-top:2px">Inversión en leads y confianza</div>
+          </div>
+        </div>
+        <!-- Breakdown por proyecto -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--bone);margin-bottom:10px;letter-spacing:.05em">📊 DESCUENTO POR PROYECTO</div>
+            ${Object.entries(byProj).map(([proj,d])=>`
+              <div style="padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid #f472b6;margin-bottom:8px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                  <span style="font-size:12px;font-weight:700;color:var(--bone)">${proj}</span>
+                  <span style="font-size:11px;font-weight:800;color:#f472b6">🎁 $${d.nomVal.toLocaleString()} MXN</span>
+                </div>
+                <div style="font-size:10px;color:var(--bone2)">${secsToHMS(Math.round(d.h*3600))} · ${d.entries.length} acciones gratuitas</div>
+                <div style="font-size:9px;color:#f472b6;margin-top:3px;font-style:italic">→ Valor donado como inversión en lead/propuesta</div>
+              </div>`).join('')}
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--bone);margin-bottom:10px;letter-spacing:.05em">📋 CONDICIONES COMERCIALES ACTIVAS</div>
+            ${Object.entries(byProj).map(([proj,d])=>{
+              const deal=crmData?crmData.deals.find(dl=>dl.project===proj):null;
+              return`<div style="padding:10px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--amber);margin-bottom:8px">
+                <div style="font-size:12px;font-weight:700;color:var(--bone);margin-bottom:6px">${proj}</div>
+                <div style="font-size:10px;color:var(--bone2);line-height:1.7">
+                  <div>🎁 <strong style="color:#f472b6">Auditoría gratuita</strong> — ${secsToHMS(Math.round(d.h*3600))} de trabajo sin cargo</div>
+                  ${deal?`<div>💰 <strong style="color:#22c55e">Deal activo:</strong> $${deal.valor.toLocaleString()} ${deal.moneda} — ${deal.etapa}</div>`:''}
+                  ${deal?`<div>📅 <strong style="color:var(--amber)">Cierre estimado:</strong> ${deal.fechaCierre||'—'}</div>`:''}
+                  ${deal?`<div>📊 <strong style="color:#3b82f6">Probabilidad:</strong> ${deal.prob}%</div>`:''}
+                  ${deal&&deal.notas?`<div style="margin-top:4px;font-size:9px;font-style:italic;color:var(--bone2)">📝 ${deal.notas.slice(0,80)}...</div>`:''}
+                </div>
+              </div>`;}).join('')}
+          </div>
+        </div>
+        <!-- Lista de entradas gratuitas -->
+        <div style="font-size:11px;font-weight:700;color:var(--bone);margin-bottom:8px;letter-spacing:.05em">🗂 DETALLE DE TRABAJO GRATUITO</div>
+        ${freeEntries.map(e=>{const nomVal=Math.round(durToSecs(e)/3600*settings.rate);return`
+          <div style="padding:8px 12px;background:rgba(244,114,182,.04);border:1px solid rgba(244,114,182,.15);border-radius:8px;margin-bottom:6px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px">
+              <div style="font-size:11px;font-weight:700;color:var(--bone)">${e.desc.replace('[AUDITORÍA GRATUITA] ','').slice(0,70)}${e.desc.length>70?'…':''}</div>
+              <div style="font-size:10px;color:var(--bone2);margin-top:2px">${e.dateKey} · ${e.hora||''} · ${e.project||'—'} · ${e.cat}</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:10px;font-weight:700;color:#f472b6;background:rgba(244,114,182,.1);padding:2px 8px;border-radius:6px">🎁 Sin costo</span>
+              <span style="font-size:10px;color:var(--bone2);text-decoration:line-through">$${nomVal.toLocaleString()} MXN</span>
+              <span style="font-size:10px;font-weight:700;color:var(--amber)">${secsToHMS(durToSecs(e))}</span>
+            </div>
+          </div>`;}).join('')}
+      </div>`;
+    })()}
 
     <!-- COSTOS AISLADOS POR PROYECTO -->
     ${(()=>{
