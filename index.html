@@ -3928,6 +3928,24 @@ body.client-mode #main { margin-left: 0 !important; }
         <label>📝 Notas del proceso de prompting (qué mejoró, qué no funcionó)</label>
         <textarea id="e-prompt-notes" rows="2" placeholder="Qué cambios hiciste entre intentos, qué falló primero, qué técnica funcionó..."></textarea>
       </div>
+
+      <!-- GRAPHIFY TOKENS SECTION -->
+      <div class="form-group full" style="border-top:1px solid var(--border);padding-top:12px;margin-top:12px">
+        <label style="color:var(--amber);font-weight:600">🔬 GRAPHIFY · Medición de Tokens</label>
+      </div>
+      <div class="form-group">
+        <label>Input Tokens (estimado)</label>
+        <input type="number" id="e-input-tokens" min="0" value="0" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>Output Tokens (estimado)</label>
+        <input type="number" id="e-output-tokens" min="0" value="0" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>Costo USD (auto-calculado)</label>
+        <input type="number" id="e-cost-usd" min="0" step="0.0001" value="0" placeholder="0.0000" readonly style="background:var(--surface2);opacity:0.7">
+      </div>
+
       <div class="form-group full">
         <label>Notas técnicas</label>
         <textarea id="e-notes" rows="2" placeholder="Detalles técnicos, links, referencias..."></textarea>
@@ -6850,6 +6868,10 @@ function saveEntry(){
     solution:document.getElementById('e-solution').value.trim(),
     learning:document.getElementById('e-learning').value.trim(),
     sw,tags:[],
+    // GRAPHIFY TOKENS
+    input_tokens:parseInt(document.getElementById('e-input-tokens').value)||0,
+    output_tokens:parseInt(document.getElementById('e-output-tokens').value)||0,
+    cost_usd:parseFloat(document.getElementById('e-cost-usd').value)||0,
   };
   if(editingId){
     const idx=customEntries.findIndex(e=>e.id===editingId);
@@ -11562,6 +11584,36 @@ function studioAttachFile(file){
 </script>
 
 <script>
+/* ── GRAPHIFY TOKENS AUTO-CALCULATION ── */
+(function() {
+  const HAIKU_INPUT = 0.80 / 1_000_000;  // $0.80 per 1M input tokens
+  const HAIKU_OUTPUT = 4.00 / 1_000_000; // $4.00 per 1M output tokens
+
+  function updateCostUSD() {
+    const inputTokens = parseInt(document.getElementById('e-input-tokens')?.value) || 0;
+    const outputTokens = parseInt(document.getElementById('e-output-tokens')?.value) || 0;
+    const costUSD = (inputTokens * HAIKU_INPUT) + (outputTokens * HAIKU_OUTPUT);
+    const costField = document.getElementById('e-cost-usd');
+    if (costField) costField.value = costUSD.toFixed(6);
+  }
+
+  // Auto-calculate when tokens change
+  document.addEventListener('input', function(e) {
+    if (e.target.id === 'e-input-tokens' || e.target.id === 'e-output-tokens') {
+      updateCostUSD();
+    }
+  });
+
+  // Initial calculation when modal opens
+  const origShowModal = window.showModal;
+  window.showModal = function(id) {
+    origShowModal(id);
+    if (id === 'entry-modal') setTimeout(updateCostUSD, 100);
+  };
+})();
+</script>
+
+<script>
 /* ── Graphify · Observabilidad ── */
 (function() {
   if (typeof setTab === 'function') {
@@ -11613,10 +11665,41 @@ function studioAttachFile(file){
 
   function renderGraphify(data) {
     const view = document.getElementById('view-graphify');
-    if (!data || data.empty) {
-      view.innerHTML = '<div style="padding:40px;text-align:center;color:var(--bone2)">⏳ Sin datos disponibles. Ejecuta sesiones en Claude Code para llenar el tracker.</div>';
-      return;
-    }
+
+    // Calcular costos reales del tracker
+    const allEntries = [...entries, ...customEntries].filter(e => e.input_tokens || e.output_tokens || e.cost_usd);
+    const totalCostUSD = allEntries.reduce((sum, e) => sum + (e.cost_usd || 0), 0);
+    const totalTokens = allEntries.reduce((sum, e) => sum + (e.input_tokens || 0) + (e.output_tokens || 0), 0);
+
+    // Agrupar por proyecto
+    const byProject = {};
+    allEntries.forEach(e => {
+      const proj = e.project || 'Sin proyecto';
+      if (!byProject[proj]) byProject[proj] = { cost: 0, count: 0 };
+      byProject[proj].cost += e.cost_usd || 0;
+      byProject[proj].count += 1;
+    });
+    const projRanked = Object.entries(byProject).sort((a,b) => b[1].cost - a[1].cost).slice(0, 5);
+
+    // Agrupar por cliente
+    const byClient = {};
+    allEntries.forEach(e => {
+      const cli = e.client || 'Sin cliente';
+      if (!byClient[cli]) byClient[cli] = { cost: 0, count: 0 };
+      byClient[cli].cost += e.cost_usd || 0;
+      byClient[cli].count += 1;
+    });
+    const clientRanked = Object.entries(byClient).sort((a,b) => b[1].cost - a[1].cost).slice(0, 5);
+
+    // Agrupar por categoría
+    const byCat = {};
+    allEntries.forEach(e => {
+      const cat = e.cat || 'Otro';
+      if (!byCat[cat]) byCat[cat] = { cost: 0, count: 0 };
+      byCat[cat].cost += e.cost_usd || 0;
+      byCat[cat].count += 1;
+    });
+    const catRanked = Object.entries(byCat).sort((a,b) => b[1].cost - a[1].cost);
 
     const kpis = data.kpis || {};
     const predictive = data.predictive || {};
@@ -11657,25 +11740,93 @@ function studioAttachFile(file){
           <div style="font-size:12px;color:var(--bone);line-height:1.5">${predictive.recommendation || 'Sistema Graphify activo. Mantén las optimizaciones de protocolo para máximo ROI.'}</div>
         </div>
 
+        <!-- REAL TRACKER DATA - Costs by Project -->
+        ${projRanked.length > 0 ? `
+          <div style="margin-top:20px">
+            <h4 style="color:var(--amber);font-size:12px;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">💰 Costos por Proyecto (Datos Reales)</h4>
+            <table style="width:100%;border-collapse:collapse;font-size:11px">
+              <tr style="border-bottom:1px solid var(--border)">
+                <th style="padding:8px;text-align:left;color:var(--bone2);font-weight:600;background:var(--surface2)">Proyecto</th>
+                <th style="padding:8px;text-align:right;color:var(--bone2);font-weight:600;background:var(--surface2)">Costo USD</th>
+                <th style="padding:8px;text-align:right;color:var(--bone2);font-weight:600;background:var(--surface2)">Acciones</th>
+              </tr>
+              ${projRanked.map(([proj, data]) => `
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:8px;color:var(--bone)">${proj}</td>
+                  <td style="padding:8px;text-align:right;color:var(--green);font-weight:600">$${data.cost.toFixed(4)}</td>
+                  <td style="padding:8px;text-align:right;color:var(--bone2)">${data.count}</td>
+                </tr>
+              `).join('')}
+            </table>
+          </div>
+        ` : ''}
+
+        <!-- Costs by Client -->
+        ${clientRanked.length > 0 ? `
+          <div style="margin-top:20px">
+            <h4 style="color:var(--amber);font-size:12px;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">👥 Costos por Cliente</h4>
+            <table style="width:100%;border-collapse:collapse;font-size:11px">
+              <tr style="border-bottom:1px solid var(--border)">
+                <th style="padding:8px;text-align:left;color:var(--bone2);font-weight:600;background:var(--surface2)">Cliente</th>
+                <th style="padding:8px;text-align:right;color:var(--bone2);font-weight:600;background:var(--surface2)">Costo USD</th>
+                <th style="padding:8px;text-align:right;color:var(--bone2);font-weight:600;background:var(--surface2)">Acciones</th>
+              </tr>
+              ${clientRanked.map(([cli, data]) => `
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:8px;color:var(--bone)">${cli}</td>
+                  <td style="padding:8px;text-align:right;color:var(--green);font-weight:600">$${data.cost.toFixed(4)}</td>
+                  <td style="padding:8px;text-align:right;color:var(--bone2)">${data.count}</td>
+                </tr>
+              `).join('')}
+            </table>
+          </div>
+        ` : ''}
+
+        <!-- Costs by Category -->
+        ${catRanked.length > 0 ? `
+          <div style="margin-top:20px">
+            <h4 style="color:var(--amber);font-size:12px;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">📂 Costos por Categoría</h4>
+            <table style="width:100%;border-collapse:collapse;font-size:11px">
+              <tr style="border-bottom:1px solid var(--border)">
+                <th style="padding:8px;text-align:left;color:var(--bone2);font-weight:600;background:var(--surface2)">Categoría</th>
+                <th style="padding:8px;text-align:right;color:var(--bone2);font-weight:600;background:var(--surface2)">Costo USD</th>
+                <th style="padding:8px;text-align:right;color:var(--bone2);font-weight:600;background:var(--surface2)">%</th>
+              </tr>
+              ${catRanked.map(([cat, data]) => `
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:8px;color:var(--bone)">${cat}</td>
+                  <td style="padding:8px;text-align:right;color:var(--green);font-weight:600">$${data.cost.toFixed(4)}</td>
+                  <td style="padding:8px;text-align:right;color:var(--amber);font-weight:600">${totalCostUSD > 0 ? ((data.cost/totalCostUSD)*100).toFixed(1) : '0'}%</td>
+                </tr>
+              `).join('')}
+              <tr style="border-top:2px solid var(--border);font-weight:700;background:var(--surface2)">
+                <td style="padding:8px;color:var(--amber)">TOTAL</td>
+                <td style="padding:8px;text-align:right;color:var(--green);font-weight:700">$${totalCostUSD.toFixed(4)}</td>
+                <td style="padding:8px;text-align:right;color:var(--amber)">100%</td>
+              </tr>
+            </table>
+          </div>
+        ` : ''}
+
         <!-- Stats Table -->
-        <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:20px">
+        <table style="width:100%;border-collapse:collapse;font-size:11px;margin-top:20px;margin-bottom:20px">
           <tr style="border-bottom:1px solid var(--border)">
             <th style="padding:10px;text-align:left;color:var(--bone2);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface2)">Métrica</th>
             <th style="padding:10px;text-align:right;color:var(--bone2);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface2)">Valor</th>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:10px;color:var(--bone2)">Costo Total (Tracker)</td>
+            <td style="padding:10px;text-align:right;color:var(--green);font-weight:600">$${totalCostUSD.toFixed(4)}</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:10px;color:var(--bone2)">Total Tokens</td>
+            <td style="padding:10px;text-align:right;color:var(--amber);font-weight:600">${(totalTokens/1_000_000).toFixed(2)}M</td>
           </tr>
           <tr style="border-bottom:1px solid var(--border)">
             <td style="padding:10px;color:var(--bone2)">Daily Avg Cost</td>
             <td style="padding:10px;text-align:right;color:var(--amber);font-weight:600">$${trends.daily_avg_usd?.toFixed(4) || '0.0000'}</td>
           </tr>
           <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:10px;color:var(--bone2)">Weekly Projection</td>
-            <td style="padding:10px;text-align:right;color:var(--amber);font-weight:600">$${trends.weekly_avg_usd?.toFixed(2) || '0.00'}</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:10px;color:var(--bone2)">Total Savings</td>
-            <td style="padding:10px;text-align:right;color:var(--green);font-weight:600">$${predictive.roi?.total_savings_usd?.toFixed(2) || kpis.ahorro_neto_usd?.toFixed(2) || '0.00'}</td>
-          </tr>
-          <tr>
             <td style="padding:10px;color:var(--bone2)">Velocity</td>
             <td style="padding:10px;text-align:right;color:var(--amber);font-weight:600">${trends.velocity_pct?.toFixed(1) || '0.0'}%</td>
           </tr>
