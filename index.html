@@ -1,4 +1,4 @@
-﻿<!doctype html>
+﻿﻿<!doctype html>
 <html lang="es-MX">
 <head>
 <meta charset="utf-8">
@@ -3060,6 +3060,7 @@ body.client-mode #main { margin-left: 0 !important; }
 <!-- Firebase Auth SDK (compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
+<script defer src="https://victor-ia-brain-tracker.vercel.app/vi-track.js" data-site="victor-ia-tracker"></script>
 </head>
 <body>
 
@@ -3677,6 +3678,7 @@ body.client-mode #main { margin-left: 0 !important; }
   <button class="tab-btn team-tab" onclick="setTab('crm')">CRM</button>
   <button class="tab-btn team-tab" onclick="setTab('apollo')">Prospección</button>
   <button class="tab-btn team-tab" onclick="setTab('telemetria')">Telemetría IoT</button>
+  <button class="tab-btn" onclick="setTab('graphify')" style="color:#4ade80">Graphify · Observabilidad</button>
 </div>
 
 <!-- MAIN -->
@@ -3765,6 +3767,7 @@ body.client-mode #main { margin-left: 0 !important; }
     <div id="view-crm" class="hidden"></div>
     <div id="view-apollo" class="hidden"></div>
     <div id="view-telemetria" class="hidden"></div>
+    <div id="view-graphify" class="hidden"></div>
   </div>
 </div>
 
@@ -11555,6 +11558,93 @@ function studioAttachFile(file){
     document.body.classList.toggle('vic-cursor-link', !!(el && el.closest('a,button,[role=button],input,select,textarea')));
   });
   document.addEventListener('mouseleave', function() { document.body.classList.remove('vic-cursor-on'); });
+})();
+</script>
+
+<script>
+/* ── Graphify · Observabilidad ── */
+(function() {
+  if (typeof setTab === 'function') {
+    const origSetTab = window.setTab;
+    window.setTab = function(tabName) {
+      origSetTab(tabName);
+      if (tabName === 'graphify') {
+        const view = document.getElementById('view-graphify');
+        if (view && !view._graphifyLoaded) {
+          fetchGraphifyData();
+          view._graphifyLoaded = true;
+        }
+      }
+    };
+  }
+
+  function fetchGraphifyData() {
+    fetch('https://victor-ia-dashboard.vercel.app/api/tokens')
+      .then(r => r.json())
+      .then(data => renderGraphify(data))
+      .catch(e => {
+        console.error('Graphify fetch error:', e);
+        renderGraphifyError();
+      });
+  }
+
+  function renderGraphify(data) {
+    const view = document.getElementById('view-graphify');
+    if (!data || data.empty) {
+      view.innerHTML = '<div style="padding:20px;color:#aaa">Sin datos disponibles. Ejecuta sesiones en Claude Code para llenar el tracker.</div>';
+      return;
+    }
+
+    const kpis = data.kpis || {};
+    const predictive = data.predictive || {};
+
+    view.innerHTML = `
+      <div style="padding:20px;color:var(--bone)">
+        <h2 style="color:var(--amber);margin-bottom:20px;font-size:18px">Graphify · Observabilidad Total de Tokens</h2>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px">
+          <div style="background:var(--surface2);border:1px solid var(--border);padding:12px;border-radius:2px">
+            <div style="font-size:11px;color:var(--bone2);margin-bottom:4px">Ahorro Neto</div>
+            <div style="font-size:24px;color:var(--green);font-weight:600">$${kpis.ahorro_neto_usd?.toFixed(2) || '0.00'}</div>
+            <div style="font-size:10px;color:var(--bone2);margin-top:4px">${kpis.eficiencia_pct || 0}% eficiencia</div>
+          </div>
+
+          <div style="background:var(--surface2);border:1px solid var(--border);padding:12px;border-radius:2px">
+            <div style="font-size:11px;color:var(--bone2);margin-bottom:4px">Tokens Reales</div>
+            <div style="font-size:24px;color:var(--amber);font-weight:600">${kpis.tokens_reales_M?.toFixed(2) || '0'} M</div>
+            <div style="font-size:10px;color:var(--bone2);margin-top:4px">Consumo optimizado</div>
+          </div>
+
+          <div style="background:var(--surface2);border:1px solid var(--border);padding:12px;border-radius:2px">
+            <div style="font-size:11px;color:var(--bone2);margin-bottom:4px">Proyección 30d</div>
+            <div style="font-size:24px;color:var(--amber);font-weight:600">$${predictive.forecast_next_30_days_usd?.toFixed(2) || '0.00'}</div>
+            <div style="font-size:10px;color:var(--bone2);margin-top:4px">Tendencia: ${predictive.trends?.trend_direction || 'estable'}</div>
+          </div>
+
+          <div style="background:var(--surface2);border:1px solid var(--border);padding:12px;border-radius:2px">
+            <div style="font-size:11px;color:var(--bone2);margin-bottom:4px">Proyección 90d</div>
+            <div style="font-size:24px;color:var(--amber);font-weight:600">$${predictive.forecast_next_90_days_usd?.toFixed(2) || '0.00'}</div>
+            <div style="font-size:10px;color:var(--bone2);margin-top:4px">Trimestral estimado</div>
+          </div>
+        </div>
+
+        <div style="background:var(--surface2);border:1px solid var(--amber3);border-left:3px solid var(--amber);padding:12px;border-radius:2px;margin-bottom:20px">
+          <div style="font-size:11px;color:var(--amber);font-weight:600;margin-bottom:8px">Recomendación</div>
+          <div style="font-size:13px;color:var(--bone)">${predictive.recommendation || 'Mantenga el protocolo Graphify activo para optimizar costos.'}</div>
+        </div>
+
+        <div style="font-size:10px;color:var(--bone2);text-align:center;padding-top:12px;border-top:1px solid var(--border)">
+          Actualizado: ${new Date(data.generated_at).toLocaleString('es-MX')}<br>
+          <a href="https://tracker.victor-ia.xyz/?tab=graphify" style="color:var(--amber);text-decoration:underline">Ver dashboard completo →</a>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderGraphifyError() {
+    const view = document.getElementById('view-graphify');
+    view.innerHTML = '<div style="padding:20px;color:#ff6b6b">Error al cargar datos de Graphify. Verifica la conexión.</div>';
+  }
 })();
 </script>
 </body>
