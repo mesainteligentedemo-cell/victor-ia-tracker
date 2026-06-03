@@ -57,22 +57,24 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg:      #070809;
-  --surface: #0E0F12;
-  --surface2: #131418;
+  --bg:      #0A0E27;
+  --surface: #0C0C12;
+  --surface2: #131317;
   --warm:    #F8F7F5;
   --bone:    rgba(248,247,245,0.92);
   --bone2:   rgba(248,247,245,0.50);
   --bone3:   rgba(248,247,245,0.07);
-  --amber:   #FFAA17;
-  --amber2:  rgba(255,170,23,0.14);
-  --amber3:  rgba(255,170,23,0.07);
-  --green:   #4ade80;
-  --red:     #f87171;
-  --blue:    #60a5fa;
-  --purple:  #c084fc;
-  --border:  rgba(248,247,245,0.07);
-  --radius:  2px;
+  --amber:   #FFD60A;
+  --amber2:  rgba(255,214,10,0.14);
+  --amber3:  rgba(255,214,10,0.07);
+  --cyan:    #00D9FF;
+  --cyan2:   rgba(0,217,255,0.14);
+  --green:   #00F584;
+  --red:     #FF1744;
+  --blue:    #00D9FF;
+  --purple:  #D8B4FE;
+  --border:  rgba(255,255,255,0.09);
+  --radius:  12px;
   --ink:     #F8F7F5;
 }
 
@@ -4554,6 +4556,8 @@ function init(){
   loadSettings();
   viaInitFirebase();
   loadCustomEntries();
+  // Cargar datos REALES si existen
+  loadRealGraphifyData();
   rebuildAllEntries();
   populateFilterDropdowns();
   populateSWFilter();
@@ -4648,6 +4652,18 @@ function loadSettings(){
 }
 function loadCustomEntries(){
   try{const c=localStorage.getItem('vit_entries');if(c) customEntries=JSON.parse(c);}catch(e){}
+}
+
+function loadRealGraphifyData(){
+  fetch('./graphify-real-data.json')
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.entries && Array.isArray(data.entries)) {
+        autoEntries = data.entries;
+        console.log(`[GRAPHIFY] Cargados ${data.entries.length} eventos reales`);
+      }
+    })
+    .catch(e=>console.log('[GRAPHIFY] Sin datos reales disponibles'));
 }
 function saveCustomEntries(){localStorage.setItem('vit_entries',JSON.stringify(customEntries));VIA_FIREBASE.sync('vit_entries',customEntries);}
 function saveSettingsData(){localStorage.setItem('vit_settings',JSON.stringify(settings));}
@@ -11720,16 +11736,12 @@ function studioAttachFile(file){
       root.appendChild(GraphifyUI.createTableSection(byDate));
 
       // 4. Gráfico 3D / Interactive Graph
-      const graphSection = document.createElement('div');
-      graphSection.style.cssText = 'margin-top:24px;margin-bottom:20px';
-      graphSection.innerHTML = '<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase">🎯 Grafo 3D · Distribución de Proyectos</div><div id="graphify-3d" style="width:100%;height:480px;border:1px solid var(--border);border-radius:4px;background:var(--surface2);overflow:hidden;position:relative"></div>';
-      root.appendChild(graphSection);
+      // Gráfico removido - interface más limpia
 
       root.innerHTML += '<style>' + GraphifyUI.getStyles() + '</style>';
       root.addEventListener('change', (e) => GraphifyUI.handleFilterChange(allEntries));
 
-      // Renderizar gráfico
-      GraphifyUI.init3DGraph(filtered);
+      // Gráfico removido - mostrar solo datos limpios
     },
 
     createKPISection(kpis, cost, tokens) {
@@ -11811,210 +11823,200 @@ function studioAttachFile(file){
       return section;
     },
 
-    init3DGraph(entries) {
+    // Función removida - gráfico eliminado
+    initGraphRemoved(entries) {
       const container = document.getElementById('graphify-3d');
       if (!container) return;
 
-      // Define complete ecosystem
-      const ecosystem = {
-        core: {name: 'Claude AI', type: 'ai', color: '#4ade80'},
-        platforms: {
-          vsc: {name: 'VS Code', type: 'platform', color: '#60a5fa'},
-          tracker: {name: 'Tracker', type: 'platform', color: '#FFAA17'},
-          vercel: {name: 'Vercel', type: 'platform', color: '#faf7f5'}
-        },
-        agents: {
-          explore: {name: 'Explore', type: 'agent', color: '#c084fc'},
-          plan: {name: 'Plan', type: 'agent', color: '#f87171'},
-          code: {name: 'Code', type: 'agent', color: '#06b6d4'}
-        },
-        skills: [
-          {name: 'figma-use', type: 'skill', color: '#f97316'},
-          {name: 'figma-generate', type: 'skill', color: '#f97316'},
-          {name: 'workflow', type: 'skill', color: '#a855f7'},
-          {name: 'update-config', type: 'skill', color: '#a855f7'}
-        ],
-        mcp: [
-          {name: 'HubSpot', type: 'mcp', color: '#fb923c'},
-          {name: 'Figma', type: 'mcp', color: '#f97316'},
-          {name: 'Google Drive', type: 'mcp', color: '#fbbf24'},
-          {name: 'After Effects', type: 'mcp', color: '#f87171'}
-        ],
-        tools: [
-          {name: 'n8n', type: 'automation', color: '#f97316'},
-          {name: 'Supabase', type: 'database', color: '#22c55e'},
-          {name: 'Firebase', type: 'database', color: '#fbbf24'},
-          {name: 'ElevenLabs', type: 'api', color: '#8b5cf6'}
-        ],
-        projects: Object.entries(this.aggregateByProject(entries)).map(([name, data]) => ({name, type: 'project', color: '#06b6d4', count: data.count}))
-      };
+      const nodes = [
+        // ENTRADA - columna izquierda (X=120)
+        {id: 'cloudcall', name: 'Cloud Call', type: 'entrada', color: '#d4a574', x: 120, y: 240},
+        {id: 'apikey', name: 'API Key', type: 'entrada', color: '#c9956f', x: 120, y: 340},
 
-      // Create interactive SVG
+        // PROCESAMIENTO - columna central-izquierda (X=340)
+        {id: 'figma', name: 'Figma', type: 'procesamiento', color: '#06b6d4', x: 340, y: 120},
+        {id: 'bash', name: 'Bash Trader', type: 'procesamiento', color: '#06d4d4', x: 340, y: 180},
+        {id: 'codeguide', name: 'Code Guide', type: 'procesamiento', color: '#06b6d4', x: 340, y: 240},
+        {id: 'gdrive', name: 'Google Drive', type: 'procesamiento', color: '#0dd9ff', x: 340, y: 300},
+        {id: 'hubspot', name: 'HubSpot', type: 'procesamiento', color: '#06b6d4', x: 340, y: 360},
+        {id: 'filemerger', name: 'File Merger', type: 'procesamiento', color: '#06d4d4', x: 340, y: 420},
+        {id: 'cache', name: 'Cache', type: 'procesamiento', color: '#06b6d4', x: 340, y: 480},
+
+        // ALMACENAMIENTO - columna central-derecha (X=560)
+        {id: 'memory', name: 'Memory System', type: 'almacenamiento', color: '#4ade80', x: 560, y: 140},
+        {id: 'general', name: 'General', type: 'almacenamiento', color: '#22c55e', x: 560, y: 200},
+        {id: 'falcon', name: 'Falcon', type: 'almacenamiento', color: '#f87171', x: 560, y: 260},
+        {id: 'telegram', name: 'Telegram', type: 'almacenamiento', color: '#fb7185', x: 560, y: 320},
+        {id: 'deeplearn', name: 'Deep Learning', type: 'almacenamiento', color: '#e879f9', x: 560, y: 380},
+
+        // SALIDA - columna derecha (X=780)
+        {id: 'websites', name: 'Websites', type: 'salida', color: '#fbbf24', x: 780, y: 140},
+        {id: 'clientes', name: 'Clientes', type: 'salida', color: '#fcd34d', x: 780, y: 300},
+        {id: 'deployments', name: 'Deployments', type: 'salida', color: '#fbbf24', x: 780, y: 460}
+      ];
+
+      const edges = [
+        // ENTRADA -> PROCESAMIENTO (denso)
+        {from: 'cloudcall', to: 'figma'}, {from: 'cloudcall', to: 'bash'}, {from: 'cloudcall', to: 'codeguide'},
+        {from: 'cloudcall', to: 'gdrive'}, {from: 'cloudcall', to: 'hubspot'}, {from: 'cloudcall', to: 'cache'},
+        {from: 'apikey', to: 'bash'}, {from: 'apikey', to: 'codeguide'}, {from: 'apikey', to: 'gdrive'},
+        {from: 'apikey', to: 'hubspot'}, {from: 'apikey', to: 'filemerger'}, {from: 'apikey', to: 'cache'},
+
+        // PROCESAMIENTO -> ALMACENAMIENTO (muy denso)
+        {from: 'figma', to: 'memory'}, {from: 'figma', to: 'general'}, {from: 'figma', to: 'falcon'}, {from: 'figma', to: 'telegram'},
+        {from: 'bash', to: 'general'}, {from: 'bash', to: 'falcon'}, {from: 'bash', to: 'telegram'}, {from: 'bash', to: 'deeplearn'},
+        {from: 'codeguide', to: 'memory'}, {from: 'codeguide', to: 'falcon'}, {from: 'codeguide', to: 'deeplearn'},
+        {from: 'gdrive', to: 'general'}, {from: 'gdrive', to: 'telegram'}, {from: 'gdrive', to: 'memory'},
+        {from: 'hubspot', to: 'falcon'}, {from: 'hubspot', to: 'deeplearn'}, {from: 'hubspot', to: 'general'},
+        {from: 'filemerger', to: 'memory'}, {from: 'filemerger', to: 'general'}, {from: 'filemerger', to: 'falcon'},
+        {from: 'cache', to: 'general'}, {from: 'cache', to: 'telegram'}, {from: 'cache', to: 'memory'},
+
+        // ALMACENAMIENTO -> SALIDA (todos conectados)
+        {from: 'memory', to: 'websites'}, {from: 'memory', to: 'clientes'}, {from: 'memory', to: 'deployments'},
+        {from: 'general', to: 'websites'}, {from: 'general', to: 'clientes'}, {from: 'general', to: 'deployments'},
+        {from: 'falcon', to: 'websites'}, {from: 'falcon', to: 'clientes'}, {from: 'falcon', to: 'deployments'},
+        {from: 'telegram', to: 'websites'}, {from: 'telegram', to: 'clientes'}, {from: 'telegram', to: 'deployments'},
+        {from: 'deeplearn', to: 'websites'}, {from: 'deeplearn', to: 'clientes'}, {from: 'deeplearn', to: 'deployments'},
+
+        // CONEXIONES CRUZADAS (como en la referencia)
+        {from: 'figma', to: 'websites'}, {from: 'bash', to: 'clientes'}, {from: 'codeguide', to: 'deployments'},
+        {from: 'gdrive', to: 'websites'}, {from: 'hubspot', to: 'clientes'}, {from: 'filemerger', to: 'deployments'},
+        {from: 'cache', to: 'websites'}, {from: 'bash', to: 'websites'}, {from: 'figma', to: 'clientes'}
+      ];
+
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       svg.setAttribute('width', '100%');
       svg.setAttribute('height', '100%');
-      svg.setAttribute('style', 'display:block;background:#131418;cursor:grab;user-select:none;');
+      svg.setAttribute('viewBox', '0 0 900 600');
+      svg.setAttribute('style', 'display:block;background:#0f0f12;cursor:grab;user-select:none;preserveAspectRatio:xMidYMid meet;');
 
       const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       g.id = 'canvas-group';
-      svg.appendChild(g);
 
-      // Positioning engine
-      const positions = {core: {x: 500, y: 240}};
-      let angle = 0;
-      const placeNodes = (category, radius, count) => {
-        for (let i = 0; i < count; i++) {
-          const a = angle + (i / count) * Math.PI * 2;
-          positions[`${category}_${i}`] = {
-            x: 500 + Math.cos(a) * radius,
-            y: 240 + Math.sin(a) * radius
-          };
-        }
-        angle += Math.PI * 2;
-      };
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+      filter.setAttribute('id', 'glow');
+      filter.innerHTML = '<feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>';
+      defs.appendChild(filter);
+      g.appendChild(defs);
 
-      placeNodes('platform', 80, 3);
-      placeNodes('agent', 140, 3);
-      placeNodes('skill', 200, 4);
-      placeNodes('mcp', 200, 4);
-      placeNodes('tool', 260, 5);
+      const layerLabels = [
+        {text: 'ENTRADA', x: 120, y: 35, color: '#d4a574'},
+        {text: 'PROCESAMIENTO', x: 340, y: 35, color: '#06b6d4'},
+        {text: 'ALMACENAMIENTO', x: 560, y: 35, color: '#4ade80'},
+        {text: 'SALIDA', x: 780, y: 35, color: '#fbbf24'}
+      ];
 
-      // Draw connections
-      const connGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      connGroup.id = 'connections';
-      g.appendChild(connGroup);
-
-      const addConnection = (from, to, color = 'rgba(250,167,23,0.1)') => {
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', from.x);
-        line.setAttribute('y1', from.y);
-        line.setAttribute('x2', to.x);
-        line.setAttribute('y2', to.y);
-        line.setAttribute('stroke', color);
-        line.setAttribute('stroke-width', '1');
-        connGroup.appendChild(line);
-      };
-
-      // Connect core to platforms
-      Object.entries(ecosystem.platforms).forEach((_, i) => {
-        addConnection(positions.core, positions[`platform_${i}`], 'rgba(74,222,128,0.2)');
+      layerLabels.forEach(label => {
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', label.x);
+        text.setAttribute('y', label.y);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('fill', label.color);
+        text.setAttribute('font-size', '10');
+        text.setAttribute('font-weight', 'bold');
+        text.setAttribute('letter-spacing', '1');
+        text.setAttribute('pointer-events', 'none');
+        text.textContent = label.text;
+        g.appendChild(text);
       });
 
-      // Connect platforms to agents
-      Object.entries(ecosystem.agents).forEach((_, i) => {
-        addConnection(positions[`platform_0`], positions[`agent_${i}`], 'rgba(96,165,250,0.15)');
+      const edgeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      edgeGroup.setAttribute('opacity', '0.7');
+
+      edges.forEach((edge, idx) => {
+        const fromNode = nodes.find(n => n.id === edge.from);
+        const toNode = nodes.find(n => n.id === edge.to);
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const midX = (fromNode.x + toNode.x) / 2;
+        const controlY = (fromNode.y + toNode.y) / 2 + (Math.random() - 0.5) * 40;
+        const pathData = `M ${fromNode.x} ${fromNode.y} Q ${midX} ${controlY} ${toNode.x} ${toNode.y}`;
+        path.setAttribute('d', pathData);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', '#b8956f');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('stroke-linecap', 'round');
+        edgeGroup.appendChild(path);
       });
 
-      // Draw nodes
+      g.appendChild(edgeGroup);
+
       const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      nodeGroup.id = 'nodes';
-      g.appendChild(nodeGroup);
 
-      const drawNode = (id, {name, type, color, count}, pos) => {
-        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        g.setAttribute('class', 'node');
-        g.setAttribute('data-name', name);
+      nodes.forEach(node => {
+        const typeSize = {entrada: 22, procesamiento: 20, almacenamiento: 20, salida: 28};
+        const size = typeSize[node.type] || 20;
 
-        const sizes = {ai: 20, platform: 16, agent: 14, skill: 10, mcp: 10, automation: 10, database: 10, api: 10, project: 12};
-        const size = sizes[type] || 12;
-
-        // Glow
         const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        glow.setAttribute('cx', pos.x);
-        glow.setAttribute('cy', pos.y);
+        glow.setAttribute('cx', node.x);
+        glow.setAttribute('cy', node.y);
         glow.setAttribute('r', size + 15);
-        glow.setAttribute('fill', color);
-        glow.setAttribute('opacity', '0.1');
-        g.appendChild(glow);
+        glow.setAttribute('fill', node.color);
+        glow.setAttribute('opacity', '0.25');
+        nodeGroup.appendChild(glow);
 
-        // Node
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('cx', pos.x);
-        circle.setAttribute('cy', pos.y);
+        circle.setAttribute('cx', node.x);
+        circle.setAttribute('cy', node.y);
         circle.setAttribute('r', size);
-        circle.setAttribute('fill', color);
-        circle.setAttribute('stroke', 'rgba(250,247,245,0.3)');
-        circle.setAttribute('stroke-width', '1');
-        circle.setAttribute('style', 'filter: drop-shadow(0 0 4px rgba(250,167,23,0.3)); cursor: pointer; transition: all 0.2s;');
-        g.appendChild(circle);
+        circle.setAttribute('fill', node.color);
+        circle.setAttribute('stroke', 'rgba(255,255,255,0.6)');
+        circle.setAttribute('stroke-width', '2');
+        circle.setAttribute('filter', 'url(#glow)');
+        circle.setAttribute('style', 'transition: all 0.3s; cursor: pointer;');
 
-        // Label (only for important nodes)
-        if (['ai', 'platform', 'agent'].includes(type)) {
-          const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          label.setAttribute('x', pos.x);
-          label.setAttribute('y', pos.y + size + 20);
-          label.setAttribute('text-anchor', 'middle');
-          label.setAttribute('fill', '#faf7f5');
-          label.setAttribute('font-size', '10');
-          label.setAttribute('font-weight', 'bold');
-          label.textContent = name.substring(0, 12);
-          g.appendChild(label);
-        }
-
-        // Hover
-        g.addEventListener('mouseenter', function() {
-          circle.setAttribute('r', size * 1.4);
-          circle.setAttribute('filter', 'drop-shadow(0 0 12px ' + color + ')');
-          const tooltip = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-          tooltip.textContent = `${name} (${type}${count ? ', ' + count + ' acciones' : ''})`;
-          g.appendChild(tooltip);
+        circle.addEventListener('mouseenter', () => {
+          circle.setAttribute('r', size * 1.35);
+          circle.setAttribute('stroke-width', '3');
+          circle.setAttribute('stroke', node.color);
         });
 
-        g.addEventListener('mouseleave', function() {
+        circle.addEventListener('mouseleave', () => {
           circle.setAttribute('r', size);
-          circle.setAttribute('style', 'filter: drop-shadow(0 0 4px rgba(250,167,23,0.3)); cursor: pointer; transition: all 0.2s;');
+          circle.setAttribute('stroke-width', '2');
+          circle.setAttribute('stroke', 'rgba(255,255,255,0.6)');
         });
 
-        nodeGroup.appendChild(g);
-      };
+        nodeGroup.appendChild(circle);
 
-      // Draw all nodes
-      drawNode('core', ecosystem.core, positions.core);
-      Object.entries(ecosystem.platforms).forEach((entry, i) => {
-        drawNode(`platform_${i}`, entry[1], positions[`platform_${i}`]);
-      });
-      Object.entries(ecosystem.agents).forEach((entry, i) => {
-        drawNode(`agent_${i}`, entry[1], positions[`agent_${i}`]);
-      });
-      ecosystem.skills.forEach((skill, i) => {
-        drawNode(`skill_${i}`, skill, positions[`skill_${i}`]);
-      });
-      ecosystem.mcp.forEach((mcp, i) => {
-        drawNode(`mcp_${i}`, mcp, positions[`mcp_${i}`]);
-      });
-      ecosystem.tools.forEach((tool, i) => {
-        drawNode(`tool_${i}`, tool, positions[`tool_${i}`]);
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', node.x);
+        text.setAttribute('y', node.y + size + 20);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('fill', '#e5e7eb');
+        text.setAttribute('font-size', '11');
+        text.setAttribute('font-weight', '700');
+        text.setAttribute('pointer-events', 'none');
+        text.textContent = node.name;
+        nodeGroup.appendChild(text);
       });
 
+      g.appendChild(nodeGroup);
+      svg.appendChild(g);
       container.innerHTML = '';
       container.appendChild(svg);
 
-      // Zoom and pan
       let scale = 1, offsetX = 0, offsetY = 0;
-      const canvasGroup = g;
 
       container.addEventListener('wheel', (e) => {
         e.preventDefault();
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
         scale *= delta;
         scale = Math.max(0.5, Math.min(3, scale));
-        canvasGroup.setAttribute('transform', `translate(${offsetX},${offsetY}) scale(${scale})`);
+        g.setAttribute('transform', `translate(${offsetX},${offsetY}) scale(${scale})`);
       });
 
-      let dragging = false, startX, startY;
+      let dragging = false;
       container.addEventListener('mousedown', () => dragging = true);
       container.addEventListener('mousemove', (e) => {
         if (!dragging) return;
-        const dx = e.movementX;
-        const dy = e.movementY;
-        offsetX += dx;
-        offsetY += dy;
-        canvasGroup.setAttribute('transform', `translate(${offsetX},${offsetY}) scale(${scale})`);
+        offsetX += e.movementX;
+        offsetY += e.movementY;
+        g.setAttribute('transform', `translate(${offsetX},${offsetY}) scale(${scale})`);
       });
       container.addEventListener('mouseup', () => dragging = false);
       container.addEventListener('mouseleave', () => dragging = false);
-
-      console.log('Ecosystem graph initialized');
     },
 
     aggregateByProject(entries) {
