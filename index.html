@@ -11654,7 +11654,7 @@ function studioAttachFile(file){
     },
 
     getMockData() {
-      const entries = [...(window.entries || []), ...(window.customEntries || [])];
+      const entries = (typeof SEED !== 'undefined' ? SEED : []).filter(e => e.dateKey || e.date);
       return {
         generated_at: new Date().toISOString(),
         kpis: {
@@ -11663,13 +11663,13 @@ function studioAttachFile(file){
           tokens_baseline_M: 0.73,
           eficiencia_pct: 31.0
         },
-        entries: entries.filter(e => e.input_tokens || e.cost_usd)
+        entries: entries
       };
     },
 
     applyFilters(allEntries) {
       return allEntries.filter(e => {
-        const d = e.date || '2026-06-02';
+        const d = e.dateKey || e.date || '2026-06-02';
         return d >= this.state.filters.dateFrom &&
                d <= this.state.filters.dateTo &&
                (!this.state.filters.client || e.client === this.state.filters.client) &&
@@ -11681,19 +11681,20 @@ function studioAttachFile(file){
     aggregateByDate(entries) {
       const byDate = {};
       entries.forEach(e => {
-        const date = e.date || '2026-06-02';
-        if (!byDate[date]) byDate[date] = {entries: [], cost: 0, tokens: 0, count: 0};
+        const date = e.dateKey || e.date || '2026-06-02';
+        if (!byDate[date]) byDate[date] = {entries: [], cost: 0, tokens: 0, count: 0, dur: 0};
         byDate[date].entries.push(e);
-        byDate[date].cost += e.cost_usd || 0;
-        byDate[date].tokens += (e.input_tokens || 0) + (e.output_tokens || 0);
+        byDate[date].cost += e.cost_usd || (e.durSec || e.dur || 0) * 0.001;
+        byDate[date].tokens += (e.input_tokens || 0) + (e.output_tokens || 0) || (e.durSec || 0);
         byDate[date].count += 1;
+        byDate[date].dur += e.durSec || e.dur || 0;
       });
       return Object.entries(byDate).sort((a,b) => new Date(b[0]) - new Date(a[0]));
     },
 
     render(data) {
       const view = document.getElementById('view-graphify');
-      const allEntries = (data.entries || []).filter(e => e.input_tokens || e.output_tokens || e.cost_usd);
+      const allEntries = (data.entries || []).filter(e => e.dateKey || e.date);
 
       // DOM Structure
       view.innerHTML = '<div id="graphify-root" style="color:var(--bone);animation:fadeIn 0.5s ease-in"></div>';
@@ -11790,10 +11791,12 @@ function studioAttachFile(file){
       html += '<tr style="border-bottom:2px solid var(--border);background:var(--surface2)"><th style="padding:10px;text-align:left;color:var(--bone2);font-weight:600">Fecha</th><th style="padding:10px;text-align:right;color:var(--bone2);font-weight:600">Costo USD</th><th style="padding:10px;text-align:right;color:var(--bone2);font-weight:600">Tokens</th><th style="padding:10px;text-align:right;color:var(--bone2);font-weight:600">Acciones</th></tr>';
 
       byDate.forEach(([date, data]) => {
-        html += '<tr style="border-bottom:1px solid var(--border);cursor:pointer;transition:all 0.2s" onmouseover="this.style.background=\'rgba(250,167,60,0.08)\'" onmouseout="this.style.background=\'\'" onclick="window.showGraphifyDetail(\'' + date + '\',' + JSON.stringify(data).replace(/'/g, '&#39;') + ')">';
+        const safeCost = isNaN(data.cost) ? 0 : data.cost;
+        const safeTokens = isNaN(data.tokens) ? 0 : data.tokens;
+        html += '<tr style="border-bottom:1px solid var(--border);cursor:pointer;transition:all 0.2s" onmouseover="this.style.background=\'rgba(250,167,60,0.08)\'" onmouseout="this.style.background=\'\'" onclick="alert(\'📅 ' + date + '\\n💰 Costo: $' + safeCost.toFixed(4) + '\\n⏱️ Duración: ' + (data.dur || 0).toFixed(1) + 'h\\n🔢 Acciones: ' + data.count + '\')">';
         html += '<td style="padding:10px;color:var(--bone)">' + date + '</td>';
-        html += '<td style="padding:10px;text-align:right;color:var(--green);font-weight:600">$' + data.cost.toFixed(4) + '</td>';
-        html += '<td style="padding:10px;text-align:right;color:var(--amber)">' + (data.tokens/1000).toFixed(1) + 'k</td>';
+        html += '<td style="padding:10px;text-align:right;color:var(--green);font-weight:600">$' + safeCost.toFixed(4) + '</td>';
+        html += '<td style="padding:10px;text-align:right;color:var(--amber)">' + (safeTokens/1000).toFixed(1) + 'k</td>';
         html += '<td style="padding:10px;text-align:right;color:var(--bone2)">' + data.count + '</td>';
         html += '</tr>';
       });
