@@ -11719,27 +11719,17 @@ function studioAttachFile(file){
       const byDate = GraphifyUI.aggregateByDate(filtered);
       root.appendChild(GraphifyUI.createTableSection(byDate));
 
-      // 4. Gráfico 3D
+      // 4. Gráfico 3D / Interactive Graph
       const graphSection = document.createElement('div');
       graphSection.style.cssText = 'margin-top:24px;margin-bottom:20px';
-      graphSection.innerHTML = '<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase">🎯 Grafo 3D · Distribución de Proyectos</div><div id="graphify-3d" style="width:100%;height:480px;border:1px solid var(--border);border-radius:4px;background:var(--surface2)"></div>';
+      graphSection.innerHTML = '<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase">🎯 Grafo 3D · Distribución de Proyectos</div><div id="graphify-3d" style="width:100%;height:480px;border:1px solid var(--border);border-radius:4px;background:var(--surface2);overflow:hidden;position:relative"></div>';
       root.appendChild(graphSection);
 
       root.innerHTML += '<style>' + GraphifyUI.getStyles() + '</style>';
       root.addEventListener('change', (e) => GraphifyUI.handleFilterChange(allEntries));
 
-      // Inicializar 3D con delay más largo para asegurar carga
-      setTimeout(() => {
-        try {
-          if (typeof THREE !== 'undefined' && filtered && filtered.length > 0) {
-            GraphifyUI.init3DGraph(filtered);
-          } else {
-            console.warn('Three.js:', typeof THREE, 'Filtered entries:', filtered?.length);
-          }
-        } catch (e) {
-          console.error('Error inicializando 3D:', e);
-        }
-      }, 500);
+      // Renderizar gráfico
+      GraphifyUI.init3DGraph(filtered);
     },
 
     createKPISection(kpis, cost, tokens) {
@@ -11825,129 +11815,177 @@ function studioAttachFile(file){
       const container = document.getElementById('graphify-3d');
       if (!container) return;
 
+      // Group by project
+      const projectMap = {};
+      entries.forEach(e => {
+        const p = e.project || 'General';
+        if (!projectMap[p]) projectMap[p] = {count: 0, dur: 0};
+        projectMap[p].count += 1;
+        projectMap[p].dur += e.durSec || e.dur || 0;
+      });
+
+      const projects = Object.entries(projectMap);
+      const colors = ['#FFAA17', '#4ade80', '#60a5fa', '#c084fc', '#f87171', '#06b6d4'];
+
+      // Create SVG
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', '100%');
+      svg.setAttribute('height', '100%');
+      svg.setAttribute('viewBox', '0 0 1000 480');
+      svg.setAttribute('style', 'display:block;background:#131418');
+
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+
+      // Define gradients and styles
+      const styleEl = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+      styleEl.textContent = `
+        @keyframes orbit {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-20px); }
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .orbit-group { transform-origin: 500px 240px; animation: orbit 20s linear infinite; }
+        .node-group { animation: float 3s ease-in-out infinite; }
+        .center { animation: spin 4s linear infinite; }
+      `;
+      defs.appendChild(styleEl);
+
+      // Gradients for nodes
+      projects.forEach((proj, idx) => {
+        const grad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+        grad.id = 'grad' + idx;
+        const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        stop1.setAttribute('offset', '0%');
+        stop1.setAttribute('stop-color', colors[idx % colors.length]);
+        stop1.setAttribute('stop-opacity', '0.8');
+        const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+        stop2.setAttribute('offset', '100%');
+        stop2.setAttribute('stop-color', colors[idx % colors.length]);
+        stop2.setAttribute('stop-opacity', '0');
+        grad.appendChild(stop1);
+        grad.appendChild(stop2);
+        defs.appendChild(grad);
+      });
+
+      svg.appendChild(defs);
+
+      // Center group
+      const centerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      centerGroup.classList.add('center');
+
+      // Center octahedron
+      const centerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      centerPath.setAttribute('d', 'M 500 180 L 580 240 L 500 300 L 420 240 Z');
+      centerPath.setAttribute('stroke', '#4ade80');
+      centerPath.setAttribute('stroke-width', '3');
+      centerPath.setAttribute('fill', 'none');
+      centerGroup.appendChild(centerPath);
+
+      svg.appendChild(centerGroup);
+
+      // Lines from center to nodes
+      const linesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      projects.forEach((proj, idx) => {
+        const angle = (idx / projects.length) * Math.PI * 2;
+        const x = 500 + Math.cos(angle) * 150;
+        const y = 240 + Math.sin(angle) * 120;
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', '500');
+        line.setAttribute('y1', '240');
+        line.setAttribute('x2', x);
+        line.setAttribute('y2', y);
+        line.setAttribute('stroke', 'rgba(250,167,23,0.15)');
+        line.setAttribute('stroke-width', '1');
+        linesGroup.appendChild(line);
+      });
+      svg.appendChild(linesGroup);
+
+      // Orbit group with nodes
+      const orbitGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      orbitGroup.classList.add('orbit-group');
+
+      projects.forEach((proj, idx) => {
+        const [name, data] = proj;
+        const angle = (idx / projects.length) * Math.PI * 2;
+        const x = 500 + Math.cos(angle) * 150;
+        const y = 240 + Math.sin(angle) * 120;
+
+        // Node group
+        const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        nodeGroup.classList.add('node-group');
+        nodeGroup.setAttribute('style', `animation-delay: ${idx * 0.2}s`);
+
+        // Glow circle
+        const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        glow.setAttribute('cx', x);
+        glow.setAttribute('cy', y);
+        glow.setAttribute('r', '35');
+        glow.setAttribute('fill', `url(#grad${idx})`);
+        nodeGroup.appendChild(glow);
+
+        // Main sphere
+        const sphere = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        sphere.setAttribute('cx', x);
+        sphere.setAttribute('cy', y);
+        sphere.setAttribute('r', '18');
+        sphere.setAttribute('fill', colors[idx % colors.length]);
+        sphere.setAttribute('style', 'filter: drop-shadow(0 0 8px rgba(250,167,23,0.3))');
+        nodeGroup.appendChild(sphere);
+
+        // Highlight
+        const highlight = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        highlight.setAttribute('cx', x - 6);
+        highlight.setAttribute('cy', y - 6);
+        highlight.setAttribute('r', '5');
+        highlight.setAttribute('fill', 'rgba(255,255,255,0.4)');
+        nodeGroup.appendChild(highlight);
+
+        // Text
+        const textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        textBg.setAttribute('x', x - 50);
+        textBg.setAttribute('y', y + 30);
+        textBg.setAttribute('width', '100');
+        textBg.setAttribute('height', '30');
+        textBg.setAttribute('fill', 'rgba(19,20,24,0.8)');
+        textBg.setAttribute('rx', '4');
+        nodeGroup.appendChild(textBg);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', x);
+        text.setAttribute('y', y + 42);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('fill', '#faf7f5');
+        text.setAttribute('font-size', '12');
+        text.setAttribute('font-weight', 'bold');
+        text.textContent = name.substring(0, 15);
+        nodeGroup.appendChild(text);
+
+        const textSub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        textSub.setAttribute('x', x);
+        textSub.setAttribute('y', y + 55);
+        textSub.setAttribute('text-anchor', 'middle');
+        textSub.setAttribute('fill', 'rgba(250,247,245,0.6)');
+        textSub.setAttribute('font-size', '10');
+        textSub.textContent = data.count + ' acciones';
+        nodeGroup.appendChild(textSub);
+
+        orbitGroup.appendChild(nodeGroup);
+      });
+
+      svg.appendChild(orbitGroup);
+
+      // Clear container and add SVG
       container.innerHTML = '';
+      container.appendChild(svg);
 
-      try {
-        // Create canvas
-        const canvas = document.createElement('canvas');
-        canvas.style.cssText = 'width:100%;height:100%;display:block;';
-        container.appendChild(canvas);
-
-        const ctx = canvas.getContext('2d');
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
-
-        // Group by project
-        const projectMap = {};
-        entries.forEach(e => {
-          const p = e.project || 'General';
-          if (!projectMap[p]) projectMap[p] = {count: 0, dur: 0};
-          projectMap[p].count += 1;
-          projectMap[p].dur += e.durSec || e.dur || 0;
-        });
-
-        const projects = Object.entries(projectMap);
-        const colors = ['#FFAA17', '#4ade80', '#60a5fa', '#c084fc', '#f87171'];
-
-        // Center
-        const cx = canvas.width / 2;
-        const cy = canvas.height / 2;
-
-        let frame = 0;
-        const animate = () => {
-          frame++;
-
-          // Clear
-          ctx.fillStyle = '#131418';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-          // Draw nodes
-          projects.forEach((proj, idx) => {
-            const [name, data] = proj;
-            const angle = (idx / projects.length) * Math.PI * 2 + frame * 0.005;
-            const radius = 120;
-
-            const x = cx + Math.cos(angle) * radius;
-            const y = cy + Math.sin(angle) * radius + Math.sin(frame * 0.02 + idx) * 20;
-
-            // Draw glow
-            const grad = ctx.createRadialGradient(x, y, 0, x, y, 35);
-            grad.addColorStop(0, colors[idx % colors.length] + '40');
-            grad.addColorStop(1, colors[idx % colors.length] + '00');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(x, y, 35, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Draw sphere
-            ctx.fillStyle = colors[idx % colors.length];
-            ctx.beginPath();
-            ctx.arc(x, y, 20, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Draw highlight
-            ctx.fillStyle = 'rgba(255,255,255,0.3)';
-            ctx.beginPath();
-            ctx.arc(x - 6, y - 6, 6, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Label
-            ctx.fillStyle = '#faf7f5';
-            ctx.font = 'bold 11px Space Grotesk';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(name.substring(0, 12), x, y + 50);
-            ctx.font = '9px Space Grotesk';
-            ctx.fillStyle = 'rgba(250,247,245,0.6)';
-            ctx.fillText(data.count + ' acciones', x, y + 65);
-          });
-
-          // Draw center
-          const centerRot = frame * 0.03;
-          ctx.save();
-          ctx.translate(cx, cy);
-          ctx.rotate(centerRot);
-
-          ctx.strokeStyle = '#4ade80';
-          ctx.lineWidth = 2;
-          ctx.globalAlpha = 0.8;
-
-          // Octahedron-like shape
-          const s = 30;
-          ctx.beginPath();
-          ctx.moveTo(s, 0);
-          ctx.lineTo(0, s);
-          ctx.lineTo(-s, 0);
-          ctx.lineTo(0, -s);
-          ctx.closePath();
-          ctx.stroke();
-
-          ctx.restore();
-
-          // Lines from center to nodes
-          ctx.strokeStyle = 'rgba(250,167,23,0.1)';
-          ctx.lineWidth = 1;
-          projects.forEach((proj, idx) => {
-            const angle = (idx / projects.length) * Math.PI * 2 + frame * 0.005;
-            const radius = 120;
-            const x = cx + Math.cos(angle) * radius;
-            const y = cy + Math.sin(angle) * radius + Math.sin(frame * 0.02 + idx) * 20;
-
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            ctx.lineTo(x, y);
-            ctx.stroke();
-          });
-
-          requestAnimationFrame(animate);
-        };
-
-        animate();
-
-      } catch (e) {
-        console.error('Canvas error:', e);
-        container.innerHTML = '<div style="padding:20px;color:#ff6b6b">Error: ' + e.message + '</div>';
-      }
+      console.log('SVG graph rendered with', projects.length, 'projects');
     },
 
     handleFilterChange(allEntries) {
