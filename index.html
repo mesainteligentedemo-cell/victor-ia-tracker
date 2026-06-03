@@ -11722,18 +11722,24 @@ function studioAttachFile(file){
       // 4. Gráfico 3D
       const graphSection = document.createElement('div');
       graphSection.style.cssText = 'margin-top:24px;margin-bottom:20px';
-      graphSection.innerHTML = '<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase">🎯 Grafo 3D · Distribución de Proyectos</div><div id="graphify-3d" style="width:100%;height:450px;border:1px solid var(--border);border-radius:4px;background:var(--surface2);position:relative;display:flex;align-items:center;justify-content:center;color:var(--bone2);font-size:12px">Cargando gráfico 3D...</div>';
+      graphSection.innerHTML = '<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase">🎯 Grafo 3D · Distribución de Proyectos</div><div id="graphify-3d" style="width:100%;height:480px;border:1px solid var(--border);border-radius:4px;background:var(--surface2)"></div>';
       root.appendChild(graphSection);
 
       root.innerHTML += '<style>' + GraphifyUI.getStyles() + '</style>';
       root.addEventListener('change', (e) => GraphifyUI.handleFilterChange(allEntries));
 
-      // Inicializar 3D después de que el DOM esté listo
+      // Inicializar 3D con delay más largo para asegurar carga
       setTimeout(() => {
-        if (typeof THREE !== 'undefined' && filtered.length > 0) {
-          GraphifyUI.init3DGraph(filtered);
+        try {
+          if (typeof THREE !== 'undefined' && filtered && filtered.length > 0) {
+            GraphifyUI.init3DGraph(filtered);
+          } else {
+            console.warn('Three.js:', typeof THREE, 'Filtered entries:', filtered?.length);
+          }
+        } catch (e) {
+          console.error('Error inicializando 3D:', e);
         }
-      }, 200);
+      }, 500);
     },
 
     createKPISection(kpis, cost, tokens) {
@@ -11816,196 +11822,98 @@ function studioAttachFile(file){
     },
 
     init3DGraph(entries) {
-      if (typeof THREE === 'undefined') {
-        console.warn('Three.js no disponible');
-        return;
-      }
-
       const container = document.getElementById('graphify-3d');
-      if (!container) {
-        console.warn('Contenedor graphify-3d no encontrado');
+      if (!container) return;
+
+      if (typeof THREE === 'undefined') {
+        container.innerHTML = '<div style="padding:20px;color:var(--bone2);text-align:center">Three.js no cargó. Recarga la página.</div>';
         return;
       }
 
       try {
-        // Limpiar
         container.innerHTML = '';
 
-        // Scene, Camera, Renderer
-        const w = container.clientWidth || 800;
-        const h = container.clientHeight || 450;
+        // Dimensions
+        const w = Math.max(container.clientWidth || 1000, 800);
+        const h = Math.max(container.clientHeight || 480, 300);
 
+        // Scene setup
         const scene = new THREE.Scene();
-        scene.fog = new THREE.Fog(0x131418, 50, 100);
-
         const camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
-        camera.position.set(0, 3, 12);
-        camera.lookAt(0, 0, 0);
+        const renderer = new THREE.WebGLRenderer({antialias: true});
 
-        const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
         renderer.setSize(w, h);
-        renderer.setClearColor(0x131418, 1);
-        renderer.setPixelRatio(window.devicePixelRatio || 1);
+        renderer.setClearColor(0x131418);
         container.appendChild(renderer.domElement);
 
-        // Luces
-        const light1 = new THREE.PointLight(0xffffff, 1.5);
-        light1.position.set(10, 10, 10);
-        scene.add(light1);
+        camera.position.set(0, 2, 10);
 
-        const light2 = new THREE.PointLight(0xFFAA17, 0.8);
-        light2.position.set(-10, 5, -10);
-        scene.add(light2);
+        // Lights
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const light = new THREE.PointLight(0xffffff, 1);
+        light.position.set(5, 10, 7);
+        scene.add(light);
 
-        scene.add(new THREE.AmbientLight(0x444444, 1));
-
-        // Agrupar proyectos
-        const projectData = {};
+        // Group projects
+        const groups = {};
         entries.forEach(e => {
-          const proj = e.project || 'Sin proyecto';
-          if (!projectData[proj]) {
-            projectData[proj] = {count: 0, dur: 0, entries: []};
-          }
-          projectData[proj].count++;
-          projectData[proj].dur += e.durSec || e.dur || 0;
-          projectData[proj].entries.push(e);
+          const p = e.project || 'Sin proyecto';
+          if (!groups[p]) groups[p] = {count: 0, dur: 0};
+          groups[p].count++;
+          groups[p].dur += e.durSec || e.dur || 0;
         });
 
-        const projects = Object.entries(projectData);
-        const colors = [0xFFAA17, 0x4ade80, 0x60a5fa, 0xc084fc, 0xf87171, 0x06b6d4];
+        const projs = Object.entries(groups);
+        const colors = [0xFFAA17, 0x4ade80, 0x60a5fa, 0xc084fc, 0xf87171];
+        const meshes = [];
 
-        // Crear nodos
-        const nodes = [];
-        projects.forEach((proj, idx) => {
-          const [name, data] = proj;
-          const angle = (idx / projects.length) * Math.PI * 2;
-          const radius = 6;
-          const x = Math.cos(angle) * radius;
-          const z = Math.sin(angle) * radius;
-          const y = Math.sin(angle * 2) * 1.5;
+        // Create spheres
+        projs.forEach((item, i) => {
+          const [name, data] = item;
+          const angle = (i / projs.length) * Math.PI * 2;
+          const rad = 5;
 
-          const maxDur = Math.max(...projects.map(([_, d]) => d.dur || 1));
-          const size = Math.max(0.5, (data.dur / maxDur) * 1.2);
+          const geo = new THREE.SphereGeometry(0.6, 16, 16);
+          const mat = new THREE.MeshPhongMaterial({color: colors[i % colors.length]});
+          const mesh = new THREE.Mesh(geo, mat);
 
-          const geometry = new THREE.SphereGeometry(size, 32, 32);
-          const material = new THREE.MeshPhongMaterial({
-            color: colors[idx % colors.length],
-            emissive: colors[idx % colors.length],
-            emissiveIntensity: 0.2,
-            shininess: 100,
-            flatShading: false
-          });
+          mesh.position.x = Math.cos(angle) * rad;
+          mesh.position.z = Math.sin(angle) * rad;
+          mesh.position.y = 1;
+          mesh.userData = {name, count: data.count, dur: data.dur};
 
-          const mesh = new THREE.Mesh(geometry, material);
-          mesh.position.set(x, y, z);
-          mesh.scale.set(1, 1, 1);
-          mesh.userData = {name, count: data.count, dur: data.dur, idx};
           scene.add(mesh);
-          nodes.push(mesh);
+          meshes.push(mesh);
         });
 
-        // Centro giratorio
-        const centerGeo = new THREE.IcosahedronGeometry(0.8, 4);
-        const centerMat = new THREE.MeshPhongMaterial({
-          color: 0x4ade80,
-          emissive: 0x4ade80,
-          emissiveIntensity: 0.4
-        });
-        const center = new THREE.Mesh(centerGeo, centerMat);
+        // Center
+        const cGeo = new THREE.OctahedronGeometry(0.7);
+        const cMat = new THREE.MeshPhongMaterial({color: 0x4ade80});
+        const center = new THREE.Mesh(cGeo, cMat);
         scene.add(center);
 
-        // Tooltip
-        const tooltip = document.createElement('div');
-        tooltip.style.cssText = 'position:fixed;background:rgba(19,20,24,0.9);border:1px solid var(--amber);padding:10px 14px;font-size:11px;color:var(--bone);border-radius:4px;pointer-events:none;display:none;z-index:9999;max-width:220px;box-shadow:0 8px 16px rgba(0,0,0,0.4);font-weight:500';
-        document.body.appendChild(tooltip);
+        // Animate
+        let time = 0;
+        function animate() {
+          time += 0.01;
 
-        let lastHovered = null;
+          center.rotation.x += 0.003;
+          center.rotation.y += 0.005;
 
-        // Raycasting
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-
-        container.addEventListener('mousemove', (e) => {
-          const rect = container.getBoundingClientRect();
-          mouse.x = ((e.clientX - rect.left) / w) * 2 - 1;
-          mouse.y = -((e.clientY - rect.top) / h) * 2 + 1;
-
-          raycaster.setFromCamera(mouse, camera);
-          const hits = raycaster.intersectObjects(nodes);
-
-          if (hits.length > 0) {
-            const obj = hits[0].object;
-            if (lastHovered !== obj) {
-              if (lastHovered) lastHovered.scale.set(1, 1, 1);
-              lastHovered = obj;
-              obj.scale.set(1.3, 1.3, 1.3);
-
-              const d = obj.userData;
-              tooltip.innerHTML = `<strong style="color:var(--amber)">${d.name}</strong><br>📌 ${d.count} acciones<br>⏱️ ${(d.dur/3600).toFixed(1)}h`;
-              tooltip.style.display = 'block';
-              tooltip.style.left = (e.clientX + 15) + 'px';
-              tooltip.style.top = (e.clientY - 10) + 'px';
-            }
-          } else {
-            if (lastHovered) {
-              lastHovered.scale.set(1, 1, 1);
-              lastHovered = null;
-            }
-            tooltip.style.display = 'none';
-          }
-        });
-
-        // Animación
-        let frameCount = 0;
-        const animate = () => {
-          frameCount++;
-          requestAnimationFrame(animate);
-
-          // Centro gira rápido
-          center.rotation.x += 0.005;
-          center.rotation.y += 0.007;
-          center.rotation.z += 0.003;
-
-          // Nodos orbitan y rotan
-          nodes.forEach((node, i) => {
-            const speed = 0.0005;
-            const time = frameCount * speed + i * 0.3;
-
-            // Órbita
-            const orbitRadius = 6;
-            const orbitY = Math.sin(time * 0.5) * 1.5;
-            node.position.y = orbitY;
-
-            // Rotación
-            node.rotation.x += 0.002;
-            node.rotation.y += 0.003;
-
-            // Flotación
-            const originalY = Math.sin((i / nodes.length) * Math.PI * 2 + time * 0.3) * 1.5;
-            node.position.y = originalY + Math.sin(frameCount * 0.01 + i) * 0.3;
+          meshes.forEach((m, i) => {
+            m.rotation.y += 0.002;
+            m.position.y = 1 + Math.sin(time + i) * 0.5;
           });
 
           renderer.render(scene, camera);
-        };
+          requestAnimationFrame(animate);
+        }
 
         animate();
 
-        // Resize
-        window.addEventListener('resize', () => {
-          if (container && container.parentElement) {
-            const nw = container.clientWidth;
-            const nh = container.clientHeight;
-            if (nw > 0 && nh > 0) {
-              camera.aspect = nw / nh;
-              camera.updateProjectionMatrix();
-              renderer.setSize(nw, nh);
-            }
-          }
-        });
-
-      } catch (err) {
-        console.error('Error 3D:', err);
-        container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--amber)">⚠️ Error renderizando gráfico 3D<br><small style="color:var(--bone2)">' + err.message + '</small></div>';
+      } catch (e) {
+        console.error('3D Error:', e);
+        container.innerHTML = '<div style="padding:20px;color:var(--red)">Error: ' + e.message + '</div>';
       }
     },
 
