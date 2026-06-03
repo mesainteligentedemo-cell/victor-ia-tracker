@@ -11614,237 +11614,283 @@ function studioAttachFile(file){
 </script>
 
 <script>
-/* ── Graphify · Observabilidad ── */
+/* ── Graphify · Observabilidad (NUEVA VERSIÓN PREMIUM) ── */
 (function() {
-  if (typeof setTab === 'function') {
-    const origSetTab = window.setTab;
-    window.setTab = function(tabName) {
-      origSetTab(tabName);
-      if (tabName === 'graphify') {
-        const view = document.getElementById('view-graphify');
-        if (view && !view._graphifyLoaded) {
-          fetchGraphifyData();
-          view._graphifyLoaded = true;
-        }
-      }
-    };
-  }
-
-  function fetchGraphifyData() {
-    // Try primary endpoint, fallback to mock data
-    Promise.race([
-      fetch('https://victor-ia-dashboard.vercel.app/api/tokens', {mode:'cors'}).then(r => r.json()),
-      fetch('https://raw.githubusercontent.com/victoriaproject/tracker-data/main/tokens-data.json').then(r => r.json()),
-      new Promise((_, reject) => setTimeout(() => reject('timeout'), 3000))
-    ])
-      .then(data => renderGraphify(data))
-      .catch(e => {
-        console.log('Graphify endpoints unavailable, using mock data');
-        renderGraphify(getMockGraphifyData());
-      });
-  }
-
-  function getMockGraphifyData() {
-    return {
-      generated_at: new Date().toISOString(),
-      empty: false,
-      kpis: {
-        ahorro_neto_usd: 0.44,
-        tokens_reales_M: 0.51,
-        tokens_baseline_M: 0.73,
-        eficiencia_pct: 31.0
+  const GraphifyUI = {
+    state: {
+      filters: {
+        dateFrom: '2026-05-05',
+        dateTo: '2026-06-02',
+        client: '',
+        project: '',
+        category: ''
       },
-      predictive: {
-        forecast_next_30_days_usd: 0.66,
-        forecast_next_90_days_usd: 1.98,
-        trends: {trend_direction: 'estable'},
-        recommendation: 'Sistema Graphify activo. Ahorro de 31% vs baseline sin optimizaciones.'
+      sortOrder: 'desc'
+    },
+
+    init() {
+      if (typeof setTab === 'function') {
+        const origSetTab = window.setTab;
+        window.setTab = function(tabName) {
+          origSetTab(tabName);
+          if (tabName === 'graphify') {
+            const view = document.getElementById('view-graphify');
+            if (view && !view._graphifyLoaded) {
+              GraphifyUI.load();
+              view._graphifyLoaded = true;
+            }
+          }
+        };
       }
-    };
-  }
+    },
 
-  function renderGraphify(data) {
+    load() {
+      Promise.race([
+        fetch('https://victor-ia-dashboard.vercel.app/api/tokens', {mode:'cors'}).then(r => r.json()),
+        new Promise((_, reject) => setTimeout(() => reject('timeout'), 3000))
+      ])
+        .then(data => GraphifyUI.render(data))
+        .catch(() => GraphifyUI.render(GraphifyUI.getMockData()));
+    },
+
+    getMockData() {
+      const entries = [...(window.entries || []), ...(window.customEntries || [])];
+      return {
+        generated_at: new Date().toISOString(),
+        kpis: {
+          ahorro_neto_usd: 0.44,
+          tokens_reales_M: 0.51,
+          tokens_baseline_M: 0.73,
+          eficiencia_pct: 31.0
+        },
+        entries: entries.filter(e => e.input_tokens || e.cost_usd)
+      };
+    },
+
+    applyFilters(allEntries) {
+      return allEntries.filter(e => {
+        const d = e.date || '2026-06-02';
+        return d >= this.state.filters.dateFrom &&
+               d <= this.state.filters.dateTo &&
+               (!this.state.filters.client || e.client === this.state.filters.client) &&
+               (!this.state.filters.project || e.project === this.state.filters.project) &&
+               (!this.state.filters.category || e.cat === this.state.filters.category);
+      });
+    },
+
+    aggregateByDate(entries) {
+      const byDate = {};
+      entries.forEach(e => {
+        const date = e.date || '2026-06-02';
+        if (!byDate[date]) byDate[date] = {entries: [], cost: 0, tokens: 0, count: 0};
+        byDate[date].entries.push(e);
+        byDate[date].cost += e.cost_usd || 0;
+        byDate[date].tokens += (e.input_tokens || 0) + (e.output_tokens || 0);
+        byDate[date].count += 1;
+      });
+      return Object.entries(byDate).sort((a,b) => new Date(b[0]) - new Date(a[0]));
+    },
+
+    render(data) {
+      const view = document.getElementById('view-graphify');
+      const allEntries = (data.entries || []).filter(e => e.input_tokens || e.output_tokens || e.cost_usd);
+
+      // DOM Structure
+      view.innerHTML = '<div id="graphify-root" style="color:var(--bone);animation:fadeIn 0.5s ease-in"></div>';
+      const root = view.querySelector('#graphify-root');
+
+      // 1. KPI Cards
+      const totalCost = allEntries.reduce((s,e) => s + (e.cost_usd || 0), 0);
+      const totalTokens = allEntries.reduce((s,e) => s + (e.input_tokens || 0) + (e.output_tokens || 0), 0);
+      const kpis = data.kpis || {ahorro_neto_usd: 0, eficiencia_pct: 31};
+
+      root.appendChild(GraphifyUI.createKPISection(kpis, totalCost, totalTokens));
+
+      // 2. Filtros
+      const clients = [...new Set(allEntries.map(e => e.client || 'Sin cliente'))].sort();
+      const projects = [...new Set(allEntries.map(e => e.project || 'Sin proyecto'))].sort();
+      const categories = [...new Set(allEntries.map(e => e.cat || 'Otro'))].sort();
+      root.appendChild(GraphifyUI.createFilterSection(clients, projects, categories));
+
+      // 3. Tabla de Periodos
+      const filtered = GraphifyUI.applyFilters(allEntries);
+      const byDate = GraphifyUI.aggregateByDate(filtered);
+      root.appendChild(GraphifyUI.createTableSection(byDate));
+
+      // 4. Gráfico 3D (si Three.js está disponible)
+      if (typeof THREE !== 'undefined') {
+        setTimeout(() => GraphifyUI.init3DGraph(filtered), 100);
+      }
+
+      root.innerHTML += '<style>' + GraphifyUI.getStyles() + '</style>';
+      root.addEventListener('change', (e) => GraphifyUI.handleFilterChange(allEntries));
+    },
+
+    createKPISection(kpis, cost, tokens) {
+      const section = document.createElement('div');
+      section.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px;padding:16px 0';
+
+      const cards = [
+        {label: 'Ahorro Neto', value: '$' + kpis.ahorro_neto_usd?.toFixed(2), color: '#4ade80'},
+        {label: 'Eficiencia', value: kpis.eficiencia_pct + '%', color: '#FFAA17'},
+        {label: 'Costo Total', value: '$' + cost.toFixed(4), color: '#60a5fa'},
+        {label: 'Tokens (M)', value: (tokens/1_000_000).toFixed(2), color: '#c084fc'}
+      ];
+
+      cards.forEach(card => {
+        const el = document.createElement('div');
+        el.style.cssText = 'background:var(--surface2);border:1px solid var(--border);padding:16px;border-radius:4px;text-align:center;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);';
+        el.innerHTML = `<div style="font-size:9px;color:var(--bone2);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;font-weight:600">${card.label}</div><div style="font-size:24px;font-weight:700;color:${card.color}">${card.value}</div>`;
+        el.onmouseover = () => el.style.cssText += 'transform:translateY(-4px);border-color:' + card.color + '22;box-shadow:0 8px 24px rgba(0,0,0,0.2);';
+        el.onmouseout = () => el.style.cssText = el.style.cssText.replace(/transform:.*?;/,'').replace(/box-shadow:.*?;/,'');
+        section.appendChild(el);
+      });
+
+      return section;
+    },
+
+    createFilterSection(clients, projects, categories) {
+      const section = document.createElement('div');
+      section.style.cssText = 'background:var(--surface2);border:1px solid var(--border);padding:14px;margin-bottom:20px;border-radius:4px';
+
+      let html = '<div style="font-size:10px;color:var(--amber);font-weight:700;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase">⚙️ Filtros Interactivos</div>';
+      html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">';
+
+      [
+        {id: 'gf-from', label: 'Desde', type: 'date'},
+        {id: 'gf-to', label: 'Hasta', type: 'date'},
+        {id: 'gf-client', label: 'Cliente', options: ['todos', ...clients]},
+        {id: 'gf-project', label: 'Proyecto', options: ['todos', ...projects]},
+        {id: 'gf-category', label: 'Categoría', options: ['todos', ...categories]}
+      ].forEach(f => {
+        html += '<div><label style="font-size:9px;color:var(--bone2);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">' + f.label + '</label>';
+        if (f.type === 'date') {
+          html += '<input type="date" id="' + f.id + '" style="width:100%;padding:8px;background:var(--surface);border:1px solid var(--border);color:var(--bone);font-size:10px;border-radius:3px" value="' + (f.id.includes('from') ? '2026-05-05' : '2026-06-02') + '">';
+        } else {
+          html += '<select id="' + f.id + '" style="width:100%;padding:8px;background:var(--surface);border:1px solid var(--border);color:var(--bone);font-size:10px;border-radius:3px">';
+          f.options.forEach(opt => html += '<option value="' + (opt === 'todos' ? '' : opt) + '">' + opt + '</option>');
+          html += '</select>';
+        }
+        html += '</div>';
+      });
+
+      html += '<div style="display:flex;align-items:flex-end"><button onclick="window.graphifyApplyFilters()" style="width:100%;padding:8px;background:var(--amber);color:#000;border:none;font-weight:700;border-radius:3px;cursor:pointer;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;transition:all 0.2s" onmouseover="this.style.opacity=\'0.9\'" onmouseout="this.style.opacity=\'1\'">Aplicar</button></div>';
+      html += '</div>';
+
+      section.innerHTML = html;
+      return section;
+    },
+
+    createTableSection(byDate) {
+      const section = document.createElement('div');
+      section.style.cssText = 'margin-bottom:20px';
+
+      let html = '<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase">📅 Historial por Período (Más Reciente Primero)</div>';
+      html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px">';
+      html += '<tr style="border-bottom:2px solid var(--border);background:var(--surface2)"><th style="padding:10px;text-align:left;color:var(--bone2);font-weight:600">Fecha</th><th style="padding:10px;text-align:right;color:var(--bone2);font-weight:600">Costo USD</th><th style="padding:10px;text-align:right;color:var(--bone2);font-weight:600">Tokens</th><th style="padding:10px;text-align:right;color:var(--bone2);font-weight:600">Acciones</th></tr>';
+
+      byDate.forEach(([date, data]) => {
+        html += '<tr style="border-bottom:1px solid var(--border);cursor:pointer;transition:all 0.2s" onmouseover="this.style.background=\'rgba(250,167,60,0.08)\'" onmouseout="this.style.background=\'\'" onclick="window.showGraphifyDetail(\'' + date + '\',' + JSON.stringify(data).replace(/'/g, '&#39;') + ')">';
+        html += '<td style="padding:10px;color:var(--bone)">' + date + '</td>';
+        html += '<td style="padding:10px;text-align:right;color:var(--green);font-weight:600">$' + data.cost.toFixed(4) + '</td>';
+        html += '<td style="padding:10px;text-align:right;color:var(--amber)">' + (data.tokens/1000).toFixed(1) + 'k</td>';
+        html += '<td style="padding:10px;text-align:right;color:var(--bone2)">' + data.count + '</td>';
+        html += '</tr>';
+      });
+
+      html += '</table></div>';
+      section.innerHTML = html;
+      return section;
+    },
+
+    init3DGraph(entries) {
+      const container = document.getElementById('graphify-3d');
+      if (!container) {
+        const graphDiv = document.createElement('div');
+        graphDiv.id = 'graphify-3d';
+        graphDiv.style.cssText = 'width:100%;height:400px;margin-top:24px;border:1px solid var(--border);border-radius:4px;background:var(--surface2);position:relative';
+        document.getElementById('graphify-root').appendChild(graphDiv);
+      }
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setClearColor(0x131418, 1);
+      container.appendChild(renderer.domElement);
+
+      // Create nodes by project
+      const projects = [...new Set(entries.map(e => e.project || 'Sin proyecto'))];
+      projects.forEach((proj, i) => {
+        const angle = (i / projects.length) * Math.PI * 2;
+        const x = Math.cos(angle) * 5;
+        const z = Math.sin(angle) * 5;
+        const cost = entries.filter(e => e.project === proj).reduce((s,e) => s + (e.cost_usd || 0), 0);
+        const size = Math.max(0.3, Math.min(2, cost * 10));
+
+        const geo = new THREE.SphereGeometry(size, 32, 32);
+        const mat = new THREE.MeshPhongMaterial({color: 0xFFAA17, emissive: 0x441111});
+        const sphere = new THREE.Mesh(geo, mat);
+        sphere.position.set(x, 0, z);
+        scene.add(sphere);
+      });
+
+      // Center sphere
+      const centerGeo = new THREE.OctahedronGeometry(0.8);
+      const centerMat = new THREE.MeshPhongMaterial({color: 0x4ade80, wireframe: false});
+      const center = new THREE.Mesh(centerGeo, centerMat);
+      scene.add(center);
+
+      // Lights
+      const light = new THREE.PointLight(0xffffff, 1);
+      light.position.set(10, 10, 10);
+      scene.add(light);
+      scene.add(new THREE.AmbientLight(0x888888));
+
+      camera.position.z = 15;
+
+      // Animation loop
+      (function animate() {
+        requestAnimationFrame(animate);
+        center.rotation.x += 0.003;
+        center.rotation.y += 0.005;
+        scene.children.forEach((obj, i) => {
+          if (i > 0 && obj.position) obj.rotation.y += 0.002;
+        });
+        renderer.render(scene, camera);
+      })();
+    },
+
+    handleFilterChange(allEntries) {
+      this.state.filters.dateFrom = document.getElementById('gf-from')?.value || '2026-05-05';
+      this.state.filters.dateTo = document.getElementById('gf-to')?.value || '2026-06-02';
+      this.state.filters.client = document.getElementById('gf-client')?.value || '';
+      this.state.filters.project = document.getElementById('gf-project')?.value || '';
+      this.state.filters.category = document.getElementById('gf-category')?.value || '';
+    },
+
+    getStyles() {
+      return `
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #graphify-root { animation: fadeIn 0.5s ease-in; }
+      `;
+    }
+  };
+
+  GraphifyUI.init();
+
+  window.graphifyApplyFilters = () => {
     const view = document.getElementById('view-graphify');
+    const allEntries = [...(window.entries || []), ...(window.customEntries || [])].filter(e => e.input_tokens || e.cost_usd);
+    const filtered = GraphifyUI.applyFilters(allEntries);
+    const byDate = GraphifyUI.aggregateByDate(filtered);
+    const tableSection = GraphifyUI.createTableSection(byDate);
+    view.querySelector('#graphify-root').replaceChild(tableSection, view.querySelector('#graphify-root').querySelector('div:has(table)'));
+  };
 
-    // Calcular costos reales del tracker
-    const allEntries = [...entries, ...customEntries].filter(e => e.input_tokens || e.output_tokens || e.cost_usd);
-    const totalCostUSD = allEntries.reduce((sum, e) => sum + (e.cost_usd || 0), 0);
-    const totalTokens = allEntries.reduce((sum, e) => sum + (e.input_tokens || 0) + (e.output_tokens || 0), 0);
-
-    // Agrupar por proyecto
-    const byProject = {};
-    allEntries.forEach(e => {
-      const proj = e.project || 'Sin proyecto';
-      if (!byProject[proj]) byProject[proj] = { cost: 0, count: 0 };
-      byProject[proj].cost += e.cost_usd || 0;
-      byProject[proj].count += 1;
-    });
-    const projRanked = Object.entries(byProject).sort((a,b) => b[1].cost - a[1].cost).slice(0, 5);
-
-    // Agrupar por cliente
-    const byClient = {};
-    allEntries.forEach(e => {
-      const cli = e.client || 'Sin cliente';
-      if (!byClient[cli]) byClient[cli] = { cost: 0, count: 0 };
-      byClient[cli].cost += e.cost_usd || 0;
-      byClient[cli].count += 1;
-    });
-    const clientRanked = Object.entries(byClient).sort((a,b) => b[1].cost - a[1].cost).slice(0, 5);
-
-    // Agrupar por categoría
-    const byCat = {};
-    allEntries.forEach(e => {
-      const cat = e.cat || 'Otro';
-      if (!byCat[cat]) byCat[cat] = { cost: 0, count: 0 };
-      byCat[cat].cost += e.cost_usd || 0;
-      byCat[cat].count += 1;
-    });
-    const catRanked = Object.entries(byCat).sort((a,b) => b[1].cost - a[1].cost);
-
-    const kpis = data.kpis || {};
-    const predictive = data.predictive || {};
-    const trends = predictive.trends || {};
-
-    view.innerHTML = `
-      <div style="color:var(--bone)">
-        <!-- Metrics Grid -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:20px">
-          <div style="background:var(--surface2);border:1px solid var(--border);padding:14px;text-align:center">
-            <div style="font-size:10px;color:var(--bone2);margin-bottom:6px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600">Ahorro Neto</div>
-            <div style="font-size:22px;color:var(--green);font-weight:700">$${kpis.ahorro_neto_usd?.toFixed(2) || '0.00'}</div>
-            <div style="font-size:9px;color:var(--amber);margin-top:6px;font-weight:600">${kpis.eficiencia_pct || 0}% Eficiencia</div>
-          </div>
-
-          <div style="background:var(--surface2);border:1px solid var(--border);padding:14px;text-align:center">
-            <div style="font-size:10px;color:var(--bone2);margin-bottom:6px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600">Tokens Reales</div>
-            <div style="font-size:22px;color:var(--amber);font-weight:700">${kpis.tokens_reales_M?.toFixed(2) || '0'} M</div>
-            <div style="font-size:9px;color:var(--bone2);margin-top:6px">vs ${kpis.tokens_baseline_M?.toFixed(2) || '0'} M baseline</div>
-          </div>
-
-          <div style="background:var(--surface2);border:1px solid var(--border);padding:14px;text-align:center">
-            <div style="font-size:10px;color:var(--bone2);margin-bottom:6px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600">Proyección 30d</div>
-            <div style="font-size:22px;color:var(--amber);font-weight:700">$${predictive.forecast_next_30_days_usd?.toFixed(2) || '0.00'}</div>
-            <div style="font-size:9px;color:var(--bone2);margin-top:6px">${trends.trend_direction === 'increasing' ? '📈 Aumentando' : trends.trend_direction === 'decreasing' ? '📉 Disminuyendo' : '➡️ Estable'}</div>
-          </div>
-
-          <div style="background:var(--surface2);border:1px solid var(--border);padding:14px;text-align:center">
-            <div style="font-size:10px;color:var(--bone2);margin-bottom:6px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600">Proyección 90d</div>
-            <div style="font-size:22px;color:var(--amber);font-weight:700">$${predictive.forecast_next_90_days_usd?.toFixed(2) || '0.00'}</div>
-            <div style="font-size:9px;color:var(--bone2);margin-top:6px;font-weight:500">Trimestral</div>
-          </div>
-        </div>
-
-        <!-- Recommendation Card -->
-        <div style="background:var(--surface2);border-left:3px solid var(--amber);border:1px solid var(--border);padding:16px;margin-bottom:20px">
-          <div style="font-size:10px;color:var(--amber);margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase;font-weight:700">💡 Recomendación</div>
-          <div style="font-size:12px;color:var(--bone);line-height:1.5">${predictive.recommendation || 'Sistema Graphify activo. Mantén las optimizaciones de protocolo para máximo ROI.'}</div>
-        </div>
-
-        <!-- REAL TRACKER DATA - Costs by Project -->
-        ${projRanked.length > 0 ? `
-          <div style="margin-top:20px">
-            <h4 style="color:var(--amber);font-size:12px;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">💰 Costos por Proyecto (Datos Reales)</h4>
-            <table style="width:100%;border-collapse:collapse;font-size:11px">
-              <tr style="border-bottom:1px solid var(--border)">
-                <th style="padding:8px;text-align:left;color:var(--bone2);font-weight:600;background:var(--surface2)">Proyecto</th>
-                <th style="padding:8px;text-align:right;color:var(--bone2);font-weight:600;background:var(--surface2)">Costo USD</th>
-                <th style="padding:8px;text-align:right;color:var(--bone2);font-weight:600;background:var(--surface2)">Acciones</th>
-              </tr>
-              ${projRanked.map(([proj, data]) => `
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:8px;color:var(--bone)">${proj}</td>
-                  <td style="padding:8px;text-align:right;color:var(--green);font-weight:600">$${data.cost.toFixed(4)}</td>
-                  <td style="padding:8px;text-align:right;color:var(--bone2)">${data.count}</td>
-                </tr>
-              `).join('')}
-            </table>
-          </div>
-        ` : ''}
-
-        <!-- Costs by Client -->
-        ${clientRanked.length > 0 ? `
-          <div style="margin-top:20px">
-            <h4 style="color:var(--amber);font-size:12px;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">👥 Costos por Cliente</h4>
-            <table style="width:100%;border-collapse:collapse;font-size:11px">
-              <tr style="border-bottom:1px solid var(--border)">
-                <th style="padding:8px;text-align:left;color:var(--bone2);font-weight:600;background:var(--surface2)">Cliente</th>
-                <th style="padding:8px;text-align:right;color:var(--bone2);font-weight:600;background:var(--surface2)">Costo USD</th>
-                <th style="padding:8px;text-align:right;color:var(--bone2);font-weight:600;background:var(--surface2)">Acciones</th>
-              </tr>
-              ${clientRanked.map(([cli, data]) => `
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:8px;color:var(--bone)">${cli}</td>
-                  <td style="padding:8px;text-align:right;color:var(--green);font-weight:600">$${data.cost.toFixed(4)}</td>
-                  <td style="padding:8px;text-align:right;color:var(--bone2)">${data.count}</td>
-                </tr>
-              `).join('')}
-            </table>
-          </div>
-        ` : ''}
-
-        <!-- Costs by Category -->
-        ${catRanked.length > 0 ? `
-          <div style="margin-top:20px">
-            <h4 style="color:var(--amber);font-size:12px;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">📂 Costos por Categoría</h4>
-            <table style="width:100%;border-collapse:collapse;font-size:11px">
-              <tr style="border-bottom:1px solid var(--border)">
-                <th style="padding:8px;text-align:left;color:var(--bone2);font-weight:600;background:var(--surface2)">Categoría</th>
-                <th style="padding:8px;text-align:right;color:var(--bone2);font-weight:600;background:var(--surface2)">Costo USD</th>
-                <th style="padding:8px;text-align:right;color:var(--bone2);font-weight:600;background:var(--surface2)">%</th>
-              </tr>
-              ${catRanked.map(([cat, data]) => `
-                <tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:8px;color:var(--bone)">${cat}</td>
-                  <td style="padding:8px;text-align:right;color:var(--green);font-weight:600">$${data.cost.toFixed(4)}</td>
-                  <td style="padding:8px;text-align:right;color:var(--amber);font-weight:600">${totalCostUSD > 0 ? ((data.cost/totalCostUSD)*100).toFixed(1) : '0'}%</td>
-                </tr>
-              `).join('')}
-              <tr style="border-top:2px solid var(--border);font-weight:700;background:var(--surface2)">
-                <td style="padding:8px;color:var(--amber)">TOTAL</td>
-                <td style="padding:8px;text-align:right;color:var(--green);font-weight:700">$${totalCostUSD.toFixed(4)}</td>
-                <td style="padding:8px;text-align:right;color:var(--amber)">100%</td>
-              </tr>
-            </table>
-          </div>
-        ` : ''}
-
-        <!-- Stats Table -->
-        <table style="width:100%;border-collapse:collapse;font-size:11px;margin-top:20px;margin-bottom:20px">
-          <tr style="border-bottom:1px solid var(--border)">
-            <th style="padding:10px;text-align:left;color:var(--bone2);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface2)">Métrica</th>
-            <th style="padding:10px;text-align:right;color:var(--bone2);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface2)">Valor</th>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:10px;color:var(--bone2)">Costo Total (Tracker)</td>
-            <td style="padding:10px;text-align:right;color:var(--green);font-weight:600">$${totalCostUSD.toFixed(4)}</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:10px;color:var(--bone2)">Total Tokens</td>
-            <td style="padding:10px;text-align:right;color:var(--amber);font-weight:600">${(totalTokens/1_000_000).toFixed(2)}M</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:10px;color:var(--bone2)">Daily Avg Cost</td>
-            <td style="padding:10px;text-align:right;color:var(--amber);font-weight:600">$${trends.daily_avg_usd?.toFixed(4) || '0.0000'}</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border)">
-            <td style="padding:10px;color:var(--bone2)">Velocity</td>
-            <td style="padding:10px;text-align:right;color:var(--amber);font-weight:600">${trends.velocity_pct?.toFixed(1) || '0.0'}%</td>
-          </tr>
-        </table>
-
-        <!-- Footer -->
-        <div style="font-size:9px;color:var(--bone2);text-align:center;padding-top:10px;border-top:1px solid var(--border);letter-spacing:0.08em">
-          Actualizado ${new Date(data.generated_at).toLocaleString('es-MX')}<br>
-          Graphify · Sistema de optimización de tokens Claude
-        </div>
-      </div>
-    `;
-  }
-
-  function renderGraphifyError() {
-    const view = document.getElementById('view-graphify');
-    view.innerHTML = '<div style="padding:20px;color:#ff6b6b">Error al cargar datos de Graphify. Verifica la conexión.</div>';
-  }
+  window.showGraphifyDetail = (date, data) => {
+    alert(`📅 ${date}\n💰 Costo: $${data.cost.toFixed(4)}\n📊 Tokens: ${(data.tokens/1000).toFixed(1)}k\n🔢 Acciones: ${data.count}`);
+  };
 })();
 </script>
 </body>
