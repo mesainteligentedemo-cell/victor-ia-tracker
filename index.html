@@ -11823,97 +11823,122 @@ function studioAttachFile(file){
 
     init3DGraph(entries) {
       const container = document.getElementById('graphify-3d');
-      if (!container) return;
-
-      if (typeof THREE === 'undefined') {
-        container.innerHTML = '<div style="padding:20px;color:var(--bone2);text-align:center">Three.js no cargó. Recarga la página.</div>';
+      if (!container) {
+        console.warn('No container');
         return;
       }
 
+      // Check Three.js
+      if (typeof window.THREE === 'undefined') {
+        container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--bone2)">⏳ Three.js cargando...<br><small>Si persiste, recarga la página</small></div>';
+        return;
+      }
+
+      // Clear
+      while (container.firstChild) container.removeChild(container.firstChild);
+
       try {
-        container.innerHTML = '';
+        const THREE = window.THREE;
 
-        // Dimensions
-        const w = Math.max(container.clientWidth || 1000, 800);
-        const h = Math.max(container.clientHeight || 480, 300);
+        // Get dimensions with fallback
+        let w = container.parentElement?.clientWidth || 1000;
+        let h = 480;
+        if (w < 100) w = 1000;
 
-        // Scene setup
+        // Create scene
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({antialias: true});
+        scene.background = new THREE.Color(0x131418);
 
+        // Camera
+        const camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 1000);
+        camera.position.z = 8;
+        camera.position.y = 1;
+
+        // Renderer
+        const renderer = new THREE.WebGLRenderer({antialias: true, alpha: false});
         renderer.setSize(w, h);
-        renderer.setClearColor(0x131418);
+        renderer.setPixelRatio(window.devicePixelRatio || 1);
         container.appendChild(renderer.domElement);
 
-        camera.position.set(0, 2, 10);
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
 
-        // Lights
-        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-        const light = new THREE.PointLight(0xffffff, 1);
-        light.position.set(5, 10, 7);
-        scene.add(light);
+        const pointLight = new THREE.PointLight(0xffffff, 0.8);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
 
-        // Group projects
-        const groups = {};
-        entries.forEach(e => {
-          const p = e.project || 'Sin proyecto';
-          if (!groups[p]) groups[p] = {count: 0, dur: 0};
-          groups[p].count++;
-          groups[p].dur += e.durSec || e.dur || 0;
+        // Group by project
+        const projectMap = {};
+        entries.forEach(entry => {
+          const proj = entry.project || 'General';
+          if (!projectMap[proj]) {
+            projectMap[proj] = {count: 0, dur: 0};
+          }
+          projectMap[proj].count += 1;
+          projectMap[proj].dur += entry.durSec || entry.dur || 0;
         });
 
-        const projs = Object.entries(groups);
-        const colors = [0xFFAA17, 0x4ade80, 0x60a5fa, 0xc084fc, 0xf87171];
-        const meshes = [];
+        const projectList = Object.entries(projectMap);
+        const colors = [0xFFAA17, 0x4ade80, 0x60a5fa, 0xc084fc, 0xf87171, 0x06b6d4];
+        const spheres = [];
 
-        // Create spheres
-        projs.forEach((item, i) => {
-          const [name, data] = item;
-          const angle = (i / projs.length) * Math.PI * 2;
-          const rad = 5;
+        // Create spheres for each project
+        projectList.forEach((entry, idx) => {
+          const [name, data] = entry;
+          const angle = (idx / projectList.length) * Math.PI * 2;
+          const distance = 4;
 
-          const geo = new THREE.SphereGeometry(0.6, 16, 16);
-          const mat = new THREE.MeshPhongMaterial({color: colors[i % colors.length]});
-          const mesh = new THREE.Mesh(geo, mat);
+          const geometry = new THREE.SphereGeometry(0.5, 24, 24);
+          const material = new THREE.MeshPhongMaterial({
+            color: colors[idx % colors.length],
+            shininess: 100
+          });
+          const sphere = new THREE.Mesh(geometry, material);
 
-          mesh.position.x = Math.cos(angle) * rad;
-          mesh.position.z = Math.sin(angle) * rad;
-          mesh.position.y = 1;
-          mesh.userData = {name, count: data.count, dur: data.dur};
+          sphere.position.x = Math.cos(angle) * distance;
+          sphere.position.z = Math.sin(angle) * distance;
+          sphere.position.y = 0;
 
-          scene.add(mesh);
-          meshes.push(mesh);
+          scene.add(sphere);
+          spheres.push({mesh: sphere, idx: idx});
         });
 
-        // Center
-        const cGeo = new THREE.OctahedronGeometry(0.7);
-        const cMat = new THREE.MeshPhongMaterial({color: 0x4ade80});
-        const center = new THREE.Mesh(cGeo, cMat);
-        scene.add(center);
+        // Center object
+        const centerGeo = new THREE.OctahedronGeometry(0.6, 2);
+        const centerMat = new THREE.MeshPhongMaterial({color: 0x4ade80});
+        const centerMesh = new THREE.Mesh(centerGeo, centerMat);
+        scene.add(centerMesh);
 
-        // Animate
-        let time = 0;
-        function animate() {
-          time += 0.01;
+        // Animation loop
+        let frame = 0;
+        const animate = () => {
+          frame++;
 
-          center.rotation.x += 0.003;
-          center.rotation.y += 0.005;
+          // Rotate center
+          centerMesh.rotation.x += 0.004;
+          centerMesh.rotation.y += 0.006;
 
-          meshes.forEach((m, i) => {
-            m.rotation.y += 0.002;
-            m.position.y = 1 + Math.sin(time + i) * 0.5;
+          // Animate spheres
+          spheres.forEach(obj => {
+            obj.mesh.rotation.x += 0.001;
+            obj.mesh.rotation.y += 0.002;
+
+            // Bob up and down
+            obj.mesh.position.y = Math.sin(frame * 0.02 + obj.idx) * 0.8;
           });
 
           renderer.render(scene, camera);
           requestAnimationFrame(animate);
-        }
+        };
 
         animate();
 
-      } catch (e) {
-        console.error('3D Error:', e);
-        container.innerHTML = '<div style="padding:20px;color:var(--red)">Error: ' + e.message + '</div>';
+        console.log('3D graph initialized with', projectList.length, 'projects');
+
+      } catch (err) {
+        console.error('3D graph error:', err.message);
+        container.innerHTML = '<div style="padding:20px;color:#ff6b6b"><strong>Error:</strong> ' + err.message + '</div>';
       }
     },
 
