@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700;800&family=Cormorant+Display:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@r128/build/three.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -11718,13 +11719,21 @@ function studioAttachFile(file){
       const byDate = GraphifyUI.aggregateByDate(filtered);
       root.appendChild(GraphifyUI.createTableSection(byDate));
 
-      // 4. Gráfico 3D (si Three.js está disponible)
-      if (typeof THREE !== 'undefined') {
-        setTimeout(() => GraphifyUI.init3DGraph(filtered), 100);
-      }
+      // 4. Gráfico 3D
+      const graphSection = document.createElement('div');
+      graphSection.style.cssText = 'margin-top:24px;margin-bottom:20px';
+      graphSection.innerHTML = '<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase">🎯 Grafo 3D · Distribución de Proyectos</div><div id="graphify-3d" style="width:100%;height:450px;border:1px solid var(--border);border-radius:4px;background:var(--surface2);position:relative;display:flex;align-items:center;justify-content:center;color:var(--bone2);font-size:12px">Cargando gráfico 3D...</div>';
+      root.appendChild(graphSection);
 
       root.innerHTML += '<style>' + GraphifyUI.getStyles() + '</style>';
       root.addEventListener('change', (e) => GraphifyUI.handleFilterChange(allEntries));
+
+      // Inicializar 3D después de que el DOM esté listo
+      setTimeout(() => {
+        if (typeof THREE !== 'undefined' && filtered.length > 0) {
+          GraphifyUI.init3DGraph(filtered);
+        }
+      }, 200);
     },
 
     createKPISection(kpis, cost, tokens) {
@@ -11807,61 +11816,177 @@ function studioAttachFile(file){
     },
 
     init3DGraph(entries) {
-      const container = document.getElementById('graphify-3d');
-      if (!container) {
-        const graphDiv = document.createElement('div');
-        graphDiv.id = 'graphify-3d';
-        graphDiv.style.cssText = 'width:100%;height:400px;margin-top:24px;border:1px solid var(--border);border-radius:4px;background:var(--surface2);position:relative';
-        document.getElementById('graphify-root').appendChild(graphDiv);
-      }
+      try {
+        const container = document.getElementById('graphify-3d');
+        if (!container) return;
 
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-      const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
-      renderer.setSize(container.clientWidth, container.clientHeight);
-      renderer.setClearColor(0x131418, 1);
-      container.appendChild(renderer.domElement);
+        // Limpiar contenedor
+        container.innerHTML = '';
+        container.style.background = 'var(--surface2)';
 
-      // Create nodes by project
-      const projects = [...new Set(entries.map(e => e.project || 'Sin proyecto'))];
-      projects.forEach((proj, i) => {
-        const angle = (i / projects.length) * Math.PI * 2;
-        const x = Math.cos(angle) * 5;
-        const z = Math.sin(angle) * 5;
-        const cost = entries.filter(e => e.project === proj).reduce((s,e) => s + (e.cost_usd || 0), 0);
-        const size = Math.max(0.3, Math.min(2, cost * 10));
+        // Three.js setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x131418);
 
-        const geo = new THREE.SphereGeometry(size, 32, 32);
-        const mat = new THREE.MeshPhongMaterial({color: 0xFFAA17, emissive: 0x441111});
-        const sphere = new THREE.Mesh(geo, mat);
-        sphere.position.set(x, 0, z);
-        scene.add(sphere);
-      });
+        const camera = new THREE.PerspectiveCamera(
+          75,
+          container.clientWidth / container.clientHeight,
+          0.1,
+          1000
+        );
 
-      // Center sphere
-      const centerGeo = new THREE.OctahedronGeometry(0.8);
-      const centerMat = new THREE.MeshPhongMaterial({color: 0x4ade80, wireframe: false});
-      const center = new THREE.Mesh(centerGeo, centerMat);
-      scene.add(center);
+        const renderer = new THREE.WebGLRenderer({antialias: true, alpha: false});
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
 
-      // Lights
-      const light = new THREE.PointLight(0xffffff, 1);
-      light.position.set(10, 10, 10);
-      scene.add(light);
-      scene.add(new THREE.AmbientLight(0x888888));
-
-      camera.position.z = 15;
-
-      // Animation loop
-      (function animate() {
-        requestAnimationFrame(animate);
-        center.rotation.x += 0.003;
-        center.rotation.y += 0.005;
-        scene.children.forEach((obj, i) => {
-          if (i > 0 && obj.position) obj.rotation.y += 0.002;
+        // Agrupar por proyecto
+        const projectMap = {};
+        entries.forEach(e => {
+          const proj = e.project || 'Sin proyecto';
+          if (!projectMap[proj]) projectMap[proj] = {count: 0, dur: 0};
+          projectMap[proj].count += 1;
+          projectMap[proj].dur += e.durSec || e.dur || 0;
         });
-        renderer.render(scene, camera);
-      })();
+
+        const projects = Object.entries(projectMap);
+        const colors = ['#FFAA17', '#4ade80', '#60a5fa', '#c084fc', '#f87171', '#06b6d4'];
+
+        // Crear nodos por proyecto (en círculo)
+        projects.forEach((entry, i) => {
+          const [proj, data] = entry;
+          const angle = (i / projects.length) * Math.PI * 2;
+          const radius = 6;
+          const x = Math.cos(angle) * radius;
+          const z = Math.sin(angle) * radius;
+
+          // Tamaño proporcional a duración
+          const maxDur = Math.max(...projects.map(([_, d]) => d.dur));
+          const size = Math.max(0.4, Math.min(1.5, (data.dur / maxDur) * 1.5));
+
+          // Crear esfera
+          const geo = new THREE.SphereGeometry(size, 32, 32);
+          const color = colors[i % colors.length];
+          const mat = new THREE.MeshPhongMaterial({
+            color: color,
+            emissive: color,
+            emissiveIntensity: 0.3,
+            shininess: 100
+          });
+          const sphere = new THREE.Mesh(geo, mat);
+          sphere.position.set(x, Math.sin(angle) * 2, z);
+          sphere.castShadow = true;
+          sphere.receiveShadow = true;
+          sphere.userData = {name: proj, count: data.count, dur: data.dur};
+
+          scene.add(sphere);
+        });
+
+        // Centro de control (octaedro giratorio)
+        const centerGeo = new THREE.OctahedronGeometry(1);
+        const centerMat = new THREE.MeshPhongMaterial({
+          color: 0x4ade80,
+          emissive: 0x4ade80,
+          emissiveIntensity: 0.5,
+          shininess: 200
+        });
+        const center = new THREE.Mesh(centerGeo, centerMat);
+        center.castShadow = true;
+        center.receiveShadow = true;
+        scene.add(center);
+
+        // Iluminación
+        const pointLight = new THREE.PointLight(0xffffff, 1.2, 100);
+        pointLight.position.set(15, 15, 15);
+        pointLight.castShadow = true;
+        scene.add(pointLight);
+
+        const ambientLight = new THREE.AmbientLight(0x666666, 0.6);
+        scene.add(ambientLight);
+
+        // Cámara
+        camera.position.z = 12;
+        camera.position.y = 4;
+
+        // Raycasting para hover
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        const tooltip = document.createElement('div');
+        tooltip.style.cssText = 'position:absolute;background:rgba(19,20,24,0.95);border:1px solid rgba(250,167,60,0.5);color:var(--bone);padding:8px 12px;font-size:10px;border-radius:3px;pointer-events:none;display:none;z-index:1000;max-width:200px;box-shadow:0 4px 12px rgba(0,0,0,0.5)';
+        container.appendChild(tooltip);
+
+        let hoveredObject = null;
+
+        container.addEventListener('mousemove', (event) => {
+          const rect = container.getBoundingClientRect();
+          mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+          mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+          raycaster.setFromCamera(mouse, camera);
+          const intersects = raycaster.intersectObjects(scene.children);
+
+          if (intersects.length > 0) {
+            const obj = intersects[0].object;
+            if (obj.userData.name && obj !== hoveredObject) {
+              hoveredObject = obj;
+              obj.scale.set(1.2, 1.2, 1.2);
+              const data = obj.userData;
+              tooltip.innerHTML = `<strong>${data.name}</strong><br>Acciones: ${data.count}<br>Duración: ${(data.dur/3600).toFixed(1)}h`;
+              tooltip.style.display = 'block';
+              tooltip.style.left = (event.clientX - rect.left + 10) + 'px';
+              tooltip.style.top = (event.clientY - rect.top + 10) + 'px';
+            }
+          } else {
+            if (hoveredObject) {
+              hoveredObject.scale.set(1, 1, 1);
+              hoveredObject = null;
+            }
+            tooltip.style.display = 'none';
+          }
+        });
+
+        // Animation loop
+        const animate = () => {
+          requestAnimationFrame(animate);
+
+          // Rotaciones
+          center.rotation.x += 0.004;
+          center.rotation.y += 0.006;
+          center.rotation.z += 0.002;
+
+          // Órbita de nodos
+          scene.children.forEach((obj, i) => {
+            if (obj.userData && obj.userData.name) {
+              obj.rotation.x += 0.002;
+              obj.rotation.y += 0.003;
+              obj.position.y += Math.sin(Date.now() * 0.0005 + i) * 0.001;
+            }
+          });
+
+          renderer.render(scene, camera);
+        };
+
+        animate();
+
+        // Resize handler
+        const handleResize = () => {
+          if (container.parentElement) {
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+          }
+        };
+
+        window.addEventListener('resize', handleResize);
+
+      } catch (e) {
+        console.error('Error en 3D graph:', e);
+        const container = document.getElementById('graphify-3d');
+        if (container) container.innerHTML = '<div style="padding:20px;color:var(--bone2)">⚠️ Grafo 3D no disponible</div>';
+      }
     },
 
     handleFilterChange(allEntries) {
