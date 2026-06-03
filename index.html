@@ -11815,177 +11815,216 @@ function studioAttachFile(file){
       const container = document.getElementById('graphify-3d');
       if (!container) return;
 
-      // Group by project
-      const projectMap = {};
-      entries.forEach(e => {
-        const p = e.project || 'General';
-        if (!projectMap[p]) projectMap[p] = {count: 0, dur: 0};
-        projectMap[p].count += 1;
-        projectMap[p].dur += e.durSec || e.dur || 0;
-      });
+      // Define complete ecosystem
+      const ecosystem = {
+        core: {name: 'Claude AI', type: 'ai', color: '#4ade80'},
+        platforms: {
+          vsc: {name: 'VS Code', type: 'platform', color: '#60a5fa'},
+          tracker: {name: 'Tracker', type: 'platform', color: '#FFAA17'},
+          vercel: {name: 'Vercel', type: 'platform', color: '#faf7f5'}
+        },
+        agents: {
+          explore: {name: 'Explore', type: 'agent', color: '#c084fc'},
+          plan: {name: 'Plan', type: 'agent', color: '#f87171'},
+          code: {name: 'Code', type: 'agent', color: '#06b6d4'}
+        },
+        skills: [
+          {name: 'figma-use', type: 'skill', color: '#f97316'},
+          {name: 'figma-generate', type: 'skill', color: '#f97316'},
+          {name: 'workflow', type: 'skill', color: '#a855f7'},
+          {name: 'update-config', type: 'skill', color: '#a855f7'}
+        ],
+        mcp: [
+          {name: 'HubSpot', type: 'mcp', color: '#fb923c'},
+          {name: 'Figma', type: 'mcp', color: '#f97316'},
+          {name: 'Google Drive', type: 'mcp', color: '#fbbf24'},
+          {name: 'After Effects', type: 'mcp', color: '#f87171'}
+        ],
+        tools: [
+          {name: 'n8n', type: 'automation', color: '#f97316'},
+          {name: 'Supabase', type: 'database', color: '#22c55e'},
+          {name: 'Firebase', type: 'database', color: '#fbbf24'},
+          {name: 'ElevenLabs', type: 'api', color: '#8b5cf6'}
+        ],
+        projects: Object.entries(this.aggregateByProject(entries)).map(([name, data]) => ({name, type: 'project', color: '#06b6d4', count: data.count}))
+      };
 
-      const projects = Object.entries(projectMap);
-      const colors = ['#FFAA17', '#4ade80', '#60a5fa', '#c084fc', '#f87171', '#06b6d4'];
-
-      // Create SVG
+      // Create interactive SVG
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       svg.setAttribute('width', '100%');
       svg.setAttribute('height', '100%');
-      svg.setAttribute('viewBox', '0 0 1000 480');
-      svg.setAttribute('style', 'display:block;background:#131418');
+      svg.setAttribute('style', 'display:block;background:#131418;cursor:grab;user-select:none;');
 
-      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.id = 'canvas-group';
+      svg.appendChild(g);
 
-      // Define gradients and styles
-      const styleEl = document.createElementNS('http://www.w3.org/2000/svg', 'style');
-      styleEl.textContent = `
-        @keyframes orbit {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+      // Positioning engine
+      const positions = {core: {x: 500, y: 240}};
+      let angle = 0;
+      const placeNodes = (category, radius, count) => {
+        for (let i = 0; i < count; i++) {
+          const a = angle + (i / count) * Math.PI * 2;
+          positions[`${category}_${i}`] = {
+            x: 500 + Math.cos(a) * radius,
+            y: 240 + Math.sin(a) * radius
+          };
         }
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-20px); }
-        }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .orbit-group { transform-origin: 500px 240px; animation: orbit 20s linear infinite; }
-        .node-group { animation: float 3s ease-in-out infinite; }
-        .center { animation: spin 4s linear infinite; }
-      `;
-      defs.appendChild(styleEl);
+        angle += Math.PI * 2;
+      };
 
-      // Gradients for nodes
-      projects.forEach((proj, idx) => {
-        const grad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
-        grad.id = 'grad' + idx;
-        const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-        stop1.setAttribute('offset', '0%');
-        stop1.setAttribute('stop-color', colors[idx % colors.length]);
-        stop1.setAttribute('stop-opacity', '0.8');
-        const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
-        stop2.setAttribute('offset', '100%');
-        stop2.setAttribute('stop-color', colors[idx % colors.length]);
-        stop2.setAttribute('stop-opacity', '0');
-        grad.appendChild(stop1);
-        grad.appendChild(stop2);
-        defs.appendChild(grad);
-      });
+      placeNodes('platform', 80, 3);
+      placeNodes('agent', 140, 3);
+      placeNodes('skill', 200, 4);
+      placeNodes('mcp', 200, 4);
+      placeNodes('tool', 260, 5);
 
-      svg.appendChild(defs);
+      // Draw connections
+      const connGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      connGroup.id = 'connections';
+      g.appendChild(connGroup);
 
-      // Center group
-      const centerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      centerGroup.classList.add('center');
-
-      // Center octahedron
-      const centerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      centerPath.setAttribute('d', 'M 500 180 L 580 240 L 500 300 L 420 240 Z');
-      centerPath.setAttribute('stroke', '#4ade80');
-      centerPath.setAttribute('stroke-width', '3');
-      centerPath.setAttribute('fill', 'none');
-      centerGroup.appendChild(centerPath);
-
-      svg.appendChild(centerGroup);
-
-      // Lines from center to nodes
-      const linesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      projects.forEach((proj, idx) => {
-        const angle = (idx / projects.length) * Math.PI * 2;
-        const x = 500 + Math.cos(angle) * 150;
-        const y = 240 + Math.sin(angle) * 120;
+      const addConnection = (from, to, color = 'rgba(250,167,23,0.1)') => {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', '500');
-        line.setAttribute('y1', '240');
-        line.setAttribute('x2', x);
-        line.setAttribute('y2', y);
-        line.setAttribute('stroke', 'rgba(250,167,23,0.15)');
+        line.setAttribute('x1', from.x);
+        line.setAttribute('y1', from.y);
+        line.setAttribute('x2', to.x);
+        line.setAttribute('y2', to.y);
+        line.setAttribute('stroke', color);
         line.setAttribute('stroke-width', '1');
-        linesGroup.appendChild(line);
+        connGroup.appendChild(line);
+      };
+
+      // Connect core to platforms
+      Object.entries(ecosystem.platforms).forEach((_, i) => {
+        addConnection(positions.core, positions[`platform_${i}`], 'rgba(74,222,128,0.2)');
       });
-      svg.appendChild(linesGroup);
 
-      // Orbit group with nodes
-      const orbitGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      orbitGroup.classList.add('orbit-group');
+      // Connect platforms to agents
+      Object.entries(ecosystem.agents).forEach((_, i) => {
+        addConnection(positions[`platform_0`], positions[`agent_${i}`], 'rgba(96,165,250,0.15)');
+      });
 
-      projects.forEach((proj, idx) => {
-        const [name, data] = proj;
-        const angle = (idx / projects.length) * Math.PI * 2;
-        const x = 500 + Math.cos(angle) * 150;
-        const y = 240 + Math.sin(angle) * 120;
+      // Draw nodes
+      const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      nodeGroup.id = 'nodes';
+      g.appendChild(nodeGroup);
 
-        // Node group
-        const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        nodeGroup.classList.add('node-group');
-        nodeGroup.setAttribute('style', `animation-delay: ${idx * 0.2}s`);
+      const drawNode = (id, {name, type, color, count}, pos) => {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('class', 'node');
+        g.setAttribute('data-name', name);
 
-        // Glow circle
+        const sizes = {ai: 20, platform: 16, agent: 14, skill: 10, mcp: 10, automation: 10, database: 10, api: 10, project: 12};
+        const size = sizes[type] || 12;
+
+        // Glow
         const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        glow.setAttribute('cx', x);
-        glow.setAttribute('cy', y);
-        glow.setAttribute('r', '35');
-        glow.setAttribute('fill', `url(#grad${idx})`);
-        nodeGroup.appendChild(glow);
+        glow.setAttribute('cx', pos.x);
+        glow.setAttribute('cy', pos.y);
+        glow.setAttribute('r', size + 15);
+        glow.setAttribute('fill', color);
+        glow.setAttribute('opacity', '0.1');
+        g.appendChild(glow);
 
-        // Main sphere
-        const sphere = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        sphere.setAttribute('cx', x);
-        sphere.setAttribute('cy', y);
-        sphere.setAttribute('r', '18');
-        sphere.setAttribute('fill', colors[idx % colors.length]);
-        sphere.setAttribute('style', 'filter: drop-shadow(0 0 8px rgba(250,167,23,0.3))');
-        nodeGroup.appendChild(sphere);
+        // Node
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos.x);
+        circle.setAttribute('cy', pos.y);
+        circle.setAttribute('r', size);
+        circle.setAttribute('fill', color);
+        circle.setAttribute('stroke', 'rgba(250,247,245,0.3)');
+        circle.setAttribute('stroke-width', '1');
+        circle.setAttribute('style', 'filter: drop-shadow(0 0 4px rgba(250,167,23,0.3)); cursor: pointer; transition: all 0.2s;');
+        g.appendChild(circle);
 
-        // Highlight
-        const highlight = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        highlight.setAttribute('cx', x - 6);
-        highlight.setAttribute('cy', y - 6);
-        highlight.setAttribute('r', '5');
-        highlight.setAttribute('fill', 'rgba(255,255,255,0.4)');
-        nodeGroup.appendChild(highlight);
+        // Label (only for important nodes)
+        if (['ai', 'platform', 'agent'].includes(type)) {
+          const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          label.setAttribute('x', pos.x);
+          label.setAttribute('y', pos.y + size + 20);
+          label.setAttribute('text-anchor', 'middle');
+          label.setAttribute('fill', '#faf7f5');
+          label.setAttribute('font-size', '10');
+          label.setAttribute('font-weight', 'bold');
+          label.textContent = name.substring(0, 12);
+          g.appendChild(label);
+        }
 
-        // Text
-        const textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        textBg.setAttribute('x', x - 50);
-        textBg.setAttribute('y', y + 30);
-        textBg.setAttribute('width', '100');
-        textBg.setAttribute('height', '30');
-        textBg.setAttribute('fill', 'rgba(19,20,24,0.8)');
-        textBg.setAttribute('rx', '4');
-        nodeGroup.appendChild(textBg);
+        // Hover
+        g.addEventListener('mouseenter', function() {
+          circle.setAttribute('r', size * 1.4);
+          circle.setAttribute('filter', 'drop-shadow(0 0 12px ' + color + ')');
+          const tooltip = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+          tooltip.textContent = `${name} (${type}${count ? ', ' + count + ' acciones' : ''})`;
+          g.appendChild(tooltip);
+        });
 
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', x);
-        text.setAttribute('y', y + 42);
-        text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('fill', '#faf7f5');
-        text.setAttribute('font-size', '12');
-        text.setAttribute('font-weight', 'bold');
-        text.textContent = name.substring(0, 15);
-        nodeGroup.appendChild(text);
+        g.addEventListener('mouseleave', function() {
+          circle.setAttribute('r', size);
+          circle.setAttribute('style', 'filter: drop-shadow(0 0 4px rgba(250,167,23,0.3)); cursor: pointer; transition: all 0.2s;');
+        });
 
-        const textSub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        textSub.setAttribute('x', x);
-        textSub.setAttribute('y', y + 55);
-        textSub.setAttribute('text-anchor', 'middle');
-        textSub.setAttribute('fill', 'rgba(250,247,245,0.6)');
-        textSub.setAttribute('font-size', '10');
-        textSub.textContent = data.count + ' acciones';
-        nodeGroup.appendChild(textSub);
+        nodeGroup.appendChild(g);
+      };
 
-        orbitGroup.appendChild(nodeGroup);
+      // Draw all nodes
+      drawNode('core', ecosystem.core, positions.core);
+      Object.entries(ecosystem.platforms).forEach((entry, i) => {
+        drawNode(`platform_${i}`, entry[1], positions[`platform_${i}`]);
+      });
+      Object.entries(ecosystem.agents).forEach((entry, i) => {
+        drawNode(`agent_${i}`, entry[1], positions[`agent_${i}`]);
+      });
+      ecosystem.skills.forEach((skill, i) => {
+        drawNode(`skill_${i}`, skill, positions[`skill_${i}`]);
+      });
+      ecosystem.mcp.forEach((mcp, i) => {
+        drawNode(`mcp_${i}`, mcp, positions[`mcp_${i}`]);
+      });
+      ecosystem.tools.forEach((tool, i) => {
+        drawNode(`tool_${i}`, tool, positions[`tool_${i}`]);
       });
 
-      svg.appendChild(orbitGroup);
-
-      // Clear container and add SVG
       container.innerHTML = '';
       container.appendChild(svg);
 
-      console.log('SVG graph rendered with', projects.length, 'projects');
+      // Zoom and pan
+      let scale = 1, offsetX = 0, offsetY = 0;
+      const canvasGroup = g;
+
+      container.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        scale *= delta;
+        scale = Math.max(0.5, Math.min(3, scale));
+        canvasGroup.setAttribute('transform', `translate(${offsetX},${offsetY}) scale(${scale})`);
+      });
+
+      let dragging = false, startX, startY;
+      container.addEventListener('mousedown', () => dragging = true);
+      container.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        const dx = e.movementX;
+        const dy = e.movementY;
+        offsetX += dx;
+        offsetY += dy;
+        canvasGroup.setAttribute('transform', `translate(${offsetX},${offsetY}) scale(${scale})`);
+      });
+      container.addEventListener('mouseup', () => dragging = false);
+      container.addEventListener('mouseleave', () => dragging = false);
+
+      console.log('Ecosystem graph initialized');
+    },
+
+    aggregateByProject(entries) {
+      const map = {};
+      entries.forEach(e => {
+        const p = e.project || 'General';
+        if (!map[p]) map[p] = {count: 0};
+        map[p].count++;
+      });
+      return map;
     },
 
     handleFilterChange(allEntries) {
