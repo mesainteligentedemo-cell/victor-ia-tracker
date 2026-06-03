@@ -11816,152 +11816,173 @@ function studioAttachFile(file){
     },
 
     init3DGraph(entries) {
+      if (typeof THREE === 'undefined') {
+        console.warn('Three.js no disponible');
+        return;
+      }
+
+      const container = document.getElementById('graphify-3d');
+      if (!container) {
+        console.warn('Contenedor graphify-3d no encontrado');
+        return;
+      }
+
       try {
-        const container = document.getElementById('graphify-3d');
-        if (!container) return;
-
-        // Limpiar contenedor
+        // Limpiar
         container.innerHTML = '';
-        container.style.background = 'var(--surface2)';
 
-        // Three.js setup
+        // Scene, Camera, Renderer
+        const w = container.clientWidth || 800;
+        const h = container.clientHeight || 450;
+
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x131418);
+        scene.fog = new THREE.Fog(0x131418, 50, 100);
 
-        const camera = new THREE.PerspectiveCamera(
-          75,
-          container.clientWidth / container.clientHeight,
-          0.1,
-          1000
-        );
+        const camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
+        camera.position.set(0, 3, 12);
+        camera.lookAt(0, 0, 0);
 
-        const renderer = new THREE.WebGLRenderer({antialias: true, alpha: false});
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.shadowMap.enabled = true;
+        const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+        renderer.setSize(w, h);
+        renderer.setClearColor(0x131418, 1);
+        renderer.setPixelRatio(window.devicePixelRatio || 1);
         container.appendChild(renderer.domElement);
 
-        // Agrupar por proyecto
-        const projectMap = {};
+        // Luces
+        const light1 = new THREE.PointLight(0xffffff, 1.5);
+        light1.position.set(10, 10, 10);
+        scene.add(light1);
+
+        const light2 = new THREE.PointLight(0xFFAA17, 0.8);
+        light2.position.set(-10, 5, -10);
+        scene.add(light2);
+
+        scene.add(new THREE.AmbientLight(0x444444, 1));
+
+        // Agrupar proyectos
+        const projectData = {};
         entries.forEach(e => {
           const proj = e.project || 'Sin proyecto';
-          if (!projectMap[proj]) projectMap[proj] = {count: 0, dur: 0};
-          projectMap[proj].count += 1;
-          projectMap[proj].dur += e.durSec || e.dur || 0;
+          if (!projectData[proj]) {
+            projectData[proj] = {count: 0, dur: 0, entries: []};
+          }
+          projectData[proj].count++;
+          projectData[proj].dur += e.durSec || e.dur || 0;
+          projectData[proj].entries.push(e);
         });
 
-        const projects = Object.entries(projectMap);
-        const colors = ['#FFAA17', '#4ade80', '#60a5fa', '#c084fc', '#f87171', '#06b6d4'];
+        const projects = Object.entries(projectData);
+        const colors = [0xFFAA17, 0x4ade80, 0x60a5fa, 0xc084fc, 0xf87171, 0x06b6d4];
 
-        // Crear nodos por proyecto (en círculo)
-        projects.forEach((entry, i) => {
-          const [proj, data] = entry;
-          const angle = (i / projects.length) * Math.PI * 2;
+        // Crear nodos
+        const nodes = [];
+        projects.forEach((proj, idx) => {
+          const [name, data] = proj;
+          const angle = (idx / projects.length) * Math.PI * 2;
           const radius = 6;
           const x = Math.cos(angle) * radius;
           const z = Math.sin(angle) * radius;
+          const y = Math.sin(angle * 2) * 1.5;
 
-          // Tamaño proporcional a duración
-          const maxDur = Math.max(...projects.map(([_, d]) => d.dur));
-          const size = Math.max(0.4, Math.min(1.5, (data.dur / maxDur) * 1.5));
+          const maxDur = Math.max(...projects.map(([_, d]) => d.dur || 1));
+          const size = Math.max(0.5, (data.dur / maxDur) * 1.2);
 
-          // Crear esfera
-          const geo = new THREE.SphereGeometry(size, 32, 32);
-          const color = colors[i % colors.length];
-          const mat = new THREE.MeshPhongMaterial({
-            color: color,
-            emissive: color,
-            emissiveIntensity: 0.3,
-            shininess: 100
+          const geometry = new THREE.SphereGeometry(size, 32, 32);
+          const material = new THREE.MeshPhongMaterial({
+            color: colors[idx % colors.length],
+            emissive: colors[idx % colors.length],
+            emissiveIntensity: 0.2,
+            shininess: 100,
+            flatShading: false
           });
-          const sphere = new THREE.Mesh(geo, mat);
-          sphere.position.set(x, Math.sin(angle) * 2, z);
-          sphere.castShadow = true;
-          sphere.receiveShadow = true;
-          sphere.userData = {name: proj, count: data.count, dur: data.dur};
 
-          scene.add(sphere);
+          const mesh = new THREE.Mesh(geometry, material);
+          mesh.position.set(x, y, z);
+          mesh.scale.set(1, 1, 1);
+          mesh.userData = {name, count: data.count, dur: data.dur, idx};
+          scene.add(mesh);
+          nodes.push(mesh);
         });
 
-        // Centro de control (octaedro giratorio)
-        const centerGeo = new THREE.OctahedronGeometry(1);
+        // Centro giratorio
+        const centerGeo = new THREE.IcosahedronGeometry(0.8, 4);
         const centerMat = new THREE.MeshPhongMaterial({
           color: 0x4ade80,
           emissive: 0x4ade80,
-          emissiveIntensity: 0.5,
-          shininess: 200
+          emissiveIntensity: 0.4
         });
         const center = new THREE.Mesh(centerGeo, centerMat);
-        center.castShadow = true;
-        center.receiveShadow = true;
         scene.add(center);
 
-        // Iluminación
-        const pointLight = new THREE.PointLight(0xffffff, 1.2, 100);
-        pointLight.position.set(15, 15, 15);
-        pointLight.castShadow = true;
-        scene.add(pointLight);
+        // Tooltip
+        const tooltip = document.createElement('div');
+        tooltip.style.cssText = 'position:fixed;background:rgba(19,20,24,0.9);border:1px solid var(--amber);padding:10px 14px;font-size:11px;color:var(--bone);border-radius:4px;pointer-events:none;display:none;z-index:9999;max-width:220px;box-shadow:0 8px 16px rgba(0,0,0,0.4);font-weight:500';
+        document.body.appendChild(tooltip);
 
-        const ambientLight = new THREE.AmbientLight(0x666666, 0.6);
-        scene.add(ambientLight);
+        let lastHovered = null;
 
-        // Cámara
-        camera.position.z = 12;
-        camera.position.y = 4;
-
-        // Raycasting para hover
+        // Raycasting
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
-        const tooltip = document.createElement('div');
-        tooltip.style.cssText = 'position:absolute;background:rgba(19,20,24,0.95);border:1px solid rgba(250,167,60,0.5);color:var(--bone);padding:8px 12px;font-size:10px;border-radius:3px;pointer-events:none;display:none;z-index:1000;max-width:200px;box-shadow:0 4px 12px rgba(0,0,0,0.5)';
-        container.appendChild(tooltip);
 
-        let hoveredObject = null;
-
-        container.addEventListener('mousemove', (event) => {
+        container.addEventListener('mousemove', (e) => {
           const rect = container.getBoundingClientRect();
-          mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-          mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+          mouse.x = ((e.clientX - rect.left) / w) * 2 - 1;
+          mouse.y = -((e.clientY - rect.top) / h) * 2 + 1;
 
           raycaster.setFromCamera(mouse, camera);
-          const intersects = raycaster.intersectObjects(scene.children);
+          const hits = raycaster.intersectObjects(nodes);
 
-          if (intersects.length > 0) {
-            const obj = intersects[0].object;
-            if (obj.userData.name && obj !== hoveredObject) {
-              hoveredObject = obj;
-              obj.scale.set(1.2, 1.2, 1.2);
-              const data = obj.userData;
-              tooltip.innerHTML = `<strong>${data.name}</strong><br>Acciones: ${data.count}<br>Duración: ${(data.dur/3600).toFixed(1)}h`;
+          if (hits.length > 0) {
+            const obj = hits[0].object;
+            if (lastHovered !== obj) {
+              if (lastHovered) lastHovered.scale.set(1, 1, 1);
+              lastHovered = obj;
+              obj.scale.set(1.3, 1.3, 1.3);
+
+              const d = obj.userData;
+              tooltip.innerHTML = `<strong style="color:var(--amber)">${d.name}</strong><br>📌 ${d.count} acciones<br>⏱️ ${(d.dur/3600).toFixed(1)}h`;
               tooltip.style.display = 'block';
-              tooltip.style.left = (event.clientX - rect.left + 10) + 'px';
-              tooltip.style.top = (event.clientY - rect.top + 10) + 'px';
+              tooltip.style.left = (e.clientX + 15) + 'px';
+              tooltip.style.top = (e.clientY - 10) + 'px';
             }
           } else {
-            if (hoveredObject) {
-              hoveredObject.scale.set(1, 1, 1);
-              hoveredObject = null;
+            if (lastHovered) {
+              lastHovered.scale.set(1, 1, 1);
+              lastHovered = null;
             }
             tooltip.style.display = 'none';
           }
         });
 
-        // Animation loop
+        // Animación
+        let frameCount = 0;
         const animate = () => {
+          frameCount++;
           requestAnimationFrame(animate);
 
-          // Rotaciones
-          center.rotation.x += 0.004;
-          center.rotation.y += 0.006;
-          center.rotation.z += 0.002;
+          // Centro gira rápido
+          center.rotation.x += 0.005;
+          center.rotation.y += 0.007;
+          center.rotation.z += 0.003;
 
-          // Órbita de nodos
-          scene.children.forEach((obj, i) => {
-            if (obj.userData && obj.userData.name) {
-              obj.rotation.x += 0.002;
-              obj.rotation.y += 0.003;
-              obj.position.y += Math.sin(Date.now() * 0.0005 + i) * 0.001;
-            }
+          // Nodos orbitan y rotan
+          nodes.forEach((node, i) => {
+            const speed = 0.0005;
+            const time = frameCount * speed + i * 0.3;
+
+            // Órbita
+            const orbitRadius = 6;
+            const orbitY = Math.sin(time * 0.5) * 1.5;
+            node.position.y = orbitY;
+
+            // Rotación
+            node.rotation.x += 0.002;
+            node.rotation.y += 0.003;
+
+            // Flotación
+            const originalY = Math.sin((i / nodes.length) * Math.PI * 2 + time * 0.3) * 1.5;
+            node.position.y = originalY + Math.sin(frameCount * 0.01 + i) * 0.3;
           });
 
           renderer.render(scene, camera);
@@ -11969,23 +11990,22 @@ function studioAttachFile(file){
 
         animate();
 
-        // Resize handler
-        const handleResize = () => {
-          if (container.parentElement) {
-            const w = container.clientWidth;
-            const h = container.clientHeight;
-            camera.aspect = w / h;
-            camera.updateProjectionMatrix();
-            renderer.setSize(w, h);
+        // Resize
+        window.addEventListener('resize', () => {
+          if (container && container.parentElement) {
+            const nw = container.clientWidth;
+            const nh = container.clientHeight;
+            if (nw > 0 && nh > 0) {
+              camera.aspect = nw / nh;
+              camera.updateProjectionMatrix();
+              renderer.setSize(nw, nh);
+            }
           }
-        };
+        });
 
-        window.addEventListener('resize', handleResize);
-
-      } catch (e) {
-        console.error('Error en 3D graph:', e);
-        const container = document.getElementById('graphify-3d');
-        if (container) container.innerHTML = '<div style="padding:20px;color:var(--bone2)">⚠️ Grafo 3D no disponible</div>';
+      } catch (err) {
+        console.error('Error 3D:', err);
+        container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--amber)">⚠️ Error renderizando gráfico 3D<br><small style="color:var(--bone2)">' + err.message + '</small></div>';
       }
     },
 
