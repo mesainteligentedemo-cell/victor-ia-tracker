@@ -11823,122 +11823,130 @@ function studioAttachFile(file){
 
     init3DGraph(entries) {
       const container = document.getElementById('graphify-3d');
-      if (!container) {
-        console.warn('No container');
-        return;
-      }
+      if (!container) return;
 
-      // Check Three.js
-      if (typeof window.THREE === 'undefined') {
-        container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--bone2)">⏳ Three.js cargando...<br><small>Si persiste, recarga la página</small></div>';
-        return;
-      }
-
-      // Clear
-      while (container.firstChild) container.removeChild(container.firstChild);
+      container.innerHTML = '';
 
       try {
-        const THREE = window.THREE;
+        // Create canvas
+        const canvas = document.createElement('canvas');
+        canvas.style.cssText = 'width:100%;height:100%;display:block;';
+        container.appendChild(canvas);
 
-        // Get dimensions with fallback
-        let w = container.parentElement?.clientWidth || 1000;
-        let h = 480;
-        if (w < 100) w = 1000;
-
-        // Create scene
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x131418);
-
-        // Camera
-        const camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 1000);
-        camera.position.z = 8;
-        camera.position.y = 1;
-
-        // Renderer
-        const renderer = new THREE.WebGLRenderer({antialias: true, alpha: false});
-        renderer.setSize(w, h);
-        renderer.setPixelRatio(window.devicePixelRatio || 1);
-        container.appendChild(renderer.domElement);
-
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-        scene.add(ambientLight);
-
-        const pointLight = new THREE.PointLight(0xffffff, 0.8);
-        pointLight.position.set(5, 5, 5);
-        scene.add(pointLight);
+        const ctx = canvas.getContext('2d');
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
 
         // Group by project
         const projectMap = {};
-        entries.forEach(entry => {
-          const proj = entry.project || 'General';
-          if (!projectMap[proj]) {
-            projectMap[proj] = {count: 0, dur: 0};
-          }
-          projectMap[proj].count += 1;
-          projectMap[proj].dur += entry.durSec || entry.dur || 0;
+        entries.forEach(e => {
+          const p = e.project || 'General';
+          if (!projectMap[p]) projectMap[p] = {count: 0, dur: 0};
+          projectMap[p].count += 1;
+          projectMap[p].dur += e.durSec || e.dur || 0;
         });
 
-        const projectList = Object.entries(projectMap);
-        const colors = [0xFFAA17, 0x4ade80, 0x60a5fa, 0xc084fc, 0xf87171, 0x06b6d4];
-        const spheres = [];
+        const projects = Object.entries(projectMap);
+        const colors = ['#FFAA17', '#4ade80', '#60a5fa', '#c084fc', '#f87171'];
 
-        // Create spheres for each project
-        projectList.forEach((entry, idx) => {
-          const [name, data] = entry;
-          const angle = (idx / projectList.length) * Math.PI * 2;
-          const distance = 4;
+        // Center
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
 
-          const geometry = new THREE.SphereGeometry(0.5, 24, 24);
-          const material = new THREE.MeshPhongMaterial({
-            color: colors[idx % colors.length],
-            shininess: 100
-          });
-          const sphere = new THREE.Mesh(geometry, material);
-
-          sphere.position.x = Math.cos(angle) * distance;
-          sphere.position.z = Math.sin(angle) * distance;
-          sphere.position.y = 0;
-
-          scene.add(sphere);
-          spheres.push({mesh: sphere, idx: idx});
-        });
-
-        // Center object
-        const centerGeo = new THREE.OctahedronGeometry(0.6, 2);
-        const centerMat = new THREE.MeshPhongMaterial({color: 0x4ade80});
-        const centerMesh = new THREE.Mesh(centerGeo, centerMat);
-        scene.add(centerMesh);
-
-        // Animation loop
         let frame = 0;
         const animate = () => {
           frame++;
 
-          // Rotate center
-          centerMesh.rotation.x += 0.004;
-          centerMesh.rotation.y += 0.006;
+          // Clear
+          ctx.fillStyle = '#131418';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-          // Animate spheres
-          spheres.forEach(obj => {
-            obj.mesh.rotation.x += 0.001;
-            obj.mesh.rotation.y += 0.002;
+          // Draw nodes
+          projects.forEach((proj, idx) => {
+            const [name, data] = proj;
+            const angle = (idx / projects.length) * Math.PI * 2 + frame * 0.005;
+            const radius = 120;
 
-            // Bob up and down
-            obj.mesh.position.y = Math.sin(frame * 0.02 + obj.idx) * 0.8;
+            const x = cx + Math.cos(angle) * radius;
+            const y = cy + Math.sin(angle) * radius + Math.sin(frame * 0.02 + idx) * 20;
+
+            // Draw glow
+            const grad = ctx.createRadialGradient(x, y, 0, x, y, 35);
+            grad.addColorStop(0, colors[idx % colors.length] + '40');
+            grad.addColorStop(1, colors[idx % colors.length] + '00');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(x, y, 35, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw sphere
+            ctx.fillStyle = colors[idx % colors.length];
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw highlight
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.beginPath();
+            ctx.arc(x - 6, y - 6, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Label
+            ctx.fillStyle = '#faf7f5';
+            ctx.font = 'bold 11px Space Grotesk';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(name.substring(0, 12), x, y + 50);
+            ctx.font = '9px Space Grotesk';
+            ctx.fillStyle = 'rgba(250,247,245,0.6)';
+            ctx.fillText(data.count + ' acciones', x, y + 65);
           });
 
-          renderer.render(scene, camera);
+          // Draw center
+          const centerRot = frame * 0.03;
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(centerRot);
+
+          ctx.strokeStyle = '#4ade80';
+          ctx.lineWidth = 2;
+          ctx.globalAlpha = 0.8;
+
+          // Octahedron-like shape
+          const s = 30;
+          ctx.beginPath();
+          ctx.moveTo(s, 0);
+          ctx.lineTo(0, s);
+          ctx.lineTo(-s, 0);
+          ctx.lineTo(0, -s);
+          ctx.closePath();
+          ctx.stroke();
+
+          ctx.restore();
+
+          // Lines from center to nodes
+          ctx.strokeStyle = 'rgba(250,167,23,0.1)';
+          ctx.lineWidth = 1;
+          projects.forEach((proj, idx) => {
+            const angle = (idx / projects.length) * Math.PI * 2 + frame * 0.005;
+            const radius = 120;
+            const x = cx + Math.cos(angle) * radius;
+            const y = cy + Math.sin(angle) * radius + Math.sin(frame * 0.02 + idx) * 20;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+          });
+
           requestAnimationFrame(animate);
         };
 
         animate();
 
-        console.log('3D graph initialized with', projectList.length, 'projects');
-
-      } catch (err) {
-        console.error('3D graph error:', err.message);
-        container.innerHTML = '<div style="padding:20px;color:#ff6b6b"><strong>Error:</strong> ' + err.message + '</div>';
+      } catch (e) {
+        console.error('Canvas error:', e);
+        container.innerHTML = '<div style="padding:20px;color:#ff6b6b">Error: ' + e.message + '</div>';
       }
     },
 
