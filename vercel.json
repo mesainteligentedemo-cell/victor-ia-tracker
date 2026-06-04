@@ -5,6 +5,19 @@
   "cleanUrls": false,
   "trailingSlash": false,
   "public": true,
+  "env": {
+    "GSC_API_KEY": "@gsc-api-key"
+  },
+  "crons": [
+    {
+      "path": "/api/fetch-gsc",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/fetch-gsc",
+      "schedule": "0 14 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
