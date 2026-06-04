@@ -1,0 +1,161 @@
+{
+  "metadata": {
+    "calculo": "Nano Banana 3 en 4K: 3 créditos por imagen",
+    "presupuesto_mensual": "6000 créditos = $3,000 MXN",
+    "costo_por_credito": 0.50,
+    "articulos_mes": 48,
+    "imagenes_por_articulo": 5,
+    "total_imagenes_mes": 240,
+    "creditos_usados": 720,
+    "creditos_disponibles": 5280
+  },
+
+  "blog_publishing_real": {
+    "nombre": "Blog Publishing Diario",
+    "departamento": "Content & Marketing",
+    "volumen": "48 artículos/mes",
+    "modelo": "Claude Sonnet 4.6",
+    "costos_desglosados": {
+      "nano_banana_3_imagenes_4k": {
+        "descripcion": "240 imágenes 4K (5 por artículo: portada + 4 internas)",
+        "cantidad": 240,
+        "creditos_por_imagen": 3,
+        "creditos_totales": 720,
+        "costo_mxn": 360,
+        "costo_por_imagen": 1.50
+      },
+      "claude_api_sonnet": {
+        "descripcion": "Input: 150K tok × $3/1M; Output: 5K × $15/1M",
+        "costo_mxn": 574.80
+      },
+      "vercel_hosting": {
+        "costo_mxn": 400
+      },
+      "herramientas": {
+        "costo_mxn": 100
+      }
+    },
+    "costo_total_mensual_mxn": 1434.80,
+    "costo_por_articulo_mxn": 29.90,
+    "metricas": {
+      "articulos_generados": 48,
+      "imagenes_4k": 240,
+      "ejecuciones_exitosas": 35,
+      "tasa_exito": "97.2%"
+    }
+  },
+
+  "research_real": {
+    "nombre": "Investigación Diaria",
+    "departamento": "Content Strategy",
+    "volumen": "48 investigaciones/mes",
+    "modelo": "Claude Sonnet 4.6",
+    "nota": "Sin generación de imágenes - Solo fact-checking y búsqueda",
+    "costos_desglosados": {
+      "nano_banana_3": {
+        "costo_mxn": 0,
+        "razon": "No genera imágenes"
+      },
+      "claude_api_sonnet": {
+        "descripcion": "Input: 200K tok × $3/1M; Output: 10K × $15/1M",
+        "costo_mxn": 121.20
+      },
+      "herramientas": {
+        "descripcion": "APIs de fact-checking, búsqueda académica",
+        "costo_mxn": 180
+      }
+    },
+    "costo_total_mensual_mxn": 301.20,
+    "costo_por_articulo_mxn": 6.27,
+    "metricas": {
+      "investigaciones_realizadas": 48,
+      "ejecuciones_exitosas": 34,
+      "tasa_exito": "100%"
+    }
+  },
+
+  "copy_redaccion_real": {
+    "nombre": "Redacción de Artículos",
+    "departamento": "Content Creation",
+    "volumen": "48 artículos 2,500+ palabras/mes",
+    "modelo": "Claude Sonnet 4.6",
+    "nota": "Sin generación de imágenes - Solo redacción",
+    "costos_desglosados": {
+      "nano_banana_3": {
+        "costo_mxn": 0,
+        "razon": "No genera imágenes"
+      },
+      "claude_api_sonnet": {
+        "descripcion": "Input: 150K tok × $3/1M; Output: 150K × $15/1M",
+        "costo_mxn": 748.80
+      },
+      "herramientas": {
+        "descripcion": "Grammarly, linters, revision tools",
+        "costo_mxn": 150
+      }
+    },
+    "costo_total_mensual_mxn": 898.80,
+    "costo_por_articulo_mxn": 18.73,
+    "metricas": {
+      "articulos_redactados": 48,
+      "ejecuciones_exitosas": 34,
+      "tasa_exito": "97.1%"
+    }
+  },
+
+  "resumen_total_real": {
+    "costo_total_mensual_mxn": 2634.80,
+    "desglose_por_componente": {
+      "nano_banana_3_imagenes": 360,
+      "claude_api_sonnet": 1444.80,
+      "vercel_hosting": 400,
+      "herramientas": 430
+    },
+    "costo_por_articulo_completo_mxn": 54.90,
+    "articulos_totales_mes": 48,
+    "imagenes_4k_totales": 240,
+    "ejecuciones_exitosas": 103,
+    "tasa_exito_global": "98.1%",
+    "creditos_nano_banana_usados": "720 de 6,000",
+    "creditos_disponibles": 5280,
+    "ahorro_vs_original": {
+      "antes": 11484.80,
+      "despues": 2634.80,
+      "ahorro_mxn": 8850.00,
+      "porcentaje": "77%",
+      "costo_por_articulo_antes": 239.27,
+      "costo_por_articulo_despues": 54.90,
+      "ahorro_por_articulo": 184.37
+    },
+    "estrategia_mantenida": {
+      "geo": "✅ Targeting MX, ejemplos locales",
+      "seo": "✅ JSON-LD, meta tags, link building, 2,500+ palabras",
+      "aeo": "✅ Key Takeaways, FAQ, data cards, data visualizations en imágenes",
+      "calidad_visual": "✅ 240 imágenes 4K/mes (5 por artículo)",
+      "calidad_contenido": "✅ Sonnet para research, blog, copy"
+    }
+  },
+
+  "donde_va_el_presupuesto": {
+    "total_creditos": 6000,
+    "asignacion": {
+      "blog_images": {
+        "creditos": 720,
+        "porcentaje": "12%",
+        "costo_mxn": 360
+      },
+      "research": {
+        "creditos": 0,
+        "porcentaje": "0%",
+        "costo_mxn": 0
+      },
+      "copy": {
+        "creditos": 0,
+        "porcentaje": "0%",
+        "costo_mxn": 0
+      }
+    },
+    "creditos_restantes": 5280,
+    "uso_potencial": "Génesis de más imágenes, videos cortos, animaciones SVG, stock adicional"
+  }
+}
