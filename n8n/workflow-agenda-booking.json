@@ -1,0 +1,125 @@
+{
+  "name": "VICTOR IA — Agenda Booking",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agenda-booking",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-in",
+      "name": "Webhook Agenda",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "agenda-booking"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ok:true}) }}",
+        "options": {}
+      },
+      "id": "webhook-resp",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [460, 140]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.body.email }}",
+        "subject": "Confirmado — Tu diagnóstico con VICTOR IA · {{ $json.body.fecha_display }}",
+        "emailType": "html",
+        "message": "={{ $('Build Email Cliente').item.json.html }}",
+        "options": {
+          "replyTo": "contacto@victor-ia.com.mx"
+        }
+      },
+      "id": "email-cliente",
+      "name": "Email → Cliente",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [880, 220]
+    },
+    {
+      "parameters": {
+        "sendTo": "contacto@victor-ia.com.mx",
+        "subject": "🗓 Nueva agenda — {{ $json.body.nombre }} · {{ $json.body.fecha_display }} {{ $json.body.hora }}",
+        "emailType": "html",
+        "message": "={{ $('Build Email Interno').item.json.html }}",
+        "options": {}
+      },
+      "id": "email-interno",
+      "name": "Email → Equipo Victor IA",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [880, 400]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "value": "1rmoA61km6UvDYxEJdV_UhNZrKZDYjmudzpXUImPVMhM", "mode": "id" },
+        "sheetName": { "value": "Agendas", "mode": "name" },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "id": "sheets-log",
+      "name": "Google Sheets — Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [880, 580]
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.item.json.body;\nconst logoUrl = 'https://victor-ia-website.vercel.app/assets/brand/logo-full.png';\nconst faviconUrl = 'https://victor-ia-website.vercel.app/favicon-32x32.png';\n\nconst html = `<!DOCTYPE html>\n<html lang='es'>\n<head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'>\n<title>Confirmación — VICTOR IA</title>\n</head>\n<body style='margin:0;padding:0;background:#F8F7F5;font-family:Georgia,serif;'>\n<table width='100%' cellpadding='0' cellspacing='0' border='0' style='background:#F8F7F5;'>\n<tr><td align='center' style='padding:40px 20px;'>\n\n<table width='560' cellpadding='0' cellspacing='0' border='0' style='max-width:560px;width:100%;'>\n\n  <!-- Logo -->\n  <tr><td align='center' style='padding:0 0 40px 0;'>\n    <img src='${logoUrl}' alt='VICTOR IA' width='160' style='display:block;mix-blend-mode:multiply;'>\n  </td></tr>\n\n  <!-- Hero -->\n  <tr><td style='background:#0E0F12;border-radius:4px;padding:40px 40px 36px;'>\n    <p style='margin:0 0 6px;font-family:Arial,sans-serif;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,0.4);'>Confirmación de videollamada</p>\n    <h1 style='margin:0 0 20px;font-family:Georgia,serif;font-size:28px;font-weight:400;color:#F8F7F5;line-height:1.15;'>Tu diagnóstico<br><em>está confirmado.</em></h1>\n    <p style='margin:0;font-family:Arial,sans-serif;font-size:14px;line-height:1.6;color:rgba(248,247,245,0.65);'>Hola ${b.nombre}, nos vemos el <strong style='color:#F8F7F5;'>${b.fecha_display}</strong> a las <strong style='color:#F8F7F5;'>${b.hora_display}</strong>.</p>\n  </td></tr>\n\n  <!-- Detalles -->\n  <tr><td style='padding:32px 0 0;'>\n    <table width='100%' cellpadding='0' cellspacing='0' border='0' style='border:1px solid rgba(14,15,18,0.1);border-radius:4px;'>\n      <tr><td style='padding:18px 24px;border-bottom:1px solid rgba(14,15,18,0.08);'>\n        <span style='font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(14,15,18,0.4);display:block;margin-bottom:4px;'>Fecha</span>\n        <span style='font-family:Arial,sans-serif;font-size:14px;color:#0E0F12;font-weight:600;'>${b.fecha_display}</span>\n      </td></tr>\n      <tr><td style='padding:18px 24px;border-bottom:1px solid rgba(14,15,18,0.08);'>\n        <span style='font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(14,15,18,0.4);display:block;margin-bottom:4px;'>Hora</span>\n        <span style='font-family:Arial,sans-serif;font-size:14px;color:#0E0F12;font-weight:600;'>${b.hora_display}</span>\n      </td></tr>\n      <tr><td style='padding:18px 24px;border-bottom:1px solid rgba(14,15,18,0.08);'>\n        <span style='font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(14,15,18,0.4);display:block;margin-bottom:4px;'>Modalidad</span>\n        <span style='font-family:Arial,sans-serif;font-size:14px;color:#0E0F12;font-weight:600;'>Videollamada · 30 minutos</span>\n      </td></tr>\n      <tr><td style='padding:18px 24px;'>\n        <span style='font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(14,15,18,0.4);display:block;margin-bottom:4px;'>Tema</span>\n        <span style='font-family:Arial,sans-serif;font-size:14px;color:#0E0F12;font-weight:600;'>${b.tema}</span>\n      </td></tr>\n    </table>\n  </td></tr>\n\n  <!-- CTA Google Calendar -->\n  <tr><td style='padding:28px 0 0;text-align:center;'>\n    <a href='${b.gcal_url}' target='_blank' style='display:inline-block;background:#0E0F12;color:#F8F7F5;text-decoration:none;padding:14px 32px;border-radius:2px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;'>Agregar a Google Calendar</a>\n  </td></tr>\n\n  <!-- Cuerpo -->\n  <tr><td style='padding:32px 0;'>\n    <p style='font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:rgba(14,15,18,0.6);margin:0 0 16px;'>Te enviaremos el link de videollamada 24 horas antes. Si necesitas cambiar la fecha, responde directamente a este correo.</p>\n    <p style='font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:rgba(14,15,18,0.6);margin:0;'>En VICTOR IA construimos inteligencia que trabaja 24/7 para tu empresa — agentes autónomos, sitios cinematográficos y automatización real. Nos vemos pronto.</p>\n  </td></tr>\n\n  <!-- Firma -->\n  <tr><td style='border-top:1px solid rgba(14,15,18,0.09);padding:28px 0 0;'>\n    <table cellpadding='0' cellspacing='0' border='0'>\n      <tr>\n        <td style='padding-right:14px;'>\n          <img src='${faviconUrl}' alt='VI' width='36' style='display:block;border-radius:6px;'>\n        </td>\n        <td>\n          <p style='margin:0;font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#0E0F12;letter-spacing:1px;'>VICTOR IA</p>\n          <p style='margin:2px 0 0;font-family:Arial,sans-serif;font-size:11px;color:rgba(14,15,18,0.5);'>Playa del Carmen, Quintana Roo · México</p>\n          <p style='margin:2px 0 0;font-family:Arial,sans-serif;font-size:11px;color:rgba(14,15,18,0.5);'>victor-ia-website.vercel.app</p>\n        </td>\n      </tr>\n    </table>\n  </td></tr>\n\n  <!-- Footer -->\n  <tr><td style='padding:24px 0 0;text-align:center;'>\n    <p style='font-family:Arial,sans-serif;font-size:10px;color:rgba(14,15,18,0.3);margin:0;'>© 2026 VICTOR IA · Playa del Carmen, México</p>\n  </td></tr>\n\n</table>\n</td></tr>\n</table>\n</body></html>`;\n\nreturn [{ json: { html, ...b } }];"
+      },
+      "id": "build-email-cliente",
+      "name": "Build Email Cliente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 220]
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.item.json.body;\n\nconst html = `<html><body style='font-family:Arial,sans-serif;background:#f5f5f5;padding:30px;'>\n<div style='max-width:500px;background:#fff;border-radius:6px;padding:28px;border:1px solid #e0e0e0;'>\n  <p style='font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#999;margin:0 0 16px;'>Nueva agenda · VICTOR IA</p>\n  <h2 style='margin:0 0 20px;font-size:22px;color:#0E0F12;'>${b.nombre}</h2>\n  <table width='100%' cellpadding='0' cellspacing='0'>\n    <tr><td style='padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:12px;color:#999;width:100px;'>Email</td><td style='padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600;color:#0E0F12;'><a href='mailto:${b.email}'>${b.email}</a></td></tr>\n    <tr><td style='padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:12px;color:#999;'>WhatsApp</td><td style='padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600;color:#0E0F12;'><a href='https://wa.me/${b.whatsapp.replace(/\\D/g,'')}'>${b.whatsapp}</a></td></tr>\n    <tr><td style='padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:12px;color:#999;'>Empresa</td><td style='padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;color:#0E0F12;'>${b.empresa||'—'}</td></tr>\n    <tr><td style='padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:12px;color:#999;'>Fecha</td><td style='padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600;color:#0E0F12;'>${b.fecha_display}</td></tr>\n    <tr><td style='padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:12px;color:#999;'>Hora</td><td style='padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600;color:#0E0F12;'>${b.hora_display}</td></tr>\n    <tr><td style='padding:8px 0;font-size:12px;color:#999;'>Tema</td><td style='padding:8px 0;font-size:13px;color:#0E0F12;'>${b.tema}</td></tr>\n  </table>\n  <div style='margin-top:20px;'><a href='${b.gcal_url}' target='_blank' style='background:#0E0F12;color:#fff;padding:10px 20px;text-decoration:none;border-radius:3px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;'>Agregar a Calendar</a></div>\n  <p style='margin:20px 0 0;font-size:11px;color:#bbb;'>Agendado el ${b.ts}</p>\n</div></body></html>`;\n\nreturn [{ json: { html, ...b } }];"
+      },
+      "id": "build-email-interno",
+      "name": "Build Email Interno",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.item.json.body;\nreturn [{ json: {\n  Timestamp: b.ts,\n  Nombre: b.nombre,\n  Email: b.email,\n  WhatsApp: b.whatsapp,\n  Empresa: b.empresa || '',\n  Tema: b.tema,\n  Fecha: b.fecha,\n  Hora: b.hora,\n  FechaDisplay: b.fecha_display,\n  HoraDisplay: b.hora_display,\n  URL: b.source_url || ''\n}}];"
+      },
+      "id": "build-sheets-row",
+      "name": "Build Sheets Row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 580]
+    }
+  ],
+  "connections": {
+    "Webhook Agenda": {
+      "main": [[
+        { "node": "Respond OK", "type": "main", "index": 0 },
+        { "node": "Build Email Cliente", "type": "main", "index": 0 },
+        { "node": "Build Email Interno", "type": "main", "index": 0 },
+        { "node": "Build Sheets Row", "type": "main", "index": 0 }
+      ]]
+    },
+    "Build Email Cliente":  { "main": [[{ "node": "Email → Cliente", "type": "main", "index": 0 }]] },
+    "Build Email Interno":  { "main": [[{ "node": "Email → Equipo Victor IA", "type": "main", "index": 0 }]] },
+    "Build Sheets Row":     { "main": [[{ "node": "Google Sheets — Log", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "meta": { "templateCredsSetupCompleted": true },
+  "tags": [{ "name": "Victor IA" }]
+}

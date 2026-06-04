@@ -1,0 +1,78 @@
+<style>@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,300;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap');</style>
+<body style="margin:0;padding:0;background:#070809;font-family:'Space Grotesk',Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#070809;"><tr><td align="center" style="padding:40px 16px 56px;">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+<!-- ══ HEADER ══ -->
+<tr><td style="background:#0E0F12;padding:32px 44px;border-bottom:1px solid rgba(248,247,245,0.05);">
+  <table width="100%" cellpadding="0" cellspacing="0"><tr>
+    <td>
+      <img src="https://victor-ia-website.vercel.app/assets/brand/logo-full.png" width="130" style="display:block;max-width:130px;" alt="VICTOR IA">
+    </td>
+    <td align="right" style="vertical-align:middle;">
+      <span style="font-family:'Space Grotesk',Arial,sans-serif;background:#FFAA17;color:#0E0F12;padding:6px 18px;font-size:8px;font-weight:700;letter-spacing:0.35em;text-transform:uppercase;">Nuevo Lead</span>
+    </td>
+  </tr></table>
+</td></tr>
+
+<!-- ══ INTRO ══ -->
+<tr><td style="background:#0E0F12;padding:44px 44px 8px;">
+  <h1 style="margin:0 0 16px;font-family:'Fraunces',Georgia,serif;font-size:30px;font-weight:300;font-style:italic;color:#F8F7F5;line-height:1.15;letter-spacing:-0.015em;">Nuevo prospecto<br><span style="color:#FFAA17;">interactu&oacute; con Victor IA.</span></h1>
+  <p style="margin:0 0 36px;font-family:'Space Grotesk',Arial,sans-serif;font-size:12px;font-weight:300;color:rgba(248,247,245,0.32);line-height:1.8;border-left:2px solid rgba(255,170,23,0.5);padding-left:16px;">Un visitante complet&oacute; el formulario del asistente de voz. Aqu&iacute; est&aacute;n sus datos de contacto.</p>
+</td></tr>
+
+<!-- ══ DATOS ══ -->
+<tr><td style="background:#0E0F12;padding:0 44px 40px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid rgba(248,247,245,0.06);">
+
+    <tr>
+      <td style="padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);width:120px;font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;vertical-align:top;">Nombre</td>
+      <td style="padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:14px;color:#F8F7F5;font-weight:500;">{{ $json.nombre || '—' }}</td>
+    </tr>
+    <tr>
+      <td style="padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;vertical-align:top;">Email</td>
+      <td style="padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);">{{ $json.email ? '<a href="mailto:' + $json.email + '" style="font-family:\'Space Grotesk\',Arial,sans-serif;font-size:14px;color:#FFAA17;text-decoration:none;font-weight:500;">' + $json.email + '</a>' : '<span style="font-family:Arial,sans-serif;font-size:14px;color:rgba(248,247,245,0.2);">—</span>' }}</td>
+    </tr>
+    <tr>
+      <td style="padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;vertical-align:top;">WhatsApp</td>
+      <td style="padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);">{{ $json.whatsapp ? '<a href="https://wa.me/' + $json.whatsapp.replace(/\D/g,"") + '" style="font-family:\'Space Grotesk\',Arial,sans-serif;font-size:14px;color:#25D366;text-decoration:none;font-weight:500;">' + $json.whatsapp + ' &rarr;</a>' : '<span style="font-family:Arial,sans-serif;font-size:14px;color:rgba(248,247,245,0.2);">—</span>' }}</td>
+    </tr>
+    <tr>
+      <td style="padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;">P&aacute;gina</td>
+      <td style="padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;color:rgba(248,247,245,0.45);">{{ $json.page_title || '—' }}</td>
+    </tr>
+    <tr>
+      <td style="padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;">Canal</td>
+      <td style="padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;color:rgba(248,247,245,0.45);">{{ $json.canal || '—' }}</td>
+    </tr>
+    <tr>
+      <td style="padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;">Duraci&oacute;n</td>
+      <td style="padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;color:rgba(248,247,245,0.45);">{{ $json.durStr || '—' }}</td>
+    </tr>
+    <tr>
+      <td style="padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;">Scroll</td>
+      <td style="padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;color:rgba(248,247,245,0.45);">{{ $json.scrlStr || '—' }}</td>
+    </tr>
+    <tr>
+      <td style="padding:14px 0;font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;">Fecha</td>
+      <td style="padding:14px 0 14px 20px;font-family:'Space Grotesk',Arial,sans-serif;font-size:12px;color:rgba(248,247,245,0.3);">{{ $json.fecha }} &nbsp;&middot;&nbsp; {{ $json.hora }}</td>
+    </tr>
+
+  </table>
+</td></tr>
+
+<!-- ══ BOTÓN AUDIO ══ -->
+{{ $json.conv_id ? '<tr><td style="background:#0E0F12;padding:0 44px 44px;"><a href="https://elevenlabs.io/app/conversational-ai/history/' + $json.conv_id + '" target="_blank" style="display:block;background:#FFAA17;color:#0E0F12;text-align:center;padding:20px 24px;font-family:\'Space Grotesk\',Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;text-decoration:none;">Escuchar grabaci&oacute;n completa &nbsp;&nbsp;&rarr;</a></td></tr>' : '' }}
+
+<!-- ══ TRANSCRIPCIÓN ══ -->
+{{ $json.transcript_texto ? '<tr><td style="background:#0E0F12;padding:0 44px 44px;"><p style="margin:0 0 16px;font-family:\'Space Grotesk\',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.4em;text-transform:uppercase;">Transcripci&oacute;n de la llamada</p><div style="border:1px solid rgba(248,247,245,0.07);padding:22px 24px;font-family:\'Space Grotesk\',Arial,sans-serif;font-size:11px;line-height:1.9;color:rgba(248,247,245,0.35);white-space:pre-wrap;">' + $json.transcript_texto.substring(0,2500).replace(/</g,"&lt;").replace(/>/g,"&gt;") + ($json.transcript_texto.length > 2500 ? "\n\n[...truncado]" : "") + '</div></td></tr>' : '' }}
+
+<!-- ══ FOOTER ══ -->
+<tr><td style="background:#070809;padding:24px 44px 32px;text-align:center;border-top:1px solid rgba(248,247,245,0.04);">
+  <p style="margin:0 0 10px;font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.5);letter-spacing:0.4em;text-transform:uppercase;">Victor IA</p>
+  <p style="margin:0;font-family:'Space Grotesk',Arial,sans-serif;font-size:10px;color:rgba(248,247,245,0.15);line-height:1.9;">victor-ia.com.mx &middot; info@victor-ia.com.mx &middot; +52 984 235 3159</p>
+</td></tr>
+
+</table>
+</td></tr></table>
+</body>

@@ -1,0 +1,59 @@
+{
+  "name": "Victor IA — Auto-Tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "auto-tracker",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "at-0001-0001-0001-000000000001",
+      "name": "Webhook Auto-Tracker",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "auto-tracker"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body   = $input.first().json.body || $input.first().json;\nconst action = body.action || 'write';\nconst sd     = $getWorkflowStaticData('global');\nif (!sd.buckets) sd.buckets = {};\n\n// ── WRITE ─────────────────────────────────────────────────────────────────\nif (action === 'write') {\n  const h   = (body.hora || '00:00').substring(0, 2);\n  const pk  = (body.project || 'VictorIA').replace(/[^a-zA-Z0-9]/g, '_');\n\n  // source: 'window' = tiempo real de ventana activa (window-tracker)\n  //         'claude' = acciones de Claude Code (hook)\n  // Cada fuente tiene su propio bucket para no mezclar tiempos.\n  const src = body.source ||\n    (body.session === 'window-tracker' ? 'window' :\n     (body.tool === 'WindowTracker'    ? 'window' : 'claude'));\n\n  const key = `${body.dateKey}_${h}_${pk}_${src}`;\n\n  if (!sd.buckets[key]) {\n    sd.buckets[key] = {\n      dateKey:    body.dateKey || '',\n      hour:       h,\n      hora:       body.hora    || `${h}:00`,\n      project:    body.project || 'Victor IA',\n      client:     body.client  || body.project || 'Victor IA',\n      cat:        body.cat     || 'Desarrollo',\n      source:     src,\n      swDuration: {},   // { swId: segundos acumulados }\n      contexts:   {},   // { swId: [archivos/secciones vistas] }\n      files: [], langs: [], termCmds: [], gitOps: [],\n      count: 0, saves: 0, edits: 0, terminals: 0, debugs: 0, creates: 0,\n      sessions: []\n    };\n  }\n\n  const b = sd.buckets[key];\n  b.count++;\n\n  // ── swDuration ────────────────────────────────────────────────────────\n  const incoming = body.swDuration || {};\n  for (const [sw, secs] of Object.entries(incoming)) {\n    b.swDuration[sw] = (b.swDuration[sw] || 0) + (secs || 0);\n  }\n  // Para source=claude sin swDuration explícita, estima 60s (no aplica a window)\n  if (src === 'claude' && !Object.keys(incoming).length) {\n    (body.sw || []).forEach(sw => {\n      b.swDuration[sw] = (b.swDuration[sw] || 0) + 60;\n    });\n  }\n\n  // ── Contextos (archivos o secciones activas por app) ──────────────────\n  const ctxIn = (body.meta && body.meta.contexts) || {};\n  for (const [sw, ctxList] of Object.entries(ctxIn)) {\n    if (!b.contexts[sw]) b.contexts[sw] = [];\n    (ctxList || []).forEach(c => {\n      if (c && !b.contexts[sw].includes(c)) b.contexts[sw].push(c);\n    });\n    if (b.contexts[sw].length > 10) b.contexts[sw] = b.contexts[sw].slice(-10);\n  }\n\n  // ── Archivos (hook claude) ─────────────────────────────────────────────\n  (body.file ? body.file.split(', ') : []).map(f => f.trim()).filter(Boolean)\n    .forEach(f => { if (!b.files.includes(f)) b.files.push(f); });\n\n  // ── Meta ──────────────────────────────────────────────────────────────\n  const meta = body.meta || {};\n  if (meta.langs)    meta.langs.forEach(l    => { if (!b.langs.includes(l))     b.langs.push(l);     });\n  if (meta.termCmds) meta.termCmds.forEach(c => { if (!b.termCmds.includes(c)) b.termCmds.push(c); });\n  if (meta.gitOps)   meta.gitOps.forEach(g   => { if (!b.gitOps.includes(g))   b.gitOps.push(g);   });\n  b.saves     += meta.saves     || 0;\n  b.edits     += meta.edits     || 0;\n  b.terminals += meta.terminals || 0;\n  b.debugs    += meta.debugs    || 0;\n  b.creates   += meta.creates   || 0;\n\n  if (body.session && !b.sessions.includes(body.session)) b.sessions.push(body.session);\n\n  if (b.files.length    > 40) b.files    = b.files.slice(-40);\n  if (b.termCmds.length > 25) b.termCmds = b.termCmds.slice(-25);\n  if (b.gitOps.length   > 15) b.gitOps   = b.gitOps.slice(-15);\n\n  return [{ json: { ok: true, key, count: b.count, source: src } }];\n\n// ── READ ──────────────────────────────────────────────────────────────────\n} else {\n  const buckets = Object.values(sd.buckets || {});\n  buckets.sort((a, b) => (`${b.dateKey}_${b.hour}`).localeCompare(`${a.dateKey}_${a.hour}`));\n\n  const entries = buckets.map(b => {\n    const src = b.source || 'window';\n\n    const swEntries = Object.entries(b.swDuration || {})\n      .filter(([, s]) => s > 0)\n      .sort((a, bb) => bb[1] - a[1]);\n    const swList = swEntries.map(([sw]) => sw);\n    if (!swList.length) swList.push(src === 'window' ? 'vscode' : 'claude-code');\n\n    // Duración: window = tiempo real sin cap | claude = estimado con mín 15min\n    const totalSW = swEntries.reduce((acc, [, s]) => acc + s, 0);\n    const durSec  = src === 'window'\n      ? Math.max(totalSW, 0)\n      : Math.min(Math.max(totalSW, 900), 3600);\n    const dur = Math.round((durSec / 3600) * 4) / 4;\n\n    // Desglose: 'after-effects 12min [banner.aep] · hubspot 8min'\n    const swBreakdown = swEntries.slice(0, 6).map(([sw, s]) => {\n      const mins = Math.round(s / 60);\n      const ctx  = (b.contexts && b.contexts[sw] || []).slice(0, 2).join(', ');\n      return ctx ? `${sw} ${mins}min [${ctx}]` : `${sw} ${mins}min`;\n    }).join(' · ');\n\n    // Descripción según fuente\n    let desc;\n    if (src === 'window') {\n      const appParts = swEntries.slice(0, 3).map(([sw, s]) => {\n        const mins = Math.round(s / 60);\n        const ctx  = (b.contexts && b.contexts[sw] || [])[0] || '';\n        return ctx ? `${sw}:${ctx} ${mins}min` : `${sw} ${mins}min`;\n      });\n      desc = `\\u{1F4CA} Apps: ${appParts.join(' \\u00B7 ') || b.project}`;\n    } else {\n      const topFiles = b.files.slice(0, 3).join(', ') + (b.files.length > 3 ? ` +${b.files.length - 3}` : '');\n      const actParts = [];\n      if (b.saves  > 0) actParts.push(`${b.saves} saves`);\n      if (b.edits  > 0) actParts.push(`${b.edits} edits`);\n      if (b.debugs > 0) actParts.push(`${b.debugs} debug`);\n      if (b.gitOps && b.gitOps.length) actParts.push(b.gitOps.slice(0, 2).join(', '));\n      const actStr = actParts.length ? ` \\u2014 ${actParts.join(' \\u00B7 ')}` : '';\n      desc = `\\u{1F916} Claude: ${topFiles || b.project}${actStr}`;\n    }\n\n    const obs = src === 'window'\n      ? `Window tracking \\u00B7 ${swBreakdown || swList.join(', ')}`\n      : `Claude Code \\u00B7 ${b.sessions.length} sesi\\u00F3n(es) \\u00B7 ${swBreakdown || swList.join(', ')}`;\n\n    const noteParts = [];\n    if (b.langs    && b.langs.length)    noteParts.push(`Langs: ${b.langs.join(', ')}`);\n    if (b.termCmds && b.termCmds.length) noteParts.push(`Cmds: ${b.termCmds.slice(0, 4).join(' | ')}`);\n    if (swBreakdown) noteParts.push(`SW: ${swBreakdown}`);\n    const notes = noteParts.join(' | ') || `Apps: ${swList.slice(0, 5).join(', ')}`;\n\n    const pk = b.project.replace(/[^a-zA-Z0-9]/g, '_');\n    return {\n      id:         `auto_${b.dateKey}_${b.hour}_${pk}_${src}`,\n      dateKey:    b.dateKey,\n      hora:       `${String(b.hour).padStart(2, '0')}:00`,\n      source:     src,\n      desc,\n      cat:        b.cat,\n      project:    b.project,\n      client:     b.client || b.project,\n      status:     'Completado',\n      priority:   'Media',\n      dur,\n      durSec,\n      tags:       [],\n      rework:     0,\n      obs,\n      notes,\n      sw:         swList,\n      swDuration: b.swDuration,\n      contexts:   b.contexts || {},\n      isAuto:     true\n    };\n  });\n\n  return [{ json: { entries } }];\n}"
+      },
+      "id": "at-0002-0002-0002-000000000002",
+      "name": "Auto-Tracker Logic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" },
+              { "name": "Content-Type", "value": "application/json" }
+            ]
+          }
+        }
+      },
+      "id": "at-0003-0003-0003-000000000003",
+      "name": "Respuesta CORS",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [720, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Auto-Tracker": {
+      "main": [[{ "node": "Auto-Tracker Logic", "type": "main", "index": 0 }]]
+    },
+    "Auto-Tracker Logic": {
+      "main": [[{ "node": "Respuesta CORS", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": true,
+  "settings": { "executionOrder": "v1" },
+  "meta": { "instanceId": "victor-ia" }
+}

@@ -1,0 +1,376 @@
+<!-- Sección Actividades Repetitivas (integrada en tracker index.html) -->
+
+<style>
+    .actividades-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+        gap: 20px;
+        padding: 24px 32px;
+    }
+
+    .actividad-card {
+        background: #0A0A0A;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 24px;
+        transition: all 0.3s ease;
+    }
+
+    .actividad-card:hover {
+        border-color: rgba(255, 214, 10, 0.3);
+        background: #1A1A1A;
+    }
+
+    .actividad-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+
+    .actividad-title { font-size: 16px; font-weight: 600; }
+    .actividad-category {
+        display: inline-block;
+        padding: 4px 8px;
+        background: rgba(255, 214, 10, 0.15);
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #FFD60A;
+        text-transform: uppercase;
+    }
+
+    .actividad-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        background: rgba(34, 197, 94, 0.15);
+        border-radius: 4px;
+        font-size: 10px;
+        color: #86EFAC;
+    }
+
+    .actividad-section {
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .actividad-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .section-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: #FFD60A;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .section-content {
+        font-size: 13px;
+        color: #A0A0A0;
+        line-height: 1.5;
+    }
+
+    .badge-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        font-size: 11px;
+        color: #FFFFFF;
+    }
+
+    .cost-box {
+        background: rgba(255, 214, 10, 0.05);
+        border: 1px solid rgba(255, 214, 10, 0.15);
+        border-radius: 8px;
+        padding: 12px;
+    }
+
+    .cost-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .cost-row:last-child {
+        margin-bottom: 0;
+        padding-top: 8px;
+        border-top: 1px solid rgba(255, 214, 10, 0.2);
+        font-weight: 600;
+        color: #FFD60A;
+    }
+
+    .metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .metric {
+        background: rgba(255, 255, 255, 0.02);
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 11px;
+    }
+
+    .metric-value {
+        font-weight: 600;
+        color: #FFD60A;
+        display: block;
+    }
+
+    .metric-label {
+        color: #707070;
+        font-size: 10px;
+    }
+
+    .kpi-grid-actividades {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        padding: 24px 32px;
+    }
+
+    .kpi-card-actividades {
+        background: #0A0A0A;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .kpi-label-actividades {
+        font-size: 12px;
+        color: #707070;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .kpi-value-actividades {
+        font-size: 32px;
+        font-weight: 700;
+        color: #FFD60A;
+        margin-bottom: 4px;
+    }
+
+    .kpi-meta-actividades {
+        font-size: 11px;
+        color: #505050;
+    }
+</style>
+
+<script>
+    // Datos de actividades repetitivas con costos en MXN
+    const ACTIVIDADES_DATA = {
+        'blog-daily-publishing': {
+            name: 'Blog Publishing Diario',
+            category: 'blog',
+            status: 'active',
+            what: 'Publicar artículos de blog SEO-optimizados',
+            how: 'Scripts Python (generate-article.py, qa-verify.py) + API Claude + Vercel deploy',
+            why: 'Generar tráfico orgánico y autoridad en SEO; Lead generation; Posicionamiento IA en LATAM',
+            market: 'Empresas medianas y PyMEs México/LATAM',
+            expectedResults: '100+ artículos/año, 10K+ visitantes/mes, ROI +300%',
+            department: 'Content & Marketing',
+            channels: ['Blog', 'Email', 'LinkedIn', 'Facebook'],
+            platforms: ['victor-ia.xyz'],
+            software: ['n8n', 'Claude API', 'Vercel'],
+            agents: ['Claude Sonnet 4.6'],
+            skills: ['web-4o', 'seo-audit-tecnico'],
+            costs: {
+                apiCalls: 7650,
+                agents: 11050,
+                software: 3400,
+                storage: 850,
+                total: 22950
+            },
+            successCount: 35,
+            errorCount: 1
+        },
+        'blog-daily-research': {
+            name: 'Investigación Diaria para Blog',
+            category: 'research',
+            status: 'active',
+            what: 'Investigar temas, validar datos, consultar fuentes para artículos',
+            how: 'Web scraping + búsqueda en múltiples fuentes + verificación de datos + fact-checking',
+            why: 'Garantizar que cada artículo tiene información verificada y research de calidad',
+            market: 'Empresas medianas y PyMEs México/LATAM',
+            expectedResults: '100% datos verificados, 5+ fuentes por artículo, 30-45 min/artículo',
+            department: 'Content Strategy',
+            channels: ['Internal', 'Blog'],
+            platforms: ['Research Sources'],
+            software: ['Web Scraper', 'Fact-check APIs', 'Google Sheets'],
+            agents: ['Claude Opus 4.8'],
+            skills: ['web-scrape-complete', 'deep-research'],
+            costs: {
+                apiCalls: 3400,
+                agents: 7650,
+                software: 850,
+                storage: 340,
+                total: 12240
+            },
+            successCount: 34,
+            errorCount: 0
+        },
+        'blog-daily-copy': {
+            name: 'Redacción de Artículos Blog',
+            category: 'copy',
+            status: 'active',
+            what: 'Redactar artículos 2,500+ palabras, SEO-optimizados, tono Victor IA',
+            how: 'Claude API (Sonnet 4.6) con prompts especializados + brand guidelines + revisor',
+            why: 'Producir contenido de alta calidad, consistente con marca Victor IA',
+            market: 'Empresas medianas y PyMEs México/LATAM',
+            expectedResults: '1 artículo/día, 2,500+ palabras, 95+ puntuación, tasa conversión +15%',
+            department: 'Content Creation',
+            channels: ['Blog', 'Email'],
+            platforms: ['victor-ia.xyz'],
+            software: ['Claude API', 'Google Docs'],
+            agents: ['Claude Sonnet 4.6'],
+            skills: ['web-4o', 'skill-inclusivo'],
+            costs: {
+                apiCalls: 5100,
+                agents: 6800,
+                software: 1360,
+                storage: 510,
+                total: 13770
+            },
+            successCount: 34,
+            errorCount: 1
+        }
+    };
+
+    function renderActividades() {
+        const activities = Object.values(ACTIVIDADES_DATA);
+        const totalCost = activities.reduce((sum, a) => sum + a.costs.total, 0);
+        const activeTasks = activities.filter(a => a.status === 'active').length;
+        const totalExecutions = activities.reduce((sum, a) => sum + (a.successCount || 0), 0);
+
+        // Actualizar KPIs
+        document.getElementById('kpiActiveTasks')?.textContent || (function() {
+            const kpiHtml = `
+                <div class="kpi-grid-actividades">
+                    <div class="kpi-card-actividades">
+                        <div class="kpi-label-actividades">Tareas Activas</div>
+                        <div class="kpi-value-actividades" id="kpiActiveTasks">${activeTasks}</div>
+                        <div class="kpi-meta-actividades">De ${activities.length} tareas</div>
+                    </div>
+                    <div class="kpi-card-actividades">
+                        <div class="kpi-label-actividades">Costo Total/Mes</div>
+                        <div class="kpi-value-actividades">$${(totalCost).toLocaleString('es-MX')}</div>
+                        <div class="kpi-meta-actividades">MXN - Todos los softwares</div>
+                    </div>
+                    <div class="kpi-card-actividades">
+                        <div class="kpi-label-actividades">Ejecuciones Exitosas</div>
+                        <div class="kpi-value-actividades">${totalExecutions}</div>
+                        <div class="kpi-meta-actividades">Últimos 30 días</div>
+                    </div>
+                </div>
+            `;
+            document.querySelector('.content-wrapper').insertAdjacentHTML('afterbegin', kpiHtml);
+        })();
+
+        // Renderizar tarjetas
+        const html = activities.map(activity => `
+            <div class="actividad-card">
+                <div class="actividad-header">
+                    <div>
+                        <div class="actividad-title">${activity.name}</div>
+                        <span class="actividad-category">${activity.category}</span>
+                    </div>
+                    <span class="actividad-status">${activity.status === 'active' ? '✓ Activo' : '⚠️ Pausado'}</span>
+                </div>
+
+                <div class="actividad-section">
+                    <div class="section-label">Qué se hace</div>
+                    <div class="section-content">${activity.what}</div>
+                </div>
+
+                <div class="actividad-section">
+                    <div class="section-label">Cómo se hace</div>
+                    <div class="section-content">${activity.how}</div>
+                </div>
+
+                <div class="actividad-section">
+                    <div class="section-label">Objetivo</div>
+                    <div class="section-content">${activity.why}</div>
+                </div>
+
+                <div class="actividad-section">
+                    <div class="section-label">Departamento responsable</div>
+                    <div class="section-content"><strong>${activity.department}</strong></div>
+                </div>
+
+                <div class="actividad-section">
+                    <div class="section-label">Agentes & Skills</div>
+                    <div style="margin-bottom: 8px;">
+                        <strong style="color: #FFD60A; font-size: 11px;">Agentes:</strong>
+                        <div class="badge-group" style="margin-top: 4px;">
+                            ${(activity.agents || []).map(a => `<span class="badge">${a}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div>
+                        <strong style="color: #FFD60A; font-size: 11px;">Skills:</strong>
+                        <div class="badge-group" style="margin-top: 4px;">
+                            ${(activity.skills || []).map(s => `<span class="badge">${s}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actividad-section">
+                    <div class="section-label">Costos mensuales (MXN)</div>
+                    <div class="cost-box">
+                        <div class="cost-row">
+                            <span>API Calls</span>
+                            <span>$${activity.costs.apiCalls.toLocaleString('es-MX')}</span>
+                        </div>
+                        <div class="cost-row">
+                            <span>Agentes IA</span>
+                            <span>$${activity.costs.agents.toLocaleString('es-MX')}</span>
+                        </div>
+                        <div class="cost-row">
+                            <span>Software SaaS</span>
+                            <span>$${activity.costs.software.toLocaleString('es-MX')}</span>
+                        </div>
+                        <div class="cost-row">
+                            <span>Storage/Hosting</span>
+                            <span>$${activity.costs.storage.toLocaleString('es-MX')}</span>
+                        </div>
+                        <div class="cost-row">
+                            <span>TOTAL</span>
+                            <span>$${activity.costs.total.toLocaleString('es-MX')}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metrics">
+                    <div class="metric">
+                        <span class="metric-value">${activity.successCount}</span>
+                        <span class="metric-label">Éxitos</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value">${activity.errorCount}</span>
+                        <span class="metric-label">Errores</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        return html;
+    }
+</script>

@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telemetría para Hoteles — VICTOR IA</title>
+<meta name="description" content="Monitoreo en tiempo real de toda la infraestructura de tu hotel. Sensores IoT, alertas predictivas y trazabilidad total a través del Tracker de VICTOR IA.">
+<meta name="theme-color" content="#070809">
+<meta property="og:title" content="Telemetría para Hoteles — VICTOR IA">
+<meta property="og:description" content="Tu hotel, visible en tiempo real. Cada sensor, cada alerta, cada acción — trazada en el Tracker.">
+<meta property="og:type" content="website">
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&family=Cormorant+Display:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #070809;
+  --surface: #0E0F12;
+  --surface2: #131418;
+  --warm:    #F8F7F5;
+  --bone:    rgba(248,247,245,0.92);
+  --bone2:   rgba(248,247,245,0.50);
+  --bone3:   rgba(248,247,245,0.07);
+  --amber:   #FFAA17;
+  --amber2:  rgba(255,170,23,0.14);
+  --amber3:  rgba(255,170,23,0.07);
+  --green:   #4ade80;
+  --green2:  rgba(74,222,128,0.12);
+  --red:     #f87171;
+  --red2:    rgba(248,113,113,0.12);
+  --blue:    #60a5fa;
+  --blue2:   rgba(96,165,250,0.12);
+  --purple:  #c084fc;
+  --border:  rgba(248,247,245,0.07);
+  --radius:  2px;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--bone);
+  min-height: 100vh;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+
+/* ─ TOPBAR ─ */
+#topbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 clamp(1.2rem,3vw,2.5rem);
+  height: 58px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.via-logo-wrap { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.via-logo-wrap img { height: 28px; }
+.via-logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; color: var(--bone); }
+.via-logo-sep { width: 1px; height: 18px; background: var(--border); }
+.topbar-badge {
+  background: var(--amber2);
+  border: 1px solid rgba(255,170,23,0.4);
+  color: var(--amber);
+  font-size: 9px; padding: 2px 8px;
+  letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600;
+}
+.topbar-spacer { flex: 1; }
+.topbar-nav { display: flex; gap: 4px; }
+.topbar-nav a {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--bone2); padding: 8px 14px;
+  border: 1px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.topbar-nav a:hover { color: var(--amber); border-color: rgba(255,170,23,0.3); }
+.topbar-nav a.active { color: var(--amber); border-color: rgba(255,170,23,0.4); background: var(--amber3); }
+.topbar-cta {
+  background: var(--amber); color: #000;
+  padding: 9px 18px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  transition: opacity 0.15s;
+}
+.topbar-cta:hover { opacity: 0.85; }
+
+/* ─ HERO ─ */
+#hero {
+  padding: clamp(4rem,10vw,7rem) clamp(1.5rem,5vw,5rem) clamp(3rem,8vw,5.5rem);
+  border-bottom: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+#hero::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 70% 60% at 65% 50%, rgba(255,170,23,0.06) 0%, transparent 70%);
+}
+.hero-label {
+  font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--amber); font-weight: 600; margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.hero-label::before {
+  content: ''; display: block; width: 24px; height: 1px; background: var(--amber);
+}
+.hero-h1 {
+  font-family: 'Cormorant Display', serif;
+  font-size: clamp(2.8rem, 7vw, 5.5rem);
+  font-weight: 400; line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--warm); margin-bottom: 1.25rem;
+  max-width: 800px;
+}
+.hero-h1 em { font-style: italic; color: var(--amber); }
+.hero-sub {
+  font-size: clamp(14px,1.8vw,17px); color: var(--bone2);
+  line-height: 1.65; max-width: 560px; margin-bottom: 2.5rem;
+  font-weight: 300;
+}
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.btn-primary {
+  background: var(--amber); color: #000;
+  padding: 13px 28px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  transition: opacity 0.15s; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-primary:hover { opacity: 0.85; }
+.btn-ghost {
+  background: transparent; color: var(--bone2);
+  border: 1px solid var(--border);
+  padding: 13px 24px;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
+  transition: border-color 0.15s, color 0.15s; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-ghost:hover { border-color: rgba(255,170,23,0.4); color: var(--amber); }
+
+/* ─ STATS BAR ─ */
+#stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+.stat-cell {
+  padding: 1.6rem 2rem;
+  border-right: 1px solid var(--border);
+}
+.stat-cell:last-child { border-right: none; }
+.stat-kpi {
+  font-family: 'Cormorant Display', serif;
+  font-size: clamp(2rem,4vw,3rem); font-weight: 300;
+  color: var(--amber); line-height: 1; margin-bottom: 0.4rem;
+}
+.stat-desc { font-size: 11px; color: var(--bone2); font-weight: 400; }
+.stat-sub { font-size: 9px; color: rgba(248,247,245,0.3); letter-spacing: 0.1em; margin-top: 3px; }
+
+/* ─ SECTION WRAPPER ─ */
+.section { padding: clamp(3rem,7vw,5.5rem) clamp(1.5rem,5vw,5rem); border-bottom: 1px solid var(--border); }
+.section-label {
+  font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--amber); font-weight: 600; margin-bottom: 1.2rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-label::before {
+  content: ''; display: block; width: 16px; height: 1px; background: var(--amber);
+}
+.section-h2 {
+  font-family: 'Cormorant Display', serif;
+  font-size: clamp(1.9rem,4vw,3.2rem);
+  font-weight: 400; line-height: 1.1; color: var(--warm);
+  margin-bottom: 1rem;
+}
+.section-h2 em { font-style: italic; color: var(--amber); }
+.section-body {
+  font-size: 15px; color: var(--bone2); line-height: 1.7;
+  max-width: 620px; font-weight: 300;
+}
+
+/* ─ SENSOR GRID ─ */
+.sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 2.5rem;
+}
+.sensor-card {
+  background: var(--surface);
+  padding: 1.75rem 1.75rem;
+  transition: background 0.2s;
+}
+.sensor-card:hover { background: var(--surface2); }
+.sensor-icon {
+  font-size: 22px; margin-bottom: 1rem;
+  width: 44px; height: 44px;
+  background: var(--bone3); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+}
+.sensor-name {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--bone); margin-bottom: 0.5rem;
+}
+.sensor-desc {
+  font-size: 12px; color: var(--bone2); line-height: 1.55; font-weight: 300;
+}
+.sensor-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 1rem; }
+.stag {
+  font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 2px 7px; border: 1px solid var(--border); color: var(--bone2);
+}
+.stag.amber { border-color: rgba(255,170,23,0.4); color: var(--amber); }
+.stag.green { border-color: rgba(74,222,128,0.35); color: var(--green); }
+.stag.blue  { border-color: rgba(96,165,250,0.35); color: var(--blue); }
+.stag.red   { border-color: rgba(248,113,113,0.3); color: var(--red); }
+
+/* ─ LIVE FEED MOCKUP ─ */
+.live-feed {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  margin-top: 2.5rem;
+  overflow: hidden;
+}
+.feed-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+.feed-title { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--bone2); }
+.feed-live {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 9px; color: var(--green); letter-spacing: 0.15em; text-transform: uppercase;
+}
+.feed-live::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+  animation: pulse-green 2s infinite;
+}
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.35; }
+}
+.feed-row {
+  display: grid;
+  grid-template-columns: 38px 1fr 90px 100px 80px;
+  align-items: center;
+  padding: 0.7rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  transition: background 0.12s;
+}
+.feed-row:last-child { border-bottom: none; }
+.feed-row:hover { background: var(--bone3); }
+.feed-row.header {
+  font-size: 9px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--bone2); background: transparent;
+}
+.feed-num { font-size: 10px; color: var(--bone2); font-variant-numeric: tabular-nums; }
+.feed-desc { color: var(--bone); }
+.feed-sensor { font-size: 10px; color: var(--bone2); }
+.feed-time { font-size: 10px; color: var(--bone2); font-variant-numeric: tabular-nums; }
+.feed-status {
+  font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 3px 8px; border: 1px solid; text-align: center;
+}
+.s-ok    { border-color: rgba(74,222,128,0.4);  color: var(--green); }
+.s-warn  { border-color: rgba(255,170,23,0.4);  color: var(--amber); }
+.s-alert { border-color: rgba(248,113,113,0.4); color: var(--red); }
+.s-info  { border-color: rgba(96,165,250,0.35); color: var(--blue); }
+
+/* ─ PROCESS STEPS ─ */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 2.5rem;
+}
+.step-card {
+  background: var(--surface);
+  padding: 2rem 1.75rem;
+}
+.step-num {
+  font-family: 'Cormorant Display', serif;
+  font-size: 2.8rem; font-weight: 300; color: rgba(255,170,23,0.18);
+  line-height: 1; margin-bottom: 1rem; letter-spacing: -0.02em;
+}
+.step-name {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--bone); margin-bottom: 0.65rem;
+}
+.step-desc { font-size: 12px; color: var(--bone2); line-height: 1.6; font-weight: 300; }
+
+/* ─ TRACKER INTEGRATION ─ */
+.tracker-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  margin-top: 2.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 0;
+}
+.tracker-info {
+  padding: 2.5rem 2.5rem;
+  border-right: 1px solid var(--border);
+}
+.tracker-ui {
+  padding: 1.5rem;
+}
+.tracker-ui-inner {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.tui-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.7rem 1rem;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.tui-logo {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--amber);
+}
+.tui-badge {
+  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 2px 7px; background: var(--amber2);
+  border: 1px solid rgba(255,170,23,0.4); color: var(--amber);
+}
+.tui-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 72px 80px 70px;
+  align-items: center;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+.tui-row.th {
+  font-size: 8px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--bone2); background: var(--surface2);
+}
+.tui-row:last-child { border-bottom: none; }
+.tui-row:not(.th):hover { background: var(--bone3); }
+.tui-n { font-size: 9px; color: var(--bone2); }
+.tui-d { color: var(--bone); font-size: 11px; }
+.tui-cat {
+  font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 2px 6px; border: 1px solid var(--border); color: var(--bone2);
+}
+.tui-cat.sensor  { border-color: rgba(96,165,250,0.35); color: var(--blue); }
+.tui-cat.alerta  { border-color: rgba(248,113,113,0.35); color: var(--red); }
+.tui-cat.mant    { border-color: rgba(74,222,128,0.35); color: var(--green); }
+.tui-cat.config  { border-color: rgba(255,170,23,0.4); color: var(--amber); }
+.tui-h  { color: var(--amber); font-variant-numeric: tabular-nums; font-size: 11px; text-align: right; }
+
+/* ─ BENEFITS GRID ─ */
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+.benefit-card {
+  padding: 1.5rem 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: border-color 0.2s;
+}
+.benefit-card:hover { border-color: rgba(255,170,23,0.3); }
+.benefit-icon { font-size: 18px; margin-bottom: 0.85rem; }
+.benefit-title {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--bone); margin-bottom: 0.5rem;
+}
+.benefit-body { font-size: 12px; color: var(--bone2); line-height: 1.6; font-weight: 300; }
+
+/* ─ CTA BLOCK ─ */
+#cta {
+  padding: clamp(4rem,9vw,7rem) clamp(1.5rem,5vw,5rem);
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+#cta::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(255,170,23,0.07) 0%, transparent 70%);
+}
+.cta-label {
+  font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--amber); font-weight: 600; margin-bottom: 1.5rem;
+}
+.cta-h2 {
+  font-family: 'Cormorant Display', serif;
+  font-size: clamp(2.2rem,5vw,4rem); font-weight: 400;
+  color: var(--warm); margin-bottom: 1.2rem; line-height: 1.1;
+}
+.cta-h2 em { font-style: italic; color: var(--amber); }
+.cta-sub {
+  font-size: 15px; color: var(--bone2); font-weight: 300;
+  max-width: 520px; margin: 0 auto 2.5rem; line-height: 1.65;
+}
+.cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ─ FOOTER ─ */
+footer {
+  padding: 1.5rem clamp(1.5rem,5vw,5rem);
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1rem;
+}
+.footer-left { font-size: 10px; color: var(--bone2); letter-spacing: 0.15em; text-transform: uppercase; }
+.footer-right { display: flex; gap: 20px; }
+.footer-right a { font-size: 10px; color: rgba(248,247,245,0.25); letter-spacing: 0.1em; transition: color 0.15s; }
+.footer-right a:hover { color: var(--amber); }
+
+/* ─ RESPONSIVE ─ */
+@media (max-width: 860px) {
+  #stats-bar { grid-template-columns: repeat(2,1fr); }
+  .stat-cell:nth-child(2) { border-right: none; }
+  .tracker-block { grid-template-columns: 1fr; }
+  .tracker-info { border-right: none; border-bottom: 1px solid var(--border); }
+  .topbar-nav { display: none; }
+  .feed-row { grid-template-columns: 28px 1fr 80px 70px; }
+  .feed-sensor { display: none; }
+}
+@media (max-width: 560px) {
+  #stats-bar { grid-template-columns: 1fr 1fr; }
+  .tui-row { grid-template-columns: 24px 1fr 65px 55px; }
+  .tui-row > :nth-child(4) { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─ TOPBAR ─ -->
+<header id="topbar">
+  <div class="via-logo-wrap">
+    <span class="via-logo-text">VICTOR IA</span>
+  </div>
+  <div class="via-logo-sep"></div>
+  <span class="topbar-badge">Telemetría Hotelera</span>
+  <div class="topbar-spacer"></div>
+  <nav class="topbar-nav">
+    <a href="#que-monitoreamos">Qué monitoreamos</a>
+    <a href="#como-funciona">Cómo funciona</a>
+    <a href="#tracker">El Tracker</a>
+    <a href="#beneficios">Beneficios</a>
+  </nav>
+  <a href="#cta" class="topbar-cta">Agendar llamada</a>
+</header>
+
+<!-- ─ HERO ─ -->
+<section id="hero">
+  <p class="hero-label">Infraestructura hotelera · IoT + IA</p>
+  <h1 class="hero-h1">Tu hotel,<br>visible en <em>tiempo real.</em></h1>
+  <p class="hero-sub">Sensores IoT en cada habitación, planta y sistema. Cada alerta, anomalía y acción de mantenimiento queda registrada y trazada en tu panel del Tracker — sin puntos ciegos.</p>
+  <div class="hero-actions">
+    <a href="#cta" class="btn-primary">Agendar videollamada →</a>
+    <a href="#que-monitoreamos" class="btn-ghost">Ver qué monitoreamos</a>
+  </div>
+</section>
+
+<!-- ─ STATS BAR ─ -->
+<div id="stats-bar">
+  <div class="stat-cell">
+    <p class="stat-kpi">200+</p>
+    <p class="stat-desc">Sensores por propiedad</p>
+    <p class="stat-sub">Energía · Clima · Acceso · Agua</p>
+  </div>
+  <div class="stat-cell">
+    <p class="stat-kpi">99.8%</p>
+    <p class="stat-desc">Uptime de telemetría</p>
+    <p class="stat-sub">SLA garantizado</p>
+  </div>
+  <div class="stat-cell">
+    <p class="stat-kpi">−32%</p>
+    <p class="stat-desc">Ahorro energético promedio</p>
+    <p class="stat-sub">Primer año de operación</p>
+  </div>
+  <div class="stat-cell">
+    <p class="stat-kpi">4.1×</p>
+    <p class="stat-desc">ROI promedio</p>
+    <p class="stat-sub">Sobre inversión inicial</p>
+  </div>
+</div>
+
+<!-- ─ QUÉ MONITOREAMOS ─ -->
+<section class="section" id="que-monitoreamos">
+  <p class="section-label">Cobertura completa</p>
+  <h2 class="section-h2">Cada sistema de tu<br>hotel, <em>conectado.</em></h2>
+  <p class="section-body">Desde climatización hasta minibar. Desplegamos sensores IoT certificados en toda la propiedad y los conectamos en tiempo real al Tracker.</p>
+
+  <div class="sensor-grid">
+    <div class="sensor-card">
+      <div class="sensor-icon">⚡</div>
+      <p class="sensor-name">Energía y Electricidad</p>
+      <p class="sensor-desc">Consumo por habitación, por piso y por sistema. Detección de picos, equipos encendidos en habitaciones vacías y patrones anómalos.</p>
+      <div class="sensor-tags">
+        <span class="stag amber">Tiempo real</span>
+        <span class="stag green">Predictivo</span>
+      </div>
+    </div>
+    <div class="sensor-card">
+      <div class="sensor-icon">🌡️</div>
+      <p class="sensor-name">HVAC y Climatización</p>
+      <p class="sensor-desc">Temperatura y humedad por zona. Optimización automática de A/C según ocupación, clima exterior y perfil del huésped.</p>
+      <div class="sensor-tags">
+        <span class="stag blue">Automatizable</span>
+        <span class="stag green">−18% consumo</span>
+      </div>
+    </div>
+    <div class="sensor-card">
+      <div class="sensor-icon">💧</div>
+      <p class="sensor-name">Agua y Plomería</p>
+      <p class="sensor-desc">Monitoreo de consumo, presión y temperatura. Detección temprana de fugas antes de que se conviertan en daño estructural.</p>
+      <div class="sensor-tags">
+        <span class="stag red">Alerta de fuga</span>
+        <span class="stag amber">Consumo por cuarto</span>
+      </div>
+    </div>
+    <div class="sensor-card">
+      <div class="sensor-icon">🚪</div>
+      <p class="sensor-name">Accesos y Ocupación</p>
+      <p class="sensor-desc">Estado de cerraduras electrónicas, ocupación por habitación y movimiento en áreas comunes. Correlación con PMS para check-in/out automático.</p>
+      <div class="sensor-tags">
+        <span class="stag blue">PMS integrado</span>
+        <span class="stag green">En tiempo real</span>
+      </div>
+    </div>
+    <div class="sensor-card">
+      <div class="sensor-icon">🔒</div>
+      <p class="sensor-name">Seguridad</p>
+      <p class="sensor-desc">Cámaras con detección de anomalías por IA, sensores de humo, CO₂ y apertura de ventanas. Alertas inmediatas al staff y a dirección.</p>
+      <div class="sensor-tags">
+        <span class="stag red">Alerta crítica</span>
+        <span class="stag amber">IA visual</span>
+      </div>
+    </div>
+    <div class="sensor-card">
+      <div class="sensor-icon">🛎️</div>
+      <p class="sensor-name">Experiencia del Huésped</p>
+      <p class="sensor-desc">Minibar inteligente, estado de TV y amenidades, solicitudes de servicio al cuarto. Todo registrado para mejorar NPS y personalizar la estancia.</p>
+      <div class="sensor-tags">
+        <span class="stag blue">NPS</span>
+        <span class="stag green">Personalización</span>
+      </div>
+    </div>
+    <div class="sensor-card">
+      <div class="sensor-icon">🔧</div>
+      <p class="sensor-name">Mantenimiento Predictivo</p>
+      <p class="sensor-desc">Vibración y temperatura de equipos (calderas, elevadores, generadores). Alertas antes de la falla para programar mantenimiento sin afectar al huésped.</p>
+      <div class="sensor-tags">
+        <span class="stag amber">Predictivo</span>
+        <span class="stag green">−60% downtime</span>
+      </div>
+    </div>
+    <div class="sensor-card">
+      <div class="sensor-icon">☀️</div>
+      <p class="sensor-name">Áreas Comunes y Spa</p>
+      <p class="sensor-desc">Iluminación adaptativa, aforo de albercas, jacuzzi, gym y restaurantes. Optimización de turnos de limpieza y energía en zonas de bajo tráfico.</p>
+      <div class="sensor-tags">
+        <span class="stag blue">Aforo</span>
+        <span class="stag amber">Iluminación</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─ LIVE FEED ─ -->
+<section class="section" id="live-feed" style="padding-top: 0; border-top: none;">
+  <p class="section-label">Flujo en vivo</p>
+  <h2 class="section-h2">Así se ve el<br>monitoreo <em>activo.</em></h2>
+  <p class="section-body">Cada evento de sensor genera un registro en tiempo real. El equipo de operaciones y el Tracker reciben la señal simultáneamente.</p>
+
+  <div class="live-feed">
+    <div class="feed-topbar">
+      <span class="feed-title">Feed de telemetría — Hotel Las Palmas · Hoy</span>
+      <span class="feed-live">En vivo</span>
+    </div>
+    <div class="feed-row header">
+      <span>#</span>
+      <span>Evento detectado</span>
+      <span>Sensor</span>
+      <span>Hora</span>
+      <span>Estado</span>
+    </div>
+    <div class="feed-row">
+      <span class="feed-num">01</span>
+      <span class="feed-desc">Temperatura hab. 412 supera 26°C con A/C activo</span>
+      <span class="feed-sensor">HVAC-412</span>
+      <span class="feed-time">14:38:22</span>
+      <span class="feed-status s-warn">Alerta</span>
+    </div>
+    <div class="feed-row">
+      <span class="feed-num">02</span>
+      <span class="feed-desc">Consumo energético piso 3 normalizado post mantenimiento</span>
+      <span class="feed-sensor">PWR-P3</span>
+      <span class="feed-time">14:35:07</span>
+      <span class="feed-status s-ok">Normal</span>
+    </div>
+    <div class="feed-row">
+      <span class="feed-num">03</span>
+      <span class="feed-desc">Cerradura hab. 308 sin respuesta — posible batería baja</span>
+      <span class="feed-sensor">LOCK-308</span>
+      <span class="feed-time">14:31:55</span>
+      <span class="feed-status s-alert">Crítico</span>
+    </div>
+    <div class="feed-row">
+      <span class="feed-num">04</span>
+      <span class="feed-desc">Check-in completado — hab. 505 marcada como ocupada</span>
+      <span class="feed-sensor">OCC-505</span>
+      <span class="feed-time">14:28:41</span>
+      <span class="feed-status s-info">Info</span>
+    </div>
+    <div class="feed-row">
+      <span class="feed-num">05</span>
+      <span class="feed-desc">Presión de agua baja detectada en tubería nivel −1</span>
+      <span class="feed-sensor">WTR-B1</span>
+      <span class="feed-time">14:22:14</span>
+      <span class="feed-status s-alert">Crítico</span>
+    </div>
+    <div class="feed-row">
+      <span class="feed-num">06</span>
+      <span class="feed-desc">Minibar hab. 203 reabastecido — actualizado inventario</span>
+      <span class="feed-sensor">MINI-203</span>
+      <span class="feed-time">14:18:03</span>
+      <span class="feed-status s-ok">Ok</span>
+    </div>
+    <div class="feed-row">
+      <span class="feed-num">07</span>
+      <span class="feed-desc">Vibración inusual en compresor de chillers — 3.2× baseline</span>
+      <span class="feed-sensor">MECH-CH1</span>
+      <span class="feed-time">13:59:47</span>
+      <span class="feed-status s-warn">Alerta</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─ CÓMO FUNCIONA ─ -->
+<section class="section" id="como-funciona">
+  <p class="section-label">Proceso</p>
+  <h2 class="section-h2">De cero a<br><em>operativo en 4 semanas.</em></h2>
+  <p class="section-body">Sin interrupciones al huésped, sin obras mayores. Desplegamos sensores inalámbricos en paralelo a la operación normal.</p>
+
+  <div class="steps">
+    <div class="step-card">
+      <p class="step-num">01</p>
+      <p class="step-name">Auditoría de infraestructura</p>
+      <p class="step-desc">Mapeamos cada sistema del hotel — eléctrico, hidráulico, HVAC, accesos — e identificamos los puntos críticos de telemetría con mayor ROI.</p>
+    </div>
+    <div class="step-card">
+      <p class="step-num">02</p>
+      <p class="step-name">Despliegue de sensores</p>
+      <p class="step-desc">Instalamos los dispositivos IoT (inalámbricos en su mayoría) sin interrumpir la operación. Comunicación LoRaWAN + WiFi 6 con redundancia celular.</p>
+    </div>
+    <div class="step-card">
+      <p class="step-num">03</p>
+      <p class="step-name">Integración con el Tracker</p>
+      <p class="step-desc">Cada sensor queda conectado al Tracker de VICTOR IA. Alertas, acciones correctivas, técnicos asignados y tiempos de resolución — todo trazado.</p>
+    </div>
+    <div class="step-card">
+      <p class="step-num">04</p>
+      <p class="step-name">Operación y mejora continua</p>
+      <p class="step-desc">El sistema aprende los patrones de tu hotel. Los modelos de IA ajustan umbrales, predicen fallos y proponen optimizaciones cada semana.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─ TRACKER INTEGRATION ─ -->
+<section class="section" id="tracker">
+  <p class="section-label">Trazabilidad total</p>
+  <h2 class="section-h2">Todo lo que pasa en<br>tu hotel, <em>rastreado.</em></h2>
+  <p class="section-body">Cada evento de telemetría se sincroniza automáticamente con tu panel en el Tracker de VICTOR IA. Tu equipo ve en tiempo real qué ocurre, quién está atendiendo y cuánto tiempo lleva cada resolución.</p>
+
+  <div class="tracker-block">
+    <div class="tracker-info">
+      <ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:1.5rem; margin-top:0.5rem;">
+        <li style="display:flex; gap:1rem; align-items:flex-start;">
+          <span style="color:var(--amber); font-size:18px; flex-shrink:0; margin-top:2px;">→</span>
+          <div>
+            <p style="font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--bone); margin-bottom:4px;">Alertas en tiempo real</p>
+            <p style="font-size:12px; color:var(--bone2); line-height:1.6; font-weight:300;">Cada anomalía genera un ticket automático en el Tracker con severidad, sensor de origen y foto del técnico asignado.</p>
+          </div>
+        </li>
+        <li style="display:flex; gap:1rem; align-items:flex-start;">
+          <span style="color:var(--amber); font-size:18px; flex-shrink:0; margin-top:2px;">→</span>
+          <div>
+            <p style="font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--bone); margin-bottom:4px;">Tiempo de resolución</p>
+            <p style="font-size:12px; color:var(--bone2); line-height:1.6; font-weight:300;">Se registra automáticamente desde que se detecta la alerta hasta que el técnico cierra el ticket. Visibilidad total para gerencia.</p>
+          </div>
+        </li>
+        <li style="display:flex; gap:1rem; align-items:flex-start;">
+          <span style="color:var(--amber); font-size:18px; flex-shrink:0; margin-top:2px;">→</span>
+          <div>
+            <p style="font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--bone); margin-bottom:4px;">Historial por habitación</p>
+            <p style="font-size:12px; color:var(--bone2); line-height:1.6; font-weight:300;">Cada cuarto tiene su propio log: reparaciones, consumos históricos, anomalías recurrentes y tiempo de vida de equipos.</p>
+          </div>
+        </li>
+        <li style="display:flex; gap:1rem; align-items:flex-start;">
+          <span style="color:var(--amber); font-size:18px; flex-shrink:0; margin-top:2px;">→</span>
+          <div>
+            <p style="font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--bone); margin-bottom:4px;">Reportes automáticos</p>
+            <p style="font-size:12px; color:var(--bone2); line-height:1.6; font-weight:300;">Reporte semanal y mensual generado por IA con resumen ejecutivo, KPIs de eficiencia y recomendaciones de acción.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="tracker-ui">
+      <div class="tracker-ui-inner">
+        <div class="tui-header">
+          <span class="tui-logo">VICTOR IA · TRACKER</span>
+          <span class="tui-badge">Hotel Las Palmas</span>
+        </div>
+        <div class="tui-row th">
+          <span>#</span>
+          <span>Acción / Evento</span>
+          <span>Categoría</span>
+          <span>Hab.</span>
+          <span>Min.</span>
+        </div>
+        <div class="tui-row">
+          <span class="tui-n">01</span>
+          <span class="tui-d">Revisión A/C — temperatura anómala</span>
+          <span class="tui-cat alerta">Alerta</span>
+          <span class="tui-cat" style="border-color:var(--border);color:var(--bone2)">412</span>
+          <span class="tui-h">25</span>
+        </div>
+        <div class="tui-row">
+          <span class="tui-n">02</span>
+          <span class="tui-d">Cambio batería cerradura electrónica</span>
+          <span class="tui-cat mant">Mant.</span>
+          <span class="tui-cat" style="border-color:var(--border);color:var(--bone2)">308</span>
+          <span class="tui-h">15</span>
+        </div>
+        <div class="tui-row">
+          <span class="tui-n">03</span>
+          <span class="tui-d">Diagnóstico presión hidráulica nivel −1</span>
+          <span class="tui-cat alerta">Alerta</span>
+          <span class="tui-cat" style="border-color:var(--border);color:var(--bone2)">−1</span>
+          <span class="tui-h">40</span>
+        </div>
+        <div class="tui-row">
+          <span class="tui-n">04</span>
+          <span class="tui-d">Recalibración sensor vibración chiller</span>
+          <span class="tui-cat mant">Mant.</span>
+          <span class="tui-cat" style="border-color:var(--border);color:var(--bone2)">Sala TEC</span>
+          <span class="tui-h">35</span>
+        </div>
+        <div class="tui-row">
+          <span class="tui-n">05</span>
+          <span class="tui-d">Actualización umbrales HVAC temporada alta</span>
+          <span class="tui-cat config">Config.</span>
+          <span class="tui-cat" style="border-color:var(--border);color:var(--bone2)">Global</span>
+          <span class="tui-h">20</span>
+        </div>
+        <div class="tui-row">
+          <span class="tui-n">06</span>
+          <span class="tui-d">Revisión consumo energético piso 3 ok</span>
+          <span class="tui-cat sensor">Sensor</span>
+          <span class="tui-cat" style="border-color:var(--border);color:var(--bone2)">P3</span>
+          <span class="tui-h">10</span>
+        </div>
+        <div style="padding:0.7rem 1rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; background:var(--surface2);">
+          <span style="font-size:9px;color:var(--bone2);letter-spacing:0.12em;text-transform:uppercase;">Total sesión hoy</span>
+          <span style="font-size:11px;color:var(--amber);font-weight:600;">2h 25m · 6 acciones</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─ BENEFICIOS ─ -->
+<section class="section" id="beneficios">
+  <p class="section-label">Resultados tangibles</p>
+  <h2 class="section-h2">Lo que cambia en<br>los primeros <em>90 días.</em></h2>
+  <p class="section-body">Los hoteles que implementan telemetría con VICTOR IA ven resultados medibles en el primer trimestre de operación.</p>
+
+  <div class="benefits">
+    <div class="benefit-card">
+      <div class="benefit-icon">💰</div>
+      <p class="benefit-title">Reducción de costos operativos</p>
+      <p class="benefit-body">Ahorro promedio de 32% en energía y 28% en agua gracias a la detección de desperdicio en habitaciones vacías y fugas tempranas.</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">⏱️</div>
+      <p class="benefit-title">Respuesta 5× más rápida</p>
+      <p class="benefit-body">Las alertas llegan antes de que el huésped lo note. El tiempo promedio de resolución baja de 4.2 horas a 48 minutos.</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">📊</div>
+      <p class="benefit-title">Decisiones basadas en datos</p>
+      <p class="benefit-body">Tu dirección recibe reportes semanales con métricas reales — no intuición. Fundamento sólido para inversiones en mantenimiento.</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">⭐</div>
+      <p class="benefit-title">NPS más alto</p>
+      <p class="benefit-body">Menos quejas por temperatura, agua caliente o accesos fallidos. Los problemas se resuelven antes de impactar la experiencia del huésped.</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">🔮</div>
+      <p class="benefit-title">Cero sorpresas en equipos</p>
+      <p class="benefit-desc">El modelo predictivo detecta degradación en calderas, elevadores y generadores con 3-6 semanas de anticipación. Mantenimiento programado, no de emergencia.</p>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon">📋</div>
+      <p class="benefit-title">Cumplimiento normativo</p>
+      <p class="benefit-body">Registro automático de condiciones para COFEPRIS, NOM-001-SEDE, IMSS y seguros. Evidencia digital lista para cualquier auditoría.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─ CTA ─ -->
+<section id="cta">
+  <p class="cta-label">Siguiente paso</p>
+  <h2 class="cta-h2">30 minutos para ver<br><em>tu hotel en el Tracker.</em></h2>
+  <p class="cta-sub">Agendamos una videollamada, mapeamos tus sistemas críticos y te mostramos cómo se vería tu hotel conectado a la telemetría en tiempo real.</p>
+  <div class="cta-actions">
+    <a href="https://victor-ia.xyz/#contacto" class="btn-primary">Agendar videollamada →</a>
+    <a href="https://victor-ia.xyz/" class="btn-ghost">Ver el Tracker →</a>
+  </div>
+</section>
+
+<!-- ─ FOOTER ─ -->
+<footer>
+  <p class="footer-left">© 2026 INFLUENCE IA SA DE CV · Telemetría Hotelera</p>
+  <div class="footer-right">
+    <a href="https://victor-ia.xyz/privacidad">Privacidad</a>
+    <a href="https://victor-ia.xyz/terminos">Términos</a>
+    <a href="https://victor-ia.xyz/">Tracker →</a>
+  </div>
+</footer>
+
+</body>
+</html>

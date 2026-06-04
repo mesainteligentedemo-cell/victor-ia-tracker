@@ -1,0 +1,29 @@
+{
+  "name": "victor-ia-tracker-v2",
+  "version": "2.0.0",
+  "description": "Victor IA Tracker v2 — Premium Dashboard with Linear.app Dark Mode Style",
+  "type": "module",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "build": "echo 'No build step needed — static HTML'",
+    "start": "npx http-server -p 8000 --cors"
+  },
+  "keywords": [
+    "dashboard",
+    "tracker",
+    "linear",
+    "dark-mode",
+    "premium",
+    "analytics",
+    "kpi",
+    "glassmorphism"
+  ],
+  "author": "Victor IA",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/victor-ia-tracker.git"
+  },
+  "homepage": "https://victor-ia-tracker.vercel.app"
+}

@@ -1,0 +1,395 @@
+{
+  "name": "Victor IA — ElevenLabs Conversations",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "elevenlabs-conv",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "b2c3d4e5-0001-0001-0001-000000000001",
+      "name": "Webhook ElevenLabs",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "elevenlabs-conv"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nconst body = raw.body || raw;\nconst type = body.type || '';\nconst now = new Date().toISOString();\n\n// Solo procesar formularios del widget; ignorar webhooks automáticos de ElevenLabs\nif(type !== 'contact_form' && !type.startsWith('form_')) return [];\n\nconst nombre          = body.nombre    || '';\nconst email           = body.email     || '';\nconst whatsapp        = body.whatsapp  || '';\nconst canal           = body.canal     || 'web';\nconst conv_id         = body.elevenlabs_conversation_id || '';\nconst slug            = body.slug      || '';\nconst source_url      = body.source_url  || '';\nconst page_title      = body.page_title  || '';\nconst duracion_seg    = body.duracion_conversacion_seg != null ? Number(body.duracion_conversacion_seg) : null;\nconst tiempo_pagina_seg = body.tiempo_en_pagina_seg   != null ? Number(body.tiempo_en_pagina_seg)      : null;\nconst scroll_pct      = body.scroll_depth_pct         != null ? Number(body.scroll_depth_pct)          : null;\nconst visita_num      = body.visita_num || 1;\nconst transcript_texto = (body.transcript || '').slice(0, 5000);\nconst fecha           = (body.ts || now).split('T')[0];\nconst hora            = (body.ts || now).split('T')[1]?.slice(0, 5) || now.split('T')[1].slice(0, 5);\n\nconst durStr  = duracion_seg      != null ? String(duracion_seg)      + ' s' : '';\nconst tieStr  = tiempo_pagina_seg != null ? String(tiempo_pagina_seg) + ' s' : '';\nconst scrlStr = scroll_pct        != null ? String(scroll_pct)        + '%'  : '';\n\nreturn [{\n  json: {\n    type, nombre, email, whatsapp, canal, conv_id,\n    slug, source_url, page_title,\n    visita_num: String(visita_num),\n    duracion_seg, tiempo_pagina_seg, scroll_pct,\n    durStr, tieStr, scrlStr,\n    transcript_texto,\n    transcript_para_resumen: transcript_texto.slice(0, 3000),\n    fecha, hora,\n    conversation_id: conv_id,\n    agent_id:   body.agent_id || '',\n    empresa:    body.empresa  || '',\n    duracion_min: duracion_seg != null ? Math.round(duracion_seg / 60) : 0,\n    num_mensajes: transcript_texto ? transcript_texto.split('\\n').filter(Boolean).length : 0,\n    estado_conv: body.status || 'completed'\n  }\n}];"
+      },
+      "id": "b2c3d4e5-0002-0002-0002-000000000002",
+      "name": "Extraer Datos Conversacion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "VICTOR IA <info@victor-ia.com.mx>",
+        "toEmail": "mesainteligentedemo@gmail.com",
+        "subject": "=🔔 Nuevo lead — Victor IA · {{ $json.nombre || 'Sin nombre' }}",
+        "emailType": "html",
+        "html": "=<style>@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,300;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap');</style>\n<body style=\"margin:0;padding:0;background:#070809;font-family:'Space Grotesk',Arial,sans-serif;-webkit-font-smoothing:antialiased;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#070809;\"><tr><td align=\"center\" style=\"padding:40px 16px 56px;\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:600px;width:100%;\">\n\n<!-- ══ HEADER ══ -->\n<tr><td style=\"background:#0E0F12;padding:32px 44px;border-bottom:1px solid rgba(248,247,245,0.05);\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr>\n    <td>\n      <img src=\"https://victor-ia-website.vercel.app/assets/brand/logo-full.png\" width=\"130\" style=\"display:block;max-width:130px;\" alt=\"VICTOR IA\">\n    </td>\n    <td align=\"right\" style=\"vertical-align:middle;\">\n      <span style=\"font-family:'Space Grotesk',Arial,sans-serif;background:#FFAA17;color:#0E0F12;padding:6px 18px;font-size:8px;font-weight:700;letter-spacing:0.35em;text-transform:uppercase;\">Nuevo Lead</span>\n    </td>\n  </tr></table>\n</td></tr>\n\n<!-- ══ INTRO ══ -->\n<tr><td style=\"background:#0E0F12;padding:44px 44px 8px;\">\n  <h1 style=\"margin:0 0 16px;font-family:'Fraunces',Georgia,serif;font-size:30px;font-weight:300;font-style:italic;color:#F8F7F5;line-height:1.15;letter-spacing:-0.015em;\">Nuevo prospecto<br><span style=\"color:#FFAA17;\">interactu&oacute; con Victor IA.</span></h1>\n  <p style=\"margin:0 0 36px;font-family:'Space Grotesk',Arial,sans-serif;font-size:12px;font-weight:300;color:rgba(248,247,245,0.32);line-height:1.8;border-left:2px solid rgba(255,170,23,0.5);padding-left:16px;\">Un visitante complet&oacute; el formulario del asistente de voz. Aqu&iacute; est&aacute;n sus datos de contacto.</p>\n</td></tr>\n\n<!-- ══ DATOS ══ -->\n<tr><td style=\"background:#0E0F12;padding:0 44px 40px;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-top:1px solid rgba(248,247,245,0.06);\">\n\n    <tr>\n      <td style=\"padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);width:120px;font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;vertical-align:top;\">Nombre</td>\n      <td style=\"padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:14px;color:#F8F7F5;font-weight:500;\">{{ $json.nombre || '—' }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;vertical-align:top;\">Email</td>\n      <td style=\"padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);\">{{ $json.email ? '<a href=\"mailto:' + $json.email + '\" style=\"font-family:\\'Space Grotesk\\',Arial,sans-serif;font-size:14px;color:#FFAA17;text-decoration:none;font-weight:500;\">' + $json.email + '</a>' : '<span style=\"font-family:Arial,sans-serif;font-size:14px;color:rgba(248,247,245,0.2);\">—</span>' }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;vertical-align:top;\">WhatsApp</td>\n      <td style=\"padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);\">{{ $json.whatsapp ? '<a href=\"https://wa.me/' + $json.whatsapp.replace(/\\D/g,\"\") + '\" style=\"font-family:\\'Space Grotesk\\',Arial,sans-serif;font-size:14px;color:#25D366;text-decoration:none;font-weight:500;\">' + $json.whatsapp + ' &rarr;</a>' : '<span style=\"font-family:Arial,sans-serif;font-size:14px;color:rgba(248,247,245,0.2);\">—</span>' }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;\">P&aacute;gina</td>\n      <td style=\"padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;color:rgba(248,247,245,0.45);\">{{ $json.page_title || '—' }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;\">Canal</td>\n      <td style=\"padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;color:rgba(248,247,245,0.45);\">{{ $json.canal || '—' }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;\">Duraci&oacute;n</td>\n      <td style=\"padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;color:rgba(248,247,245,0.45);\">{{ $json.durStr || '—' }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:14px 0;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;\">Scroll</td>\n      <td style=\"padding:14px 0 14px 20px;border-bottom:1px solid rgba(248,247,245,0.05);font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;color:rgba(248,247,245,0.45);\">{{ $json.scrlStr || '—' }}</td>\n    </tr>\n    <tr>\n      <td style=\"padding:14px 0;font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.35em;text-transform:uppercase;\">Fecha</td>\n      <td style=\"padding:14px 0 14px 20px;font-family:'Space Grotesk',Arial,sans-serif;font-size:12px;color:rgba(248,247,245,0.3);\">{{ $json.fecha }} &nbsp;&middot;&nbsp; {{ $json.hora }}</td>\n    </tr>\n\n  </table>\n</td></tr>\n\n<!-- ══ BOTÓN AUDIO ══ -->\n{{ $json.conv_id ? '<tr><td style=\"background:#0E0F12;padding:0 44px 44px;\"><a href=\"https://elevenlabs.io/app/conversational-ai/history/' + $json.conv_id + '\" target=\"_blank\" style=\"display:block;background:#FFAA17;color:#0E0F12;text-align:center;padding:20px 24px;font-family:\\'Space Grotesk\\',Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;text-decoration:none;\">Escuchar grabaci&oacute;n completa &nbsp;&nbsp;&rarr;</a></td></tr>' : '' }}\n\n<!-- ══ TRANSCRIPCIÓN ══ -->\n{{ $json.transcript_texto ? '<tr><td style=\"background:#0E0F12;padding:0 44px 44px;\"><p style=\"margin:0 0 16px;font-family:\\'Space Grotesk\\',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.55);letter-spacing:0.4em;text-transform:uppercase;\">Transcripci&oacute;n de la llamada</p><div style=\"border:1px solid rgba(248,247,245,0.07);padding:22px 24px;font-family:\\'Space Grotesk\\',Arial,sans-serif;font-size:11px;line-height:1.9;color:rgba(248,247,245,0.35);white-space:pre-wrap;\">' + $json.transcript_texto.substring(0,2500).replace(/</g,\"&lt;\").replace(/>/g,\"&gt;\") + ($json.transcript_texto.length > 2500 ? \"\\n\\n[...truncado]\" : \"\") + '</div></td></tr>' : '' }}\n\n<!-- ══ FOOTER ══ -->\n<tr><td style=\"background:#070809;padding:24px 44px 32px;text-align:center;border-top:1px solid rgba(248,247,245,0.04);\">\n  <p style=\"margin:0 0 10px;font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.5);letter-spacing:0.4em;text-transform:uppercase;\">Victor IA</p>\n  <p style=\"margin:0;font-family:'Space Grotesk',Arial,sans-serif;font-size:10px;color:rgba(248,247,245,0.15);line-height:1.9;\">victor-ia.com.mx &middot; info@victor-ia.com.mx &middot; +52 984 235 3159</p>\n</td></tr>\n\n</table>\n</td></tr></table>\n</body>\n",
+        "options": {}
+      },
+      "id": "b2c3d4e5-0009-0009-0009-000000000009",
+      "name": "Enviar Email Lead",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        700,
+        120
+      ],
+      "credentials": {
+        "smtp": {
+          "name": "Hostinger SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-email",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-0010-0010-0010-000000000010",
+      "name": "¿Hay email del lead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "VICTOR IA <info@victor-ia.com.mx>",
+        "toEmail": "={{ $json.email }}",
+        "ccEmail": "mesainteligentedemo@gmail.com",
+        "subject": "={{ $json.nombre ? 'Hola, ' + $json.nombre.split(' ')[0] + ' — gracias por contactar a Victor IA' : 'Gracias por contactar a Victor IA' }}",
+        "emailType": "html",
+        "html": "=<style>@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,300;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap');</style>\n<body style=\"margin:0;padding:0;background:#F8F7F5;font-family:'Space Grotesk',Arial,sans-serif;-webkit-font-smoothing:antialiased;\">\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#F8F7F5;\"><tr><td align=\"center\" style=\"padding:48px 16px 64px;\">\n<table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:600px;width:100%;\">\n\n<!-- ══ HERO ══ -->\n<tr><td style=\"background:#0E0F12;padding:52px 52px 48px;text-align:center;\">\n\n  <!-- Logo -->\n  <img src=\"https://victor-ia-website.vercel.app/assets/brand/logo-full.png\" width=\"148\" style=\"display:block;margin:0 auto 44px;max-width:148px;\" alt=\"VICTOR IA\">\n\n  <!-- Badge -->\n  <table cellpadding=\"0\" cellspacing=\"0\" style=\"margin:0 auto 32px;\"><tr><td style=\"border:1px solid rgba(255,170,23,0.3);padding:7px 24px;\">\n    <span style=\"font-family:'Space Grotesk',Arial,sans-serif;color:rgba(255,170,23,0.75);font-size:8px;font-weight:600;letter-spacing:0.45em;text-transform:uppercase;\">Confirmaci&oacute;n de contacto</span>\n  </td></tr></table>\n\n  <!-- Heading -->\n  <h1 style=\"margin:0 0 20px;font-family:'Fraunces',Georgia,serif;font-size:40px;font-weight:300;font-style:italic;color:#F8F7F5;line-height:1.1;letter-spacing:-0.02em;\">{{ $json.nombre ? $json.nombre.split(' ')[0] : 'Hola' }}, tu mensaje<br><em style=\"color:#FFAA17;font-style:italic;\">lleg&oacute; con &eacute;xito.</em></h1>\n\n  <!-- Subtitle -->\n  <p style=\"margin:0;font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;font-weight:300;color:rgba(248,247,245,0.38);line-height:1.9;letter-spacing:0.01em;\">Hemos recibido tu informaci&oacute;n y nuestro equipo<br>ya est&aacute; revisando los detalles de tu proyecto.</p>\n\n</td></tr>\n\n<!-- Línea oro -->\n<tr><td style=\"height:1px;background:#FFAA17;font-size:0;line-height:0;\">&nbsp;</td></tr>\n\n<!-- ══ CUERPO ══ -->\n<tr><td style=\"background:#ffffff;padding:56px 52px 48px;\">\n\n  <!-- Eyebrow -->\n  <p style=\"margin:0 0 14px;font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:#FFAA17;letter-spacing:0.45em;text-transform:uppercase;\">Lo que sigue</p>\n\n  <!-- Subtítulo editorial -->\n  <h2 style=\"margin:0 0 44px;font-family:'Fraunces',Georgia,serif;font-size:24px;font-weight:300;font-style:italic;color:#0E0F12;line-height:1.3;letter-spacing:-0.01em;\">Un especialista de Victor IA<br>se comunicar&aacute; contigo pronto.</h2>\n\n  <!-- Pasos -->\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-bottom:48px;\">\n\n    <tr><td style=\"padding:22px 0;border-bottom:1px solid rgba(14,15,18,0.07);\">\n      <table cellpadding=\"0\" cellspacing=\"0\"><tr>\n        <td style=\"width:30px;vertical-align:top;padding-top:0;\">\n          <span style=\"font-family:'Fraunces',Georgia,serif;font-size:28px;font-style:italic;font-weight:300;color:#FFAA17;line-height:1;\">1</span>\n        </td>\n        <td style=\"padding-left:22px;font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;font-weight:300;color:rgba(14,15,18,0.5);line-height:1.8;\">\n          Nuestro equipo <strong style=\"color:#0E0F12;font-weight:600;\">analiza tu caso con IA</strong> para personalizar la propuesta perfecta para ti.\n        </td>\n      </tr></table>\n    </td></tr>\n\n    <tr><td style=\"padding:22px 0;border-bottom:1px solid rgba(14,15,18,0.07);\">\n      <table cellpadding=\"0\" cellspacing=\"0\"><tr>\n        <td style=\"width:30px;vertical-align:top;padding-top:0;\">\n          <span style=\"font-family:'Fraunces',Georgia,serif;font-size:28px;font-style:italic;font-weight:300;color:#FFAA17;line-height:1;\">2</span>\n        </td>\n        <td style=\"padding-left:22px;font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;font-weight:300;color:rgba(14,15,18,0.5);line-height:1.8;\">\n          Te contactamos en <strong style=\"color:#0E0F12;font-weight:600;\">menos de 24 horas</strong> con una estrategia hecha a la medida de tu negocio.\n        </td>\n      </tr></table>\n    </td></tr>\n\n    <tr><td style=\"padding:22px 0;\">\n      <table cellpadding=\"0\" cellspacing=\"0\"><tr>\n        <td style=\"width:30px;vertical-align:top;padding-top:0;\">\n          <span style=\"font-family:'Fraunces',Georgia,serif;font-size:28px;font-style:italic;font-weight:300;color:#FFAA17;line-height:1;\">3</span>\n        </td>\n        <td style=\"padding-left:22px;font-family:'Space Grotesk',Arial,sans-serif;font-size:13px;font-weight:300;color:rgba(14,15,18,0.5);line-height:1.8;\">\n          Juntos definimos c&oacute;mo la <strong style=\"color:#0E0F12;font-weight:600;\">inteligencia artificial puede multiplicar</strong> los resultados de tu empresa.\n        </td>\n      </tr></table>\n    </td></tr>\n\n  </table>\n\n  <!-- CTA Principal -->\n  <a href=\"https://victor-ia-website.vercel.app/agenda\" style=\"display:block;background:#0E0F12;color:#F8F7F5;text-align:center;padding:20px 24px;font-family:'Space Grotesk',Arial,sans-serif;font-size:9px;font-weight:600;letter-spacing:0.28em;text-transform:uppercase;text-decoration:none;margin-bottom:10px;\">Agenda tu diagn&oacute;stico gratuito &nbsp;&nbsp;&rarr;</a>\n\n  <!-- CTA Secundario -->\n  <a href=\"https://wa.me/5219842353159\" style=\"display:block;background:#F8F7F5;border:1px solid rgba(14,15,18,0.15);color:#0E0F12;text-align:center;padding:19px 24px;font-family:'Space Grotesk',Arial,sans-serif;font-size:9px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none;\">Continuar por WhatsApp &nbsp;&nbsp;&rarr;</a>\n\n</td></tr>\n\n<!-- ══ CITA ══ -->\n<tr><td style=\"background:#0E0F12;padding:56px 52px 48px;text-align:center;\">\n  <p style=\"margin:0 0 28px;font-family:'Fraunces',Georgia,serif;font-size:21px;font-style:italic;font-weight:300;color:#F8F7F5;line-height:1.6;letter-spacing:-0.01em;\">&ldquo;La inteligencia artificial no reemplaza<br>a las personas &mdash; las hace extraordinarias.&rdquo;</p>\n  <p style=\"margin:0;font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.7);letter-spacing:0.42em;text-transform:uppercase;\">&mdash;&nbsp; Victor IA</p>\n</td></tr>\n\n<!-- ══ FOOTER ══ -->\n<tr><td style=\"background:#070809;padding:26px 52px 36px;text-align:center;border-top:1px solid rgba(248,247,245,0.04);\">\n  <p style=\"margin:0 0 10px;font-family:'Space Grotesk',Arial,sans-serif;font-size:8px;font-weight:600;color:rgba(255,170,23,0.6);letter-spacing:0.38em;text-transform:uppercase;\">Victor IA</p>\n  <p style=\"margin:0 0 18px;font-family:'Space Grotesk',Arial,sans-serif;font-size:10px;color:rgba(248,247,245,0.18);line-height:1.9;\">victor-ia.com.mx &middot; info@victor-ia.com.mx &middot; +52 984 235 3159</p>\n  <p style=\"margin:0;font-family:'Space Grotesk',Arial,sans-serif;font-size:9px;color:rgba(248,247,245,0.08);\">Recibiste este correo porque interactuaste con nuestro asistente de IA.</p>\n</td></tr>\n\n</table>\n</td></tr></table>\n</body>",
+        "options": {}
+      },
+      "id": "b2c3d4e5-0011-0011-0011-000000000011",
+      "name": "Email Agradecimiento Usuario",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [
+        940,
+        240
+      ],
+      "credentials": {
+        "smtp": {
+          "name": "Hostinger SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"openai/gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Analiza esta conversacion de ventas y responde en JSON exacto con estos campos: {\\\"resumen\\\": \\\"1-2 oraciones\\\", \\\"necesidad\\\": \\\"que necesita el cliente\\\", \\\"presupuesto\\\": \\\"monto o rango mencionado o null\\\", \\\"urgencia\\\": \\\"alta/media/baja\\\", \\\"interes\\\": \\\"alto/medio/bajo\\\", \\\"siguiente_paso\\\": \\\"accion recomendada\\\", \\\"calificacion\\\": \\\"MQL/SQL/No calificado\\\"}\\n\\nTranscript:\\n{{ $json.transcript_para_resumen }}\"\n    }\n  ],\n  \"max_tokens\": 400,\n  \"temperature\": 0.3\n}",
+        "options": {}
+      },
+      "id": "b2c3d4e5-0003-0003-0003-000000000003",
+      "name": "IA — Analizar Conversacion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        700,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const convData = $('Extraer Datos Conversacion').first().json;\nconst aiResponse = $input.first().json;\n\nlet analisis = {};\ntry {\n  const content = aiResponse.choices?.[0]?.message?.content || '{}';\n  const jsonMatch = content.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) analisis = JSON.parse(jsonMatch[0]);\n} catch(e) {\n  analisis = { resumen: 'No se pudo analizar', calificacion: 'Revisar manual' };\n}\n\nreturn [{\n  json: {\n    ...convData,\n    resumen_ia:        analisis.resumen        || '',\n    necesidad_ia:      analisis.necesidad       || '',\n    presupuesto_ia:    analisis.presupuesto     || '',\n    urgencia_ia:       analisis.urgencia        || 'media',\n    interes_ia:        analisis.interes         || 'medio',\n    siguiente_paso_ia: analisis.siguiente_paso  || '',\n    calificacion_ia:   analisis.calificacion    || 'No calificado',\n    crear_contacto: !!(convData.email || convData.nombre),\n    es_mql: analisis.calificacion === 'MQL' || analisis.calificacion === 'SQL',\n    nota_hubspot: `[Victor IA] ${convData.fecha} ${convData.hora}\\nResumen: ${analisis.resumen}\\nNecesidad: ${analisis.necesidad}\\nCalificacion: ${analisis.calificacion}\\nSiguiente: ${analisis.siguiente_paso}\\n\\nTranscript:\\n${convData.transcript_texto.slice(0,1000)}`\n  }\n}];"
+      },
+      "id": "b2c3d4e5-0004-0004-0004-000000000004",
+      "name": "Combinar Datos + IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        940,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1rmoA61km6UvDYxEJdV_UhNZrKZDYjmudzpXUImPVMhM",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Conversaciones",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $json.fecha }}",
+            "Hora": "={{ $json.hora }}",
+            "Conv_ID": "={{ $json.conversation_id }}",
+            "Nombre": "={{ $json.nombre }}",
+            "Email": "={{ $json.email }}",
+            "WhatsApp": "={{ $json.whatsapp }}",
+            "Canal": "={{ $json.canal }}",
+            "Slug": "={{ $json.slug }}",
+            "URL": "={{ $json.source_url }}",
+            "Empresa": "={{ $json.empresa }}",
+            "Duracion_seg": "={{ $json.duracion_seg }}",
+            "TiempoEnPagina": "={{ $json.tiempo_pagina_seg }}",
+            "ScrollDepth": "={{ $json.scroll_pct }}",
+            "Visita_num": "={{ $json.visita_num }}",
+            "Num_mensajes": "={{ $json.num_mensajes }}",
+            "Resumen_IA": "={{ $json.resumen_ia }}",
+            "Necesidad": "={{ $json.necesidad_ia }}",
+            "Presupuesto": "={{ $json.presupuesto_ia }}",
+            "Urgencia": "={{ $json.urgencia_ia }}",
+            "Interes": "={{ $json.interes_ia }}",
+            "Calificacion": "={{ $json.calificacion_ia }}",
+            "Siguiente_paso": "={{ $json.siguiente_paso_ia }}",
+            "Transcript": "={{ $json.transcript_texto.slice(0, 2000) }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-0005-0005-0005-000000000005",
+      "name": "Google Sheets — Conversaciones",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        1180,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-mql",
+              "leftValue": "={{ $json.es_mql }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-0006-0006-0006-000000000006",
+      "name": "Es MQL o SQL?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1180,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "upsert",
+        "email": "={{ $json.email || $json.conversation_id + '@sin-email.victor-ia.com' }}",
+        "additionalFields": {
+          "firstName": "={{ $json.nombre.split(' ')[0] }}",
+          "lastName": "={{ $json.nombre.split(' ').slice(1).join(' ') }}",
+          "company": "={{ $json.empresa }}",
+          "phone": "={{ $json.whatsapp }}",
+          "lifecyclestage": "={{ $json.calificacion_ia === 'SQL' ? 'salesqualifiedlead' : 'marketingqualifiedlead' }}"
+        }
+      },
+      "id": "b2c3d4e5-0007-0007-0007-000000000007",
+      "name": "HubSpot — Crear Contacto",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2,
+      "position": [
+        1420,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"ok\": true}"
+      },
+      "id": "b2c3d4e5-0008-0008-0008-000000000008",
+      "name": "Respuesta OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        600
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook ElevenLabs": {
+      "main": [
+        [
+          {
+            "node": "Extraer Datos Conversacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer Datos Conversacion": {
+      "main": [
+        [
+          {
+            "node": "Enviar Email Lead",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "¿Hay email del lead?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IA — Analizar Conversacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Hay email del lead?": {
+      "main": [
+        [
+          {
+            "node": "Email Agradecimiento Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Enviar Email Lead": {
+      "main": [
+        []
+      ]
+    },
+    "Email Agradecimiento Usuario": {
+      "main": [
+        []
+      ]
+    },
+    "IA — Analizar Conversacion": {
+      "main": [
+        [
+          {
+            "node": "Combinar Datos + IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combinar Datos + IA": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets — Conversaciones",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Es MQL o SQL?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es MQL o SQL?": {
+      "main": [
+        [
+          {
+            "node": "HubSpot — Crear Contacto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respuesta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot — Crear Contacto": {
+      "main": [
+        [
+          {
+            "node": "Respuesta OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "instanceId": "victor-ia"
+  }
+}

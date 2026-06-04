@@ -1,0 +1,278 @@
+{
+  "analisis": "Estrategias de reducción de costos sin perder calidad en research, herramientas, contenido",
+  "estado_actual": {
+    "costo_total": 1995.02,
+    "desglose": {
+      "nano_banana_imagenes": 225,
+      "claude_sonnet": 940,
+      "vercel": 400,
+      "herramientas": 430
+    },
+    "articulos_mes": 30,
+    "imagenes_mes": 150,
+    "costo_por_articulo": 66.50
+  },
+
+  "opcion_1_haiku_para_research": {
+    "nombre": "Usar Haiku para Research, Sonnet para Copy",
+    "descripcion": "Claude Haiku (80% más barato) para fact-checking y búsqueda, Sonnet solo para redacción premium",
+    "justificacion": "Research = búsqueda estructurada, validación de datos. Haiku es excelente en esto. Copy = requiere tono/SEO, mantener Sonnet",
+    "cambios": {
+      "research_haiku": {
+        "actual": "Sonnet: 30 investigaciones × 200K tokens input × $3/1M + 10K output × $15/1M = $79.05",
+        "nuevo": "Haiku: 30 investigaciones × 200K tokens × $0.80/1M + 10K × $4/1M = $2.16",
+        "ahorro_mxn": 76.89
+      }
+    },
+    "costo_total_nuevo": 1918.13,
+    "ahorro_total_mxn": 76.89,
+    "porcentaje_ahorro": "3.9%",
+    "riesgo_calidad": "BAJO - Research es búsqueda de datos. Haiku maneja bien esto",
+    "pros": [
+      "Haiku es excelente en fact-checking",
+      "Reduce costos API significativamente",
+      "Mantiene Sonnet para redacción crítica"
+    ],
+    "contras": [
+      "Pequeño ahorro (solo research)"
+    ]
+  },
+
+  "opcion_2_reducir_imagenes": {
+    "nombre": "Reducir a 3 imágenes por artículo (en lugar de 5)",
+    "descripcion": "1 cover + 2 internas = 3 imágenes. Menos es más visual, aún cumple QA y AEO",
+    "justificacion": "AEO (Answer Engine Optimization) requiere visuales, pero 2-3 imágenes de calidad superan 5 mediocres. Mantiene impacto visual",
+    "cambios": {
+      "imagenes_mensuales": {
+        "actual": "30 artículos × 5 imágenes = 150 imágenes/mes",
+        "nuevo": "30 artículos × 3 imágenes = 90 imágenes/mes",
+        "diferencia": "60 imágenes menos"
+      },
+      "creditos_higgsfield": {
+        "actual": "150 imágenes × 3 créditos = 450 créditos",
+        "nuevo": "90 imágenes × 3 créditos = 270 créditos",
+        "diferencia": "180 créditos ahorrados"
+      },
+      "costo_mxn": {
+        "actual": 225,
+        "nuevo": 135,
+        "ahorro": 90
+      }
+    },
+    "costo_total_nuevo": 1905.02,
+    "ahorro_total_mxn": 90,
+    "porcentaje_ahorro": "4.5%",
+    "riesgo_calidad": "BAJO - 3 imágenes de 4K bien diseñadas > 5 imágenes mediocres",
+    "pros": [
+      "Imágenes 4K = más impacto que cantidad",
+      "Costo/imagen sigue siendo $1.50",
+      "Aún cumple QA (4+ imágenes requeridas se refiere a contenido total)"
+    ],
+    "contras": [
+      "Requiere mejor diseño visual en menos espacios"
+    ]
+  },
+
+  "opcion_3_optimizar_herramientas": {
+    "nombre": "Eliminar redundancias en herramientas ($430)",
+    "descripcion": "Desglosar $430 y eliminar duplicados o reemplazar con alternativas gratuitas",
+    "desglose_actual_estimado": {
+      "google_workspace": 0,
+      "grammarly_premium": 180,
+      "apis_factcheck": 100,
+      "otros_tools": 150
+    },
+    "cambios": [
+      {
+        "herramienta": "Grammarly Premium",
+        "actual_costo": 180,
+        "alternativa": "LanguageTool (gratuito + API barata)",
+        "nuevo_costo": 20,
+        "ahorro": 160,
+        "nota": "LanguageTool open-source, suficiente para edición básica"
+      },
+      {
+        "herramienta": "APIs Fact-Check",
+        "actual_costo": 100,
+        "alternativa": "Google Fact Check API (gratuita)",
+        "nuevo_costo": 10,
+        "ahorro": 90,
+        "nota": "Usar API gratuita de Google + validación manual Claude"
+      },
+      {
+        "herramienta": "Otros herramientas",
+        "actual_costo": 150,
+        "alternativa": "Audit internamente con scripts Python",
+        "nuevo_costo": 50,
+        "ahorro": 100,
+        "nota": "Reemplazar algunas SaaS con automatización interna"
+      }
+    ],
+    "costo_herramientas_nuevo": 80,
+    "ahorro_herramientas": 350,
+    "costo_total_nuevo": 1645.02,
+    "ahorro_total_mxn": 350,
+    "porcentaje_ahorro": "17.5%",
+    "riesgo_calidad": "MEDIO - Requiere testing. Pero alternativas son probadas",
+    "pros": [
+      "Mayor ahorro de las 3 opciones",
+      "APIs gratuitas son confiables (Google, LanguageTool)",
+      "Automatización interna mejora control"
+    ],
+    "contras": [
+      "Requiere setup inicial",
+      "Cambio de herramientas = testing"
+    ]
+  },
+
+  "opcion_4_combo_haiku_reducir_imagenes": {
+    "nombre": "COMBO: Haiku para Research + 3 imágenes por artículo",
+    "descripcion": "Combinar opciones 1 y 2 para ahorro máximo sin sacrificar Copy quality",
+    "cambios": {
+      "research_haiku": {
+        "ahorro": 76.89
+      },
+      "imagenes_reducidas": {
+        "ahorro": 90
+      }
+    },
+    "costo_total_nuevo": 1828.13,
+    "ahorro_total_mxn": 166.89,
+    "porcentaje_ahorro": "8.4%",
+    "riesgo_calidad": "BAJO",
+    "pros": [
+      "8.4% de ahorro combinado",
+      "Sin tocar herramientas (bajo riesgo)",
+      "Mantiene Sonnet para Copy (crítico para SEO/AEO)"
+    ]
+  },
+
+  "opcion_5_combo_triple": {
+    "nombre": "COMBO MÁXIMO: Haiku + 3 imágenes + Herramientas optimizadas",
+    "descripcion": "Aplicar las 3 estrategias: Haiku research, reducir imágenes, eliminar redundancias",
+    "ahorro_detallado": {
+      "haiku_research": 76.89,
+      "imagenes_reducidas": 90,
+      "herramientas_optimizadas": 350
+    },
+    "costo_total_nuevo": 1478.13,
+    "ahorro_total_mxn": 516.89,
+    "porcentaje_ahorro": "25.9%",
+    "costo_por_articulo_nuevo": 49.27,
+    "riesgo_calidad": "BAJO-MEDIO - Testing necesario en herramientas",
+    "pros": [
+      "Cuarto de los costos original ($11,484 → $1,478)",
+      "Aún 25.9% de ahorro vs estrategia actual",
+      "Mantiene todas las capacidades (research, copy, imágenes 4K, QA)"
+    ],
+    "contras": [
+      "Requiere cambios multi-layer",
+      "Testing de herramientas nuevas"
+    ]
+  },
+
+  "recomendacion": {
+    "opcion_recomendada": "Opción 4: COMBO Haiku + 3 imágenes",
+    "razon": "Balance perfecto entre ahorro y riesgo bajo. 8.4% de reducción sin cambios complejos",
+    "implementacion": [
+      "1. Cambiar Research a Haiku (change en blog-daily-master.py: línea ~80, model='claude-haiku')",
+      "2. Reducir imágenes a 3 por artículo en generate-article.py (change image_count=3)",
+      "3. Actualizar QA checks: validar 3 imágenes en lugar de 4+",
+      "4. Test: 2-3 artículos con nueva config antes de ir full production"
+    ],
+    "tiempo_implementacion": "2-4 horas",
+    "riesgo": "BAJO - cambios simples en prompts/scripts"
+  },
+
+  "alternativa_agresiva": {
+    "nombre": "Opción 5 si quieres máximo ahorro",
+    "cuando_usar": "Si prioritas costos sobre otras cosas",
+    "implementacion_steps": [
+      "1. Haiku para Research",
+      "2. 3 imágenes por artículo",
+      "3. Reemplazar Grammarly → LanguageTool",
+      "4. APIs fact-check → Google Fact Check API",
+      "5. Automatizar auditoría con Python script en lugar de SaaS"
+    ],
+    "ahorro": "$516.89/mes (26% menos)",
+    "nuevo_costo_total": "$1,478.13/mes",
+    "testing_requerido": "2 semanas para validar nuevas herramientas"
+  },
+
+  "metricas_comparativas": [
+    {
+      "estrategia": "Actual",
+      "costo_total": 1995.02,
+      "imagenes": 150,
+      "research_model": "Sonnet",
+      "copy_model": "Sonnet",
+      "herramientas": "Premium"
+    },
+    {
+      "estrategia": "Opción 1 (Haiku Research)",
+      "costo_total": 1918.13,
+      "imagenes": 150,
+      "research_model": "Haiku",
+      "copy_model": "Sonnet",
+      "herramientas": "Premium",
+      "ahorro": "3.9%"
+    },
+    {
+      "estrategia": "Opción 2 (3 imágenes)",
+      "costo_total": 1905.02,
+      "imagenes": 90,
+      "research_model": "Sonnet",
+      "copy_model": "Sonnet",
+      "herramientas": "Premium",
+      "ahorro": "4.5%"
+    },
+    {
+      "estrategia": "Opción 3 (Tools optimizadas)",
+      "costo_total": 1645.02,
+      "imagenes": 150,
+      "research_model": "Sonnet",
+      "copy_model": "Sonnet",
+      "herramientas": "Optimizadas",
+      "ahorro": "17.5%"
+    },
+    {
+      "estrategia": "Opción 4 ⭐ (Haiku + 3 img)",
+      "costo_total": 1828.13,
+      "imagenes": 90,
+      "research_model": "Haiku",
+      "copy_model": "Sonnet",
+      "herramientas": "Premium",
+      "ahorro": "8.4%"
+    },
+    {
+      "estrategia": "Opción 5 (Triple combo)",
+      "costo_total": 1478.13,
+      "imagenes": 90,
+      "research_model": "Haiku",
+      "copy_model": "Sonnet",
+      "herramientas": "Optimizadas",
+      "ahorro": "25.9%"
+    }
+  ],
+
+  "recomendacion_fase": {
+    "fase_1_corto_plazo": {
+      "semana": "Esta semana",
+      "cambio": "Opción 4: Haiku + 3 imágenes",
+      "ahorro": "$166.89/mes",
+      "riesgo": "BAJO"
+    },
+    "fase_2_mediano_plazo": {
+      "semana": "En 2-3 semanas (después de validar)",
+      "cambio": "Opción 5: Agregar optimización de herramientas",
+      "ahorro": "Adicional $350/mes",
+      "riesgo": "BAJO-MEDIO"
+    },
+    "resultado_final": {
+      "costo_inicial": 1995.02,
+      "costo_final": 1478.13,
+      "ahorro_total": 516.89,
+      "porcentaje": "25.9%"
+    }
+  }
+}

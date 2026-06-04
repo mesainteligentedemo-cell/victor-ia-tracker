@@ -1,0 +1,111 @@
+{
+  "last_updated": "2026-06-04T12:00:00",
+  "date_range": {
+    "start": "2026-05-07",
+    "end": "2026-06-04"
+  },
+  "summary": {
+    "indexed_pages": 87,
+    "total_clicks": 3847,
+    "total_impressions": 91205,
+    "avg_ctr": 4.2,
+    "avg_position": 8.5,
+    "top_10_keywords_count": 12
+  },
+  "estimated_value": {
+    "cpc_mxn": 33,
+    "monthly_value_mxn": 126951
+  },
+  "top_keywords": [
+    {
+      "rank": 1,
+      "keyword": "IA para empresas México",
+      "position": 2,
+      "clicks": 524,
+      "impressions": 5210,
+      "ctr": 8.2,
+      "trend": "↑"
+    },
+    {
+      "rank": 2,
+      "keyword": "automatización procesos",
+      "position": 5,
+      "clicks": 438,
+      "impressions": 5010,
+      "ctr": 7.1,
+      "trend": "↑"
+    },
+    {
+      "rank": 3,
+      "keyword": "soluciones IA LATAM",
+      "position": 8,
+      "clicks": 412,
+      "impressions": 4950,
+      "ctr": 5.8,
+      "trend": "↑"
+    },
+    {
+      "rank": 4,
+      "keyword": "Claude API integración",
+      "position": 11,
+      "clicks": 287,
+      "impressions": 5440,
+      "ctr": 9.4,
+      "trend": "→"
+    },
+    {
+      "rank": 5,
+      "keyword": "chatbot empresarial",
+      "position": 6,
+      "clicks": 312,
+      "impressions": 4820,
+      "ctr": 6.5,
+      "trend": "↓"
+    },
+    {
+      "rank": 6,
+      "keyword": "análisis datos IA",
+      "position": 9,
+      "clicks": 298,
+      "impressions": 5100,
+      "ctr": 5.8,
+      "trend": "↓"
+    },
+    {
+      "rank": 7,
+      "keyword": "optimización SEO IA",
+      "position": 12,
+      "clicks": 245,
+      "impressions": 4650,
+      "ctr": 5.3,
+      "trend": "↑"
+    },
+    {
+      "rank": 8,
+      "keyword": "agentes IA autónomos",
+      "position": 15,
+      "clicks": 198,
+      "impressions": 4120,
+      "ctr": 4.8,
+      "trend": "↑"
+    },
+    {
+      "rank": 9,
+      "keyword": "herramientas IA gratis",
+      "position": 14,
+      "clicks": 167,
+      "impressions": 3890,
+      "ctr": 4.3,
+      "trend": "→"
+    },
+    {
+      "rank": 10,
+      "keyword": "capacitación IA empresas",
+      "position": 18,
+      "clicks": 125,
+      "impressions": 3845,
+      "ctr": 3.2,
+      "trend": "↓"
+    }
+  ]
+}
