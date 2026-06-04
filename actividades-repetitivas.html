@@ -952,26 +952,26 @@
                     • Análisis con IA
                 `;
 
-                return \`
+                return `
                     <tr>
-                        <td><strong>\${kw.keyword}</strong></td>
+                        <td><strong>${kw.keyword}</strong></td>
                         <td style="font-size: 11px; color: #A0A0A0;">
-                            <a href="\${kw.url || '#'}" target="_blank" style="color: #FFAA17; text-decoration: none;" title="Ver contenido posicionado">
-                                \${urlDomain}\${urlPath.length > 1 ? urlPath.substring(0, 30) + '...' : ''}
+                            <a href="${kw.url || '#'}" target="_blank" style="color: #FFAA17; text-decoration: none;" title="Ver contenido posicionado">
+                                ${urlDomain}${urlPath.length > 1 ? urlPath.substring(0, 30) + '...' : ''}
                             </a>
                         </td>
-                        <td><span class="rank-badge \${kw.position <= 3 ? 'top' : ''}">#\${kw.position}</span></td>
-                        <td><strong>$\${(kw.clicks * 33).toLocaleString('es-MX')}</strong></td>
-                        <td>\${kw.ctr}%</td>
-                        <td>\${kw.impressions.toLocaleString('es-MX')}</td>
+                        <td><span class="rank-badge ${kw.position <= 3 ? 'top' : ''}">#${kw.position}</span></td>
+                        <td><strong>$${(kw.clicks * 33).toLocaleString('es-MX')}</strong></td>
+                        <td>${kw.ctr}%</td>
+                        <td>${kw.impressions.toLocaleString('es-MX')}</td>
                         <td style="font-size: 9px; white-space: nowrap;">
-                            <a href="\${googleSearchUrl}" target="_blank" title="Ver en Google Search - posición #\${kw.position}" style="color: #4285F4; margin-right: 4px; text-decoration: none;">📍 Google</a>
-                            <a href="\${bingSearchUrl}" target="_blank" title="Ver en Bing Search" style="color: #00A4EF; margin-right: 4px; text-decoration: none;">🔎 Bing</a>
-                            <a href="\${kw.url || '#'}" target="_blank" title="Ver contenido directamente" style="color: #FFAA17; margin-right: 4px; text-decoration: none;">📄 URL</a>
-                            <a href="https://claude.ai?prompt=Keyword:%20\${encodeURIComponent(kw.keyword)}%0APosición:%20#\${kw.position}%0AURL:%20\${encodeURIComponent(kw.url)}%0A%0AAnaliza%20por%20qué%20está%20en%20esa%20posición%20y%20cómo%20mejorar" target="_blank" title="Analizar con Claude AI" style="color: #4ade80; text-decoration: none;">🤖 AI</a>
+                            <a href="${googleSearchUrl}" target="_blank" title="Ver en Google Search - posición #${kw.position}" style="color: #4285F4; margin-right: 4px; text-decoration: none;">📍 Google</a>
+                            <a href="${bingSearchUrl}" target="_blank" title="Ver en Bing Search" style="color: #00A4EF; margin-right: 4px; text-decoration: none;">🔎 Bing</a>
+                            <a href="${kw.url || '#'}" target="_blank" title="Ver contenido directamente" style="color: #FFAA17; margin-right: 4px; text-decoration: none;">📄 URL</a>
+                            <a href="https://claude.ai?prompt=Keyword:%20${encodeURIComponent(kw.keyword)}%0APosición:%20#${kw.position}%0AURL:%20${encodeURIComponent(kw.url)}%0A%0AAnaliza%20por%20qué%20está%20en%20esa%20posición%20y%20cómo%20mejorar" target="_blank" title="Analizar con Claude AI" style="color: #4ade80; text-decoration: none;">🤖 AI</a>
                         </td>
                     </tr>
-                \`;
+                `;
             }).join('');
 
             // Renderizar daily log con timestamps
