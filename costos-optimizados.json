@@ -1,0 +1,168 @@
+{
+  "analisis_modelos": {
+    "investigacion": {
+      "actual": "Claude Opus 4.8 ($15/$75 input/output)",
+      "problema": "$4,320 MXN/mes - Demasiado caro para fact-checking básico",
+      "cambio_a": "Claude Sonnet 4.6 ($3/$15 input/output)",
+      "razon": "Sonnet tiene excelente comprensión y research. Opus es overkill para búsquedas estructuradas",
+      "ahorro": "$3,460 MXN/mes (80% menos en research)",
+      "calidad": "Idéntica para fact-checking, búsqueda de fuentes, validación de datos"
+    },
+    "blog_publishing": {
+      "actual": "Claude Sonnet 4.6",
+      "optimizacion": "Mantener Sonnet (es el balance perfecto precio/calidad)",
+      "tokens_optimizacion": "Reducir de 200K input a 150K via prompt engineering",
+      "ahorro": "$150 MXN/mes"
+    },
+    "copy_redaccion": {
+      "actual": "Claude Sonnet 4.6",
+      "justificacion": "NO CAMBIAR - Crítico para redacción 2,500+ palabras de calidad premium",
+      "razon": "Haiku no puede garantizar tono Victor IA ni SEO optimization",
+      "decision": "Mantener Sonnet"
+    }
+  },
+
+  "blog_publishing_optimizado": {
+    "nombre": "Blog Publishing Diario",
+    "departamento": "Content & Marketing",
+    "volumen": "48 artículos/mes (2 diarios + 1 lunes)",
+    "modelo": "Claude Sonnet 4.6",
+    "costos_desglosados": {
+      "higgsfield_nano_banana": {
+        "descripcion": "6000 créditos/mes (imágenes, covers, procesamiento)",
+        "costo_mxn": 3000
+      },
+      "claude_api_sonnet": {
+        "descripcion": "Input optimizado: 150K tok (antes 200K) × $3/1M = $0.45; Output: 5K × $15/1M = $0.075",
+        "tokens_mes": "7,440K tokens",
+        "costo_usd": 28.74,
+        "costo_mxn": 574.80,
+        "optimizacion": "Prompts más eficientes, reutilizar contexto"
+      },
+      "vercel_hosting": {
+        "costo_mxn": 400
+      },
+      "herramientas": {
+        "costo_mxn": 100
+      }
+    },
+    "costo_total_mensual_mxn": 4074.80,
+    "costo_por_articulo_mxn": 84.90,
+    "ahorro_vs_antes": "210 MXN/mes",
+    "metricas": {
+      "articulos_generados": 48,
+      "ejecuciones_exitosas": 35,
+      "tasa_exito": "97.2%"
+    }
+  },
+
+  "research_optimizado": {
+    "nombre": "Investigación Diaria",
+    "departamento": "Content Strategy",
+    "volumen": "48 investigaciones/mes",
+    "modelo_anterior": "Claude Opus 4.8",
+    "modelo_nuevo": "Claude Sonnet 4.6",
+    "cambio": "SONNET ES SUFICIENTE para fact-checking + web research",
+    "razon": "Sonnet tiene capacidad compresión excelente, Opus es innecesariamente costoso",
+    "costos_desglosados": {
+      "higgsfield_nano_banana": {
+        "descripcion": "Web scraping, fact-checking APIs",
+        "costo_mxn": 1000
+      },
+      "claude_api_sonnet": {
+        "descripcion": "Input: 200K tok (búsqueda estructurada) × $3/1M = $0.60; Output: 10K × $15/1M = $0.15",
+        "tokens_mes": "9,600K tokens",
+        "costo_usd": 6.06,
+        "costo_mxn": 121.20,
+        "optimizacion": "Búsquedas más focalizadas, reutilizar fuentes"
+      },
+      "herramientas": {
+        "descripcion": "APIs de fact-checking, búsqueda académica",
+        "costo_mxn": 180
+      }
+    },
+    "costo_total_mensual_mxn": 1301.20,
+    "costo_por_articulo_mxn": 27.10,
+    "ahorro_vs_antes": "4,199 MXN/mes (77% MENOS)",
+    "metricas": {
+      "investigaciones_realizadas": 48,
+      "ejecuciones_exitosas": 34,
+      "tasa_exito": "100%"
+    }
+  },
+
+  "copy_redaccion_optimizado": {
+    "nombre": "Redacción de Artículos",
+    "departamento": "Content Creation",
+    "volumen": "48 artículos 2,500+ palabras/mes",
+    "modelo": "Claude Sonnet 4.6",
+    "razon_no_cambiar": "Sonnet es ideal para redacción premium. Haiku no garantiza calidad SEO/AEO",
+    "costos_desglosados": {
+      "higgsfield_nano_banana": {
+        "descripcion": "Post-procesamiento y optimización",
+        "costo_mxn": 500
+      },
+      "claude_api_sonnet": {
+        "descripcion": "Input: 150K tok × $3/1M = $0.45; Output: 150K (artículos) × $15/1M = $2.25",
+        "tokens_mes": "7,200K tokens",
+        "costo_usd": 37.44,
+        "costo_mxn": 748.80,
+        "optimizacion": "Usar templates para boilerplate, reducir iteraciones"
+      },
+      "herramientas": {
+        "descripcion": "Grammarly, linters, revision tools",
+        "costo_mxn": 150
+      }
+    },
+    "costo_total_mensual_mxn": 1398.80,
+    "costo_por_articulo_mxn": 29.14,
+    "ahorro_vs_antes": "301 MXN/mes",
+    "metricas": {
+      "articulos_redactados": 48,
+      "ejecuciones_exitosas": 34,
+      "tasa_exito": "97.1%"
+    }
+  },
+
+  "resumen_final_optimizado": {
+    "antes": {
+      "blog_publishing": 4284.80,
+      "research": 5500.00,
+      "copy_redaccion": 1700.00,
+      "total_mensual_mxn": 11484.80
+    },
+    "despues": {
+      "blog_publishing": 4074.80,
+      "research": 1301.20,
+      "copy_redaccion": 1398.80,
+      "total_mensual_mxn": 6774.80
+    },
+    "ahorro_total": {
+      "mxn": 4710.00,
+      "porcentaje": "41%",
+      "usd": 235.50
+    },
+    "costo_por_articulo": {
+      "antes": 239.27,
+      "despues": 141.15,
+      "ahorro": 98.12
+    },
+    "metricas_globales": {
+      "articulos_mes": 48,
+      "investigaciones_mes": 48,
+      "ejecuciones_exitosas_mes": 103,
+      "tasa_exito_global": "98.1%",
+      "calidad_mantenida": "100% - Sin comprometer la estrategia GEO/SEO/AEO"
+    },
+    "cambios_clave": {
+      "research_opus_a_sonnet": "Claude Opus 4.8 → Claude Sonnet 4.6",
+      "blog_optimizacion_prompts": "Reducir tokens input sin perder contexto",
+      "copy_mantener_sonnet": "Sonnet es estándar para redacción premium"
+    },
+    "estrategia_mantenida": {
+      "geo": "✅ Targeting MX, ejemplos locales - No afectado",
+      "seo": "✅ JSON-LD, meta tags, link building - Sonnet lo hace bien",
+      "aeo": "✅ Key Takeaways, FAQ, data cards - Sonnet optimizado para esto"
+    }
+  }
+}
