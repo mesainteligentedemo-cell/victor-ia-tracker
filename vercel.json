@@ -5,28 +5,6 @@
   "cleanUrls": false,
   "trailingSlash": false,
   "public": true,
-  "env": {
-    "NEXT_PUBLIC_APP_URL": "https://victor-ia-tracker.vercel.app"
-  },
-  "routes": [
-    {
-      "src": "/actividades-repetitivas\\.html",
-      "dest": "/actividades-repetitivas.html",
-      "methods": ["GET"]
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/.*\\.html$",
-      "dest": "/$0"
-    },
-    {
-      "src": "^/(?!api|.*\\.html|.*\\.js|.*\\.css|.*\\.json|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.gif|.*\\.ico).*",
-      "dest": "/index.html"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -42,19 +20,6 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600"
-        }
-      ]
-    },
-    {
-      "source": "/.*\\.html$",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }
