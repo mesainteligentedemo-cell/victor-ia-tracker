@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-06-04T12:00:00",
+  "last_updated": "2026-06-04T12:00:00.000000",
   "date_range": {
     "start": "2026-05-07",
     "end": "2026-06-04"
@@ -24,6 +24,7 @@
       "clicks": 524,
       "impressions": 5210,
       "ctr": 8.2,
+      "url": "https://victor-ia.xyz/blog/ia-empresas-mexico",
       "trend": "↑"
     },
     {
@@ -33,6 +34,7 @@
       "clicks": 438,
       "impressions": 5010,
       "ctr": 7.1,
+      "url": "https://victor-ia.xyz/blog/automatizacion-procesos",
       "trend": "↑"
     },
     {
@@ -42,6 +44,7 @@
       "clicks": 412,
       "impressions": 4950,
       "ctr": 5.8,
+      "url": "https://victor-ia.xyz/blog/soluciones-ia-latam",
       "trend": "↑"
     },
     {
@@ -51,6 +54,7 @@
       "clicks": 287,
       "impressions": 5440,
       "ctr": 9.4,
+      "url": "https://victor-ia.xyz/blog/claude-api",
       "trend": "→"
     },
     {
@@ -60,6 +64,7 @@
       "clicks": 312,
       "impressions": 4820,
       "ctr": 6.5,
+      "url": "https://victor-ia.xyz/blog/chatbot-empresarial",
       "trend": "↓"
     },
     {
@@ -69,6 +74,7 @@
       "clicks": 298,
       "impressions": 5100,
       "ctr": 5.8,
+      "url": "https://victor-ia.xyz/blog/analisis-datos",
       "trend": "↓"
     },
     {
@@ -78,6 +84,7 @@
       "clicks": 245,
       "impressions": 4650,
       "ctr": 5.3,
+      "url": "https://victor-ia.xyz/blog/seo-ia",
       "trend": "↑"
     },
     {
@@ -87,6 +94,7 @@
       "clicks": 198,
       "impressions": 4120,
       "ctr": 4.8,
+      "url": "https://victor-ia.xyz/blog/agentes-ia",
       "trend": "↑"
     },
     {
@@ -96,6 +104,7 @@
       "clicks": 167,
       "impressions": 3890,
       "ctr": 4.3,
+      "url": "https://victor-ia.xyz/blog/herramientas-ia",
       "trend": "→"
     },
     {
@@ -105,6 +114,7 @@
       "clicks": 125,
       "impressions": 3845,
       "ctr": 3.2,
+      "url": "https://victor-ia.xyz/blog/capacitacion-ia",
       "trend": "↓"
     }
   ]
