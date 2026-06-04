@@ -1,0 +1,134 @@
+{
+  "metadata": {
+    "generacion": "2 artículos/día + 1 extra lunes = 48 artículos/mes",
+    "tipo_cambio": "1 USD = 20 MXN",
+    "actualizado": "2026-06-04"
+  },
+
+  "blog_publishing": {
+    "nombre": "Blog Publishing Diario",
+    "departamento": "Content & Marketing",
+    "volumen": "48 artículos/mes (2 diarios + 1 lunes)",
+    "agentes": ["Claude Sonnet 4.6"],
+    "costos_desglosados": {
+      "higgsfield_nano_banana": {
+        "descripcion": "6000 créditos/mes (imágenes, video covers, procesamiento)",
+        "costo_usd": 150,
+        "costo_mxn": 3000,
+        "por_item": 62.50
+      },
+      "claude_api_sonnet": {
+        "descripcion": "Input: 200K tok × $3/1M = $0.60; Output: 5K tok × $15/1M = $0.075",
+        "tokens_mes": "9,840K tokens",
+        "costo_usd": 39.24,
+        "costo_mxn": 784.80,
+        "por_item": 16.35
+      },
+      "vercel_hosting": {
+        "descripcion": "Deploy + CDN + serverless functions",
+        "costo_usd": 20,
+        "costo_mxn": 400,
+        "por_item": 8.33
+      },
+      "herramientas": {
+        "descripcion": "Google Workspace (prorrateo), n8n (self-hosted)",
+        "costo_usd": 5,
+        "costo_mxn": 100,
+        "por_item": 2.08
+      }
+    },
+    "costo_total_mensual_mxn": 4284.80,
+    "costo_por_articulo_mxn": 89.27,
+    "metricas": {
+      "articulos_generados": 48,
+      "ejecuciones_exitosas": 35,
+      "errores": 1,
+      "tasa_exito": "97.2%"
+    }
+  },
+
+  "research": {
+    "nombre": "Investigación Diaria para Blog",
+    "departamento": "Content Strategy",
+    "volumen": "48 investigaciones/mes",
+    "agentes": ["Claude Opus 4.8"],
+    "costos_desglosados": {
+      "higgsfield_nano_banana": {
+        "descripcion": "Créditos para web scraping, fact-checking APIs",
+        "asignacion_porcentaje": 33.3,
+        "costo_mxn": 1000
+      },
+      "claude_api_opus": {
+        "descripcion": "Input: 300K tok × $15/1M = $4.50; Output: 5K tok × $75/1M = $0.375",
+        "tokens_mes": "14,400K tokens input",
+        "costo_usd": 216,
+        "costo_mxn": 4320,
+        "por_item": 90
+      },
+      "herramientas": {
+        "descripcion": "APIs de fact-checking, búsqueda académica",
+        "costo_mxn": 180
+      }
+    },
+    "costo_total_mensual_mxn": 5500,
+    "costo_por_articulo_mxn": 114.58,
+    "metricas": {
+      "investigaciones_realizadas": 48,
+      "ejecuciones_exitosas": 34,
+      "errores": 0,
+      "tasa_exito": "100%"
+    }
+  },
+
+  "copy_redaccion": {
+    "nombre": "Redacción de Artículos Blog",
+    "departamento": "Content Creation",
+    "volumen": "48 artículos 2,500+ palabras/mes",
+    "agentes": ["Claude Sonnet 4.6"],
+    "costos_desglosados": {
+      "higgsfield_nano_banana": {
+        "descripcion": "Créditos para post-procesamiento y optimización",
+        "asignacion_porcentaje": 16.7,
+        "costo_mxn": 500
+      },
+      "claude_api_sonnet": {
+        "descripcion": "Input: 200K tok × $3/1M = $0.60; Output: 130K tok × $15/1M = $1.95",
+        "tokens_mes": "6,240K tokens",
+        "costo_usd": 52.50,
+        "costo_mxn": 1050,
+        "por_item": 21.87
+      },
+      "google_workspace": {
+        "descripcion": "Google Docs, Drive (prorrateo)",
+        "costo_mxn": 0
+      },
+      "herramientas": {
+        "descripcion": "Grammarly, linters, revision tools",
+        "costo_mxn": 150
+      }
+    },
+    "costo_total_mensual_mxn": 1700,
+    "costo_por_articulo_mxn": 35.42,
+    "metricas": {
+      "articulos_redactados": 48,
+      "ejecuciones_exitosas": 34,
+      "errores": 1,
+      "tasa_exito": "97.1%"
+    }
+  },
+
+  "resumen_total": {
+    "costo_total_mensual_mxn": 11484.80,
+    "desglose_principal": {
+      "higgsfield_nano_banana": 4500,
+      "claude_api": 6154.80,
+      "vercel_hosting": 400,
+      "herramientas": 430
+    },
+    "costo_por_articulo_mxn": 239.27,
+    "articulos_totales_mes": 48,
+    "ejecuciones_exitosas_mes": 103,
+    "tasa_exito_global": "98.1%",
+    "roi_estimado": "300-400% (si genera $35K+ en leads/mes)"
+  }
+}
