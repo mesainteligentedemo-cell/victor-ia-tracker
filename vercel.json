@@ -5,9 +5,6 @@
   "cleanUrls": false,
   "trailingSlash": false,
   "public": true,
-  "env": {
-    "GSC_API_KEY": "@gsc-api-key"
-  },
   "crons": [
     {
       "path": "/api/fetch-gsc",
