@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Publishing Monitor — Victor IA Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000000;
+            color: #FFFFFF;
+            padding: 24px;
+        }
+
+        .monitor-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .monitor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .header-title h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header-title p {
+            font-size: 13px;
+            color: #A0A0A0;
+        }
+
+        .monitor-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: 1px solid rgba(255, 214, 10, 0.3);
+            background: rgba(255, 214, 10, 0.1);
+            color: #FFD60A;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 214, 10, 0.15);
+            border-color: #FFD60A;
+        }
+
+        .publications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .publication-card {
+            background: #0A0A0A;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .publication-card:hover {
+            border-color: rgba(255, 214, 10, 0.3);
+            background: #1A1A1A;
+        }
+
+        .publication-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .publication-type {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(255, 214, 10, 0.15);
+            border: 1px solid rgba(255, 214, 10, 0.3);
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #FFD60A;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .publication-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 12px 0 8px;
+            line-height: 1.4;
+        }
+
+        .publication-slug {
+            font-size: 11px;
+            color: #707070;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 12px;
+        }
+
+        .publication-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .status-initiated {
+            background: rgba(100, 116, 139, 0.2);
+            color: #94A3B8;
+        }
+
+        .status-generating {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60A5FA;
+            animation: pulse 2s infinite;
+        }
+
+        .status-qa {
+            background: rgba(168, 85, 247, 0.2);
+            color: #D8B4FE;
+        }
+
+        .status-published {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86EFAC;
+        }
+
+        .status-failed {
+            background: rgba(239, 68, 68, 0.2);
+            color: #FCA5A5;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-initiated .status-dot { background: #64748B; }
+        .status-generating .status-dot { background: #3B82F6; }
+        .status-qa .status-dot { background: #A855F7; }
+        .status-published .status-dot { background: #22C55E; }
+        .status-failed .status-dot { background: #EF4444; }
+
+        .publication-time {
+            font-size: 11px;
+            color: #707070;
+            margin-bottom: 16px;
+        }
+
+        .publication-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn.view-live {
+            background: rgba(255, 214, 10, 0.1);
+            border-color: rgba(255, 214, 10, 0.3);
+            color: #FFD60A;
+        }
+
+        .action-btn.view-live:hover {
+            background: rgba(255, 214, 10, 0.2);
+            border-color: #FFD60A;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #707070;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state .hint {
+            font-size: 12px;
+            color: #505050;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #0A0A0A;
+            border: 1px solid rgba(34, 197, 94, 0.5);
+            border-radius: 8px;
+            padding: 16px 20px;
+            max-width: 300px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.error {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .notification.success {
+            border-color: rgba(34, 197, 94, 0.5);
+        }
+
+        .notification-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 12px;
+            color: #A0A0A0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .publications-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .monitor-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="monitor-container">
+        <div class="monitor-header">
+            <div class="header-title">
+                <h1>📚 Blog Publishing Monitor</h1>
+                <p id="current-date">Hoy</p>
+            </div>
+            <div class="monitor-actions">
+                <button class="btn" onclick="refreshPublications()">
+                    🔄 Actualizar
+                </button>
+                <a href="https://victor-ia.xyz/blog" class="btn" target="_blank">
+                    👁️ Ver Blog
+                </a>
+            </div>
+        </div>
+
+        <div id="publications-container" class="publications-grid">
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                <p>Cargando publicaciones...</p>
+                <p class="hint">Los artículos aparecerán aquí cuando se publiquen</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://victor-ia.xyz/api/blog-status';
+        const BLOG_BASE = 'https://victor-ia.xyz/blog';
+
+        // Actualizar fecha
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('es-MX', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }).charAt(0).toUpperCase() + new Date().toLocaleDateString('es-MX', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }).slice(1);
+
+        async function fetchPublications() {
+            try {
+                const response = await fetch(API_BASE);
+                const data = await response.json();
+                return data.publications || [];
+            } catch (error) {
+                console.error('Error fetching publications:', error);
+                return [];
+            }
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'initiated': 'Iniciado',
+                'generating': 'Generando',
+                'qa': 'Verificación QA',
+                'qa_failed': 'QA Fallido',
+                'published': 'Publicado',
+                'deploy_failed': 'Error Deploy',
+                'failed': 'Fallido'
+            };
+            return labels[status] || status;
+        }
+
+        function getStatusClass(status) {
+            const classes = {
+                'initiated': 'status-initiated',
+                'generating': 'status-generating',
+                'qa': 'status-qa',
+                'qa_failed': 'status-failed',
+                'published': 'status-published',
+                'deploy_failed': 'status-failed',
+                'failed': 'status-failed'
+            };
+            return classes[status] || 'status-initiated';
+        }
+
+        function renderPublications(publications) {
+            const container = document.getElementById('publications-container');
+
+            if (!publications || publications.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1;">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            <p>No hay publicaciones programadas hoy</p>
+                            <p class="hint">Las publicaciones aparecerán aquí automáticamente</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = publications.map(pub => `
+                <div class="publication-card">
+                    <div class="publication-header">
+                        <span class="publication-type">${pub.type || 'article'}</span>
+                        <div class="publication-status">
+                            <span class="status-badge ${getStatusClass(pub.status)}">
+                                <span class="status-dot"></span>
+                                ${getStatusLabel(pub.status)}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="publication-title">${pub.title || pub.slug}</div>
+                    <div class="publication-slug">${pub.slug}</div>
+                    <div class="publication-time">
+                        ${pub.relativeTime || 'hace poco'}
+                    </div>
+
+                    ${pub.error ? `
+                        <div style="font-size: 11px; color: #FCA5A5; margin-bottom: 12px; padding: 8px; background: rgba(239, 68, 68, 0.1); border-radius: 4px;">
+                            ⚠️ ${pub.error}
+                        </div>
+                    ` : ''}
+
+                    <div class="publication-actions">
+                        ${pub.status === 'published' && pub.url ? `
+                            <a href="${pub.url}" target="_blank" class="action-btn view-live">
+                                👁️ Ver artículo
+                            </a>
+                        ` : `
+                            <button class="action-btn" disabled style="opacity: 0.5; cursor: not-allowed;">
+                                Pendiente...
+                            </button>
+                        `}
+                        <button class="action-btn" onclick="copySlug('${pub.slug}')">
+                            📋 Copiar slug
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function copySlug(slug) {
+            navigator.clipboard.writeText(slug);
+            showNotification(`Slug copiado: ${slug}`, 'success');
+        }
+
+        function showNotification(message, type = 'success') {
+            const notif = document.createElement('div');
+            notif.className = `notification ${type}`;
+            notif.innerHTML = `
+                <div class="notification-title">${type === 'success' ? '✓' : '⚠️'} ${type === 'success' ? 'Éxito' : 'Error'}</div>
+                <div class="notification-message">${message}</div>
+            `;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+        async function refreshPublications() {
+            const pubs = await fetchPublications();
+            renderPublications(pubs);
+        }
+
+        // Cargar publicaciones al abrir
+        refreshPublications();
+
+        // Auto-refresh cada 10 segundos
+        setInterval(refreshPublications, 10000);
+    </script>
+</body>
+</html>
