@@ -1,0 +1,231 @@
+{
+  "metadata": {
+    "version": "2.0 - Nueva estrategia",
+    "articulos_por_semana": 5,
+    "articulos_por_mes": 22,
+    "cambio_vs_anterior": "De 48 articulos/mes → 22 articulos/mes (-54%)",
+    "calculo": "Nano Banana 3 en 4K: 3 créditos por imagen",
+    "presupuesto_mensual": "6000 créditos = $3,000 MXN",
+    "costo_por_credito": 0.50,
+    "imagenes_por_articulo": 5,
+    "total_imagenes_mes": 110,
+    "creditos_usados": 330,
+    "creditos_disponibles": 5670
+  },
+
+  "blog_publishing_real_v2": {
+    "nombre": "Blog Publishing Diario",
+    "departamento": "Content & Marketing",
+    "volumen": "22 artículos/mes (1 diario + especiales lunes)",
+    "modelo": "Claude Sonnet 4.6",
+    "cambio_vs_anterior": "Reduce de 48 a 22 artículos (-54%)",
+    "costos_desglosados": {
+      "nano_banana_3_imagenes_4k": {
+        "descripcion": "110 imágenes 4K (5 por artículo: portada + 4 internas)",
+        "cantidad": 110,
+        "creditos_por_imagen": 3,
+        "creditos_totales": 330,
+        "costo_mxn": 165,
+        "costo_por_imagen": 1.50
+      },
+      "claude_api_sonnet": {
+        "descripcion": "Input: 75K tok × $3/1M; Output: 2.5K × $15/1M",
+        "costo_mxn": 287.40
+      },
+      "vercel_hosting": {
+        "costo_mxn": 400
+      },
+      "herramientas": {
+        "costo_mxn": 100
+      }
+    },
+    "costo_total_mensual_mxn": 952.40,
+    "costo_por_articulo_mxn": 43.29,
+    "metricas": {
+      "articulos_generados": 22,
+      "imagenes_4k": 110,
+      "ejecuciones_exitosas": 21,
+      "tasa_exito": "95.5%"
+    },
+    "ahorro_vs_anterior": {
+      "anterior_mensual": 1434.80,
+      "nuevo_mensual": 952.40,
+      "ahorro_mxn": 482.40,
+      "porcentaje": "33.6%"
+    }
+  },
+
+  "research_real_v2": {
+    "nombre": "Investigación Diaria",
+    "departamento": "Content Strategy",
+    "volumen": "22 investigaciones/mes",
+    "modelo": "Claude Sonnet 4.6",
+    "nota": "Sin generación de imágenes - Solo fact-checking y búsqueda",
+    "cambio_vs_anterior": "Reduce de 48 a 22 investigaciones (-54%)",
+    "costos_desglosados": {
+      "nano_banana_3": {
+        "costo_mxn": 0,
+        "razon": "No genera imágenes"
+      },
+      "claude_api_sonnet": {
+        "descripcion": "Input: 100K tok × $3/1M; Output: 5K × $15/1M",
+        "costo_mxn": 60.75
+      },
+      "herramientas": {
+        "descripcion": "APIs de fact-checking, búsqueda académica",
+        "costo_mxn": 180
+      }
+    },
+    "costo_total_mensual_mxn": 240.75,
+    "costo_por_articulo_mxn": 10.94,
+    "metricas": {
+      "investigaciones_realizadas": 22,
+      "ejecuciones_exitosas": 22,
+      "tasa_exito": "100%"
+    },
+    "ahorro_vs_anterior": {
+      "anterior_mensual": 301.20,
+      "nuevo_mensual": 240.75,
+      "ahorro_mxn": 60.45,
+      "porcentaje": "20%"
+    }
+  },
+
+  "copy_redaccion_real_v2": {
+    "nombre": "Redacción de Artículos",
+    "departamento": "Content Creation",
+    "volumen": "22 artículos 2,500+ palabras/mes",
+    "modelo": "Claude Sonnet 4.6",
+    "nota": "Sin generación de imágenes - Solo redacción",
+    "cambio_vs_anterior": "Reduce de 48 a 22 artículos (-54%)",
+    "costos_desglosados": {
+      "nano_banana_3": {
+        "costo_mxn": 0,
+        "razon": "No genera imágenes"
+      },
+      "claude_api_sonnet": {
+        "descripcion": "Input: 75K tok × $3/1M; Output: 75K × $15/1M",
+        "costo_mxn": 374.40
+      },
+      "herramientas": {
+        "descripcion": "Grammarly, linters, revision tools",
+        "costo_mxn": 150
+      }
+    },
+    "costo_total_mensual_mxn": 524.40,
+    "costo_por_articulo_mxn": 23.84,
+    "metricas": {
+      "articulos_redactados": 22,
+      "ejecuciones_exitosas": 21,
+      "tasa_exito": "95.5%"
+    },
+    "ahorro_vs_anterior": {
+      "anterior_mensual": 898.80,
+      "nuevo_mensual": 524.40,
+      "ahorro_mxn": 374.40,
+      "porcentaje": "41.6%"
+    }
+  },
+
+  "resumen_total_real_v2": {
+    "costo_total_mensual_mxn": 1717.55,
+    "desglose_por_componente": {
+      "nano_banana_3_imagenes": 165,
+      "claude_api_sonnet": 722.55,
+      "vercel_hosting": 400,
+      "herramientas": 430
+    },
+    "costo_por_articulo_completo_mxn": 78.07,
+    "articulos_totales_mes": 22,
+    "imagenes_4k_totales": 110,
+    "ejecuciones_exitosas": 64,
+    "tasa_exito_global": "97%",
+    "creditos_nano_banana_usados": "330 de 6,000",
+    "creditos_disponibles": 5670,
+    "ahorro_vs_anterior": {
+      "anterior": 2634.80,
+      "nuevo": 1717.55,
+      "ahorro_mxn": 917.25,
+      "porcentaje": "34.8%",
+      "costo_por_articulo_antes": 54.90,
+      "costo_por_articulo_ahora": 78.07,
+      "nota": "El costo por artículo aumenta porque Vercel ($400) y herramientas ($430) son costos fijos que se distribuyen entre menos artículos"
+    },
+    "estrategia_mantenida": {
+      "geo": "✅ Targeting MX, ejemplos locales",
+      "seo": "✅ JSON-LD, meta tags, link building, 2,500+ palabras",
+      "aeo": "✅ Key Takeaways, FAQ, data cards, data visualizations en imágenes",
+      "calidad_visual": "✅ 110 imágenes 4K/mes (5 por artículo)",
+      "calidad_contenido": "✅ Sonnet para research, blog, copy"
+    }
+  },
+
+  "comparativa_full": {
+    "inicio": {
+      "articulos_mes": 48,
+      "imagenes_mes": 240,
+      "creditos": 720,
+      "costo_mensual_mxn": 11484.80,
+      "costo_por_articulo": 239.27,
+      "fase": "Estrategia original (2 diarios + 3 lunes)"
+    },
+    "optimizacion_modelos": {
+      "articulos_mes": 48,
+      "imagenes_mes": 240,
+      "creditos": 720,
+      "costo_mensual_mxn": 6774.80,
+      "costo_por_articulo": 141.15,
+      "fase": "Después de cambiar Opus → Sonnet",
+      "ahorro": "41% ($4,710 MXN)"
+    },
+    "costos_reales": {
+      "articulos_mes": 48,
+      "imagenes_mes": 240,
+      "creditos": 720,
+      "costo_mensual_mxn": 2634.80,
+      "costo_por_articulo": 54.90,
+      "fase": "Con cálculo correcto de Nano Banana 3",
+      "ahorro_acumulado": "77% ($8,850 MXN)"
+    },
+    "nueva_estrategia": {
+      "articulos_mes": 22,
+      "imagenes_mes": 110,
+      "creditos": 330,
+      "costo_mensual_mxn": 1717.55,
+      "costo_por_articulo": 78.07,
+      "fase": "1 artículo diario + especiales lunes",
+      "ahorro_acumulado": "85% ($9,767.25 MXN)",
+      "nota": "Costo por artículo sube porque Vercel/herramientas son fijos"
+    }
+  },
+
+  "donde_va_el_presupuesto_v2": {
+    "total_creditos": 6000,
+    "asignacion": {
+      "blog_images": {
+        "creditos": 330,
+        "porcentaje": "5.5%",
+        "costo_mxn": 165
+      },
+      "research": {
+        "creditos": 0,
+        "porcentaje": "0%",
+        "costo_mxn": 0
+      },
+      "copy": {
+        "creditos": 0,
+        "porcentaje": "0%",
+        "costo_mxn": 0
+      }
+    },
+    "creditos_restantes": 5670,
+    "uso_potencial": "Génesis de más imágenes, videos cortos, animaciones SVG, stock adicional, social media graphics, email templates"
+  },
+
+  "proximos_pasos": {
+    "1": "Actualizar Task Scheduler: cambiar de 2 artículos/día a 1 artículo/día",
+    "2": "Ajustar scripts de automatización para volumen reducido (22 vs 48)",
+    "3": "Actualizar dashboard del tracker con nuevos costos",
+    "4": "Considerar usar los 5,670 créditos restantes para: social media, email templates, o extra stock visual"
+  }
+}
