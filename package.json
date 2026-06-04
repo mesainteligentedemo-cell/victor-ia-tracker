@@ -25,5 +25,8 @@
     "type": "git",
     "url": "https://github.com/yourusername/victor-ia-tracker.git"
   },
-  "homepage": "https://victor-ia-tracker.vercel.app"
+  "homepage": "https://victor-ia-tracker.vercel.app",
+  "dependencies": {
+    "firebase-admin": "^13.10.0"
+  }
 }

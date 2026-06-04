@@ -687,16 +687,17 @@
                     <thead>
                         <tr>
                             <th>Palabra Clave</th>
+                            <th>URL Posicionada</th>
                             <th>Posición</th>
                             <th>Clics/Mes</th>
                             <th>CTR</th>
                             <th>Impresiones</th>
-                            <th>Estado</th>
+                            <th>Verificar</th>
                         </tr>
                     </thead>
                     <tbody id="keywords-tbody">
                         <tr>
-                            <td colspan="6" style="text-align: center; color: #707070;">Cargando datos de Google Search Console...</td>
+                            <td colspan="7" style="text-align: center; color: #707070;">Cargando datos de Google Search Console...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -926,19 +927,30 @@
             const lastUpdate = GSC_REAL_DATA?.last_updated ? new Date(GSC_REAL_DATA.last_updated).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
             document.getElementById('seo-subtitle').textContent = `${dataSource} • Última actualización: ${lastUpdate}`;
 
-            // Renderizar keywords table con más información
+            // Renderizar keywords table con URLs y botones de verificación
             const tbody = document.getElementById('keywords-tbody');
-            tbody.innerHTML = DATA.keywords.map(kw => {
+            tbody.innerHTML = DATA.keywords.map((kw, idx) => {
                 const trendIcon = kw.trend === 'up' ? '📈 ↑' : kw.trend === 'down' ? '📉 ↓' : '➡️ →';
                 const trendColor = kw.trend === 'up' ? '#86EFAC' : kw.trend === 'down' ? '#FCA5A5' : '#FFD60A';
+                const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(kw.keyword)}`;
+                const urlDomain = kw.url ? new URL(kw.url).hostname : 'victor-ia.xyz';
+
                 return `
                     <tr>
                         <td><strong>${kw.keyword}</strong></td>
-                        <td><span class="rank-badge ${kw.position <= 3 ? 'top' : ''}">#${kw.position} ${kw.dayChange}</span></td>
+                        <td style="font-size: 11px; color: #A0A0A0;">
+                            <a href="${kw.url || '#'}" target="_blank" style="color: #FFAA17; text-decoration: none;">
+                                ${urlDomain}
+                            </a>
+                        </td>
+                        <td><span class="rank-badge ${kw.position <= 3 ? 'top' : ''}">#${kw.position}</span></td>
                         <td><strong>$${(kw.clicks * 33).toLocaleString('es-MX')}</strong></td>
                         <td>${kw.ctr}%</td>
                         <td>${kw.impressions.toLocaleString('es-MX')}</td>
-                        <td style="color: ${trendColor};">${trendIcon}</td>
+                        <td style="font-size: 10px;">
+                            <a href="${googleSearchUrl}" target="_blank" title="Verificar en Google" style="color: #FFAA17; margin-right: 6px; text-decoration: none;">🔍 Google</a>
+                            <a href="https://claude.ai?prompt=Analiza%20por%20qué%20${encodeURIComponent(kw.keyword)}%20está%20posicionado%20en%20posición%20${kw.position}%20en%20Google%20y%20qué%20podemos%20hacer%20para%20mejorar" target="_blank" title="Analizar con IA" style="color: #4ade80; text-decoration: none;">🤖 IA</a>
+                        </td>
                     </tr>
                 `;
             }).join('');

@@ -11,17 +11,16 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
-# Instala con: pip install google-search-console google-auth-oauthlib
-
+# Importar librerías de Google
 try:
-    from googlesearchconsole import GSCError
     import googleapiclient.discovery
     from google.auth.transport.requests import Request
-    from google.oauth2.service_account import Credentials
     from google.auth.oauthlib.flow import InstalledAppFlow
     from google.oauth2.credentials import Credentials as OAuthCredentials
-except ImportError:
-    print("⚠️ Falta instalar librerías. Ejecuta:")
+    print("✅ Librerías cargadas correctamente")
+except ImportError as e:
+    print(f"⚠️ Error al importar librerías: {e}")
+    print("\nInstala con:")
     print("pip install google-api-python-client google-auth-oauthlib google-auth-httplib2")
     sys.exit(1)
 
