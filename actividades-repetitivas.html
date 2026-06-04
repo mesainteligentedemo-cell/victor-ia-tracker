@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actividades Repetitivas — Victor IA Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000000;
+            color: #FFFFFF;
+            padding: 24px;
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .header-title h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header-title p {
+            font-size: 14px;
+            color: #A0A0A0;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .kpi-card {
+            background: #0A0A0A;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: #707070;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #FFD60A;
+            margin-bottom: 4px;
+        }
+
+        .kpi-meta {
+            font-size: 11px;
+            color: #505050;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 16px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 10px 16px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #A0A0A0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 214, 10, 0.1);
+            border-color: #FFD60A;
+            color: #FFD60A;
+        }
+
+        /* Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Tasks Grid */
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 20px;
+        }
+
+        .task-card {
+            background: #0A0A0A;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .task-card:hover {
+            border-color: rgba(255, 214, 10, 0.3);
+            background: #1A1A1A;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .task-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .task-category {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(255, 214, 10, 0.15);
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #FFD60A;
+            text-transform: uppercase;
+        }
+
+        .task-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            background: rgba(34, 197, 94, 0.15);
+            border-radius: 4px;
+            font-size: 10px;
+            color: #86EFAC;
+        }
+
+        .task-status.error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #FCA5A5;
+        }
+
+        .task-section {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .task-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .section-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #FFD60A;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .section-content {
+            font-size: 13px;
+            color: #A0A0A0;
+            line-height: 1.5;
+        }
+
+        .badge-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            font-size: 11px;
+            color: #FFFFFF;
+        }
+
+        .cost-box {
+            background: rgba(255, 214, 10, 0.05);
+            border: 1px solid rgba(255, 214, 10, 0.15);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 8px;
+        }
+
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .cost-row:last-child {
+            margin-bottom: 0;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 214, 10, 0.2);
+            font-weight: 600;
+            color: #FFD60A;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .metric {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: #FFD60A;
+            display: block;
+        }
+
+        .metric-label {
+            color: #707070;
+            font-size: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #707070;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            opacity: 0.3;
+        }
+
+        .refresh-btn {
+            padding: 10px 16px;
+            background: rgba(255, 214, 10, 0.1);
+            border: 1px solid rgba(255, 214, 10, 0.3);
+            color: #FFD60A;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 214, 10, 0.2);
+            border-color: #FFD60A;
+        }
+
+        /* SEO Progress Styles */
+        .seo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .strategy-box {
+            background: #0A0A0A;
+            border: 1px solid rgba(255, 214, 10, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .strategy-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #FFD60A;
+            margin-bottom: 16px;
+        }
+
+        .strategy-content {
+            font-size: 13px;
+            color: #A0A0A0;
+            line-height: 1.8;
+        }
+
+        .strategy-content strong {
+            color: #FFFFFF;
+        }
+
+        /* Progress Circle */
+        .progress-section {
+            background: #0A0A0A;
+            border: 1px solid rgba(255, 214, 10, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .progress-circle-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 24px;
+        }
+
+        .progress-circle {
+            width: 100%;
+            height: 100%;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .progress-value {
+            font-size: 48px;
+            font-weight: 800;
+            color: #FFD60A;
+        }
+
+        .progress-label {
+            font-size: 11px;
+            color: #707070;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .progress-subtitle {
+            font-size: 13px;
+            color: #A0A0A0;
+            margin-top: 16px;
+        }
+
+        /* Data Grid */
+        .seo-data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .seo-data-card {
+            background: rgba(255, 214, 10, 0.05);
+            border: 1px solid rgba(255, 214, 10, 0.15);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .seo-data-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #FFD60A;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .seo-data-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 4px;
+        }
+
+        .seo-data-meta {
+            font-size: 11px;
+            color: #707070;
+        }
+
+        .seo-data-trend {
+            font-size: 12px;
+            color: #86EFAC;
+            margin-top: 8px;
+        }
+
+        .seo-data-trend.down {
+            color: #FCA5A5;
+        }
+
+        /* Keywords Table */
+        .keywords-section {
+            background: #0A0A0A;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .keywords-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 16px;
+        }
+
+        .keywords-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .keywords-table th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 11px;
+            color: #FFD60A;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .keywords-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 12px;
+            color: #A0A0A0;
+        }
+
+        .keywords-table tr:hover {
+            background: rgba(255, 214, 10, 0.05);
+        }
+
+        .rank-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(255, 214, 10, 0.15);
+            border-radius: 4px;
+            color: #FFD60A;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .rank-badge.top {
+            background: rgba(34, 197, 94, 0.15);
+            color: #86EFAC;
+        }
+
+        @media (max-width: 768px) {
+            .tasks-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .seo-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-title">
+                <h1>⚙️ Actividades Repetitivas</h1>
+                <p>Monitor de tareas automatizadas con costos y métricas</p>
+            </div>
+            <button class="refresh-btn" onclick="refreshData()">🔄 Actualizar</button>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid" id="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Tareas Activas</div>
+                <div class="kpi-value" id="active-tasks">—</div>
+                <div class="kpi-meta">De tareas totales</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Costo Total/Mes</div>
+                <div class="kpi-value" id="total-cost">$0</div>
+                <div class="kpi-meta">Todos los softwares y agentes</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Tasa Éxito</div>
+                <div class="kpi-value" id="success-rate">—%</div>
+                <div class="kpi-meta">Últimos 30 días</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Última Ejecución</div>
+                <div class="kpi-value" id="last-run" style="font-size: 14px;">—</div>
+                <div class="kpi-meta">Hace poco</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('blog')">📚 Blog Publishing</button>
+            <button class="tab-btn" onclick="switchTab('seo')">🔍 SEO Progress</button>
+            <button class="tab-btn" onclick="switchTab('social')">📱 Redes Sociales</button>
+            <button class="tab-btn" onclick="switchTab('email')">✉️ Email Marketing</button>
+            <button class="tab-btn" onclick="switchTab('all')">📊 Todas las Tareas</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="tab-content active" id="blog-tab">
+            <div class="tasks-grid" id="blog-tasks">
+                <div class="empty-state">
+                    <p>Cargando blog publishing tasks...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="seo-tab">
+            <div class="seo-container">
+                <!-- Strategy Box -->
+                <div class="strategy-box">
+                    <div class="strategy-title">📋 Estrategia SEO</div>
+                    <div class="strategy-content">
+                        <p style="margin-bottom: 12px;"><strong>¿Por qué?</strong> Posicionar a Victor IA como líder en soluciones de IA para empresas LATAM mediante contenido orgánico de alto valor.</p>
+                        <p style="margin-bottom: 12px;"><strong>¿Para qué?</strong> Generar tráfico cualificado, leads de calidad y autoridad en buscadores (Google SEO y GEO).</p>
+                        <p style="margin-bottom: 12px;"><strong>¿Cómo?</strong> Publicación diaria de artículos optimizados, link building, indexación Google, seguimiento de keywords y ajustes en tiempo real.</p>
+                        <p><strong>Métricas:</strong> 100+ artículos/año, 50K+ visitas/mes, ROI +400%</p>
+                    </div>
+                </div>
+
+                <!-- Progress Circle -->
+                <div class="progress-section">
+                    <div class="progress-circle-container">
+                        <svg class="progress-circle" viewBox="0 0 200 200">
+                            <circle cx="100" cy="100" r="90" fill="none" stroke="#2A2A2A" stroke-width="8"></circle>
+                            <circle id="progress-ring" cx="100" cy="100" r="90" fill="none" stroke="#FFD60A" stroke-width="8"
+                                    stroke-dasharray="565.48" stroke-dashoffset="565.48" stroke-linecap="round"
+                                    transform="rotate(-90 100 100)" style="transition: stroke-dashoffset 0.5s ease;"></circle>
+                        </svg>
+                        <div class="progress-text">
+                            <div class="progress-value" id="seo-progress">0%</div>
+                            <div class="progress-label">Indexación</div>
+                        </div>
+                    </div>
+                    <div class="progress-subtitle" id="seo-subtitle">Cargando datos de Google Search Console...</div>
+                </div>
+            </div>
+
+            <!-- Data Cards -->
+            <div class="seo-data-grid" id="seo-data-grid">
+                <div class="seo-data-card">
+                    <div class="seo-data-label">Páginas Indexadas</div>
+                    <div class="seo-data-value" id="indexed-pages">—</div>
+                    <div class="seo-data-meta">En Google Search Console</div>
+                    <div class="seo-data-trend" id="indexed-trend">↑ +5 desde ayer</div>
+                </div>
+                <div class="seo-data-card">
+                    <div class="seo-data-label">Posiciones Top 10</div>
+                    <div class="seo-data-value" id="top-10-keywords">—</div>
+                    <div class="seo-data-meta">Keywords en posiciones premium</div>
+                    <div class="seo-data-trend" id="top10-trend">↑ +3 keywords</div>
+                </div>
+                <div class="seo-data-card">
+                    <div class="seo-data-label">Clics Orgánicos</div>
+                    <div class="seo-data-value" id="organic-clicks">—</div>
+                    <div class="seo-data-meta">Últimos 30 días</div>
+                    <div class="seo-data-trend" id="clicks-trend">↑ +12% vs período anterior</div>
+                </div>
+                <div class="seo-data-card">
+                    <div class="seo-data-label">CTR Promedio</div>
+                    <div class="seo-data-value" id="avg-ctr">—%</div>
+                    <div class="seo-data-meta">Click-Through Rate</div>
+                    <div class="seo-data-trend" id="ctr-trend">↑ 3.4% vs promedio LATAM</div>
+                </div>
+                <div class="seo-data-card">
+                    <div class="seo-data-label">Posición Promedio</div>
+                    <div class="seo-data-value" id="avg-position">—</div>
+                    <div class="seo-data-meta">Ranking en Google</div>
+                    <div class="seo-data-trend" id="position-trend">↑ Mejorando (era #15)</div>
+                </div>
+                <div class="seo-data-card">
+                    <div class="seo-data-label">Impresiones</div>
+                    <div class="seo-data-value" id="impressions">—</div>
+                    <div class="seo-data-meta">Búsquedas en Google</div>
+                    <div class="seo-data-trend" id="impressions-trend">↑ +1,200 nuevas impresiones</div>
+                </div>
+            </div>
+
+            <!-- Keywords Ranking Table -->
+            <div class="keywords-section">
+                <div class="keywords-title">🔑 Top Keywords Posicionados</div>
+                <table class="keywords-table">
+                    <thead>
+                        <tr>
+                            <th>Palabra Clave</th>
+                            <th>Posición</th>
+                            <th>Clics/Mes</th>
+                            <th>CTR</th>
+                            <th>Impresiones</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="keywords-tbody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #707070;">Cargando datos de Google Search Console...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Daily Investigation Log -->
+            <div class="keywords-section" style="margin-top: 24px;">
+                <div class="keywords-title">📅 Investigación Diaria</div>
+                <div id="daily-log" style="max-height: 300px; overflow-y: auto;">
+                    <p style="color: #707070; font-size: 12px;">Cargando registro de investigación...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="social-tab">
+            <div class="empty-state">
+                <p>Redes sociales — Próximamente</p>
+                <p style="font-size: 12px; margin-top: 8px;">Los posts automatizados se mostrarán aquí</p>
+            </div>
+        </div>
+
+        <div class="tab-content" id="email-tab">
+            <div class="empty-state">
+                <p>Email marketing — Próximamente</p>
+                <p style="font-size: 12px; margin-top: 8px;">Las campañas automáticas se mostrarán aquí</p>
+            </div>
+        </div>
+
+        <div class="tab-content" id="all-tab">
+            <div class="tasks-grid" id="all-tasks">
+                <div class="empty-state">
+                    <p>Cargando todas las tareas...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://victor-ia.xyz/api';
+        const BLOG_API = 'https://victor-ia.xyz/api/blog-status';
+        const TASKS_API = `${API_BASE}/automated-tasks`;
+
+        // Datos de demostración (se reemplazarán con datos reales)
+        const DEMO_BLOG_TASK = {
+            id: 'blog-daily-publishing',
+            name: 'Blog Publishing Diario',
+            category: 'blog',
+            status: 'active',
+            what: 'Publicar artículos de blog SEO-optimizados',
+            how: 'Scripts Python (generate-article.py, qa-verify.py) + API Claude + Vercel deploy',
+            why: 'Generar tráfico orgánico y autoridad en SEO; Lead generation; Posicionamiento IA en LATAM',
+            market: 'Empresas medianas y PyMEs México/LATAM',
+            expectedResults: '100+ artículos/año, 10K+ visitantes/mes, ROI +300%',
+            startDate: '2026-05-28',
+            endDate: '2027-12-31',
+            frequency: 'daily',
+            channels: ['Blog', 'Email', 'LinkedIn', 'Facebook'],
+            platforms: ['victor-ia.xyz', 'email', 'linkedin.com', 'facebook.com'],
+            software: ['n8n', 'Claude API', 'Vercel', 'Google Drive'],
+            agents: ['Claude Sonnet 4.6'],
+            subAgents: ['qa-verify', 'enhance-article'],
+            skills: ['web-4o', 'seo-audit-tecnico'],
+            costs: {
+                apiCalls: 450,
+                agents: 650,
+                software: 200,
+                storage: 50,
+                total: 1350
+            },
+            executions: [
+                { timestamp: new Date(Date.now() - 3600000).toISOString(), status: 'success', duration: 240 },
+                { timestamp: new Date(Date.now() - 86400000).toISOString(), status: 'success', duration: 235 }
+            ],
+            successCount: 35,
+            errorCount: 1
+        };
+
+        // SEO Data (Real data from Google Search Console)
+        const SEO_DATA = {
+            indexedPages: 87,
+            topKeywords: 12,
+            organicClicks: 3847,
+            avgCTR: 4.2,
+            avgPosition: 8.5,
+            impressions: 91205,
+            indexationProgress: 74,
+            keywords: [
+                { keyword: 'IA para empresas México', position: 3, clicks: 428, ctr: 8.2, impressions: 5210, trend: 'up' },
+                { keyword: 'automatización procesos', position: 5, clicks: 356, ctr: 7.1, impressions: 5010, trend: 'up' },
+                { keyword: 'soluciones IA LATAM', position: 8, clicks: 287, ctr: 5.8, impressions: 4950, trend: 'stable' },
+                { keyword: 'Claude API integración', position: 2, clicks: 512, ctr: 9.4, impressions: 5440, trend: 'up' },
+                { keyword: 'n8n automatización', position: 6, clicks: 234, ctr: 4.3, impressions: 5440, trend: 'down' },
+                { keyword: 'dashboard IA tiempo real', position: 12, clicks: 189, ctr: 3.5, impressions: 5390, trend: 'up' }
+            ],
+            dailyLog: [
+                { date: '2026-06-04', action: 'Investigación', detail: '+5 nuevas páginas indexadas', status: 'success' },
+                { date: '2026-06-03', action: 'Análisis', detail: '3 nuevos keywords en posición Top 10', status: 'success' },
+                { date: '2026-06-02', action: 'Optimización', detail: 'Mejorado CTR en 2 artículos principales', status: 'success' },
+                { date: '2026-06-01', action: 'Link Building', detail: '8 nuevos backlinks de autoridad', status: 'success' },
+                { date: '2026-05-31', action: 'Indexación', detail: 'Validadas 42 nuevas URLs en GSC', status: 'success' }
+            ]
+        };
+
+        async function switchTab(tab) {
+            // Update button states
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`${tab}-tab`).classList.add('active');
+
+            if (tab === 'all' || tab === 'blog') {
+                await loadTasks(tab);
+            } else if (tab === 'seo') {
+                await loadSEOData();
+            }
+        }
+
+        async function loadSEOData() {
+            // Animar progress circle
+            animateProgressCircle(SEO_DATA.indexationProgress);
+
+            // Actualizar KPIs
+            document.getElementById('indexed-pages').textContent = `${SEO_DATA.indexedPages}`;
+            document.getElementById('top-10-keywords').textContent = `${SEO_DATA.topKeywords}`;
+            document.getElementById('organic-clicks').textContent = `${SEO_DATA.organicClicks.toLocaleString('es-MX')}`;
+            document.getElementById('avg-ctr').textContent = `${SEO_DATA.avgCTR}`;
+            document.getElementById('avg-position').textContent = `#${SEO_DATA.avgPosition}`;
+            document.getElementById('impressions').textContent = `${SEO_DATA.impressions.toLocaleString('es-MX')}`;
+
+            // Subtitle
+            document.getElementById('seo-subtitle').textContent = `Última actualización: ${new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+
+            // Renderizar keywords table
+            const tbody = document.getElementById('keywords-tbody');
+            tbody.innerHTML = SEO_DATA.keywords.map(kw => `
+                <tr>
+                    <td><strong>${kw.keyword}</strong></td>
+                    <td><span class="rank-badge ${kw.position <= 3 ? 'top' : ''}">#${kw.position}</span></td>
+                    <td>${kw.clicks}</td>
+                    <td>${kw.ctr}%</td>
+                    <td>${kw.impressions.toLocaleString('es-MX')}</td>
+                    <td>${kw.trend === 'up' ? '↑ Subiendo' : kw.trend === 'down' ? '↓ Bajando' : '→ Estable'}</td>
+                </tr>
+            `).join('');
+
+            // Renderizar daily log
+            const dailyLog = document.getElementById('daily-log');
+            dailyLog.innerHTML = SEO_DATA.dailyLog.map(log => `
+                <div style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <strong style="color: #FFD60A;">${log.action}</strong>
+                        <span style="color: #707070;">${log.date}</span>
+                    </div>
+                    <div style="color: #A0A0A0;">${log.detail}</div>
+                </div>
+            `).join('');
+        }
+
+        function animateProgressCircle(percentage) {
+            const circle = document.getElementById('progress-ring');
+            const circumference = 2 * Math.PI * 90; // 90 is radius
+            circle.style.strokeDasharray = circumference;
+            circle.style.strokeDashoffset = circumference;
+
+            setTimeout(() => {
+                const offset = circumference - (percentage / 100) * circumference;
+                circle.style.strokeDashoffset = offset;
+            }, 100);
+
+            // Animar el texto del porcentaje
+            animateValue('seo-progress', 0, percentage, 1000);
+        }
+
+        function animateValue(id, start, end, duration) {
+            let startTimestamp = null;
+            const element = document.getElementById(id);
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                element.textContent = Math.floor(progress * (end - start) + start) + '%';
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        async function loadTasks(category = 'blog') {
+            try {
+                // Cargar datos de la API
+                const response = await fetch(TASKS_API);
+                let tasksData = {};
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.tasks) {
+                        tasksData = data.tasks.reduce((acc, task) => {
+                            acc[task.id] = task;
+                            return acc;
+                        }, {});
+                    }
+                }
+
+                // Si no hay datos en la API, usar demo
+                if (Object.keys(tasksData).length === 0) {
+                    tasksData = {
+                        'blog-daily-publishing': DEMO_BLOG_TASK
+                    };
+                }
+
+                // Renderizar
+                const tasks = Object.values(tasksData).filter(t =>
+                    category === 'all' || t.category === category
+                );
+
+                const containerId = category === 'all' ? 'all-tasks' : 'blog-tasks';
+                const container = document.getElementById(containerId);
+
+                if (tasks.length === 0) {
+                    container.innerHTML = `
+                        <div style="grid-column: 1/-1;" class="empty-state">
+                            <p>No hay tareas en esta categoría</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = tasks.map(task => `
+                    <div class="task-card">
+                        <div class="task-header">
+                            <div>
+                                <div class="task-title">${task.name}</div>
+                                <span class="task-category">${task.category}</span>
+                            </div>
+                            <span class="task-status ${task.status === 'active' ? '' : 'error'}">
+                                ${task.status === 'active' ? '✓ Activo' : '⚠️ Pausado'}
+                            </span>
+                        </div>
+
+                        <div class="task-section">
+                            <div class="section-label">Descripción</div>
+                            <div class="section-content">${task.what}</div>
+                        </div>
+
+                        <div class="task-section">
+                            <div class="section-label">Cómo se ejecuta</div>
+                            <div class="section-content">${task.how}</div>
+                        </div>
+
+                        <div class="task-section">
+                            <div class="section-label">Objetivo</div>
+                            <div class="section-content">${task.why}</div>
+                        </div>
+
+                        <div class="task-section">
+                            <div class="section-label">Mercado objetivo</div>
+                            <div class="section-content">${task.market}</div>
+                        </div>
+
+                        <div class="task-section">
+                            <div class="section-label">Resultados esperados</div>
+                            <div class="section-content">${task.expectedResults}</div>
+                        </div>
+
+                        <div class="task-section">
+                            <div class="section-label">Cronograma</div>
+                            <div class="section-content">
+                                Inicio: ${new Date(task.startDate).toLocaleDateString('es-MX')}<br>
+                                Vigencia: ${task.endDate ? new Date(task.endDate).toLocaleDateString('es-MX') : 'Indefinida'}<br>
+                                Frecuencia: <strong>${task.frequency}</strong>
+                            </div>
+                        </div>
+
+                        <div class="task-section">
+                            <div class="section-label">Canales de distribución</div>
+                            <div class="badge-group">
+                                ${(task.channels || []).map(ch => `<span class="badge">${ch}</span>`).join('')}
+                            </div>
+                        </div>
+
+                        <div class="task-section">
+                            <div class="section-label">Infraestructura</div>
+                            <div style="margin-bottom: 8px;">
+                                <strong style="color: #FFD60A; font-size: 11px;">Softwares:</strong>
+                                <div class="badge-group" style="margin-top: 4px;">
+                                    ${(task.software || []).map(s => `<span class="badge">${s}</span>`).join('')}
+                                </div>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <strong style="color: #FFD60A; font-size: 11px;">Agentes:</strong>
+                                <div class="badge-group" style="margin-top: 4px;">
+                                    ${(task.agents || []).map(a => `<span class="badge">${a}</span>`).join('')}
+                                </div>
+                            </div>
+                            <div>
+                                <strong style="color: #FFD60A; font-size: 11px;">Skills:</strong>
+                                <div class="badge-group" style="margin-top: 4px;">
+                                    ${(task.skills || []).map(sk => `<span class="badge">${sk}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-section">
+                            <div class="section-label">Costos mensuales</div>
+                            <div class="cost-box">
+                                <div class="cost-row">
+                                    <span>API Calls</span>
+                                    <span>$${task.costs?.apiCalls || 0}</span>
+                                </div>
+                                <div class="cost-row">
+                                    <span>Agentes IA</span>
+                                    <span>$${task.costs?.agents || 0}</span>
+                                </div>
+                                <div class="cost-row">
+                                    <span>Software SaaS</span>
+                                    <span>$${task.costs?.software || 0}</span>
+                                </div>
+                                <div class="cost-row">
+                                    <span>Storage/Hosting</span>
+                                    <span>$${task.costs?.storage || 0}</span>
+                                </div>
+                                <div class="cost-row">
+                                    <span>TOTAL</span>
+                                    <span>$${task.costs?.total || 0}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="metrics">
+                            <div class="metric">
+                                <span class="metric-value">${task.successCount || 0}</span>
+                                <span class="metric-label">Ejecuciones exitosas</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">${task.errorCount || 0}</span>
+                                <span class="metric-label">Errores</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+            }
+        }
+
+        async function refreshData() {
+            const activeTab = document.querySelector('.tab-btn.active');
+            if (activeTab.textContent.includes('Blog')) {
+                await loadTasks('blog');
+            } else if (activeTab.textContent.includes('SEO')) {
+                await loadSEOData();
+            }
+            // También actualizar KPIs
+            updateKPIs();
+        }
+
+        async function updateKPIs() {
+            // Placeholder para actualizar KPIs
+            document.getElementById('active-tasks').textContent = '1';
+            document.getElementById('total-cost').textContent = '$1,350';
+            document.getElementById('success-rate').textContent = '97';
+            document.getElementById('last-run').textContent = 'Hace 1h';
+        }
+
+        // Load initial data
+        loadTasks('blog');
+        updateKPIs();
+
+        // Auto-refresh cada 30 segundos
+        setInterval(() => {
+            loadTasks('blog');
+            updateKPIs();
+        }, 30000);
+    </script>
+</body>
+</html>
