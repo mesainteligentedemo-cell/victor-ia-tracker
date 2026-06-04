@@ -927,32 +927,51 @@
             const lastUpdate = GSC_REAL_DATA?.last_updated ? new Date(GSC_REAL_DATA.last_updated).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
             document.getElementById('seo-subtitle').textContent = `${dataSource} • Última actualización: ${lastUpdate}`;
 
-            // Renderizar keywords table con URLs y botones de verificación
+            // Renderizar keywords table con URLs y botones de verificación en múltiples navegadores
             const tbody = document.getElementById('keywords-tbody');
             tbody.innerHTML = DATA.keywords.map((kw, idx) => {
                 const trendIcon = kw.trend === 'up' ? '📈 ↑' : kw.trend === 'down' ? '📉 ↓' : '➡️ →';
                 const trendColor = kw.trend === 'up' ? '#86EFAC' : kw.trend === 'down' ? '#FCA5A5' : '#FFD60A';
-                const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(kw.keyword)}`;
-                const urlDomain = kw.url ? new URL(kw.url).hostname : 'victor-ia.xyz';
 
-                return `
+                // URLs de búsqueda en diferentes motores y navegadores
+                const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(kw.keyword)}`;
+                const bingSearchUrl = `https://www.bing.com/search?q=${encodeURIComponent(kw.keyword)}`;
+
+                const urlDomain = kw.url ? new URL(kw.url).hostname : 'victor-ia.xyz';
+                const urlPath = kw.url ? new URL(kw.url).pathname : '/';
+
+                // Crear tooltip con información de cómo verificar
+                const verifyInfo = `
+                    Posición real: #${kw.position}
+                    URL: ${kw.url || 'victor-ia.xyz'}
+
+                    Click para verificar en:
+                    • Google Search (verás la posición exacta)
+                    • Bing Search
+                    • URL directa del contenido
+                    • Análisis con IA
+                `;
+
+                return \`
                     <tr>
-                        <td><strong>${kw.keyword}</strong></td>
+                        <td><strong>\${kw.keyword}</strong></td>
                         <td style="font-size: 11px; color: #A0A0A0;">
-                            <a href="${kw.url || '#'}" target="_blank" style="color: #FFAA17; text-decoration: none;">
-                                ${urlDomain}
+                            <a href="\${kw.url || '#'}" target="_blank" style="color: #FFAA17; text-decoration: none;" title="Ver contenido posicionado">
+                                \${urlDomain}\${urlPath.length > 1 ? urlPath.substring(0, 30) + '...' : ''}
                             </a>
                         </td>
-                        <td><span class="rank-badge ${kw.position <= 3 ? 'top' : ''}">#${kw.position}</span></td>
-                        <td><strong>$${(kw.clicks * 33).toLocaleString('es-MX')}</strong></td>
-                        <td>${kw.ctr}%</td>
-                        <td>${kw.impressions.toLocaleString('es-MX')}</td>
-                        <td style="font-size: 10px;">
-                            <a href="${googleSearchUrl}" target="_blank" title="Verificar en Google" style="color: #FFAA17; margin-right: 6px; text-decoration: none;">🔍 Google</a>
-                            <a href="https://claude.ai?prompt=Analiza%20por%20qué%20${encodeURIComponent(kw.keyword)}%20está%20posicionado%20en%20posición%20${kw.position}%20en%20Google%20y%20qué%20podemos%20hacer%20para%20mejorar" target="_blank" title="Analizar con IA" style="color: #4ade80; text-decoration: none;">🤖 IA</a>
+                        <td><span class="rank-badge \${kw.position <= 3 ? 'top' : ''}">#\${kw.position}</span></td>
+                        <td><strong>$\${(kw.clicks * 33).toLocaleString('es-MX')}</strong></td>
+                        <td>\${kw.ctr}%</td>
+                        <td>\${kw.impressions.toLocaleString('es-MX')}</td>
+                        <td style="font-size: 9px; white-space: nowrap;">
+                            <a href="\${googleSearchUrl}" target="_blank" title="Ver en Google Search - posición #\${kw.position}" style="color: #4285F4; margin-right: 4px; text-decoration: none;">📍 Google</a>
+                            <a href="\${bingSearchUrl}" target="_blank" title="Ver en Bing Search" style="color: #00A4EF; margin-right: 4px; text-decoration: none;">🔎 Bing</a>
+                            <a href="\${kw.url || '#'}" target="_blank" title="Ver contenido directamente" style="color: #FFAA17; margin-right: 4px; text-decoration: none;">📄 URL</a>
+                            <a href="https://claude.ai?prompt=Keyword:%20\${encodeURIComponent(kw.keyword)}%0APosición:%20#\${kw.position}%0AURL:%20\${encodeURIComponent(kw.url)}%0A%0AAnaliza%20por%20qué%20está%20en%20esa%20posición%20y%20cómo%20mejorar" target="_blank" title="Analizar con Claude AI" style="color: #4ade80; text-decoration: none;">🤖 AI</a>
                         </td>
                     </tr>
-                `;
+                \`;
             }).join('');
 
             // Renderizar daily log con timestamps
