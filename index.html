@@ -434,9 +434,14 @@ $actividades_section        </div>
 
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
+                const tabValue = e.target.dataset.tab;
+                if (tabValue === 'actividades-repetitivas') {
+                    window.location.href = '/actividades-repetitivas.html';
+                    return;
+                }
                 document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
                 e.target.classList.add('active');
-                dashboardState.activeTab = e.target.dataset.tab;
+                dashboardState.activeTab = tabValue;
             });
         });
 
