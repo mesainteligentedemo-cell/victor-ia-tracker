@@ -38,20 +38,59 @@
       }
     } catch(e) {}
   }
-  // 2. Sin sesión <svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="vertical-align:-2px;flex-shrink:0"><use href="#icon-arrow-right"></use></svg> login
+  // 2. Sin sesión -> login
   if (!localStorage.getItem('via_access_role')) {
     window.location.replace('https://victor-ia.xyz/login');
     return;
   }
-  // 3. OK <svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="vertical-align:-2px;flex-shrink:0"><use href="#icon-arrow-right"></use></svg> inicializar Firebase y mostrar
-  document.documentElement.style.opacity='0';
-  document.documentElement.style.transition='opacity .25s';
+
+  // 3. Helper que SIEMPRE restaura la visibilidad de la página.
+  //    Esto es critico: si algo falla (CDN bloqueado, firebase undefined,
+  //    error en initClientMode) la pagina NUNCA debe quedarse en blanco.
+  var _shown = false;
+  function revealPage(){
+    if (_shown) return;
+    _shown = true;
+    document.documentElement.style.opacity = '1';
+  }
+
+  // Ocultar mientras inicializa, pero con red de seguridad multiple.
+  document.documentElement.style.opacity = '0';
+  document.documentElement.style.transition = 'opacity .25s';
+
+  // Red de seguridad 1: timeout absoluto. Pase lo que pase, a los 2.5s
+  // la pagina se muestra si o si.
+  setTimeout(revealPage, 2500);
+
+  // Red de seguridad 2: si cualquier error global salta, mostrar la pagina.
+  window.addEventListener('error', revealPage);
+
+  // 4. Inicializar Firebase de forma defensiva (no debe romper el render).
   var cfg={apiKey:"AIzaSyBciNfVGjH5l3szzGVgatXlZvLvaoNsp14",authDomain:"victor-ia-tracker.firebaseapp.com",projectId:"victor-ia-tracker",storageBucket:"victor-ia-tracker.firebasestorage.app",messagingSenderId:"475376340371",appId:"1:475376340371:web:caaf70c5c4063edfcb6c66"};
-  if(!firebase.apps.length)firebase.initializeApp(cfg);
-  document.addEventListener('DOMContentLoaded',function(){
-    document.documentElement.style.opacity='1';
-    if(typeof initClientMode==='function')initClientMode();
-  });
+  try {
+    if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+      if (!firebase.apps.length) firebase.initializeApp(cfg);
+    } else {
+      console.warn('[tracker] Firebase SDK no disponible — la pagina se muestra igual.');
+    }
+  } catch(e) {
+    console.warn('[tracker] Error inicializando Firebase:', e);
+  }
+
+  // 5. Mostrar la pagina e inicializar la app cuando el DOM este listo.
+  function boot(){
+    revealPage();
+    try {
+      if (typeof initClientMode === 'function') initClientMode();
+    } catch(e) {
+      console.warn('[tracker] Error en initClientMode:', e);
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
 })();
 </script>
 <style>
