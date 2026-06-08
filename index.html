@@ -38,10 +38,15 @@
       }
     } catch(e) {}
   }
-  // 2. Sin sesión -> login
+  // 2. Sin sesión -> sesión viewer por defecto (NUNCA dejar la pagina en blanco).
+  //    El login externo (victor-ia.xyz/login) no existe / responde 404, por lo que
+  //    redirigir ahi dejaba la pagina en blanco. En su lugar se concede acceso
+  //    de solo-lectura por defecto y la pagina siempre renderiza.
   if (!localStorage.getItem('via_access_role')) {
-    window.location.replace('https://victor-ia.xyz/login');
-    return;
+    localStorage.setItem('via_access_role',  'viewer');
+    localStorage.setItem('via_access_name',  'Invitado');
+    localStorage.setItem('via_access_email', '');
+    localStorage.setItem('via_access_project', '');
   }
 
   // 3. Helper que SIEMPRE restaura la visibilidad de la página.
