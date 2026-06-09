@@ -13458,55 +13458,164 @@ function studioAttachFile(file){
     },
 
     init3DGraph(entries) {
-      setTimeout(() => {
-        const container = document.getElementById('graphify-3d');
-        if (!container) {console.warn('❌ graphify-3d container not found'); return;}
+      const container = document.getElementById('graphify-3d');
+      if (!container) return;
 
-        // Load Babylon.js if not already loaded
-        if (typeof BABYLON === 'undefined') {
-          console.log('📦 Loading Babylon.js from CDN...');
-          const script = document.createElement('script');
-          script.src = 'https://cdn.babylonjs.com/babylon.js';
-          script.onload = () => {
-            console.log('✅ Babylon.js loaded');
-            GraphifyUI.init3DGraph(entries);
-          };
-          script.onerror = () => {
-            console.error('❌ Failed to load Babylon.js');
-            container.innerHTML = '<div style="color:red;padding:20px">Error loading 3D engine. Check console.</div>';
-          };
-          document.head.appendChild(script);
-          return;
+      container.innerHTML = '<canvas id="graphify-canvas" style="display:block;width:100%;height:100%;background:#0a0b0d"></canvas>';
+      const canvas = container.querySelector('#graphify-canvas');
+      const ctx = canvas.getContext('2d');
+
+      const resizeCanvas = () => {
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+      };
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      // Definir nodos de la arquitectura
+      const nodes = [
+        {name: 'Claude AI', x: 0, y: 0, z: 0, color: '#4ade80', size: 15, type: 'core'},
+        // Plataformas
+        {name: 'VS Code', x: -80, y: 60, z: 80, color: '#60a5fa', size: 10, type: 'platform'},
+        {name: 'Vercel', x: 80, y: 60, z: 80, color: '#faf7f5', size: 10, type: 'platform'},
+        {name: 'Claude Code', x: 0, y: 60, z: -100, color: '#FFAA17', size: 10, type: 'platform'},
+        // Agentes
+        {name: 'Explore', x: -100, y: -40, z: 60, color: '#c084fc', size: 8, type: 'agent'},
+        {name: 'Plan', x: 0, y: -40, z: 120, color: '#f87171', size: 8, type: 'agent'},
+        {name: 'Code Review', x: 100, y: -40, z: 60, color: '#06b6d4', size: 8, type: 'agent'},
+        // Skills
+        {name: 'figma-use', x: -120, y: 20, z: -40, color: '#f97316', size: 6, type: 'skill'},
+        {name: 'workflow', x: -60, y: 20, z: -80, color: '#a855f7', size: 6, type: 'skill'},
+        {name: 'css-quality', x: 60, y: 20, z: -80, color: '#22c55e', size: 6, type: 'skill'},
+        {name: 'svg-motion', x: 120, y: 20, z: -40, color: '#f97316', size: 6, type: 'skill'},
+        // MCP
+        {name: 'HubSpot', x: -90, y: -80, z: 0, color: '#fb923c', size: 7, type: 'mcp'},
+        {name: 'Figma', x: -30, y: -80, z: 80, color: '#f97316', size: 7, type: 'mcp'},
+        {name: 'Google Drive', x: 30, y: -80, z: 80, color: '#fbbf24', size: 7, type: 'mcp'},
+        {name: 'After Effects', x: 90, y: -80, z: 0, color: '#f87171', size: 7, type: 'mcp'},
+        // APIs
+        {name: 'ElevenLabs', x: -70, y: -120, z: -60, color: '#8b5cf6', size: 6, type: 'api'},
+        {name: 'OpenRouter', x: 0, y: -120, z: -100, color: '#06b6d4', size: 6, type: 'api'},
+        {name: 'Gemini', x: 70, y: -120, z: -60, color: '#f87171', size: 6, type: 'api'},
+      ];
+
+      // Proyección 3D a 2D
+      const project = (x, y, z, scale = 1) => {
+        const perspective = 500 / (500 + z);
+        return {
+          sx: canvas.width/2 + x * perspective * scale,
+          sy: canvas.height/2 + y * perspective * scale,
+          scale: perspective
+        };
+      };
+
+      let rotation = {x: 0.5, y: 0.3};
+      let time = 0;
+
+      const rotatePoint = (x, y, z, rx, ry) => {
+        // Rotación Y
+        let xx = x * Math.cos(ry) - z * Math.sin(ry);
+        let zz = x * Math.sin(ry) + z * Math.cos(ry);
+        x = xx; z = zz;
+
+        // Rotación X
+        let yy = y * Math.cos(rx) - z * Math.sin(rx);
+        zz = y * Math.sin(rx) + z * Math.cos(rx);
+        y = yy; z = zz;
+
+        return {x, y, z};
+      };
+
+      const draw = () => {
+        ctx.fillStyle = '#0a0b0d';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        time += 0.016;
+        rotation.y += 0.002;
+
+        // Sortear nodos por profundidad
+        const projectedNodes = nodes.map(n => {
+          const rot = rotatePoint(n.x, n.y, n.z, rotation.x, rotation.y);
+          const proj = project(rot.x, rot.y, rot.z);
+          return {...n, ...proj, z: rot.z};
+        }).sort((a, b) => a.z - b.z);
+
+        // Dibujar líneas de conexión
+        ctx.strokeStyle = 'rgba(255, 170, 23, 0.1)';
+        ctx.lineWidth = 1;
+        projectedNodes.forEach(n => {
+          if (n.type !== 'core') {
+            const core = projectedNodes.find(x => x.type === 'core');
+            ctx.beginPath();
+            ctx.moveTo(core.sx, core.sy);
+            ctx.lineTo(n.sx, n.sy);
+            ctx.stroke();
+          }
+        });
+
+        // Dibujar nodos
+        projectedNodes.forEach(n => {
+          const pulse = Math.sin(time * 2 + n.x * 0.01) * 0.3 + 0.7;
+          const size = n.size * n.scale * pulse;
+
+          // Glow
+          ctx.shadowColor = n.color;
+          ctx.shadowBlur = 20 * pulse;
+          ctx.fillStyle = n.color;
+          ctx.globalAlpha = 0.8 * n.scale;
+          ctx.beginPath();
+          ctx.arc(n.sx, n.sy, size, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Borde
+          ctx.globalAlpha = 1;
+          ctx.strokeStyle = n.color;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Label
+          ctx.globalAlpha = n.scale * 0.9;
+          ctx.fillStyle = '#f5f1e8';
+          ctx.font = 'bold 9px Inter';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.shadowBlur = 0;
+          ctx.fillText(n.name, n.sx, n.sy + size + 14);
+        });
+
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+
+        // Partículas de energía
+        for (let i = 0; i < 30; i++) {
+          const angle = (time * 0.5 + i * 0.2) % (Math.PI * 2);
+          const radius = 120 + Math.sin(time * 0.3 + i) * 40;
+          const x = Math.cos(angle) * radius;
+          const y = (Math.sin(time * 0.2 + i) - 0.5) * 100;
+          const z = Math.sin(angle) * radius;
+
+          const rot = rotatePoint(x, y, z, rotation.x, rotation.y);
+          const proj = project(rot.x, rot.y, rot.z);
+
+          ctx.fillStyle = `rgba(255, 170, 23, ${0.6 * (0.5 + Math.sin(time + i))})`;
+          ctx.globalAlpha = 0.5 + Math.sin(time * 2 + i) * 0.5;
+          ctx.fillRect(proj.sx - 2, proj.sy - 2, 4, 4);
         }
 
-        console.log('🎬 Initializing Babylon.js scene...');
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(draw);
+      };
 
-      container.innerHTML = '';
+      // Interactividad
+      canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        rotation.y = (x / canvas.width) * Math.PI * 2;
+        rotation.x = (y / canvas.height) * Math.PI - Math.PI / 2;
+      });
 
-      // ========== BABYLON.JS SCENE SETUP ==========
-      const engine = new BABYLON.Engine(container, true);
-      const scene = new BABYLON.Scene(engine);
-      scene.clearColor = new BABYLON.Color3(0.07, 0.078, 0.094);
-      scene.collisionsEnabled = true;
-
-      // Camera setup
-      const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 80, 140));
-      camera.attachControl(container, true);
-      camera.minZ = 0.1;
-      camera.maxZ = 1000;
-      camera.speed = 0;
-      camera.angularSensibility = 1000;
-
-      // ========== LIGHTING ==========
-      const ambLight = new BABYLON.HemisphericLight('amb', new BABYLON.Vector3(0, 1, 0), scene);
-      ambLight.intensity = 0.5;
-      ambLight.specular = new BABYLON.Color3(0.2, 0.2, 0.2);
-
-      const dirLight = new BABYLON.PointLight('point1', new BABYLON.Vector3(100, 150, 100), scene);
-      dirLight.intensity = 0.8;
-      dirLight.range = 500;
-
-      const coreLight = new BABYLON.PointLight('core', new BABYLON.Vector3(0, 0, 0), scene);
+      draw();
       coreLight.intensity = 0.6;
       coreLight.range = 200;
       coreLight.diffuse = new BABYLON.Color3(1, 0.67, 0.09); // Amber
