@@ -13348,21 +13348,33 @@ function studioAttachFile(file){
       const categories = [...new Set(allEntries.map(e => e.cat || 'Otro'))].sort();
       root.appendChild(GraphifyUI.createFilterSection(clients, projects, categories));
 
-      // 3. Tabla de Periodos
+      // 3. Gráfico 3D / Interactive Graph (PRIORITY)
+      const graphSection = document.createElement('div');
+      graphSection.style.cssText = 'margin-top:24px;margin-bottom:24px';
+      graphSection.innerHTML = `<div style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <div style="font-size:11px;color:var(--amber);font-weight:700;letter-spacing:0.1em;text-transform:uppercase"> GRAPHIFY 3D · Arquitectura del Tracker</div>
+          <div style="font-size:9px;color:var(--bone2);background:rgba(255,170,23,0.1);padding:2px 8px;border-radius:3px;letter-spacing:0.05em">Interactive · Drag to Rotate · Scroll to Zoom · Click for Details</div>
+        </div>
+        <div id="graphify-3d" style="width:100%;height:600px;border:1px solid rgba(255,170,23,0.2);border-radius:6px;background:var(--surface2);overflow:hidden;position:relative;box-shadow:0 0 30px rgba(255,170,23,0.1)"></div>
+      </div>`;
+      root.appendChild(graphSection);
+
+      // 4. Tabla de Periodos
       const filtered = GraphifyUI.applyFilters(allEntries);
       const byDate = GraphifyUI.aggregateByDate(filtered);
       root.appendChild(GraphifyUI.createTableSection(byDate));
 
-      // 4. Gráfico 3D / Interactive Graph
-      const graphSection = document.createElement('div');
-      graphSection.style.cssText = 'margin-top:24px;margin-bottom:20px';
-      graphSection.innerHTML = '<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase"> Grafo 3D · Distribución de Proyectos</div><div id="graphify-3d" style="width:100%;height:480px;border:1px solid var(--border);border-radius:4px;background:var(--surface2);overflow:hidden;position:relative"></div>';
-      root.appendChild(graphSection);
+      // 5. Stats by Category
+      root.appendChild(GraphifyUI.createCategoryStats(filtered));
+
+      // 6. Flujo de Tokens (Token Flow Diagram)
+      root.appendChild(GraphifyUI.createTokenFlowSection(allEntries));
 
       root.innerHTML += '<style>' + GraphifyUI.getStyles() + '</style>';
       root.addEventListener('change', (e) => GraphifyUI.handleFilterChange(allEntries));
 
-      // Renderizar gráfico
+      // Renderizar gráfico 3D
       GraphifyUI.init3DGraph(filtered);
     },
 
@@ -13447,208 +13459,345 @@ function studioAttachFile(file){
 
     init3DGraph(entries) {
       const container = document.getElementById('graphify-3d');
-      if (!container) return;
+      if (!container || typeof THREE === 'undefined') return;
 
-      // Define complete ecosystem
+      // Clear previous scene
+      container.innerHTML = '';
+
+      // Create Three.js scene
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x131418);
+      scene.fog = new THREE.Fog(0x131418, 400, 1200);
+
+      const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 10000);
+      camera.position.set(0, 30, 60);
+      camera.lookAt(0, 0, 0);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFShadowShadowMap;
+      container.appendChild(renderer.domElement);
+
+      // Lights
+      const ambLight = new THREE.AmbientLight(0xffffff, 0.4);
+      scene.add(ambLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(100, 150, 100);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 2048;
+      dirLight.shadow.mapSize.height = 2048;
+      scene.add(dirLight);
+
+      const pointLight = new THREE.PointLight(0xFFAA17, 0.5, 300);
+      pointLight.position.set(0, 50, 0);
+      scene.add(pointLight);
+
+      // Color scheme
+      const colors = {
+        ai: 0x4ade80,
+        platform: 0x60a5fa,
+        agent: 0xc084fc,
+        skill: 0xf97316,
+        mcp: 0xfb923c,
+        automation: 0xf97316,
+        database: 0x22c55e,
+        api: 0x8b5cf6,
+        project: 0x06b6d4,
+        cli: 0xfaf7f5
+      };
+
+      // Define ecosystem components
       const ecosystem = {
-        core: {name: 'Claude AI', type: 'ai', color: '#4ade80'},
-        platforms: {
-          vsc: {name: 'VS Code', type: 'platform', color: '#60a5fa'},
-          tracker: {name: 'Tracker', type: 'platform', color: '#FFAA17'},
-          vercel: {name: 'Vercel', type: 'platform', color: '#faf7f5'}
-        },
-        agents: {
-          explore: {name: 'Explore', type: 'agent', color: '#c084fc'},
-          plan: {name: 'Plan', type: 'agent', color: '#f87171'},
-          code: {name: 'Code', type: 'agent', color: '#06b6d4'}
-        },
+        core: { name: 'Claude AI', type: 'ai', pos: [0, 0, 0] },
+        platforms: [
+          { name: 'Claude Code', type: 'cli', pos: [-50, 5, -40] },
+          { name: 'VS Code', type: 'platform', pos: [-50, 5, 40] },
+          { name: 'Vercel', type: 'platform', pos: [50, 5, -40] }
+        ],
+        agents: [
+          { name: 'Explore', type: 'agent', pos: [-80, 15, 0] },
+          { name: 'Plan', type: 'agent', pos: [0, 15, 80] },
+          { name: 'Code Review', type: 'agent', pos: [80, 15, 0] },
+          { name: 'CSS Auditor', type: 'agent', pos: [0, 15, -80] }
+        ],
         skills: [
-          {name: 'figma-use', type: 'skill', color: '#f97316'},
-          {name: 'figma-generate', type: 'skill', color: '#f97316'},
-          {name: 'workflow', type: 'skill', color: '#a855f7'},
-          {name: 'update-config', type: 'skill', color: '#a855f7'}
+          { name: 'figma-use', type: 'skill', pos: [-100, 25, -50] },
+          { name: 'figma-generate', type: 'skill', pos: [-100, 25, 50] },
+          { name: 'workflow', type: 'skill', pos: [100, 25, -50] },
+          { name: 'update-config', type: 'skill', pos: [100, 25, 50] },
+          { name: 'css-quality', type: 'skill', pos: [-50, 25, -100] },
+          { name: 'svg-motion', type: 'skill', pos: [50, 25, -100] }
         ],
         mcp: [
-          {name: 'HubSpot', type: 'mcp', color: '#fb923c'},
-          {name: 'Figma', type: 'mcp', color: '#f97316'},
-          {name: 'Google Drive', type: 'mcp', color: '#fbbf24'},
-          {name: 'After Effects', type: 'mcp', color: '#f87171'}
+          { name: 'HubSpot', type: 'mcp', pos: [-120, 35, 0] },
+          { name: 'Figma', type: 'mcp', pos: [0, 35, 120] },
+          { name: 'Google Drive', type: 'mcp', pos: [120, 35, 0] },
+          { name: 'After Effects', type: 'mcp', pos: [0, 35, -120] },
+          { name: 'Higgsfield', type: 'mcp', pos: [-60, 35, 60] }
         ],
-        tools: [
-          {name: 'n8n', type: 'automation', color: '#f97316'},
-          {name: 'Supabase', type: 'database', color: '#22c55e'},
-          {name: 'Firebase', type: 'database', color: '#fbbf24'},
-          {name: 'ElevenLabs', type: 'api', color: '#8b5cf6'}
+        databases: [
+          { name: 'Firebase', type: 'database', pos: [-150, 45, -60] },
+          { name: 'Supabase', type: 'database', pos: [150, 45, 60] }
         ],
-        projects: Object.entries(this.aggregateByProject(entries)).map(([name, data]) => ({name, type: 'project', color: '#06b6d4', count: data.count}))
+        apis: [
+          { name: 'ElevenLabs', type: 'api', pos: [-150, 45, 60] },
+          { name: 'OpenRouter', type: 'api', pos: [150, 45, -60] },
+          { name: 'Gemini', type: 'api', pos: [-80, 45, 130] },
+          { name: 'n8n Webhooks', type: 'automation', pos: [80, 45, -130] }
+        ]
       };
 
-      // Create interactive SVG
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('width', '100%');
-      svg.setAttribute('height', '100%');
-      svg.setAttribute('style', 'display:block;background:#131418;cursor:grab;user-select:none;');
+      // Create group for scene transformations
+      const mainGroup = new THREE.Group();
+      scene.add(mainGroup);
 
-      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      g.id = 'canvas-group';
-      svg.appendChild(g);
+      // Helper: Create node mesh
+      const createNode = (name, type, position) => {
+        const sizes = { ai: 8, platform: 5, agent: 4, skill: 2.5, mcp: 3, database: 3.5, api: 2.8, automation: 3, cli: 4 };
+        const size = sizes[type] || 3;
+        const color = colors[type] || 0xfaf7f5;
 
-      // Positioning engine
-      const positions = {core: {x: 500, y: 240}};
-      let angle = 0;
-      const placeNodes = (category, radius, count) => {
-        for (let i = 0; i < count; i++) {
-          const a = angle + (i / count) * Math.PI * 2;
-          positions[`${category}_${i}`] = {
-            x: 500 + Math.cos(a) * radius,
-            y: 240 + Math.sin(a) * radius
-          };
-        }
-        angle += Math.PI * 2;
+        const geometry = new THREE.IcosahedronGeometry(size, 4);
+        const material = new THREE.MeshStandardMaterial({
+          color: color,
+          emissive: color,
+          emissiveIntensity: 0.3,
+          metalness: 0.4,
+          roughness: 0.5,
+          wireframe: false
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(...position);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        mesh.userData = { name, type, originalEmissiveIntensity: 0.3 };
+
+        // Glow halo
+        const glowGeometry = new THREE.IcosahedronGeometry(size * 1.4, 4);
+        const glowMaterial = new THREE.MeshBasicMaterial({
+          color: color,
+          transparent: true,
+          opacity: 0.15,
+          side: THREE.BackSide
+        });
+        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+        glow.position.copy(mesh.position);
+
+        const group = new THREE.Group();
+        group.add(mesh);
+        group.add(glow);
+        group.userData = { mesh, glow, glowMaterial };
+
+        return group;
       };
 
-      placeNodes('platform', 80, 3);
-      placeNodes('agent', 140, 3);
-      placeNodes('skill', 200, 4);
-      placeNodes('mcp', 200, 4);
-      placeNodes('tool', 260, 5);
-
-      // Draw connections
-      const connGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      connGroup.id = 'connections';
-      g.appendChild(connGroup);
-
-      const addConnection = (from, to, color = 'rgba(250,167,23,0.1)') => {
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', from.x);
-        line.setAttribute('y1', from.y);
-        line.setAttribute('x2', to.x);
-        line.setAttribute('y2', to.y);
-        line.setAttribute('stroke', color);
-        line.setAttribute('stroke-width', '1');
-        connGroup.appendChild(line);
+      // Helper: Create connection line
+      const createConnection = (from, to, color = 0xFFAA17, intensity = 0.3) => {
+        const points = [new THREE.Vector3(...from), new THREE.Vector3(...to)];
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const material = new THREE.LineBasicMaterial({
+          color: color,
+          linewidth: 2,
+          transparent: true,
+          opacity: intensity
+        });
+        return new THREE.Line(geometry, material);
       };
 
-      // Connect core to platforms
-      Object.entries(ecosystem.platforms).forEach((_, i) => {
-        addConnection(positions.core, positions[`platform_${i}`], 'rgba(74,222,128,0.2)');
+      // Build scene graph
+      const nodes = [];
+      const connections = [];
+
+      // Core node
+      const coreNode = createNode(ecosystem.core.name, ecosystem.core.type, ecosystem.core.pos);
+      mainGroup.add(coreNode);
+      nodes.push(coreNode);
+
+      // Platforms
+      ecosystem.platforms.forEach(p => {
+        const node = createNode(p.name, p.type, p.pos);
+        mainGroup.add(node);
+        nodes.push(node);
+        connections.push(createConnection(ecosystem.core.pos, p.pos, 0x4ade80, 0.4));
       });
 
-      // Connect platforms to agents
-      Object.entries(ecosystem.agents).forEach((_, i) => {
-        addConnection(positions[`platform_0`], positions[`agent_${i}`], 'rgba(96,165,250,0.15)');
+      // Agents
+      ecosystem.agents.forEach(a => {
+        const node = createNode(a.name, a.type, a.pos);
+        mainGroup.add(node);
+        nodes.push(node);
+        connections.push(createConnection(ecosystem.core.pos, a.pos, 0xc084fc, 0.3));
       });
 
-      // Draw nodes
-      const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      nodeGroup.id = 'nodes';
-      g.appendChild(nodeGroup);
+      // Skills
+      ecosystem.skills.forEach(s => {
+        const node = createNode(s.name, s.type, s.pos);
+        mainGroup.add(node);
+        nodes.push(node);
+      });
 
-      const drawNode = (id, {name, type, color, count}, pos) => {
-        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        g.setAttribute('class', 'node');
-        g.setAttribute('data-name', name);
+      // MCPs
+      ecosystem.mcp.forEach(m => {
+        const node = createNode(m.name, m.type, m.pos);
+        mainGroup.add(node);
+        nodes.push(node);
+        connections.push(createConnection(ecosystem.core.pos, m.pos, 0xfb923c, 0.25));
+      });
 
-        const sizes = {ai: 20, platform: 16, agent: 14, skill: 10, mcp: 10, automation: 10, database: 10, api: 10, project: 12};
-        const size = sizes[type] || 12;
+      // Databases
+      ecosystem.databases.forEach(d => {
+        const node = createNode(d.name, d.type, d.pos);
+        mainGroup.add(node);
+        nodes.push(node);
+      });
 
-        // Glow
-        const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        glow.setAttribute('cx', pos.x);
-        glow.setAttribute('cy', pos.y);
-        glow.setAttribute('r', size + 15);
-        glow.setAttribute('fill', color);
-        glow.setAttribute('opacity', '0.1');
-        g.appendChild(glow);
+      // APIs
+      ecosystem.apis.forEach(a => {
+        const node = createNode(a.name, a.type, a.pos);
+        mainGroup.add(node);
+        nodes.push(node);
+      });
 
-        // Node
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('cx', pos.x);
-        circle.setAttribute('cy', pos.y);
-        circle.setAttribute('r', size);
-        circle.setAttribute('fill', color);
-        circle.setAttribute('stroke', 'rgba(250,247,245,0.3)');
-        circle.setAttribute('stroke-width', '1');
-        circle.setAttribute('style', 'filter: drop-shadow(0 0 4px rgba(250,167,23,0.3)); cursor: pointer; transition: all 0.2s;');
-        g.appendChild(circle);
+      // Add connections to scene
+      connections.forEach(conn => mainGroup.add(conn));
 
-        // Label (only for important nodes)
-        if (['ai', 'platform', 'agent'].includes(type)) {
-          const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-          label.setAttribute('x', pos.x);
-          label.setAttribute('y', pos.y + size + 20);
-          label.setAttribute('text-anchor', 'middle');
-          label.setAttribute('fill', '#faf7f5');
-          label.setAttribute('font-size', '10');
-          label.setAttribute('font-weight', 'bold');
-          label.textContent = name.substring(0, 12);
-          g.appendChild(label);
-        }
+      // Create labels (using canvas texture)
+      const labelCanvas = document.createElement('canvas');
+      labelCanvas.width = 512;
+      labelCanvas.height = 64;
+      const labelCtx = labelCanvas.getContext('2d');
 
-        // Hover
-        g.addEventListener('mouseenter', function() {
-          circle.setAttribute('r', size * 1.4);
-          circle.setAttribute('filter', 'drop-shadow(0 0 12px ' + color + ')');
-          const tooltip = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-          tooltip.textContent = `${name} (${type}${count ? ', ' + count + ' acciones' : ''})`;
-          g.appendChild(tooltip);
+      const createLabelSprite = (text, color = '#faf7f5') => {
+        labelCtx.clearRect(0, 0, 512, 64);
+        labelCtx.fillStyle = color;
+        labelCtx.font = 'bold 32px sans-serif';
+        labelCtx.textAlign = 'center';
+        labelCtx.fillText(text.substring(0, 16), 256, 40);
+
+        const texture = new THREE.CanvasTexture(labelCanvas);
+        const material = new THREE.SpriteMaterial({ map: texture, sizeAttenuation: true });
+        const sprite = new THREE.Sprite(material);
+        sprite.scale.set(16, 4, 1);
+        return sprite;
+      };
+
+      // Interactive hover effects
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      container.addEventListener('mousemove', (e) => {
+        mouse.x = (e.clientX / container.clientWidth) * 2 - 1;
+        mouse.y = -(e.clientY / container.clientHeight) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(mainGroup.children, true);
+
+        nodes.forEach(node => {
+          const mesh = node.userData.mesh;
+          const glow = node.userData.glow;
+          if (!mesh) return;
+
+          mesh.material.emissiveIntensity = 0.3;
+          glow.material.opacity = 0.15;
         });
 
-        g.addEventListener('mouseleave', function() {
-          circle.setAttribute('r', size);
-          circle.setAttribute('style', 'filter: drop-shadow(0 0 4px rgba(250,167,23,0.3)); cursor: pointer; transition: all 0.2s;');
-        });
+        if (intersects.length > 0) {
+          let obj = intersects[0].object;
+          while (obj.parent && !obj.userData.mesh) obj = obj.parent;
 
-        nodeGroup.appendChild(g);
-      };
-
-      // Draw all nodes
-      drawNode('core', ecosystem.core, positions.core);
-      Object.entries(ecosystem.platforms).forEach((entry, i) => {
-        drawNode(`platform_${i}`, entry[1], positions[`platform_${i}`]);
-      });
-      Object.entries(ecosystem.agents).forEach((entry, i) => {
-        drawNode(`agent_${i}`, entry[1], positions[`agent_${i}`]);
-      });
-      ecosystem.skills.forEach((skill, i) => {
-        drawNode(`skill_${i}`, skill, positions[`skill_${i}`]);
-      });
-      ecosystem.mcp.forEach((mcp, i) => {
-        drawNode(`mcp_${i}`, mcp, positions[`mcp_${i}`]);
-      });
-      ecosystem.tools.forEach((tool, i) => {
-        drawNode(`tool_${i}`, tool, positions[`tool_${i}`]);
+          if (obj.userData.mesh) {
+            obj.userData.mesh.material.emissiveIntensity = 0.8;
+            obj.userData.glow.material.opacity = 0.4;
+            container.style.cursor = 'pointer';
+          }
+        } else {
+          container.style.cursor = 'grab';
+        }
       });
 
-      container.innerHTML = '';
-      container.appendChild(svg);
+      container.addEventListener('click', (e) => {
+        mouse.x = (e.clientX / container.clientWidth) * 2 - 1;
+        mouse.y = -(e.clientY / container.clientHeight) * 2 + 1;
 
-      // Zoom and pan
-      let scale = 1, offsetX = 0, offsetY = 0;
-      const canvasGroup = g;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(mainGroup.children, true);
+
+        if (intersects.length > 0) {
+          let obj = intersects[0].object;
+          while (obj.parent && !obj.userData.name) obj = obj.parent;
+
+          if (obj.userData.name) {
+            const info = `${obj.userData.name}\nType: ${obj.userData.type}\nStatus: Active`;
+            console.log(info);
+          }
+        }
+      });
+
+      // Camera controls
+      let isDragging = false;
+      let previousMousePosition = { x: 0, y: 0 };
+
+      container.addEventListener('mousedown', () => isDragging = true);
+      container.addEventListener('mouseup', () => isDragging = false);
+      container.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+
+        const deltaX = e.clientX - previousMousePosition.x;
+        const deltaY = e.clientY - previousMousePosition.y;
+
+        mainGroup.rotation.y += deltaX * 0.01;
+        mainGroup.rotation.x += deltaY * 0.01;
+
+        previousMousePosition = { x: e.clientX, y: e.clientY };
+      });
 
       container.addEventListener('wheel', (e) => {
         e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        scale *= delta;
-        scale = Math.max(0.5, Math.min(3, scale));
-        canvasGroup.setAttribute('transform', `translate(${offsetX},${offsetY}) scale(${scale})`);
+        const delta = e.deltaY > 0 ? 1.1 : 0.9;
+        camera.position.multiplyScalar(delta);
+        camera.position.z = Math.max(50, Math.min(200, camera.position.z));
       });
 
-      let dragging = false, startX, startY;
-      container.addEventListener('mousedown', () => dragging = true);
-      container.addEventListener('mousemove', (e) => {
-        if (!dragging) return;
-        const dx = e.movementX;
-        const dy = e.movementY;
-        offsetX += dx;
-        offsetY += dy;
-        canvasGroup.setAttribute('transform', `translate(${offsetX},${offsetY}) scale(${scale})`);
-      });
-      container.addEventListener('mouseup', () => dragging = false);
-      container.addEventListener('mouseleave', () => dragging = false);
+      // Animation loop
+      let frameId;
+      const animate = () => {
+        frameId = requestAnimationFrame(animate);
 
-      console.log('Ecosystem graph initialized');
+        // Rotate scene gently
+        if (!isDragging) {
+          mainGroup.rotation.y += 0.0005;
+        }
+
+        // Pulse glow on core node
+        const coreTime = Date.now() * 0.001;
+        if (coreNode.userData.mesh) {
+          coreNode.userData.mesh.material.emissiveIntensity = 0.3 + Math.sin(coreTime) * 0.3;
+        }
+
+        renderer.render(scene, camera);
+      };
+      animate();
+
+      // Handle window resize
+      const onWindowResize = () => {
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      };
+      window.addEventListener('resize', onWindowResize);
+
+      // Cleanup function
+      window.cleanup3DGraph = () => {
+        cancelAnimationFrame(frameId);
+        window.removeEventListener('resize', onWindowResize);
+        renderer.dispose();
+      };
+
+      console.log('3D Ecosystem graph with Three.js initialized');
     },
 
     aggregateByProject(entries) {
@@ -13661,6 +13810,113 @@ function studioAttachFile(file){
       return map;
     },
 
+    createCategoryStats(entries) {
+      const section = document.createElement('div');
+      section.style.cssText = 'margin-top:24px;margin-bottom:24px';
+
+      // Group by category
+      const byCat = {};
+      entries.forEach(e => {
+        const cat = e.cat || 'Otro';
+        if (!byCat[cat]) byCat[cat] = {count: 0, cost: 0, tokens: 0};
+        byCat[cat].count++;
+        byCat[cat].cost += e.cost_usd || 0;
+        byCat[cat].tokens += (e.input_tokens || 0) + (e.output_tokens || 0);
+      });
+
+      let html = `<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase"> Estadísticas por Categoría</div>`;
+      html += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">`;
+
+      Object.entries(byCat).forEach(([cat, data]) => {
+        const catColor = this.getCategoryColor(cat);
+        html += `<div style="background:var(--surface2);border:1px solid rgba(255,170,23,0.1);padding:14px;border-radius:6px;border-left:3px solid ${catColor}">
+          <div style="font-size:10px;color:var(--bone2);font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px">${cat}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div>
+              <div style="font-size:9px;color:var(--bone2);margin-bottom:2px">Acciones</div>
+              <div style="font-size:18px;font-weight:700;color:${catColor}">${data.count}</div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--bone2);margin-bottom:2px">Costo</div>
+              <div style="font-size:14px;font-weight:600;color:var(--green)">$${data.cost.toFixed(4)}</div>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:9px;color:var(--bone2)">Tokens: ${(data.tokens/1000).toFixed(1)}k</div>
+        </div>`;
+      });
+
+      html += `</div>`;
+      section.innerHTML = html;
+      return section;
+    },
+
+    createTokenFlowSection(entries) {
+      const section = document.createElement('div');
+      section.style.cssText = 'margin-top:24px;margin-bottom:24px';
+
+      // Calculate token flow
+      const inputTokens = entries.reduce((s, e) => s + (e.input_tokens || 0), 0);
+      const outputTokens = entries.reduce((s, e) => s + (e.output_tokens || 0), 0);
+      const totalTokens = inputTokens + outputTokens;
+      const inputPct = totalTokens > 0 ? (inputTokens / totalTokens * 100) : 0;
+
+      let html = `<div style="font-size:11px;color:var(--amber);font-weight:700;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase"> Flujo de Tokens</div>`;
+      html += `<div style="background:var(--surface2);border:1px solid rgba(255,170,23,0.1);padding:16px;border-radius:6px">`;
+
+      // Flow diagram
+      html += `<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="flex:1">
+          <div style="font-size:10px;color:var(--bone2);margin-bottom:4px;font-weight:600">Input Tokens</div>
+          <div style="width:100%;height:20px;background:rgba(255,170,23,0.1);border-radius:3px;overflow:hidden;position:relative;border:1px solid rgba(255,170,23,0.2)">
+            <div style="width:${inputPct}%;height:100%;background:linear-gradient(90deg,#60a5fa,#4ade80);transition:width 0.3s ease"></div>
+          </div>
+          <div style="font-size:11px;color:var(--blue);margin-top:4px;font-weight:600">${inputPct.toFixed(1)}% (${(inputTokens/1_000_000).toFixed(2)}M)</div>
+        </div>
+        <div style="font-size:24px;color:var(--amber);opacity:0.5">→</div>
+        <div style="flex:1">
+          <div style="font-size:10px;color:var(--bone2);margin-bottom:4px;font-weight:600">Output Tokens</div>
+          <div style="width:100%;height:20px;background:rgba(255,170,23,0.1);border-radius:3px;overflow:hidden;position:relative;border:1px solid rgba(255,170,23,0.2)">
+            <div style="width:${100-inputPct}%;height:100%;background:linear-gradient(90deg,#c084fc,#f87171);transition:width 0.3s ease"></div>
+          </div>
+          <div style="font-size:11px;color:var(--purple);margin-top:4px;font-weight:600">${(100-inputPct).toFixed(1)}% (${(outputTokens/1_000_000).toFixed(2)}M)</div>
+        </div>
+      </div>`;
+
+      // Stats grid
+      html += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
+        <div style="background:rgba(96,165,250,0.08);padding:10px;border-radius:4px;border-left:2px solid #60a5fa">
+          <div style="font-size:9px;color:var(--bone2);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Total Tokens</div>
+          <div style="font-size:18px;font-weight:700;color:#60a5fa">${(totalTokens/1_000_000).toFixed(2)}M</div>
+        </div>
+        <div style="background:rgba(74,222,128,0.08);padding:10px;border-radius:4px;border-left:2px solid #4ade80">
+          <div style="font-size:9px;color:var(--bone2);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Costo Total</div>
+          <div style="font-size:18px;font-weight:700;color:#4ade80">$${entries.reduce((s,e) => s + (e.cost_usd || 0), 0).toFixed(4)}</div>
+        </div>
+        <div style="background:rgba(192,132,252,0.08);padding:10px;border-radius:4px;border-left:2px solid #c084fc">
+          <div style="font-size:9px;color:var(--bone2);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Avg Token Cost</div>
+          <div style="font-size:18px;font-weight:700;color:#c084fc">$${totalTokens > 0 ? (entries.reduce((s,e) => s + (e.cost_usd || 0), 0) / (totalTokens/1_000_000)).toFixed(6) : '0'}</div>
+        </div>
+      </div>`;
+
+      html += `</div>`;
+      section.innerHTML = html;
+      return section;
+    },
+
+    getCategoryColor(cat) {
+      const colors = {
+        'Exploration': '#60a5fa',
+        'Design': '#f97316',
+        'Development': '#4ade80',
+        'Testing': '#c084fc',
+        'Deployment': '#fbbf24',
+        'Analytics': '#06b6d4',
+        'Other': '#8b5cf6',
+        'Otro': '#8b5cf6'
+      };
+      return colors[cat] || colors['Other'];
+    },
+
     handleFilterChange(allEntries) {
       this.state.filters.dateFrom = document.getElementById('gf-from')?.value || '2026-05-05';
       this.state.filters.dateTo = document.getElementById('gf-to')?.value || '2026-06-02';
@@ -13671,8 +13927,41 @@ function studioAttachFile(file){
 
     getStyles() {
       return `
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        #graphify-root { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes pulseGlow {
+          0%, 100% { box-shadow: 0 0 10px rgba(255,170,23,0.1), inset 0 0 10px rgba(255,170,23,0.05); }
+          50% { box-shadow: 0 0 30px rgba(255,170,23,0.3), inset 0 0 20px rgba(255,170,23,0.1); }
+        }
+        #graphify-root { animation: fadeIn 0.6s ease-out; }
+        #graphify-3d { animation: slideInLeft 0.8s ease-out; }
+
+        /* 3D Graph Styles */
+        #graphify-3d canvas { display: block !important; width: 100% !important; height: 100% !important; }
+
+        /* Filter controls */
+        #graphify-root select, #graphify-root input[type="date"] {
+          transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+        }
+        #graphify-root select:focus, #graphify-root input[type="date"]:focus {
+          box-shadow: 0 0 0 2px rgba(255,170,23,0.2), 0 0 8px rgba(255,170,23,0.4) !important;
+        }
+
+        /* Category cards */
+        #graphify-root [style*="border-left:3px"] {
+          transition: all 0.2s ease;
+        }
+        #graphify-root [style*="border-left:3px"]:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        /* KPI Cards */
+        .kpi-card { animation: fadeIn 0.5s ease-out both; }
+        .kpi-card:nth-child(1) { animation-delay: 0.1s; }
+        .kpi-card:nth-child(2) { animation-delay: 0.2s; }
+        .kpi-card:nth-child(3) { animation-delay: 0.3s; }
+        .kpi-card:nth-child(4) { animation-delay: 0.4s; }
       `;
     }
   };
