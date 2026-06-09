@@ -4237,7 +4237,7 @@ body.client-mode #main { margin-left: 0 !important; }
     </svg>
   </div>
   <span class="badge">v5.11</span>
-  <span id="auto-live-indicator" class="auto-live-indicator" title="Auto-tracking activo">● Live</span>
+  <span id="auto-live-indicator" class="auto-live-indicator" title="Auto-tracking activo">LIVE</span>
   <div class="spacer"></div>
   <div class="topbar-btns">
     <button class="btn-primary-cta" onclick="openAdd()" aria-label="Agregar nueva entrada">+ Entrada</button>
@@ -5461,7 +5461,7 @@ function renderTabPeriodHeader(tabId,entries){
   let stats='';
   const S=`font-size:11px;color:rgba(245,241,232,.55);white-space:nowrap`;
   const SB=`font-weight:800`;
-  const DIV=`<span style="font-size:11px;color:rgba(255,255,255,.18);margin:0 2px">·</span>`;
+  const DIV=`<span style="font-size:11px;color:rgba(255,255,255,.18);margin:0 2px">/</span>`;
   if(tabId==='analytics'){
     stats=`<span style="${S}"><strong style="${SB};color:${color}">${entries.length}</strong> acciones</span>${DIV}<span style="${S}"><strong style="${SB};color:${color}">${secsToHMS(kpis.totalSecs)}</strong></span>${DIV}<span style="${S}"><strong style="${SB};color:${color}">${kpis.compRate}%</strong> completado</span>${DIV}<span style="${S}">margen <strong style="${SB};color:${color}">$${kpis.totalMargin.toLocaleString()}</strong></span>`;
   }else if(tabId==='organigrama'){
@@ -6771,7 +6771,7 @@ function renderFeed(entries){
             <span style="font-size:10px;color:var(--bone2)">${e.dateKey}</span>
             <span style="margin-left:auto;display:flex;gap:4px;align-items:center">
               <button onclick="setQuickFilter('status','${(e.status||'').replace(/'/g,"\\'")}') " style="font-size:9px;padding:1px 6px;border-radius:6px;background:${statusColor}15;border:1px solid ${statusColor}35;color:${statusColor};cursor:pointer;font-weight:700">${e.status||'—'}</button>
-              ${e.priority==='Alta'?`<span style="font-size:9px;color:#ef4444;font-weight:800">●</span>`:''}
+              ${e.priority==='Alta'?`<span style="font-size:9px;color:#ef4444;font-weight:800">ALTA</span>`:''}
               ${e.rework?`<span style="font-size:9px;color:#ef4444;font-weight:700;background:rgba(239,68,68,.1);padding:1px 5px;border-radius:4px"> retrabajo</span>`:''}
             </span>
           </div>
@@ -7699,9 +7699,9 @@ function renderEntradas(){
             ${e.sw && e.sw.length > 0 ? `<div class="entry-card-sw">${swBadges(e.sw)}</div>` : ''}
             ${e.why || e.forwhat || e.result ? `
               <div class="entry-card-notes">
-                ${e.why?`<div class="note-item"><span class="note-icon">●</span><span class="note-label">Por qué:</span> ${e.why.slice(0,80)}${e.why.length>80?'...':''}</div>`:''}
-                ${e.forwhat?`<div class="note-item"><span class="note-icon">●</span><span class="note-label">Para qué:</span> ${e.forwhat.slice(0,80)}${e.forwhat.length>80?'...':''}</div>`:''}
-                ${e.result?`<div class="note-item"><span class="note-icon">●</span><span class="note-label">Logrado:</span> ${e.result.slice(0,80)}${e.result.length>80?'...':''}</div>`:''}
+                ${e.why?`<div class="note-item"><span class="note-icon">/</span><span class="note-label">Por qué:</span> ${e.why.slice(0,80)}${e.why.length>80?'...':''}</div>`:''}
+                ${e.forwhat?`<div class="note-item"><span class="note-icon">/</span><span class="note-label">Para qué:</span> ${e.forwhat.slice(0,80)}${e.forwhat.length>80?'...':''}</div>`:''}
+                ${e.result?`<div class="note-item"><span class="note-icon">/</span><span class="note-label">Logrado:</span> ${e.result.slice(0,80)}${e.result.length>80?'...':''}</div>`:''}
               </div>
             ` : ''}
             ${e.obs ? `<div class="entry-card-obs"><em>${e.obs.slice(0,90)}${e.obs.length>90?'...':''}</em></div>` : ''}
@@ -7713,11 +7713,11 @@ function renderEntradas(){
       `).join('')}
     </div>
     <div class="pagination">
-      <button onclick="goPage(0)" ${page===0?'disabled':''}>«</button>
-      <button onclick="goPage(${page-1})" ${page===0?'disabled':''}>‹ Ant</button>
+      <button onclick="goPage(0)" ${page===0?'disabled':''}>Primero</button>
+      <button onclick="goPage(${page-1})" ${page===0?'disabled':''}>Anterior</button>
       <span>Pág ${page+1} de ${totalPages||1}</span>
-      <button onclick="goPage(${page+1})" ${page>=totalPages-1?'disabled':''}>Sig ›</button>
-      <button onclick="goPage(${totalPages-1})" ${page>=totalPages-1?'disabled':''}>»</button>
+      <button onclick="goPage(${page+1})" ${page>=totalPages-1?'disabled':''}>Siguiente</button>
+      <button onclick="goPage(${totalPages-1})" ${page>=totalPages-1?'disabled':''}>Último</button>
     </div>
   `;
 }
@@ -8375,16 +8375,16 @@ function renderFinanzas(){
           <th>Cuenta</th><th>Tipo</th><th>Debe</th><th>Haber</th><th>Saldo</th>
         </tr></thead>
         <tbody>
-          <tr><td>Caja y Bancos</td><td><span class="badge-status s-done">Activo</span></td><td style="color:var(--green)">${moneyMX(FINANZAS.saldoCaja)}</td><td>—</td><td style="color:var(--green)">${moneyMX(FINANZAS.saldoCaja)}</td></tr>
-          <tr><td>Cuentas por Cobrar</td><td><span class="badge-status s-done">Activo</span></td><td style="color:var(--green)">${moneyMX(totalPorCobrar)}</td><td>—</td><td style="color:var(--green)">${moneyMX(totalPorCobrar)}</td></tr>
-          <tr><td>Equipo de Cómputo</td><td><span class="badge-status s-done">Activo</span></td><td style="color:var(--green)">${moneyMX(33599.20)}</td><td>—</td><td style="color:var(--green)">${moneyMX(33599.20)}</td></tr>
-          <tr><td>Mobiliario</td><td><span class="badge-status s-done">Activo</span></td><td style="color:var(--green)">${moneyMX(4004.55)}</td><td>—</td><td style="color:var(--green)">${moneyMX(4004.55)}</td></tr>
-          <tr><td>Cuentas por Pagar — Andrés Mateos</td><td><span class="badge-status s-rev">Pasivo</span></td><td>—</td><td style="color:var(--red)">${moneyMX(286003.14)}</td><td style="color:var(--red)">(${moneyMX(286003.14)})</td></tr>
-          <tr><td>Cuentas por Pagar — Pablo Solar</td><td><span class="badge-status s-rev">Pasivo</span></td><td>—</td><td style="color:var(--red)">${moneyMX(60000)}</td><td style="color:var(--red)">(${moneyMX(60000)})</td></tr>
-          <tr><td>Cuentas por Pagar — The Nucleo</td><td><span class="badge-status s-rev">Pasivo</span></td><td>—</td><td style="color:var(--red)">${moneyMX(19315.21)}</td><td style="color:var(--red)">(${moneyMX(19315.21)})</td></tr>
-          <tr><td>Ingresos por Servicios</td><td><span class="badge-status s-prog">Resultado</span></td><td>—</td><td style="color:var(--blue)">${moneyMX(totalIngresos)}</td><td style="color:var(--blue)">${moneyMX(totalIngresos)}</td></tr>
-          <tr><td>Gastos de Operación</td><td><span class="badge-status s-prog">Resultado</span></td><td style="color:var(--red)">${moneyMX(totalEgresos)}</td><td>—</td><td style="color:var(--red)">(${moneyMX(totalEgresos)})</td></tr>
-          <tr style="background:var(--amber3)"><td style="font-weight:800">TOTALES</td><td>—</td><td style="font-weight:800;color:var(--green)">${moneyMX(FINANZAS.saldoCaja+totalPorCobrar+33599.20+4004.55+totalEgresos)}</td><td style="font-weight:800;color:var(--red)">${moneyMX(totalPasivos+totalIngresos)}</td><td style="font-weight:800;color:var(--amber)">${moneyMX(capitalContable)}</td></tr>
+          <tr><td>Caja y Bancos</td><td><span class="badge-status s-done">Activo</span></td><td style="color:var(--green)">${moneyMX(FINANZAS.saldoCaja)}</td><td>/</td><td style="color:var(--green)">${moneyMX(FINANZAS.saldoCaja)}</td></tr>
+          <tr><td>Cuentas por Cobrar</td><td><span class="badge-status s-done">Activo</span></td><td style="color:var(--green)">${moneyMX(totalPorCobrar)}</td><td>/</td><td style="color:var(--green)">${moneyMX(totalPorCobrar)}</td></tr>
+          <tr><td>Equipo de Cómputo</td><td><span class="badge-status s-done">Activo</span></td><td style="color:var(--green)">${moneyMX(33599.20)}</td><td>/</td><td style="color:var(--green)">${moneyMX(33599.20)}</td></tr>
+          <tr><td>Mobiliario</td><td><span class="badge-status s-done">Activo</span></td><td style="color:var(--green)">${moneyMX(4004.55)}</td><td>/</td><td style="color:var(--green)">${moneyMX(4004.55)}</td></tr>
+          <tr><td>Cuentas por Pagar — Andrés Mateos</td><td><span class="badge-status s-rev">Pasivo</span></td><td>/</td><td style="color:var(--red)">${moneyMX(286003.14)}</td><td style="color:var(--red)">(${moneyMX(286003.14)})</td></tr>
+          <tr><td>Cuentas por Pagar — Pablo Solar</td><td><span class="badge-status s-rev">Pasivo</span></td><td>/</td><td style="color:var(--red)">${moneyMX(60000)}</td><td style="color:var(--red)">(${moneyMX(60000)})</td></tr>
+          <tr><td>Cuentas por Pagar — The Nucleo</td><td><span class="badge-status s-rev">Pasivo</span></td><td>/</td><td style="color:var(--red)">${moneyMX(19315.21)}</td><td style="color:var(--red)">(${moneyMX(19315.21)})</td></tr>
+          <tr><td>Ingresos por Servicios</td><td><span class="badge-status s-prog">Resultado</span></td><td>/</td><td style="color:var(--blue)">${moneyMX(totalIngresos)}</td><td style="color:var(--blue)">${moneyMX(totalIngresos)}</td></tr>
+          <tr><td>Gastos de Operación</td><td><span class="badge-status s-prog">Resultado</span></td><td style="color:var(--red)">${moneyMX(totalEgresos)}</td><td>/</td><td style="color:var(--red)">(${moneyMX(totalEgresos)})</td></tr>
+          <tr style="background:var(--amber3)"><td style="font-weight:800">TOTALES</td><td>/</td><td style="font-weight:800;color:var(--green)">${moneyMX(FINANZAS.saldoCaja+totalPorCobrar+33599.20+4004.55+totalEgresos)}</td><td style="font-weight:800;color:var(--red)">${moneyMX(totalPasivos+totalIngresos)}</td><td style="font-weight:800;color:var(--amber)">${moneyMX(capitalContable)}</td></tr>
         </tbody>
       </table>
     </div>
