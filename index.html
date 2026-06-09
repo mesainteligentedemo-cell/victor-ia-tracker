@@ -13458,19 +13458,28 @@ function studioAttachFile(file){
     },
 
     init3DGraph(entries) {
-      const container = document.getElementById('graphify-3d');
-      if (!container) return;
+      setTimeout(() => {
+        const container = document.getElementById('graphify-3d');
+        if (!container) {console.warn('❌ graphify-3d container not found'); return;}
 
-      // Load Babylon.js if not already loaded
-      if (typeof BABYLON === 'undefined') {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.babylonjs.com/babylon.js';
-        script.onload = () => {
-          GraphifyUI.init3DGraph(entries);
-        };
-        document.head.appendChild(script);
-        return;
-      }
+        // Load Babylon.js if not already loaded
+        if (typeof BABYLON === 'undefined') {
+          console.log('📦 Loading Babylon.js from CDN...');
+          const script = document.createElement('script');
+          script.src = 'https://cdn.babylonjs.com/babylon.js';
+          script.onload = () => {
+            console.log('✅ Babylon.js loaded');
+            GraphifyUI.init3DGraph(entries);
+          };
+          script.onerror = () => {
+            console.error('❌ Failed to load Babylon.js');
+            container.innerHTML = '<div style="color:red;padding:20px">Error loading 3D engine. Check console.</div>';
+          };
+          document.head.appendChild(script);
+          return;
+        }
+
+        console.log('🎬 Initializing Babylon.js scene...');
 
       container.innerHTML = '';
 
