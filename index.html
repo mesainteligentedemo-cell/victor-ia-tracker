@@ -13459,345 +13459,358 @@ function studioAttachFile(file){
 
     init3DGraph(entries) {
       const container = document.getElementById('graphify-3d');
-      if (!container || typeof THREE === 'undefined') return;
+      if (!container) return;
 
-      // Clear previous scene
+      // Load Babylon.js if not already loaded
+      if (typeof BABYLON === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.babylonjs.com/babylon.js';
+        script.onload = () => {
+          GraphifyUI.init3DGraph(entries);
+        };
+        document.head.appendChild(script);
+        return;
+      }
+
       container.innerHTML = '';
 
-      // Create Three.js scene
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x131418);
-      scene.fog = new THREE.Fog(0x131418, 400, 1200);
+      // ========== BABYLON.JS SCENE SETUP ==========
+      const engine = new BABYLON.Engine(container, true);
+      const scene = new BABYLON.Scene(engine);
+      scene.clearColor = new BABYLON.Color3(0.07, 0.078, 0.094);
+      scene.collisionsEnabled = true;
 
-      const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 10000);
-      camera.position.set(0, 30, 60);
-      camera.lookAt(0, 0, 0);
+      // Camera setup
+      const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 80, 140));
+      camera.attachControl(container, true);
+      camera.minZ = 0.1;
+      camera.maxZ = 1000;
+      camera.speed = 0;
+      camera.angularSensibility = 1000;
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setSize(container.clientWidth, container.clientHeight);
-      renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFShadowShadowMap;
-      container.appendChild(renderer.domElement);
+      // ========== LIGHTING ==========
+      const ambLight = new BABYLON.HemisphericLight('amb', new BABYLON.Vector3(0, 1, 0), scene);
+      ambLight.intensity = 0.5;
+      ambLight.specular = new BABYLON.Color3(0.2, 0.2, 0.2);
 
-      // Lights
-      const ambLight = new THREE.AmbientLight(0xffffff, 0.4);
-      scene.add(ambLight);
+      const dirLight = new BABYLON.PointLight('point1', new BABYLON.Vector3(100, 150, 100), scene);
+      dirLight.intensity = 0.8;
+      dirLight.range = 500;
 
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      dirLight.position.set(100, 150, 100);
-      dirLight.castShadow = true;
-      dirLight.shadow.mapSize.width = 2048;
-      dirLight.shadow.mapSize.height = 2048;
-      scene.add(dirLight);
+      const coreLight = new BABYLON.PointLight('core', new BABYLON.Vector3(0, 0, 0), scene);
+      coreLight.intensity = 0.6;
+      coreLight.range = 200;
+      coreLight.diffuse = new BABYLON.Color3(1, 0.67, 0.09); // Amber
 
-      const pointLight = new THREE.PointLight(0xFFAA17, 0.5, 300);
-      pointLight.position.set(0, 50, 0);
-      scene.add(pointLight);
+      // ========== CUSTOM HOLOGRAPHIC SHADER ==========
+      BABYLON.ShaderStore.AddVertexShader('holographic', `
+        precision highp float;
+        attribute vec3 position;
+        attribute vec3 normal;
+        attribute vec2 uv;
 
-      // Color scheme
-      const colors = {
-        ai: 0x4ade80,
-        platform: 0x60a5fa,
-        agent: 0xc084fc,
-        skill: 0xf97316,
-        mcp: 0xfb923c,
-        automation: 0xf97316,
-        database: 0x22c55e,
-        api: 0x8b5cf6,
-        project: 0x06b6d4,
-        cli: 0xfaf7f5
-      };
+        uniform mat4 worldViewProjection;
+        uniform mat4 world;
+        uniform float time;
 
-      // Define ecosystem components
-      const ecosystem = {
-        core: { name: 'Claude AI', type: 'ai', pos: [0, 0, 0] },
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        varying vec2 vUV;
+        varying float vBeatPulse;
+
+        void main() {
+          gl_Position = worldViewProjection * vec4(position, 1.0);
+          vNormal = normalize(mat3(world) * normal);
+          vPosition = vec3(world * vec4(position, 1.0));
+          vUV = uv;
+
+          float pulse = sin(time * 3.0) * 0.5 + 0.5;
+          vBeatPulse = pulse;
+        }
+      `);
+
+      BABYLON.ShaderStore.AddFragmentShader('holographic', `
+        precision highp float;
+        uniform vec3 baseColor;
+        uniform float time;
+
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        varying vec2 vUV;
+        varying float vBeatPulse;
+
+        void main() {
+          vec3 norm = normalize(vNormal);
+          vec3 viewDir = normalize(-vPosition);
+
+          float fresnel = pow(1.0 - dot(norm, viewDir), 2.5);
+          float iridescence = sin(vUV.y * 10.0 + time * 2.0) * 0.5 + 0.5;
+
+          vec3 glow = baseColor * (0.3 + fresnel * 0.7);
+          vec3 iridCol = mix(vec3(0.0, 1.0, 1.0), baseColor, iridescence);
+
+          gl_FragColor = vec4(glow + iridCol * 0.2 + vBeatPulse * 0.3, 0.8 + fresnel * 0.2);
+        }
+      `);
+
+      // ========== PARTICLE SYSTEM (10k+ particles) ==========
+      const particleSystem = new BABYLON.ParticleSystem('particles', 10000, scene);
+      particleSystem.particleTexture = new BABYLON.Texture('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IndoaXRlIi8+PC9zdmc+', scene);
+
+      const emitterBox = new BABYLON.BoxBuilder.CreateBox('emitterBox', { size: 1 }, scene);
+      emitterBox.position = new BABYLON.Vector3(0, 0, 0);
+      particleSystem.emitter = emitterBox;
+
+      particleSystem.minEmitBox = new BABYLON.Vector3(-150, -100, -150);
+      particleSystem.maxEmitBox = new BABYLON.Vector3(150, 100, 150);
+      particleSystem.emitRate = 150;
+      particleSystem.gravity = new BABYLON.Vector3(0, -5, 0);
+      particleSystem.minLifeTime = 2;
+      particleSystem.maxLifeTime = 5;
+      particleSystem.minSize = 0.5;
+      particleSystem.maxSize = 2;
+      particleSystem.minEmitPower = 10;
+      particleSystem.maxEmitPower = 30;
+
+      particleSystem.addColorGradient(0, new BABYLON.Color4(1, 0.67, 0.09, 1));
+      particleSystem.addColorGradient(0.5, new BABYLON.Color4(0.376, 0.651, 0.988, 0.8));
+      particleSystem.addColorGradient(1, new BABYLON.Color4(0.784, 0.518, 0.988, 0));
+
+      particleSystem.addSizeGradient(0, 1);
+      particleSystem.addSizeGradient(1, 0.3);
+
+      particleSystem.start();
+      emitterBox.dispose();
+
+      // ========== NODE CREATION SYSTEM ==========
+      const nodeDatabase = {
+        core: { name: 'Claude AI', type: 'ai', pos: [0, 0, 0], size: 8 },
         platforms: [
-          { name: 'Claude Code', type: 'cli', pos: [-50, 5, -40] },
-          { name: 'VS Code', type: 'platform', pos: [-50, 5, 40] },
-          { name: 'Vercel', type: 'platform', pos: [50, 5, -40] }
+          { name: 'Claude Code', type: 'cli', pos: [-50, 20, -40], size: 5 },
+          { name: 'VS Code', type: 'platform', pos: [-50, 20, 40], size: 5 },
+          { name: 'Vercel', type: 'platform', pos: [50, 20, -40], size: 5 }
         ],
         agents: [
-          { name: 'Explore', type: 'agent', pos: [-80, 15, 0] },
-          { name: 'Plan', type: 'agent', pos: [0, 15, 80] },
-          { name: 'Code Review', type: 'agent', pos: [80, 15, 0] },
-          { name: 'CSS Auditor', type: 'agent', pos: [0, 15, -80] }
+          { name: 'Explore', type: 'agent', pos: [-80, 30, 0], size: 4 },
+          { name: 'Plan', type: 'agent', pos: [0, 30, 80], size: 4 },
+          { name: 'Code Review', type: 'agent', pos: [80, 30, 0], size: 4 },
+          { name: 'CSS Auditor', type: 'agent', pos: [0, 30, -80], size: 4 }
         ],
         skills: [
-          { name: 'figma-use', type: 'skill', pos: [-100, 25, -50] },
-          { name: 'figma-generate', type: 'skill', pos: [-100, 25, 50] },
-          { name: 'workflow', type: 'skill', pos: [100, 25, -50] },
-          { name: 'update-config', type: 'skill', pos: [100, 25, 50] },
-          { name: 'css-quality', type: 'skill', pos: [-50, 25, -100] },
-          { name: 'svg-motion', type: 'skill', pos: [50, 25, -100] }
+          { name: 'figma-use', type: 'skill', pos: [-100, 40, -50], size: 2.5 },
+          { name: 'figma-gen', type: 'skill', pos: [-100, 40, 50], size: 2.5 },
+          { name: 'workflow', type: 'skill', pos: [100, 40, -50], size: 2.5 },
+          { name: 'config-update', type: 'skill', pos: [100, 40, 50], size: 2.5 }
         ],
         mcp: [
-          { name: 'HubSpot', type: 'mcp', pos: [-120, 35, 0] },
-          { name: 'Figma', type: 'mcp', pos: [0, 35, 120] },
-          { name: 'Google Drive', type: 'mcp', pos: [120, 35, 0] },
-          { name: 'After Effects', type: 'mcp', pos: [0, 35, -120] },
-          { name: 'Higgsfield', type: 'mcp', pos: [-60, 35, 60] }
-        ],
-        databases: [
-          { name: 'Firebase', type: 'database', pos: [-150, 45, -60] },
-          { name: 'Supabase', type: 'database', pos: [150, 45, 60] }
-        ],
-        apis: [
-          { name: 'ElevenLabs', type: 'api', pos: [-150, 45, 60] },
-          { name: 'OpenRouter', type: 'api', pos: [150, 45, -60] },
-          { name: 'Gemini', type: 'api', pos: [-80, 45, 130] },
-          { name: 'n8n Webhooks', type: 'automation', pos: [80, 45, -130] }
+          { name: 'HubSpot', type: 'mcp', pos: [-120, 50, 0], size: 3 },
+          { name: 'Figma', type: 'mcp', pos: [0, 50, 120], size: 3 },
+          { name: 'Google Drive', type: 'mcp', pos: [120, 50, 0], size: 3 },
+          { name: 'After Effects', type: 'mcp', pos: [0, 50, -120], size: 3 }
         ]
       };
 
-      // Create group for scene transformations
-      const mainGroup = new THREE.Group();
-      scene.add(mainGroup);
-
-      // Helper: Create node mesh
-      const createNode = (name, type, position) => {
-        const sizes = { ai: 8, platform: 5, agent: 4, skill: 2.5, mcp: 3, database: 3.5, api: 2.8, automation: 3, cli: 4 };
-        const size = sizes[type] || 3;
-        const color = colors[type] || 0xfaf7f5;
-
-        const geometry = new THREE.IcosahedronGeometry(size, 4);
-        const material = new THREE.MeshStandardMaterial({
-          color: color,
-          emissive: color,
-          emissiveIntensity: 0.3,
-          metalness: 0.4,
-          roughness: 0.5,
-          wireframe: false
-        });
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(...position);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        mesh.userData = { name, type, originalEmissiveIntensity: 0.3 };
-
-        // Glow halo
-        const glowGeometry = new THREE.IcosahedronGeometry(size * 1.4, 4);
-        const glowMaterial = new THREE.MeshBasicMaterial({
-          color: color,
-          transparent: true,
-          opacity: 0.15,
-          side: THREE.BackSide
-        });
-        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-        glow.position.copy(mesh.position);
-
-        const group = new THREE.Group();
-        group.add(mesh);
-        group.add(glow);
-        group.userData = { mesh, glow, glowMaterial };
-
-        return group;
+      const colorMap = {
+        ai: new BABYLON.Color3(0.29, 0.86, 0.5),
+        platform: new BABYLON.Color3(0.376, 0.651, 0.988),
+        agent: new BABYLON.Color3(0.784, 0.518, 0.988),
+        skill: new BABYLON.Color3(0.976, 0.451, 0.09),
+        mcp: new BABYLON.Color3(0.984, 0.576, 0.235),
+        cli: new BABYLON.Color3(0.98, 0.97, 0.96)
       };
 
-      // Helper: Create connection line
-      const createConnection = (from, to, color = 0xFFAA17, intensity = 0.3) => {
-        const points = [new THREE.Vector3(...from), new THREE.Vector3(...to)];
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        const material = new THREE.LineBasicMaterial({
-          color: color,
-          linewidth: 2,
-          transparent: true,
-          opacity: intensity
-        });
-        return new THREE.Line(geometry, material);
-      };
-
-      // Build scene graph
       const nodes = [];
-      const connections = [];
+      const tubes = [];
 
-      // Core node
-      const coreNode = createNode(ecosystem.core.name, ecosystem.core.type, ecosystem.core.pos);
-      mainGroup.add(coreNode);
+      const createNode = (name, type, pos, size) => {
+        const sphere = BABYLON.MeshBuilder.CreateSphere(name, { diameter: size * 2, segments: 32 }, scene);
+        sphere.position = new BABYLON.Vector3(...pos);
+
+        const color = colorMap[type] || new BABYLON.Color3(1, 1, 1);
+        const mat = new BABYLON.StandardMaterial(`mat_${name}`, scene);
+        mat.emissiveColor = color;
+        mat.specularColor = color;
+        mat.specularPower = 64;
+
+        sphere.material = mat;
+        sphere.metadata = { name, type, originalSize: size, originalColor: color.clone() };
+
+        return sphere;
+      };
+
+      const createTube = (from, to, color = colorMap.ai) => {
+        const tube = BABYLON.MeshBuilder.CreateTube(`tube_${from.name}_${to.name}`, {
+          path: [
+            from.position,
+            BABYLON.Vector3.Lerp(from.position, to.position, 0.5).addInPlace(new BABYLON.Vector3(Math.random() * 10 - 5, Math.random() * 10 - 5, Math.random() * 10 - 5)),
+            to.position
+          ],
+          radius: 0.8,
+          updatable: false
+        }, scene);
+
+        const tubeMat = new BABYLON.StandardMaterial(`tubeMat_${from.name}`, scene);
+        tubeMat.emissiveColor = color;
+        tubeMat.alpha = 0.3;
+        tube.material = tubeMat;
+
+        return tube;
+      };
+
+      // Build nodes
+      const coreNode = createNode(nodeDatabase.core.name, nodeDatabase.core.type, nodeDatabase.core.pos, nodeDatabase.core.size);
       nodes.push(coreNode);
 
-      // Platforms
-      ecosystem.platforms.forEach(p => {
-        const node = createNode(p.name, p.type, p.pos);
-        mainGroup.add(node);
+      [...nodeDatabase.platforms, ...nodeDatabase.agents, ...nodeDatabase.skills, ...nodeDatabase.mcp].forEach(config => {
+        const node = createNode(config.name, config.type, config.pos, config.size);
         nodes.push(node);
-        connections.push(createConnection(ecosystem.core.pos, p.pos, 0x4ade80, 0.4));
+        const tube = createTube(coreNode, node, colorMap[config.type]);
+        tubes.push(tube);
       });
 
-      // Agents
-      ecosystem.agents.forEach(a => {
-        const node = createNode(a.name, a.type, a.pos);
-        mainGroup.add(node);
-        nodes.push(node);
-        connections.push(createConnection(ecosystem.core.pos, a.pos, 0xc084fc, 0.3));
-      });
+      // ========== HOLOGRAPHIC PANEL (INFO ON HOVER) ==========
+      const createInfoPanel = (nodeData) => {
+        const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI', true, scene);
 
-      // Skills
-      ecosystem.skills.forEach(s => {
-        const node = createNode(s.name, s.type, s.pos);
-        mainGroup.add(node);
-        nodes.push(node);
-      });
+        const panelBackground = new BABYLON.GUI.Rectangle();
+        panelBackground.width = '300px';
+        panelBackground.height = '200px';
+        panelBackground.background = 'rgba(19, 20, 24, 0.95)';
+        panelBackground.thickness = 2;
+        panelBackground.borderColor = '#FFAA17';
+        panelBackground.cornerRadius = 8;
+        advancedTexture.addControl(panelBackground);
 
-      // MCPs
-      ecosystem.mcp.forEach(m => {
-        const node = createNode(m.name, m.type, m.pos);
-        mainGroup.add(node);
-        nodes.push(node);
-        connections.push(createConnection(ecosystem.core.pos, m.pos, 0xfb923c, 0.25));
-      });
+        const title = new BABYLON.GUI.TextBlock();
+        title.text = nodeData.name.toUpperCase();
+        title.fontSize = 18;
+        title.color = '#FFAA17';
+        title.fontWeight = 'bold';
+        title.textWrapping = true;
+        panelBackground.addControl(title);
 
-      // Databases
-      ecosystem.databases.forEach(d => {
-        const node = createNode(d.name, d.type, d.pos);
-        mainGroup.add(node);
-        nodes.push(node);
-      });
+        const typeLabel = new BABYLON.GUI.TextBlock();
+        typeLabel.text = `Type: ${nodeData.type}`;
+        typeLabel.fontSize = 12;
+        typeLabel.color = '#faf7f5';
+        typeLabel.top = 30;
+        panelBackground.addControl(typeLabel);
 
-      // APIs
-      ecosystem.apis.forEach(a => {
-        const node = createNode(a.name, a.type, a.pos);
-        mainGroup.add(node);
-        nodes.push(node);
-      });
+        const statusLabel = new BABYLON.GUI.TextBlock();
+        statusLabel.text = '● Active';
+        statusLabel.fontSize = 12;
+        statusLabel.color = '#4ade80';
+        statusLabel.top = 50;
+        panelBackground.addControl(statusLabel);
 
-      // Add connections to scene
-      connections.forEach(conn => mainGroup.add(conn));
-
-      // Create labels (using canvas texture)
-      const labelCanvas = document.createElement('canvas');
-      labelCanvas.width = 512;
-      labelCanvas.height = 64;
-      const labelCtx = labelCanvas.getContext('2d');
-
-      const createLabelSprite = (text, color = '#faf7f5') => {
-        labelCtx.clearRect(0, 0, 512, 64);
-        labelCtx.fillStyle = color;
-        labelCtx.font = 'bold 32px sans-serif';
-        labelCtx.textAlign = 'center';
-        labelCtx.fillText(text.substring(0, 16), 256, 40);
-
-        const texture = new THREE.CanvasTexture(labelCanvas);
-        const material = new THREE.SpriteMaterial({ map: texture, sizeAttenuation: true });
-        const sprite = new THREE.Sprite(material);
-        sprite.scale.set(16, 4, 1);
-        return sprite;
+        return { panel: panelBackground, ui: advancedTexture };
       };
 
-      // Interactive hover effects
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-
-      container.addEventListener('mousemove', (e) => {
-        mouse.x = (e.clientX / container.clientWidth) * 2 - 1;
-        mouse.y = -(e.clientY / container.clientHeight) * 2 + 1;
-
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(mainGroup.children, true);
-
-        nodes.forEach(node => {
-          const mesh = node.userData.mesh;
-          const glow = node.userData.glow;
-          if (!mesh) return;
-
-          mesh.material.emissiveIntensity = 0.3;
-          glow.material.opacity = 0.15;
-        });
-
-        if (intersects.length > 0) {
-          let obj = intersects[0].object;
-          while (obj.parent && !obj.userData.mesh) obj = obj.parent;
-
-          if (obj.userData.mesh) {
-            obj.userData.mesh.material.emissiveIntensity = 0.8;
-            obj.userData.glow.material.opacity = 0.4;
-            container.style.cursor = 'pointer';
-          }
-        } else {
-          container.style.cursor = 'grab';
-        }
-      });
+      // ========== INTERACTION (RAYCAST + DRAG) ==========
+      const raycaster = new BABYLON.Ray(BABYLON.Vector3.Zero(), BABYLON.Vector3.Forward());
+      let selectedNode = null;
+      let isDragging = false;
+      let panelUI = null;
 
       container.addEventListener('click', (e) => {
-        mouse.x = (e.clientX / container.clientWidth) * 2 - 1;
-        mouse.y = -(e.clientY / container.clientHeight) * 2 + 1;
+        const pickResult = scene.pick(e.clientX, e.clientY);
+        if (pickResult.hit && pickResult.pickedMesh) {
+          selectedNode = pickResult.pickedMesh;
+          if (panelUI) panelUI.dispose();
+          const panelData = createInfoPanel(selectedNode.metadata);
+          panelUI = panelData.ui;
 
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(mainGroup.children, true);
-
-        if (intersects.length > 0) {
-          let obj = intersects[0].object;
-          while (obj.parent && !obj.userData.name) obj = obj.parent;
-
-          if (obj.userData.name) {
-            const info = `${obj.userData.name}\nType: ${obj.userData.type}\nStatus: Active`;
-            console.log(info);
-          }
+          selectedNode.material.emissiveColor = selectedNode.metadata.originalColor.scale(2);
+          setTimeout(() => {
+            if (selectedNode) selectedNode.material.emissiveColor = selectedNode.metadata.originalColor;
+          }, 200);
         }
       });
 
-      // Camera controls
-      let isDragging = false;
-      let previousMousePosition = { x: 0, y: 0 };
-
-      container.addEventListener('mousedown', () => isDragging = true);
-      container.addEventListener('mouseup', () => isDragging = false);
       container.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-
-        const deltaX = e.clientX - previousMousePosition.x;
-        const deltaY = e.clientY - previousMousePosition.y;
-
-        mainGroup.rotation.y += deltaX * 0.01;
-        mainGroup.rotation.x += deltaY * 0.01;
-
-        previousMousePosition = { x: e.clientX, y: e.clientY };
+        const pickResult = scene.pick(e.clientX, e.clientY);
+        if (pickResult.hit && pickResult.pickedMesh) {
+          container.style.cursor = 'pointer';
+          pickResult.pickedMesh.scaling = new BABYLON.Vector3(1.3, 1.3, 1.3);
+        } else {
+          container.style.cursor = 'grab';
+          nodes.forEach(n => n.scaling = new BABYLON.Vector3(1, 1, 1));
+        }
       });
 
-      container.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? 1.1 : 0.9;
-        camera.position.multiplyScalar(delta);
-        camera.position.z = Math.max(50, Math.min(200, camera.position.z));
+      // ========== AUDIO REACTIVITY (Web Audio API) ==========
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+
+      // Play scan sound on load
+      const playTone = (freq, duration) => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+        osc.start(audioContext.currentTime);
+        osc.stop(audioContext.currentTime + duration);
+      };
+
+      // Play subtle scan sweep
+      setTimeout(() => {
+        playTone(220, 0.3);
+        setTimeout(() => playTone(330, 0.3), 150);
+        setTimeout(() => playTone(440, 0.3), 300);
+      }, 500);
+
+      // ========== ANIMATION LOOP ==========
+      let time = 0;
+      engine.runRenderLoop(() => {
+        time += 0.016;
+
+        // Node animations
+        nodes.forEach((node, idx) => {
+          node.rotation.x += 0.003;
+          node.rotation.y += 0.005;
+
+          const bob = Math.sin(time * 1.5 + idx) * 3;
+          node.position.y += (bob - (node.position.y - (node.metadata.originalSize ? 0 : 20))) * 0.05;
+
+          // Pulse on core
+          if (node === coreNode) {
+            const pulse = 1 + Math.sin(time * 2) * 0.15;
+            node.scaling = new BABYLON.Vector3(pulse, pulse, pulse);
+            coreLight.intensity = 0.4 + Math.sin(time * 2) * 0.3;
+          }
+        });
+
+        // Tube animations (wave effect)
+        tubes.forEach((tube, idx) => {
+          tube.material.alpha = 0.15 + Math.sin(time * 2 + idx) * 0.15;
+        });
+
+        // Gentle camera rotation
+        const radius = 150;
+        camera.position.x = Math.cos(time * 0.1) * radius;
+        camera.position.z = Math.sin(time * 0.1) * radius;
+        camera.target = new BABYLON.Vector3(0, 40, 0);
+
+        scene.render();
       });
 
-      // Animation loop
-      let frameId;
-      const animate = () => {
-        frameId = requestAnimationFrame(animate);
+      // ========== RESPONSIVE RESIZE ==========
+      window.addEventListener('resize', () => {
+        engine.resize();
+      });
 
-        // Rotate scene gently
-        if (!isDragging) {
-          mainGroup.rotation.y += 0.0005;
-        }
-
-        // Pulse glow on core node
-        const coreTime = Date.now() * 0.001;
-        if (coreNode.userData.mesh) {
-          coreNode.userData.mesh.material.emissiveIntensity = 0.3 + Math.sin(coreTime) * 0.3;
-        }
-
-        renderer.render(scene, camera);
-      };
-      animate();
-
-      // Handle window resize
-      const onWindowResize = () => {
-        const w = container.clientWidth;
-        const h = container.clientHeight;
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
-      };
-      window.addEventListener('resize', onWindowResize);
-
-      // Cleanup function
+      // Cleanup
       window.cleanup3DGraph = () => {
-        cancelAnimationFrame(frameId);
-        window.removeEventListener('resize', onWindowResize);
-        renderer.dispose();
+        engine.dispose();
+        if (panelUI) panelUI.dispose();
       };
 
-      console.log('3D Ecosystem graph with Three.js initialized');
+      console.log('GRAPHIFY 3D initialized with Babylon.js + Holographic Shaders');
     },
 
     aggregateByProject(entries) {
