@@ -3992,6 +3992,175 @@ body.client-mode #proj-btns .proj-btn:first-child { display: none !important; }
 body.client-mode .tab-btn.team-tab { display: none !important; }
 body.client-mode #sidebar { display: none !important; }
 body.client-mode #main { margin-left: 0 !important; }
+
+/* ── QUICK ACTIONS PANEL ── */
+#via-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px clamp(1.2rem,3vw,2.5rem);
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(255,170,23,0.04) 100%);
+  border-bottom: 2px solid rgba(255,170,23,0.25);
+  position: relative;
+  z-index: 5;
+  flex-wrap: wrap;
+  overflow-x: auto;
+}
+.via-qa-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: var(--amber);
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+.via-qa-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  background: rgba(255,170,23,0.06);
+  border: 1px solid rgba(255,170,23,0.22);
+  color: var(--bone);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.12s;
+  flex-shrink: 0;
+}
+.via-qa-btn:hover {
+  background: rgba(255,170,23,0.15);
+  border-color: rgba(255,170,23,0.55);
+  color: var(--amber);
+  transform: translateY(-1px);
+}
+.via-qa-btn:active { transform: scale(0.97); }
+.via-qa-btn svg { flex-shrink: 0; opacity: 0.85; }
+
+/* ── QUICK ACTION MODALS ── */
+.qa-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(7,8,9,0.82);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.qa-overlay.open {
+  opacity: 1; pointer-events: auto;
+}
+.qa-modal {
+  background: var(--surface);
+  border: 1px solid rgba(255,170,23,0.28);
+  border-radius: 14px;
+  padding: 32px 36px 28px;
+  width: min(520px, 92vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  transform: translateY(12px);
+  transition: transform 0.22s cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+}
+.qa-overlay.open .qa-modal { transform: translateY(0); }
+.qa-modal-header {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin-bottom: 20px;
+}
+.qa-modal-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(255,170,23,0.12);
+  border: 1px solid rgba(255,170,23,0.3);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 20px;
+}
+.qa-modal-title {
+  font-size: 18px; font-weight: 700; color: var(--bone);
+  letter-spacing: -0.02em; line-height: 1.2;
+}
+.qa-modal-sub {
+  font-size: 12px; color: var(--bone2);
+  margin-top: 3px; line-height: 1.4;
+}
+.qa-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 28px; height: 28px; border-radius: 6px;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--bone2); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s; font-family: inherit;
+}
+.qa-close:hover { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); color: #ef4444; }
+.qa-section-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.28em;
+  color: var(--amber); text-transform: uppercase; margin-bottom: 10px; margin-top: 18px;
+}
+.qa-option-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
+  gap: 8px; margin-bottom: 14px;
+}
+.qa-option {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 12px 14px;
+  background: rgba(248,247,245,0.03);
+  border: 1px solid rgba(248,247,245,0.08);
+  border-radius: 8px; cursor: pointer;
+  transition: all 0.15s; text-align: left;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--bone);
+}
+.qa-option:hover {
+  background: rgba(255,170,23,0.08);
+  border-color: rgba(255,170,23,0.35);
+  transform: translateY(-2px);
+}
+.qa-option-name {
+  font-size: 12px; font-weight: 700; line-height: 1.2;
+}
+.qa-option-desc {
+  font-size: 10px; color: var(--bone2); line-height: 1.4;
+}
+.qa-cta {
+  display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap;
+}
+.qa-btn-launch {
+  flex: 1; padding: 11px 18px;
+  background: var(--amber); color: #070809;
+  font-size: 12px; font-weight: 800; letter-spacing: 0.08em;
+  border-radius: 7px; cursor: pointer; border: none;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: all 0.15s;
+}
+.qa-btn-launch:hover { opacity: 0.88; box-shadow: 0 4px 14px rgba(255,170,23,0.35); }
+.qa-btn-cancel {
+  padding: 11px 16px;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--bone2); font-size: 12px; border-radius: 7px;
+  cursor: pointer; font-family: 'Space Grotesk', sans-serif;
+  transition: all 0.12s;
+}
+.qa-btn-cancel:hover { border-color: rgba(255,170,23,0.4); color: var(--bone); }
+.qa-divider {
+  height: 1px; background: var(--border); margin: 18px 0;
+}
+.qa-info-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 0; border-bottom: 1px solid rgba(248,247,245,0.05);
+  font-size: 12px; color: var(--bone2);
+}
+.qa-info-row strong { color: var(--bone); }
+@media (max-width: 640px) {
+  #via-quick-actions { gap: 6px; padding: 8px 12px; }
+  .via-qa-btn { padding: 6px 10px; font-size: 10px; }
+  .qa-option-grid { grid-template-columns: 1fr 1fr; }
+  .qa-modal { padding: 22px 18px 18px; }
+}
 </style>
 <!-- Firebase Auth SDK (compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
@@ -4650,6 +4819,311 @@ body.client-mode #main { margin-left: 0 !important; }
   <button class="tab-btn team-tab" onclick="setTab('apollo')">Prospección</button>
   <button class="tab-btn team-tab" onclick="setTab('telemetria')">Telemetría IoT</button>
   <button class="tab-btn" onclick="setTab('graphify')" style="color:#4ade80">Graphify · Observabilidad</button>
+</div>
+
+<!-- QUICK ACTIONS PANEL — 8 acciones IA visibles -->
+<div id="via-quick-actions" role="toolbar" aria-label="Acciones rápidas IA">
+  <span class="via-qa-label">Acciones IA</span>
+
+  <!-- 1. Generar Imagen -->
+  <button class="via-qa-btn" onclick="openQA('qa-imagen')" title="Generar imagen con Higgsfield">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    Generar Imagen
+  </button>
+
+  <!-- 2. Generar Video -->
+  <button class="via-qa-btn" onclick="openQA('qa-video')" title="Generar video con Higgsfield">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+    Generar Video
+  </button>
+
+  <!-- 3. Presentación -->
+  <button class="via-qa-btn" onclick="openQA('qa-presentacion')" title="Crear presentación animada">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    Presentación
+  </button>
+
+  <!-- 4. Web/Landing -->
+  <button class="via-qa-btn" onclick="openQA('qa-web')" title="Crear sitio web o landing page">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    Web / Landing
+  </button>
+
+  <!-- 5. Voice/Speech -->
+  <button class="via-qa-btn" onclick="openQA('qa-voice')" title="Generar voz o speech con ElevenLabs">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    Voice / Speech
+  </button>
+
+  <!-- 6. Capacitación -->
+  <button class="via-qa-btn" onclick="openQA('qa-capacitacion')" title="Generar material de capacitación">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    Capacitación
+  </button>
+
+  <!-- 7. Admin & Finanzas -->
+  <button class="via-qa-btn" onclick="openQA('qa-admin')" title="Acciones administrativas y financieras">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+    Admin &amp; Finanzas
+  </button>
+
+  <!-- 8. Dashboard -->
+  <button class="via-qa-btn" onclick="openQA('qa-dashboard')" title="Ver datos y métricas clave">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════ QUICK ACTION MODALS ═══════════════════════════════════ -->
+
+<!-- MODAL 1: GENERAR IMAGEN -->
+<div class="qa-overlay" id="qa-imagen" onclick="closeQAIfBackdrop(event,this)">
+  <div class="qa-modal">
+    <button class="qa-close" onclick="closeQA('qa-imagen')">✕</button>
+    <div class="qa-modal-header">
+      <div class="qa-modal-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+      <div>
+        <div class="qa-modal-title">Generar Imagen</div>
+        <div class="qa-modal-sub">Higgsfield · Generación con IA · Modelos top-tier</div>
+      </div>
+    </div>
+    <div class="qa-section-label">Tipo de imagen</div>
+    <div class="qa-option-grid">
+      <button class="qa-option" onclick="qaLaunch('higgsfield-imagen','producto')"><div class="qa-option-name">Foto Producto</div><div class="qa-option-desc">Shot limpio, fondo neutro, hero</div></button>
+      <button class="qa-option" onclick="qaLaunch('higgsfield-imagen','conceptual')"><div class="qa-option-name">Ilustración</div><div class="qa-option-desc">Arte conceptual, mood, branding</div></button>
+      <button class="qa-option" onclick="qaLaunch('higgsfield-imagen','retrato')"><div class="qa-option-name">Retrato IA</div><div class="qa-option-desc">Persona, equipo, avatar</div></button>
+      <button class="qa-option" onclick="qaLaunch('higgsfield-imagen','arquitectura')"><div class="qa-option-name">Arquitectura</div><div class="qa-option-desc">Exterior, interior, render</div></button>
+    </div>
+    <div class="qa-divider"></div>
+    <div class="qa-info-row"><span>Herramienta:</span><strong>Higgsfield generate_image</strong></div>
+    <div class="qa-info-row"><span>Resolución:</span><strong>1024×1024 hasta 2048×2048</strong></div>
+    <div class="qa-info-row"><span>Tiempo estimado:</span><strong>~30–90 segundos</strong></div>
+    <div class="qa-cta">
+      <button class="qa-btn-launch" onclick="qaLaunch('higgsfield-imagen','general')">Lanzar Agente Imagen</button>
+      <button class="qa-btn-cancel" onclick="closeQA('qa-imagen')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 2: GENERAR VIDEO -->
+<div class="qa-overlay" id="qa-video" onclick="closeQAIfBackdrop(event,this)">
+  <div class="qa-modal">
+    <button class="qa-close" onclick="closeQA('qa-video')">✕</button>
+    <div class="qa-modal-header">
+      <div class="qa-modal-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      </div>
+      <div>
+        <div class="qa-modal-title">Generar Video</div>
+        <div class="qa-modal-sub">Higgsfield · Seedance 2.0 · Motion Design</div>
+      </div>
+    </div>
+    <div class="qa-section-label">Tipo de video</div>
+    <div class="qa-option-grid">
+      <button class="qa-option" onclick="qaLaunch('higgsfield-video','spot')"><div class="qa-option-name">Spot Comercial</div><div class="qa-option-desc">Campaña, branding, impact</div></button>
+      <button class="qa-option" onclick="qaLaunch('higgsfield-video','motion')"><div class="qa-option-name">Motion Design</div><div class="qa-option-desc">Kinetic, tipografía, VO sync</div></button>
+      <button class="qa-option" onclick="qaLaunch('higgsfield-video','social')"><div class="qa-option-name">Redes Sociales</div><div class="qa-option-desc">Reels, Stories, TikTok</div></button>
+      <button class="qa-option" onclick="qaLaunch('higgsfield-video','corporate')"><div class="qa-option-name">Corporativo</div><div class="qa-option-desc">Presentación, institutional</div></button>
+    </div>
+    <div class="qa-divider"></div>
+    <div class="qa-info-row"><span>Herramienta:</span><strong>Higgsfield generate_video</strong></div>
+    <div class="qa-info-row"><span>Resolución:</span><strong>720p – 4K</strong></div>
+    <div class="qa-info-row"><span>Duración:</span><strong>5–30 segundos por clip</strong></div>
+    <div class="qa-cta">
+      <button class="qa-btn-launch" onclick="qaLaunch('higgsfield-video','general')">Lanzar Agente Video</button>
+      <button class="qa-btn-cancel" onclick="closeQA('qa-video')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 3: PRESENTACIÓN -->
+<div class="qa-overlay" id="qa-presentacion" onclick="closeQAIfBackdrop(event,this)">
+  <div class="qa-modal">
+    <button class="qa-close" onclick="closeQA('qa-presentacion')">✕</button>
+    <div class="qa-modal-header">
+      <div class="qa-modal-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <div>
+        <div class="qa-modal-title">Presentación Animada</div>
+        <div class="qa-modal-sub">HyperFrames · HTML-to-Video · GSAP + Timeline</div>
+      </div>
+    </div>
+    <div class="qa-section-label">Tipo de presentación</div>
+    <div class="qa-option-grid">
+      <button class="qa-option" onclick="qaLaunch('hyperframes','propuesta')"><div class="qa-option-name">Propuesta Comercial</div><div class="qa-option-desc">Deck cliente, pricing, CTA</div></button>
+      <button class="qa-option" onclick="qaLaunch('hyperframes','pitch')"><div class="qa-option-name">Pitch / Startup</div><div class="qa-option-desc">Problema, solución, traction</div></button>
+      <button class="qa-option" onclick="qaLaunch('hyperframes','reporte')"><div class="qa-option-name">Reporte de Resultados</div><div class="qa-option-desc">KPIs, gráficas, logros</div></button>
+      <button class="qa-option" onclick="qaLaunch('hyperframes','capacitacion')"><div class="qa-option-name">Capacitación</div><div class="qa-option-desc">Slides educativos, módulos</div></button>
+    </div>
+    <div class="qa-divider"></div>
+    <div class="qa-info-row"><span>Agente:</span><strong>HyperFrames (HTML → Video)</strong></div>
+    <div class="qa-info-row"><span>Stack:</span><strong>GSAP · CSS · Lottie · Three.js</strong></div>
+    <div class="qa-info-row"><span>Output:</span><strong>HTML animado + MP4 exportable</strong></div>
+    <div class="qa-cta">
+      <button class="qa-btn-launch" onclick="qaLaunch('hyperframes','general')">Lanzar HyperFrames</button>
+      <button class="qa-btn-cancel" onclick="closeQA('qa-presentacion')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 4: WEB / LANDING -->
+<div class="qa-overlay" id="qa-web" onclick="closeQAIfBackdrop(event,this)">
+  <div class="qa-modal">
+    <button class="qa-close" onclick="closeQA('qa-web')">✕</button>
+    <div class="qa-modal-header">
+      <div class="qa-modal-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <div>
+        <div class="qa-modal-title">Web / Landing Page</div>
+        <div class="qa-modal-sub">web-4o · Three.js · R3F · Luxury Dark SaaS</div>
+      </div>
+    </div>
+    <div class="qa-section-label">Tipo de sitio</div>
+    <div class="qa-option-grid">
+      <button class="qa-option" onclick="qaLaunch('web-4o','landing')"><div class="qa-option-name">Landing Page</div><div class="qa-option-desc">One-page, CTA, conversión</div></button>
+      <button class="qa-option" onclick="qaLaunch('web-4o','website')"><div class="qa-option-name">Sitio Completo</div><div class="qa-option-desc">Multi-sección, navegación</div></button>
+      <button class="qa-option" onclick="qaLaunch('web-4o','saas')"><div class="qa-option-name">SaaS / App</div><div class="qa-option-desc">Dashboard, auth, pricing</div></button>
+      <button class="qa-option" onclick="qaLaunch('web-4o','portfolio')"><div class="qa-option-name">Portfolio / Brand</div><div class="qa-option-desc">Luxury, visual, storytelling</div></button>
+    </div>
+    <div class="qa-divider"></div>
+    <div class="qa-info-row"><span>Agente:</span><strong>web-4o (Luxury Web 4.0)</strong></div>
+    <div class="qa-info-row"><span>Stack:</span><strong>Three.js · GSAP · Shadcn · Next.js</strong></div>
+    <div class="qa-info-row"><span>Deploy:</span><strong>Vercel automático</strong></div>
+    <div class="qa-cta">
+      <button class="qa-btn-launch" onclick="qaLaunch('web-4o','general')">Lanzar Agente Web</button>
+      <button class="qa-btn-cancel" onclick="closeQA('qa-web')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 5: VOICE / SPEECH -->
+<div class="qa-overlay" id="qa-voice" onclick="closeQAIfBackdrop(event,this)">
+  <div class="qa-modal">
+    <button class="qa-close" onclick="closeQA('qa-voice')">✕</button>
+    <div class="qa-modal-header">
+      <div class="qa-modal-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </div>
+      <div>
+        <div class="qa-modal-title">Voice / Speech</div>
+        <div class="qa-modal-sub">ElevenLabs · Voz Victor · Timestamps sincronizados</div>
+      </div>
+    </div>
+    <div class="qa-section-label">Tipo de audio</div>
+    <div class="qa-option-grid">
+      <button class="qa-option" onclick="qaLaunch('elevenlabs','vo')"><div class="qa-option-name">Voice Over</div><div class="qa-option-desc">VO para video con timestamps</div></button>
+      <button class="qa-option" onclick="qaLaunch('elevenlabs','narration')"><div class="qa-option-name">Narración</div><div class="qa-option-desc">Podcast, curso, explicación</div></button>
+      <button class="qa-option" onclick="qaLaunch('elevenlabs','agent')"><div class="qa-option-name">Agente de Voz</div><div class="qa-option-desc">Conversacional, soporte, ventas</div></button>
+      <button class="qa-option" onclick="qaLaunch('elevenlabs','music')"><div class="qa-option-name">Música Original</div><div class="qa-option-desc">Score único por proyecto</div></button>
+    </div>
+    <div class="qa-divider"></div>
+    <div class="qa-info-row"><span>API Key:</span><strong>sk_87d5a7899d6c489c94232248c4880a0c4fe317adb3701e67</strong></div>
+    <div class="qa-info-row"><span>Voice ID Victor:</span><strong>iDEmt5MnqUotdwCIVplo</strong></div>
+    <div class="qa-info-row"><span>Agent ID:</span><strong>agent_5701kr0h5gg6eetb69tv6c5hwfj1</strong></div>
+    <div class="qa-cta">
+      <button class="qa-btn-launch" onclick="qaLaunch('elevenlabs','vo')">Lanzar ElevenLabs</button>
+      <button class="qa-btn-cancel" onclick="closeQA('qa-voice')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 6: CAPACITACIÓN -->
+<div class="qa-overlay" id="qa-capacitacion" onclick="closeQAIfBackdrop(event,this)">
+  <div class="qa-modal">
+    <button class="qa-close" onclick="closeQA('qa-capacitacion')">✕</button>
+    <div class="qa-modal-header">
+      <div class="qa-modal-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      </div>
+      <div>
+        <div class="qa-modal-title">Capacitación</div>
+        <div class="qa-modal-sub">VTC · LMS · Módulos · Video Training</div>
+      </div>
+    </div>
+    <div class="qa-section-label">Tipo de material</div>
+    <div class="qa-option-grid">
+      <button class="qa-option" onclick="qaLaunch('vtc','modulo')"><div class="qa-option-name">Módulo de Curso</div><div class="qa-option-desc">Slides + ejercicios + evaluación</div></button>
+      <button class="qa-option" onclick="qaLaunch('vtc','video')"><div class="qa-option-name">Video Capacitación</div><div class="qa-option-desc">HyperFrames + VO sincronizado</div></button>
+      <button class="qa-option" onclick="qaLaunch('vtc','guia')"><div class="qa-option-name">Guía Rápida</div><div class="qa-option-desc">PDF / HTML interactivo</div></button>
+      <button class="qa-option" onclick="qaLaunch('vtc','roleplay')"><div class="qa-option-name">Roleplay IA</div><div class="qa-option-desc">Agente conversacional ElevenLabs</div></button>
+    </div>
+    <div class="qa-divider"></div>
+    <div class="qa-info-row"><span>Agente VTC:</span><strong>agent_9501k3vkt6svekjs6y0qe5xzcek1</strong></div>
+    <div class="qa-info-row"><span>Reportes a:</span><strong>eldudemateos@gmail.com</strong></div>
+    <div class="qa-info-row"><span>Stack:</span><strong>ElevenLabs · HyperFrames · n8n</strong></div>
+    <div class="qa-cta">
+      <button class="qa-btn-launch" onclick="qaLaunch('vtc','general')">Lanzar Agente VTC</button>
+      <button class="qa-btn-cancel" onclick="closeQA('qa-capacitacion')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 7: ADMIN & FINANZAS -->
+<div class="qa-overlay" id="qa-admin" onclick="closeQAIfBackdrop(event,this)">
+  <div class="qa-modal">
+    <button class="qa-close" onclick="closeQA('qa-admin')">✕</button>
+    <div class="qa-modal-header">
+      <div class="qa-modal-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      </div>
+      <div>
+        <div class="qa-modal-title">Admin &amp; Finanzas</div>
+        <div class="qa-modal-sub">Google Sheets · CRM · Clientes · Facturación</div>
+      </div>
+    </div>
+    <div class="qa-section-label">Acciones rápidas</div>
+    <div class="qa-option-grid">
+      <button class="qa-option" onclick="qaLaunch('admin','finanzas')"><div class="qa-option-name">Ver Finanzas</div><div class="qa-option-desc">Ingresos, egresos, margen</div></button>
+      <button class="qa-option" onclick="qaLaunch('admin','clientes')"><div class="qa-option-name">Gestión Clientes</div><div class="qa-option-desc">Pipeline, propuestas, status</div></button>
+      <button class="qa-option" onclick="qaLaunch('admin','propuesta')"><div class="qa-option-name">Nueva Propuesta</div><div class="qa-option-desc">Deck cliente, pricing, plan</div></button>
+      <button class="qa-option" onclick="qaLaunch('admin','reporte')"><div class="qa-option-name">Reporte Semanal</div><div class="qa-option-desc">KPIs, tiempo, facturado</div></button>
+    </div>
+    <div class="qa-divider"></div>
+    <div class="qa-info-row"><span>Google Sheet:</span><strong>Finanzas Victor IA</strong></div>
+    <div class="qa-info-row"><span>Egresos:</span><strong>$288,997 MXN</strong></div>
+    <div class="qa-info-row"><span>Por cobrar:</span><strong>$27,971 MXN</strong></div>
+    <div class="qa-cta">
+      <button class="qa-btn-launch" onclick="openFinanzasTab()">Ir a Finanzas</button>
+      <button class="qa-btn-launch" onclick="openCRMTab()" style="background:rgba(255,170,23,0.15);color:var(--amber)">Ir a CRM</button>
+      <button class="qa-btn-cancel" onclick="closeQA('qa-admin')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 8: DASHBOARD -->
+<div class="qa-overlay" id="qa-dashboard" onclick="closeQAIfBackdrop(event,this)">
+  <div class="qa-modal">
+    <button class="qa-close" onclick="closeQA('qa-dashboard')">✕</button>
+    <div class="qa-modal-header">
+      <div class="qa-modal-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+      <div>
+        <div class="qa-modal-title">Dashboard</div>
+        <div class="qa-modal-sub">Métricas · KPIs · Analytics · Graphify</div>
+      </div>
+    </div>
+    <div class="qa-section-label">Vistas disponibles</div>
+    <div class="qa-option-grid">
+      <button class="qa-option" onclick="closeQA('qa-dashboard');setTab('dashboard')"><div class="qa-option-name">Dashboard General</div><div class="qa-option-desc">KPIs, velocidad, racha</div></button>
+      <button class="qa-option" onclick="closeQA('qa-dashboard');setTab('analytics')"><div class="qa-option-name">Analytics</div><div class="qa-option-desc">Heatmap, patrones, insights</div></button>
+      <button class="qa-option" onclick="closeQA('qa-dashboard');setTab('reportes')"><div class="qa-option-name">Reportes</div><div class="qa-option-desc">Exportar, PDF, CSV</div></button>
+      <button class="qa-option" onclick="closeQA('qa-dashboard');setTab('graphify')"><div class="qa-option-name">Graphify · IA</div><div class="qa-option-desc">Observabilidad, grafos, tokens</div></button>
+    </div>
+    <div class="qa-divider"></div>
+    <div class="qa-info-row"><span>Dashboard BI:</span><strong>victor-ia-dashboard.vercel.app</strong></div>
+    <div class="qa-info-row"><span>Graphify:</span><strong>~/.claude/graphify/index/</strong></div>
+    <div class="qa-info-row"><span>Blog Monitor:</span><strong>tracker.victor-ia.xyz/blog-monitor.html</strong></div>
+    <div class="qa-cta">
+      <button class="qa-btn-launch" onclick="closeQA('qa-dashboard');setTab('dashboard')">Ver Dashboard</button>
+      <button class="qa-btn-launch" onclick="window.open('https://victor-ia-dashboard.vercel.app','_blank')" style="background:rgba(255,170,23,0.15);color:var(--amber)">BI Externo</button>
+      <button class="qa-btn-cancel" onclick="closeQA('qa-dashboard')">Cancelar</button>
+    </div>
+  </div>
 </div>
 
 <!-- MAIN -->
@@ -13808,6 +14282,90 @@ function studioAttachFile(file){
   window.showGraphifyDetail = (date, data) => {
     alert(` ${date}\n Costo: $${data.cost.toFixed(4)}\n<span class="icon-csv"></span> Tokens: ${(data.tokens/1000).toFixed(1)}k\n Acciones: ${data.count}`);
   };
+})();
+</script>
+
+<!-- ═══════════════════ QUICK ACTIONS — JS ═══════════════════ -->
+<script>
+(function(){
+  /* ── Abrir modal ── */
+  function openQA(id){
+    var el=document.getElementById(id);
+    if(!el) return;
+    el.classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  /* ── Cerrar modal ── */
+  function closeQA(id){
+    var el=document.getElementById(id);
+    if(!el) return;
+    el.classList.remove('open');
+    document.body.style.overflow='';
+  }
+  /* ── Cerrar al clic en backdrop ── */
+  function closeQAIfBackdrop(e,overlay){
+    if(e.target===overlay) closeQA(overlay.id);
+  }
+  /* ── Acción de lanzar agente: muestra notificación ── */
+  function qaLaunch(agente,tipo){
+    var labels={
+      'higgsfield-imagen':'Higgsfield · Generar Imagen',
+      'higgsfield-video': 'Higgsfield · Generar Video',
+      'hyperframes':      'HyperFrames · Presentación',
+      'web-4o':           'Web 4.0 · Sitio / Landing',
+      'elevenlabs':       'ElevenLabs · Voice / Speech',
+      'vtc':              'VTC · Capacitación',
+      'admin':            'Admin · ' + (tipo||'General'),
+      'dashboard':        'Dashboard · Métricas'
+    };
+    var label=labels[agente]||agente;
+    // Cerrar todos los modales abiertos
+    document.querySelectorAll('.qa-overlay.open').forEach(function(m){ m.classList.remove('open'); });
+    document.body.style.overflow='';
+    // Toast de confirmación
+    showQAToast('Agente lanzado: ' + label + (tipo&&tipo!=='general'?' — '+tipo:''));
+  }
+  /* ── Atajos especiales Admin ── */
+  function openFinanzasTab(){
+    document.querySelectorAll('.qa-overlay.open').forEach(function(m){ m.classList.remove('open'); });
+    document.body.style.overflow='';
+    if(typeof setTab==='function') setTab('finanzas');
+  }
+  function openCRMTab(){
+    document.querySelectorAll('.qa-overlay.open').forEach(function(m){ m.classList.remove('open'); });
+    document.body.style.overflow='';
+    if(typeof setTab==='function') setTab('crm');
+  }
+  /* ── Toast de notificación visual ── */
+  function showQAToast(msg){
+    var t=document.createElement('div');
+    t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:99999;background:#FFAA17;color:#070809;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:700;font-family:"Space Grotesk",sans-serif;letter-spacing:0.04em;box-shadow:0 8px 28px rgba(255,170,23,0.45);pointer-events:none;opacity:0;transition:opacity 0.2s,transform 0.2s;transform:translateX(-50%) translateY(8px)';
+    t.textContent=msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(function(){
+      t.style.opacity='1';
+      t.style.transform='translateX(-50%) translateY(0)';
+    });
+    setTimeout(function(){
+      t.style.opacity='0';
+      t.style.transform='translateX(-50%) translateY(8px)';
+      setTimeout(function(){ t.remove(); },250);
+    },2800);
+  }
+  /* ── ESC para cerrar modal activo ── */
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){
+      var open=document.querySelector('.qa-overlay.open');
+      if(open){ open.classList.remove('open'); document.body.style.overflow=''; }
+    }
+  });
+  /* ── Exponer globalmente ── */
+  window.openQA=openQA;
+  window.closeQA=closeQA;
+  window.closeQAIfBackdrop=closeQAIfBackdrop;
+  window.qaLaunch=qaLaunch;
+  window.openFinanzasTab=openFinanzasTab;
+  window.openCRMTab=openCRMTab;
 })();
 </script>
 </body>
