@@ -4,7 +4,6 @@
   "outputDirectory": ".",
   "cleanUrls": false,
   "trailingSlash": false,
-  "public": true,
   "crons": [
     {
       "path": "/api/fetch-gsc",
