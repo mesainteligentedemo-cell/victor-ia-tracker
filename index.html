@@ -4867,11 +4867,6 @@ body.client-mode #main { margin-left: 0 !important; }
     Admin &amp; Finanzas
   </button>
 
-  <!-- 8. Dashboard -->
-  <button class="via-qa-btn" onclick="openQA('qa-dashboard')" title="Ver datos y métricas clave">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-    Dashboard
-  </button>
 </div>
 
 <!-- ═══════════════════════════════════ QUICK ACTION MODALS ═══════════════════════════════════ -->
@@ -5094,37 +5089,6 @@ body.client-mode #main { margin-left: 0 !important; }
   </div>
 </div>
 
-<!-- MODAL 8: DASHBOARD -->
-<div class="qa-overlay" id="qa-dashboard" onclick="closeQAIfBackdrop(event,this)">
-  <div class="qa-modal">
-    <button class="qa-close" onclick="closeQA('qa-dashboard')">✕</button>
-    <div class="qa-modal-header">
-      <div class="qa-modal-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      </div>
-      <div>
-        <div class="qa-modal-title">Dashboard</div>
-        <div class="qa-modal-sub">Métricas · KPIs · Analytics · Graphify</div>
-      </div>
-    </div>
-    <div class="qa-section-label">Vistas disponibles</div>
-    <div class="qa-option-grid">
-      <button class="qa-option" onclick="closeQA('qa-dashboard');setTab('dashboard')"><div class="qa-option-name">Dashboard General</div><div class="qa-option-desc">KPIs, velocidad, racha</div></button>
-      <button class="qa-option" onclick="closeQA('qa-dashboard');setTab('analytics')"><div class="qa-option-name">Analytics</div><div class="qa-option-desc">Heatmap, patrones, insights</div></button>
-      <button class="qa-option" onclick="closeQA('qa-dashboard');setTab('reportes')"><div class="qa-option-name">Reportes</div><div class="qa-option-desc">Exportar, PDF, CSV</div></button>
-      <button class="qa-option" onclick="closeQA('qa-dashboard');setTab('graphify')"><div class="qa-option-name">Graphify · IA</div><div class="qa-option-desc">Observabilidad, grafos, tokens</div></button>
-    </div>
-    <div class="qa-divider"></div>
-    <div class="qa-info-row"><span>Dashboard BI:</span><strong>victor-ia-dashboard.vercel.app</strong></div>
-    <div class="qa-info-row"><span>Graphify:</span><strong>~/.claude/graphify/index/</strong></div>
-    <div class="qa-info-row"><span>Blog Monitor:</span><strong>tracker.victor-ia.xyz/blog-monitor.html</strong></div>
-    <div class="qa-cta">
-      <button class="qa-btn-launch" onclick="closeQA('qa-dashboard');setTab('dashboard')">Ver Dashboard</button>
-      <button class="qa-btn-launch" onclick="window.open('https://victor-ia-dashboard.vercel.app','_blank')" style="background:rgba(255,170,23,0.15);color:var(--amber)">BI Externo</button>
-      <button class="qa-btn-cancel" onclick="closeQA('qa-dashboard')">Cancelar</button>
-    </div>
-  </div>
-</div>
 
 <!-- MAIN -->
 <div id="main">
