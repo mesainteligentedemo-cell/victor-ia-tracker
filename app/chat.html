@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Victor IA — Chat</title>
+<style>
+  :root {
+    --user-bg: #F5F5F5;
+    --ai-bg: #FFFFFF;
+    --border: #E5E5E5;
+    --text: #111111;
+    --muted: #8A8A8A;
+    --accent: #111111;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #FAFAFA; color: var(--text);
+    display: flex; flex-direction: column;
+  }
+
+  header {
+    padding: 14px 20px; background: #FFF; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  header h1 { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  header .dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#22C55E; margin-right:8px; }
+  header button {
+    font-size: 12px; color: var(--muted); background: none; border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 12px; cursor: pointer;
+  }
+  header button:hover { color: var(--text); border-color: #CCC; }
+
+  #messages {
+    flex: 1; overflow-y: auto; padding: 24px 16px 12px;
+    display: flex; flex-direction: column; gap: 12px;
+    width: 100%; max-width: 760px; margin: 0 auto;
+  }
+  .msg {
+    max-width: 82%; padding: 11px 15px; border-radius: 14px;
+    font-size: 14.5px; line-height: 1.55; white-space: pre-wrap; word-wrap: break-word;
+  }
+  .msg.user { align-self: flex-end; background: var(--user-bg); border-bottom-right-radius: 4px; }
+  .msg.ai   { align-self: flex-start; background: var(--ai-bg); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .msg.error { align-self: flex-start; background: #FEF2F2; border: 1px solid #FECACA; color: #B91C1C; }
+  .msg code { background: #F0F0F0; padding: 1px 5px; border-radius: 4px; font-size: 13px; font-family: ui-monospace, monospace; }
+
+  .typing { align-self: flex-start; background: var(--ai-bg); border: 1px solid var(--border);
+    border-radius: 14px; border-bottom-left-radius: 4px; padding: 14px 18px; display: flex; gap: 5px; }
+  .typing span { width: 7px; height: 7px; border-radius: 50%; background: #BBB; animation: blink 1.2s infinite; }
+  .typing span:nth-child(2) { animation-delay: .2s; }
+  .typing span:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%,80%,100% { opacity:.25; transform: translateY(0);} 40% { opacity:1; transform: translateY(-3px);} }
+
+  #inputbar {
+    flex-shrink: 0; background: #FFF; border-top: 1px solid var(--border);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+  #inputbar form {
+    max-width: 760px; margin: 0 auto; display: flex; gap: 10px; align-items: flex-end;
+  }
+  #input {
+    flex: 1; resize: none; border: 1px solid var(--border); border-radius: 12px;
+    padding: 11px 14px; font-size: 14.5px; font-family: inherit; line-height: 1.4;
+    max-height: 140px; outline: none; background: #FAFAFA;
+  }
+  #input:focus { border-color: #999; background: #FFF; }
+  #send {
+    background: var(--accent); color: #FFF; border: none; border-radius: 12px;
+    padding: 11px 18px; font-size: 14px; font-weight: 600; cursor: pointer; flex-shrink: 0;
+  }
+  #send:disabled { opacity: .4; cursor: default; }
+  .empty { text-align: center; color: var(--muted); font-size: 13.5px; margin-top: 48px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="dot"></span>Victor IA — Asistente</h1>
+  <button id="clear" type="button">Limpiar historial</button>
+</header>
+
+<div id="messages"></div>
+
+<div id="inputbar">
+  <form id="form">
+    <textarea id="input" rows="1" placeholder="Escribe tu mensaje…" autocomplete="off"></textarea>
+    <button id="send" type="submit">Enviar</button>
+  </form>
+</div>
+
+<script>
+(() => {
+  const KEY = 'victoria_chat_history';
+  const $msgs = document.getElementById('messages');
+  const $form = document.getElementById('form');
+  const $input = document.getElementById('input');
+  const $send = document.getElementById('send');
+  const $clear = document.getElementById('clear');
+
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem(KEY)) || []; } catch { history = []; }
+  let busy = false;
+
+  const save = () => localStorage.setItem(KEY, JSON.stringify(history.slice(-100)));
+  const scroll = () => { $msgs.scrollTop = $msgs.scrollHeight; };
+
+  function bubble(role, text) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + (role === 'user' ? 'user' : role === 'error' ? 'error' : 'ai');
+    div.textContent = text;
+    $msgs.appendChild(div);
+    scroll();
+    return div;
+  }
+
+  function render() {
+    $msgs.innerHTML = '';
+    if (!history.length) {
+      const e = document.createElement('div');
+      e.className = 'empty';
+      e.textContent = 'Hola, soy Victor IA. Pregúntame sobre los 10 sitios, el blog o la infraestructura.';
+      $msgs.appendChild(e);
+      return;
+    }
+    history.forEach(m => bubble(m.role === 'user' ? 'user' : 'ai', m.content));
+  }
+
+  function typingIndicator() {
+    const d = document.createElement('div');
+    d.className = 'typing';
+    d.innerHTML = '<span></span><span></span><span></span>';
+    $msgs.appendChild(d);
+    scroll();
+    return d;
+  }
+
+  async function sendMessage(text) {
+    busy = true; $send.disabled = true;
+    if (!history.length) $msgs.innerHTML = '';
+    history.push({ role: 'user', content: text });
+    save();
+    bubble('user', text);
+    const typing = typingIndicator();
+
+    let aiDiv = null, aiText = '';
+
+    try {
+      const resp = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history.slice(-30) }),
+      });
+
+      if (!resp.ok || !resp.body) throw new Error('HTTP ' + resp.status);
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const t = line.trim();
+          if (!t.startsWith('data: ')) continue;
+          const raw = t.slice(6).trim();
+          if (raw === '[DONE]') continue;
+          let chunk;
+          try { chunk = JSON.parse(raw); } catch { continue; }
+          if (chunk.error) throw new Error(chunk.error);
+          if (chunk.text) {
+            if (!aiDiv) { typing.remove(); aiDiv = bubble('ai', ''); }
+            aiText += chunk.text;
+            aiDiv.textContent = aiText;
+            scroll();
+          }
+        }
+      }
+
+      typing.remove();
+      if (aiText) {
+        history.push({ role: 'assistant', content: aiText });
+        save();
+      } else if (!aiDiv) {
+        bubble('error', 'Sin respuesta del asistente. Intenta de nuevo.');
+      }
+    } catch (err) {
+      typing.remove();
+      // No guardar respuesta parcial fallida en historial
+      bubble('error', '⚠️ ' + err.message);
+    } finally {
+      busy = false; $send.disabled = false; $input.focus();
+    }
+  }
+
+  $form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = $input.value.trim();
+    if (!text || busy) return;
+    $input.value = '';
+    $input.style.height = 'auto';
+    sendMessage(text);
+  });
+
+  // Enter envía, Shift+Enter = salto de línea
+  $input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      $form.requestSubmit();
+    }
+  });
+
+  // Auto-resize del textarea
+  $input.addEventListener('input', () => {
+    $input.style.height = 'auto';
+    $input.style.height = Math.min($input.scrollHeight, 140) + 'px';
+  });
+
+  $clear.addEventListener('click', () => {
+    if (busy) return;
+    history = [];
+    localStorage.removeItem(KEY);
+    render();
+  });
+
+  render();
+  $input.focus();
+})();
+</script>
+</body>
+</html>

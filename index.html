@@ -4161,6 +4161,169 @@ body.client-mode #main { margin-left: 0 !important; }
   .qa-option-grid { grid-template-columns: 1fr 1fr; }
   .qa-modal { padding: 22px 18px 18px; }
 }
+
+/* ═══════════════════ POPUPS v2 — Voice · Upload · Config ═══════════════════ */
+.qa2-overlay {
+  position: fixed; inset: 0;
+  background: rgba(7,8,9,0.82);
+  backdrop-filter: blur(6px);
+  z-index: 9800;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.qa2-overlay.open { opacity: 1; pointer-events: auto; }
+.qa2-modal {
+  background: var(--surface, #12141a);
+  border: 1px solid rgba(255,170,23,0.28);
+  border-radius: 16px;
+  padding: 28px 30px 24px;
+  width: min(560px, 94vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  position: relative;
+  transform: translateY(14px);
+  transition: transform 0.22s cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 28px 72px rgba(0,0,0,0.7);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,170,23,0.2) transparent;
+}
+.qa2-overlay.open .qa2-modal { transform: translateY(0); }
+.qa2-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 28px; height: 28px; border-radius: 6px;
+  background: transparent; border: 1px solid rgba(248,247,245,0.12);
+  color: rgba(248,247,245,0.5); font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s; font-family: inherit; line-height: 1;
+}
+.qa2-close:hover { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.4); color: #ef4444; }
+.qa2-header {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px;
+}
+.qa2-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: rgba(255,170,23,0.1); border: 1px solid rgba(255,170,23,0.28);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.qa2-title { font-size: 17px; font-weight: 700; color: var(--bone,#f8f7f5); letter-spacing: -0.02em; line-height: 1.2; }
+.qa2-subtitle { font-size: 11px; color: var(--bone2,rgba(248,247,245,0.5)); margin-top: 3px; }
+.qa2-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.26em; color: var(--amber,#FFAA17);
+  text-transform: uppercase; margin-bottom: 8px; margin-top: 18px;
+}
+/* Voz */
+.qa2-voice-wrap { position: relative; }
+.qa2-voice-input {
+  width: 100%; min-height: 72px; resize: vertical;
+  background: rgba(248,247,245,0.04); border: 1px solid rgba(248,247,245,0.1);
+  border-radius: 10px; padding: 12px 48px 12px 14px;
+  color: var(--bone,#f8f7f5); font-family: 'Space Grotesk','Inter',sans-serif;
+  font-size: 13px; line-height: 1.5; outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.qa2-voice-input:focus { border-color: rgba(255,170,23,0.45); }
+.qa2-voice-input::placeholder { color: rgba(248,247,245,0.3); }
+.qa2-mic-btn {
+  position: absolute; bottom: 10px; right: 10px;
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(255,170,23,0.1); border: 1px solid rgba(255,170,23,0.3);
+  color: var(--amber,#FFAA17); cursor: pointer; display: flex;
+  align-items: center; justify-content: center; transition: all 0.15s;
+  font-family: inherit;
+}
+.qa2-mic-btn:hover { background: rgba(255,170,23,0.2); }
+.qa2-mic-btn.listening {
+  background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.5); color: #ef4444;
+  animation: qa2-pulse 1s infinite;
+}
+@keyframes qa2-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)} 50%{box-shadow:0 0 0 6px rgba(239,68,68,0)} }
+.qa2-mic-badge {
+  font-size: 10px; color: rgba(239,68,68,0.8); font-style: italic;
+  margin-top: 4px; min-height: 14px;
+}
+/* Opciones */
+.qa2-option-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr));
+  gap: 7px; margin-bottom: 6px;
+}
+.qa2-option {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 11px 13px; background: rgba(248,247,245,0.03);
+  border: 1px solid rgba(248,247,245,0.08); border-radius: 8px;
+  cursor: pointer; transition: all 0.14s; text-align: left;
+  font-family: 'Space Grotesk','Inter',sans-serif; color: var(--bone,#f8f7f5);
+}
+.qa2-option:hover { background: rgba(255,170,23,0.07); border-color: rgba(255,170,23,0.3); transform: translateY(-1px); }
+.qa2-option.selected { background: rgba(255,170,23,0.12); border-color: rgba(255,170,23,0.55); }
+.qa2-option-name { font-size: 11.5px; font-weight: 700; line-height: 1.2; }
+.qa2-option-desc { font-size: 10px; color: rgba(248,247,245,0.5); line-height: 1.35; }
+/* Config row */
+.qa2-cfg { display: flex; flex-direction: column; gap: 10px; }
+.qa2-cfg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.qa2-field { display: flex; flex-direction: column; gap: 5px; }
+.qa2-field label { font-size: 10px; font-weight: 600; color: rgba(248,247,245,0.5); letter-spacing: 0.08em; text-transform: uppercase; }
+.qa2-field select, .qa2-field input[type=number], .qa2-field input[type=text] {
+  background: rgba(248,247,245,0.05); border: 1px solid rgba(248,247,245,0.1);
+  border-radius: 7px; padding: 7px 10px; color: var(--bone,#f8f7f5);
+  font-family: inherit; font-size: 12px; outline: none; transition: border-color 0.14s;
+}
+.qa2-field select:focus, .qa2-field input:focus { border-color: rgba(255,170,23,0.4); }
+.qa2-field select option { background: #12141a; }
+.qa2-check-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.qa2-check {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: rgba(248,247,245,0.7); cursor: pointer;
+  padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(248,247,245,0.1);
+  background: rgba(248,247,245,0.03); transition: all 0.12s; user-select: none;
+}
+.qa2-check:hover { border-color: rgba(255,170,23,0.3); }
+.qa2-check input { accent-color: var(--amber,#FFAA17); cursor: pointer; }
+.qa2-slider-row { display: flex; flex-direction: column; gap: 4px; }
+.qa2-slider-row label { font-size: 10px; font-weight: 600; color: rgba(248,247,245,0.5); letter-spacing: 0.08em; text-transform: uppercase; }
+.qa2-slider-wrap { display: flex; align-items: center; gap: 10px; }
+.qa2-slider { flex: 1; accent-color: var(--amber,#FFAA17); }
+.qa2-slider-val { font-size: 12px; font-weight: 700; color: var(--amber,#FFAA17); min-width: 32px; text-align: right; }
+/* Dropzone */
+.qa2-dropzone {
+  border: 1.5px dashed rgba(248,247,245,0.15); border-radius: 10px;
+  padding: 18px; text-align: center; cursor: pointer;
+  transition: all 0.15s; background: rgba(248,247,245,0.02);
+  color: rgba(248,247,245,0.4); font-size: 12px;
+}
+.qa2-dropzone:hover, .qa2-dropzone.dragover {
+  border-color: rgba(255,170,23,0.45); background: rgba(255,170,23,0.05);
+  color: rgba(248,247,245,0.7);
+}
+.qa2-previews { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.qa2-preview-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(255,170,23,0.3); }
+.qa2-file-count { font-size: 10px; color: var(--amber,#FFAA17); margin-top: 4px; min-height: 14px; }
+/* Divider & info */
+.qa2-divider { height: 1px; background: rgba(248,247,245,0.07); margin: 16px 0; }
+/* Footer */
+.qa2-footer { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+.qa2-exec-btn {
+  flex: 1; padding: 12px 20px;
+  background: var(--amber,#FFAA17); color: #070809;
+  font-size: 12px; font-weight: 800; letter-spacing: 0.08em;
+  border-radius: 8px; cursor: pointer; border: none;
+  font-family: 'Space Grotesk','Inter',sans-serif; transition: all 0.15s;
+}
+.qa2-exec-btn:hover { opacity: 0.88; box-shadow: 0 4px 16px rgba(255,170,23,0.38); }
+.qa2-exec-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.qa2-cancel-btn {
+  padding: 12px 16px; background: transparent;
+  border: 1px solid rgba(248,247,245,0.12); color: rgba(248,247,245,0.5);
+  font-size: 12px; border-radius: 8px; cursor: pointer;
+  font-family: inherit; transition: all 0.12s;
+}
+.qa2-cancel-btn:hover { border-color: rgba(255,170,23,0.4); color: var(--bone,#f8f7f5); }
+@media (max-width: 640px) {
+  .qa2-cfg-row { grid-template-columns: 1fr; }
+  .qa2-modal { padding: 20px 16px 18px; }
+}
 </style>
 <!-- Firebase Auth SDK (compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
@@ -4867,224 +5030,648 @@ body.client-mode #main { margin-left: 0 !important; }
     Admin &amp; Finanzas
   </button>
 
+  <!-- 8. Biblioteca -->
+  <a href="/biblioteca.html" class="via-qa-btn" title="Ver biblioteca de activos generados" style="text-decoration: none;">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    Biblioteca
+  </a>
+
 </div>
 
-<!-- ═══════════════════════════════════ QUICK ACTION MODALS ═══════════════════════════════════ -->
+<!-- ═══════════════════════════════════ QUICK ACTION MODALS v2 ═══════════════════════════════════ -->
 
 <!-- MODAL 1: GENERAR IMAGEN -->
-<div class="qa-overlay" id="qa-imagen" onclick="closeQAIfBackdrop(event,this)">
-  <div class="qa-modal">
-    <button class="qa-close" onclick="closeQA('qa-imagen')">✕</button>
-    <div class="qa-modal-header">
-      <div class="qa-modal-icon">
+<div class="qa2-overlay" id="qa-imagen" onclick="closeIfBackdrop(event,this)">
+  <div class="qa2-modal">
+    <button class="qa2-close" onclick="closePopup('imagen')" aria-label="Cerrar">✕</button>
+    <div class="qa2-header">
+      <div class="qa2-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       </div>
       <div>
-        <div class="qa-modal-title">Generar Imagen</div>
-        <div class="qa-modal-sub">Higgsfield · Generación con IA · Modelos top-tier</div>
+        <div class="qa2-title">Generar Imagen</div>
+        <div class="qa2-subtitle">Higgsfield · Modelos top-tier · Hasta 2048×2048</div>
       </div>
     </div>
-    <div class="qa-section-label">Tipo de imagen</div>
-    <div class="qa-option-grid">
-      <button class="qa-option" onclick="qaLaunch('higgsfield-imagen','producto')"><div class="qa-option-name">Foto Producto</div><div class="qa-option-desc">Shot limpio, fondo neutro, hero</div></button>
-      <button class="qa-option" onclick="qaLaunch('higgsfield-imagen','conceptual')"><div class="qa-option-name">Ilustración</div><div class="qa-option-desc">Arte conceptual, mood, branding</div></button>
-      <button class="qa-option" onclick="qaLaunch('higgsfield-imagen','retrato')"><div class="qa-option-name">Retrato IA</div><div class="qa-option-desc">Persona, equipo, avatar</div></button>
-      <button class="qa-option" onclick="qaLaunch('higgsfield-imagen','arquitectura')"><div class="qa-option-name">Arquitectura</div><div class="qa-option-desc">Exterior, interior, render</div></button>
+
+    <div class="qa2-label">¿Qué quieres generar? (voz o texto)</div>
+    <div class="qa2-voice-wrap">
+      <textarea class="qa2-voice-input" placeholder="Ej: 'Foto de producto de botella de tequila sobre mármol negro, iluminación cinematográfica, fondo oscuro'…" rows="3"></textarea>
+      <button class="qa2-mic-btn" onclick="startListening('imagen')" title="Hablar" aria-label="Activar micrófono">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
     </div>
-    <div class="qa-divider"></div>
-    <div class="qa-info-row"><span>Herramienta:</span><strong>Higgsfield generate_image</strong></div>
-    <div class="qa-info-row"><span>Resolución:</span><strong>1024×1024 hasta 2048×2048</strong></div>
-    <div class="qa-info-row"><span>Tiempo estimado:</span><strong>~30–90 segundos</strong></div>
-    <div class="qa-cta">
-      <button class="qa-btn-launch" onclick="qaLaunch('higgsfield-imagen','general')">Lanzar Agente Imagen</button>
-      <button class="qa-btn-cancel" onclick="closeQA('qa-imagen')">Cancelar</button>
+    <div class="qa2-mic-badge"></div>
+
+    <div class="qa2-label">Tipo de imagen</div>
+    <div class="qa2-option-grid">
+      <button class="qa2-option" data-value="producto"><div class="qa2-option-name">Foto Producto</div><div class="qa2-option-desc">Shot limpio, fondo neutro, hero</div></button>
+      <button class="qa2-option" data-value="conceptual"><div class="qa2-option-name">Ilustración</div><div class="qa2-option-desc">Arte conceptual, mood, branding</div></button>
+      <button class="qa2-option" data-value="retrato"><div class="qa2-option-name">Retrato IA</div><div class="qa2-option-desc">Persona, equipo, avatar</div></button>
+      <button class="qa2-option" data-value="arquitectura"><div class="qa2-option-name">Arquitectura</div><div class="qa2-option-desc">Exterior, interior, render</div></button>
+    </div>
+
+    <div class="qa2-label">Configuración</div>
+    <div class="qa2-cfg">
+      <div class="qa2-cfg-row">
+        <div class="qa2-field">
+          <label>Aspecto</label>
+          <select name="aspect_ratio">
+            <option value="1:1">1:1 (cuadrado)</option>
+            <option value="16:9">16:9 (landscape)</option>
+            <option value="9:16">9:16 (vertical/Reels)</option>
+            <option value="4:3">4:3 (clásico)</option>
+            <option value="3:2">3:2 (foto)</option>
+          </select>
+        </div>
+        <div class="qa2-field">
+          <label>Modelo</label>
+          <select name="modelo">
+            <option value="flux-pro">Flux Pro (calidad max)</option>
+            <option value="flux-dev">Flux Dev (rápido)</option>
+            <option value="gpt-image-2">GPT Image 2</option>
+            <option value="ideogram">Ideogram v2</option>
+          </select>
+        </div>
+      </div>
+      <div class="qa2-cfg-row">
+        <div class="qa2-field">
+          <label>Cantidad</label>
+          <select name="cantidad">
+            <option value="1">1 imagen</option>
+            <option value="2">2 variantes</option>
+            <option value="4">4 variantes</option>
+          </select>
+        </div>
+        <div class="qa2-field">
+          <label>Estilo</label>
+          <select name="estilo">
+            <option value="realista">Realista / Foto</option>
+            <option value="cinematico">Cinematográfico</option>
+            <option value="ilustracion">Ilustración digital</option>
+            <option value="3d">3D render</option>
+            <option value="luxury">Luxury dark</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="qa2-label">Imagen de referencia (opcional)</div>
+    <div class="qa2-dropzone">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:6px;opacity:0.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <div>Arrastra o haz clic para subir referencia visual</div>
+    </div>
+    <div class="qa2-previews"></div>
+    <div class="qa2-file-count"></div>
+
+    <div class="qa2-divider"></div>
+    <div class="qa2-footer">
+      <button class="qa2-exec-btn" onclick="executePopup('imagen','imagen')">Generar Imagen</button>
+      <button class="qa2-cancel-btn" onclick="closePopup('imagen')">Cancelar</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL 2: GENERAR VIDEO -->
-<div class="qa-overlay" id="qa-video" onclick="closeQAIfBackdrop(event,this)">
-  <div class="qa-modal">
-    <button class="qa-close" onclick="closeQA('qa-video')">✕</button>
-    <div class="qa-modal-header">
-      <div class="qa-modal-icon">
+<div class="qa2-overlay" id="qa-video" onclick="closeIfBackdrop(event,this)">
+  <div class="qa2-modal">
+    <button class="qa2-close" onclick="closePopup('video')" aria-label="Cerrar">✕</button>
+    <div class="qa2-header">
+      <div class="qa2-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
       </div>
       <div>
-        <div class="qa-modal-title">Generar Video</div>
-        <div class="qa-modal-sub">Higgsfield · Seedance 2.0 · Motion Design</div>
+        <div class="qa2-title">Generar Video</div>
+        <div class="qa2-subtitle">Higgsfield · Seedance 2.0 · Motion Design · Hasta 4K</div>
       </div>
     </div>
-    <div class="qa-section-label">Tipo de video</div>
-    <div class="qa-option-grid">
-      <button class="qa-option" onclick="qaLaunch('higgsfield-video','spot')"><div class="qa-option-name">Spot Comercial</div><div class="qa-option-desc">Campaña, branding, impact</div></button>
-      <button class="qa-option" onclick="qaLaunch('higgsfield-video','motion')"><div class="qa-option-name">Motion Design</div><div class="qa-option-desc">Kinetic, tipografía, VO sync</div></button>
-      <button class="qa-option" onclick="qaLaunch('higgsfield-video','social')"><div class="qa-option-name">Redes Sociales</div><div class="qa-option-desc">Reels, Stories, TikTok</div></button>
-      <button class="qa-option" onclick="qaLaunch('higgsfield-video','corporate')"><div class="qa-option-name">Corporativo</div><div class="qa-option-desc">Presentación, institutional</div></button>
+
+    <div class="qa2-label">¿Qué quieres generar? (voz o texto)</div>
+    <div class="qa2-voice-wrap">
+      <textarea class="qa2-voice-input" placeholder="Ej: 'Spot de 10 segundos de producto de lujo, movimiento de cámara lento hacia adelante, música épica, texto flotante con el nombre de la marca'…" rows="3"></textarea>
+      <button class="qa2-mic-btn" onclick="startListening('video')" title="Hablar" aria-label="Activar micrófono">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
     </div>
-    <div class="qa-divider"></div>
-    <div class="qa-info-row"><span>Herramienta:</span><strong>Higgsfield generate_video</strong></div>
-    <div class="qa-info-row"><span>Resolución:</span><strong>720p – 4K</strong></div>
-    <div class="qa-info-row"><span>Duración:</span><strong>5–30 segundos por clip</strong></div>
-    <div class="qa-cta">
-      <button class="qa-btn-launch" onclick="qaLaunch('higgsfield-video','general')">Lanzar Agente Video</button>
-      <button class="qa-btn-cancel" onclick="closeQA('qa-video')">Cancelar</button>
+    <div class="qa2-mic-badge"></div>
+
+    <div class="qa2-label">Tipo de video</div>
+    <div class="qa2-option-grid">
+      <button class="qa2-option" data-value="spot"><div class="qa2-option-name">Spot Comercial</div><div class="qa2-option-desc">Campaña, branding, impact</div></button>
+      <button class="qa2-option" data-value="motion"><div class="qa2-option-name">Motion Design</div><div class="qa2-option-desc">Kinetic, tipografía, VO sync</div></button>
+      <button class="qa2-option" data-value="social"><div class="qa2-option-name">Redes Sociales</div><div class="qa2-option-desc">Reels, Stories, TikTok</div></button>
+      <button class="qa2-option" data-value="corporate"><div class="qa2-option-name">Corporativo</div><div class="qa2-option-desc">Presentación, institutional</div></button>
+    </div>
+
+    <div class="qa2-label">Configuración</div>
+    <div class="qa2-cfg">
+      <div class="qa2-cfg-row">
+        <div class="qa2-field">
+          <label>Duración (seg)</label>
+          <select name="duracion">
+            <option value="5">5 segundos</option>
+            <option value="10" selected>10 segundos</option>
+            <option value="15">15 segundos</option>
+            <option value="30">30 segundos</option>
+          </select>
+        </div>
+        <div class="qa2-field">
+          <label>Aspecto</label>
+          <select name="aspect_ratio">
+            <option value="16:9">16:9 (landscape)</option>
+            <option value="9:16">9:16 (vertical)</option>
+            <option value="1:1">1:1 (cuadrado)</option>
+          </select>
+        </div>
+      </div>
+      <div class="qa2-cfg-row">
+        <div class="qa2-field">
+          <label>Resolución</label>
+          <select name="resolucion">
+            <option value="720p">720p (rápido)</option>
+            <option value="1080p" selected>1080p (estándar)</option>
+            <option value="4k">4K (máx calidad)</option>
+          </select>
+        </div>
+        <div class="qa2-field">
+          <label>Velocidad</label>
+          <select name="velocidad">
+            <option value="lento">Lento / Cinematico</option>
+            <option value="normal" selected>Normal</option>
+            <option value="rapido">Rápido / Dinámico</option>
+          </select>
+        </div>
+      </div>
+      <div class="qa2-check-row">
+        <label class="qa2-check"><input type="checkbox" name="extras" value="musica" checked> Música de fondo</label>
+        <label class="qa2-check"><input type="checkbox" name="extras" value="vo"> Voice Over</label>
+        <label class="qa2-check"><input type="checkbox" name="extras" value="subtitulos"> Subtítulos</label>
+        <label class="qa2-check"><input type="checkbox" name="extras" value="logo"> Logo al final</label>
+      </div>
+    </div>
+
+    <div class="qa2-label">Imagen / clip de referencia (opcional)</div>
+    <div class="qa2-dropzone">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:6px;opacity:0.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <div>Arrastra imagen/frame de referencia aquí</div>
+    </div>
+    <div class="qa2-previews"></div>
+    <div class="qa2-file-count"></div>
+
+    <div class="qa2-divider"></div>
+    <div class="qa2-footer">
+      <button class="qa2-exec-btn" onclick="executePopup('video','video')">Generar Video</button>
+      <button class="qa2-cancel-btn" onclick="closePopup('video')">Cancelar</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL 3: PRESENTACIÓN -->
-<div class="qa-overlay" id="qa-presentacion" onclick="closeQAIfBackdrop(event,this)">
-  <div class="qa-modal">
-    <button class="qa-close" onclick="closeQA('qa-presentacion')">✕</button>
-    <div class="qa-modal-header">
-      <div class="qa-modal-icon">
+<div class="qa2-overlay" id="qa-presentacion" onclick="closeIfBackdrop(event,this)">
+  <div class="qa2-modal">
+    <button class="qa2-close" onclick="closePopup('presentacion')" aria-label="Cerrar">✕</button>
+    <div class="qa2-header">
+      <div class="qa2-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
       </div>
       <div>
-        <div class="qa-modal-title">Presentación Animada</div>
-        <div class="qa-modal-sub">HyperFrames · HTML-to-Video · GSAP + Timeline</div>
+        <div class="qa2-title">Presentación Animada</div>
+        <div class="qa2-subtitle">HyperFrames · HTML-to-Video · GSAP · Timeline</div>
       </div>
     </div>
-    <div class="qa-section-label">Tipo de presentación</div>
-    <div class="qa-option-grid">
-      <button class="qa-option" onclick="qaLaunch('hyperframes','propuesta')"><div class="qa-option-name">Propuesta Comercial</div><div class="qa-option-desc">Deck cliente, pricing, CTA</div></button>
-      <button class="qa-option" onclick="qaLaunch('hyperframes','pitch')"><div class="qa-option-name">Pitch / Startup</div><div class="qa-option-desc">Problema, solución, traction</div></button>
-      <button class="qa-option" onclick="qaLaunch('hyperframes','reporte')"><div class="qa-option-name">Reporte de Resultados</div><div class="qa-option-desc">KPIs, gráficas, logros</div></button>
-      <button class="qa-option" onclick="qaLaunch('hyperframes','capacitacion')"><div class="qa-option-name">Capacitación</div><div class="qa-option-desc">Slides educativos, módulos</div></button>
+
+    <div class="qa2-label">¿Sobre qué es la presentación? (voz o texto)</div>
+    <div class="qa2-voice-wrap">
+      <textarea class="qa2-voice-input" placeholder="Ej: 'Propuesta comercial para cliente de turismo de lujo. 12 slides. Incluir pricing, casos de éxito y CTA final. Colores oscuros, tipografía elegante'…" rows="3"></textarea>
+      <button class="qa2-mic-btn" onclick="startListening('presentacion')" title="Hablar" aria-label="Activar micrófono">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
     </div>
-    <div class="qa-divider"></div>
-    <div class="qa-info-row"><span>Agente:</span><strong>HyperFrames (HTML → Video)</strong></div>
-    <div class="qa-info-row"><span>Stack:</span><strong>GSAP · CSS · Lottie · Three.js</strong></div>
-    <div class="qa-info-row"><span>Output:</span><strong>HTML animado + MP4 exportable</strong></div>
-    <div class="qa-cta">
-      <button class="qa-btn-launch" onclick="qaLaunch('hyperframes','general')">Lanzar HyperFrames</button>
-      <button class="qa-btn-cancel" onclick="closeQA('qa-presentacion')">Cancelar</button>
+    <div class="qa2-mic-badge"></div>
+
+    <div class="qa2-label">Tipo de presentación</div>
+    <div class="qa2-option-grid">
+      <button class="qa2-option" data-value="propuesta"><div class="qa2-option-name">Propuesta Comercial</div><div class="qa2-option-desc">Deck cliente, pricing, CTA</div></button>
+      <button class="qa2-option" data-value="pitch"><div class="qa2-option-name">Pitch / Startup</div><div class="qa2-option-desc">Problema, solución, traction</div></button>
+      <button class="qa2-option" data-value="reporte"><div class="qa2-option-name">Reporte Resultados</div><div class="qa2-option-desc">KPIs, gráficas, logros</div></button>
+      <button class="qa2-option" data-value="capacitacion"><div class="qa2-option-name">Capacitación</div><div class="qa2-option-desc">Slides educativos, módulos</div></button>
+    </div>
+
+    <div class="qa2-label">Configuración</div>
+    <div class="qa2-cfg">
+      <div class="qa2-cfg-row">
+        <div class="qa2-field">
+          <label>Formato</label>
+          <select name="formato">
+            <option value="16:9">16:9 Landscape</option>
+            <option value="9:16">9:16 Vertical</option>
+            <option value="1:1">1:1 Cuadrado</option>
+          </select>
+        </div>
+        <div class="qa2-field">
+          <label>Idioma</label>
+          <select name="idioma">
+            <option value="es">Español</option>
+            <option value="en">English</option>
+            <option value="es-en">Bilingüe ES/EN</option>
+          </select>
+        </div>
+      </div>
+      <div class="qa2-slider-row">
+        <label>Número de slides: <span id="slides-val">10</span></label>
+        <div class="qa2-slider-wrap">
+          <input type="range" class="qa2-slider" name="slides" min="5" max="100" value="10" step="5" oninput="document.getElementById('slides-val').textContent=this.value">
+          <span class="qa2-slider-val" id="slides-val-r">10</span>
+        </div>
+      </div>
+      <div class="qa2-cfg-row">
+        <div class="qa2-field">
+          <label>Diseño</label>
+          <select name="diseno">
+            <option value="luxury-dark">Luxury Dark</option>
+            <option value="minimal-white">Minimal White</option>
+            <option value="corporate">Corporate Blue</option>
+            <option value="bold">Bold / Impact</option>
+          </select>
+        </div>
+        <div class="qa2-field">
+          <label>Color primario</label>
+          <select name="color_primario">
+            <option value="#FFAA17">Amber (Victor IA)</option>
+            <option value="#3b82f6">Azul</option>
+            <option value="#10b981">Verde</option>
+            <option value="#ec4899">Rosa</option>
+            <option value="custom">Personalizado</option>
+          </select>
+        </div>
+      </div>
+      <div class="qa2-check-row">
+        <label class="qa2-check"><input type="checkbox" name="extras" value="animaciones" checked> Animaciones GSAP</label>
+        <label class="qa2-check"><input type="checkbox" name="extras" value="musica" checked> Música de fondo</label>
+        <label class="qa2-check"><input type="checkbox" name="extras" value="vo"> Voice Over narrado</label>
+        <label class="qa2-check"><input type="checkbox" name="extras" value="exportar-mp4"> Exportar MP4</label>
+      </div>
+    </div>
+
+    <div class="qa2-label">Logotipo / assets de marca (opcional)</div>
+    <div class="qa2-dropzone">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:6px;opacity:0.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <div>Arrastra logo, paleta o imagen de marca</div>
+    </div>
+    <div class="qa2-previews"></div>
+    <div class="qa2-file-count"></div>
+
+    <div class="qa2-divider"></div>
+    <div class="qa2-footer">
+      <button class="qa2-exec-btn" onclick="executePopup('presentacion','presentacion')">Crear Presentación</button>
+      <button class="qa2-cancel-btn" onclick="closePopup('presentacion')">Cancelar</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL 4: WEB / LANDING -->
-<div class="qa-overlay" id="qa-web" onclick="closeQAIfBackdrop(event,this)">
-  <div class="qa-modal">
-    <button class="qa-close" onclick="closeQA('qa-web')">✕</button>
-    <div class="qa-modal-header">
-      <div class="qa-modal-icon">
+<div class="qa2-overlay" id="qa-web" onclick="closeIfBackdrop(event,this)">
+  <div class="qa2-modal">
+    <button class="qa2-close" onclick="closePopup('web')" aria-label="Cerrar">✕</button>
+    <div class="qa2-header">
+      <div class="qa2-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
       </div>
       <div>
-        <div class="qa-modal-title">Web / Landing Page</div>
-        <div class="qa-modal-sub">web-4o · Three.js · R3F · Luxury Dark SaaS</div>
+        <div class="qa2-title">Web / Landing Page</div>
+        <div class="qa2-subtitle">web-4o · Three.js · R3F · Luxury Dark SaaS</div>
       </div>
     </div>
-    <div class="qa-section-label">Tipo de sitio</div>
-    <div class="qa-option-grid">
-      <button class="qa-option" onclick="qaLaunch('web-4o','landing')"><div class="qa-option-name">Landing Page</div><div class="qa-option-desc">One-page, CTA, conversión</div></button>
-      <button class="qa-option" onclick="qaLaunch('web-4o','website')"><div class="qa-option-name">Sitio Completo</div><div class="qa-option-desc">Multi-sección, navegación</div></button>
-      <button class="qa-option" onclick="qaLaunch('web-4o','saas')"><div class="qa-option-name">SaaS / App</div><div class="qa-option-desc">Dashboard, auth, pricing</div></button>
-      <button class="qa-option" onclick="qaLaunch('web-4o','portfolio')"><div class="qa-option-name">Portfolio / Brand</div><div class="qa-option-desc">Luxury, visual, storytelling</div></button>
+
+    <div class="qa2-label">¿Qué sitio necesitas? (voz o texto)</div>
+    <div class="qa2-voice-wrap">
+      <textarea class="qa2-voice-input" placeholder="Ej: 'Landing page para agencia de marketing de lujo. Sección hero con video, servicios, testimoniales, formulario de contacto. Dark luxury, tipografía Cormorant'…" rows="3"></textarea>
+      <button class="qa2-mic-btn" onclick="startListening('web')" title="Hablar" aria-label="Activar micrófono">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
     </div>
-    <div class="qa-divider"></div>
-    <div class="qa-info-row"><span>Agente:</span><strong>web-4o (Luxury Web 4.0)</strong></div>
-    <div class="qa-info-row"><span>Stack:</span><strong>Three.js · GSAP · Shadcn · Next.js</strong></div>
-    <div class="qa-info-row"><span>Deploy:</span><strong>Vercel automático</strong></div>
-    <div class="qa-cta">
-      <button class="qa-btn-launch" onclick="qaLaunch('web-4o','general')">Lanzar Agente Web</button>
-      <button class="qa-btn-cancel" onclick="closeQA('qa-web')">Cancelar</button>
+    <div class="qa2-mic-badge"></div>
+
+    <div class="qa2-label">Tipo de sitio</div>
+    <div class="qa2-option-grid">
+      <button class="qa2-option" data-value="landing"><div class="qa2-option-name">Landing Page</div><div class="qa2-option-desc">One-page, CTA, conversión</div></button>
+      <button class="qa2-option" data-value="website"><div class="qa2-option-name">Sitio Completo</div><div class="qa2-option-desc">Multi-sección, navegación</div></button>
+      <button class="qa2-option" data-value="saas"><div class="qa2-option-name">SaaS / App</div><div class="qa2-option-desc">Dashboard, auth, pricing</div></button>
+      <button class="qa2-option" data-value="portfolio"><div class="qa2-option-name">Portfolio / Brand</div><div class="qa2-option-desc">Luxury, visual, storytelling</div></button>
+    </div>
+
+    <div class="qa2-label">Configuración</div>
+    <div class="qa2-cfg">
+      <div class="qa2-cfg-row">
+        <div class="qa2-field">
+          <label>Diseño visual</label>
+          <select name="diseno">
+            <option value="luxury-dark">Luxury Dark</option>
+            <option value="minimal-white">Minimal White</option>
+            <option value="bold-color">Bold Color</option>
+            <option value="glassmorphism">Glassmorphism</option>
+          </select>
+        </div>
+        <div class="qa2-field">
+          <label>Stack técnico</label>
+          <select name="stack">
+            <option value="nextjs">Next.js + Tailwind</option>
+            <option value="html">HTML + GSAP (static)</option>
+            <option value="react">React + Vite</option>
+            <option value="astro">Astro</option>
+          </select>
+        </div>
+      </div>
+      <div class="qa2-field">
+        <label>Páginas / secciones</label>
+        <input type="text" name="paginas" placeholder="Ej: Home, Servicios, Pricing, Contacto">
+      </div>
+      <div class="qa2-check-row">
+        <label class="qa2-check"><input type="checkbox" name="features" value="responsivo" checked> Responsivo mobile</label>
+        <label class="qa2-check"><input type="checkbox" name="features" value="animaciones" checked> Animaciones GSAP</label>
+        <label class="qa2-check"><input type="checkbox" name="features" value="threejs"> Three.js / 3D</label>
+        <label class="qa2-check"><input type="checkbox" name="features" value="formulario"> Formulario contacto</label>
+        <label class="qa2-check"><input type="checkbox" name="features" value="dark-mode"> Dark/Light mode</label>
+        <label class="qa2-check"><input type="checkbox" name="features" value="vercel" checked> Deploy Vercel</label>
+      </div>
+    </div>
+
+    <div class="qa2-label">Referencia visual (screenshot, logo, branding)</div>
+    <div class="qa2-dropzone">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:6px;opacity:0.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <div>Arrastra referencia visual, logo o mockup</div>
+    </div>
+    <div class="qa2-previews"></div>
+    <div class="qa2-file-count"></div>
+
+    <div class="qa2-divider"></div>
+    <div class="qa2-footer">
+      <button class="qa2-exec-btn" onclick="executePopup('web','web')">Crear Sitio Web</button>
+      <button class="qa2-cancel-btn" onclick="closePopup('web')">Cancelar</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL 5: VOICE / SPEECH -->
-<div class="qa-overlay" id="qa-voice" onclick="closeQAIfBackdrop(event,this)">
-  <div class="qa-modal">
-    <button class="qa-close" onclick="closeQA('qa-voice')">✕</button>
-    <div class="qa-modal-header">
-      <div class="qa-modal-icon">
+<div class="qa2-overlay" id="qa-voice" onclick="closeIfBackdrop(event,this)">
+  <div class="qa2-modal">
+    <button class="qa2-close" onclick="closePopup('voice')" aria-label="Cerrar">✕</button>
+    <div class="qa2-header">
+      <div class="qa2-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
       </div>
       <div>
-        <div class="qa-modal-title">Voice / Speech</div>
-        <div class="qa-modal-sub">ElevenLabs · Voz Victor · Timestamps sincronizados</div>
+        <div class="qa2-title">Voice / Speech</div>
+        <div class="qa2-subtitle">ElevenLabs · Voz Victor · Timestamps sincronizados</div>
       </div>
     </div>
-    <div class="qa-section-label">Tipo de audio</div>
-    <div class="qa-option-grid">
-      <button class="qa-option" onclick="qaLaunch('elevenlabs','vo')"><div class="qa-option-name">Voice Over</div><div class="qa-option-desc">VO para video con timestamps</div></button>
-      <button class="qa-option" onclick="qaLaunch('elevenlabs','narration')"><div class="qa-option-name">Narración</div><div class="qa-option-desc">Podcast, curso, explicación</div></button>
-      <button class="qa-option" onclick="qaLaunch('elevenlabs','agent')"><div class="qa-option-name">Agente de Voz</div><div class="qa-option-desc">Conversacional, soporte, ventas</div></button>
-      <button class="qa-option" onclick="qaLaunch('elevenlabs','music')"><div class="qa-option-name">Música Original</div><div class="qa-option-desc">Score único por proyecto</div></button>
+
+    <div class="qa2-label">Texto a generar (dicta o escribe)</div>
+    <div class="qa2-voice-wrap">
+      <textarea class="qa2-voice-input" placeholder="Escribe el texto que quieres convertir a voz, o dicta el guion del voice over aquí. Puedes incluir instrucciones de tono: [pausa], [énfasis], (más lento)…" rows="4"></textarea>
+      <button class="qa2-mic-btn" onclick="startListening('voice')" title="Hablar" aria-label="Activar micrófono">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
     </div>
-    <div class="qa-divider"></div>
-    <div class="qa-info-row"><span>API Key:</span><strong>sk_87d5a7899d6c489c94232248c4880a0c4fe317adb3701e67</strong></div>
-    <div class="qa-info-row"><span>Voice ID Victor:</span><strong>iDEmt5MnqUotdwCIVplo</strong></div>
-    <div class="qa-info-row"><span>Agent ID:</span><strong>agent_5701kr0h5gg6eetb69tv6c5hwfj1</strong></div>
-    <div class="qa-cta">
-      <button class="qa-btn-launch" onclick="qaLaunch('elevenlabs','vo')">Lanzar ElevenLabs</button>
-      <button class="qa-btn-cancel" onclick="closeQA('qa-voice')">Cancelar</button>
+    <div class="qa2-mic-badge"></div>
+
+    <div class="qa2-label">Tipo de audio</div>
+    <div class="qa2-option-grid">
+      <button class="qa2-option" data-value="vo"><div class="qa2-option-name">Voice Over</div><div class="qa2-option-desc">VO para video con timestamps</div></button>
+      <button class="qa2-option" data-value="narration"><div class="qa2-option-name">Narración</div><div class="qa2-option-desc">Podcast, curso, explicación</div></button>
+      <button class="qa2-option" data-value="agent"><div class="qa2-option-name">Agente de Voz</div><div class="qa2-option-desc">Conversacional, soporte, ventas</div></button>
+      <button class="qa2-option" data-value="music"><div class="qa2-option-name">Música Original</div><div class="qa2-option-desc">Score único por proyecto</div></button>
+    </div>
+
+    <div class="qa2-label">Configuración</div>
+    <div class="qa2-cfg">
+      <div class="qa2-cfg-row">
+        <div class="qa2-field">
+          <label>Voz</label>
+          <select name="voz">
+            <option value="iDEmt5MnqUotdwCIVplo">Victor (voz oficial)</option>
+            <option value="custom">Otra voz</option>
+          </select>
+        </div>
+        <div class="qa2-field">
+          <label>Idioma</label>
+          <select name="idioma">
+            <option value="es-MX">Español MX</option>
+            <option value="en-US">English US</option>
+            <option value="es-ES">Español ES</option>
+            <option value="pt-BR">Português BR</option>
+          </select>
+        </div>
+      </div>
+      <div class="qa2-cfg-row">
+        <div class="qa2-field">
+          <label>Tono</label>
+          <select name="tono">
+            <option value="profesional">Profesional</option>
+            <option value="conversacional">Conversacional</option>
+            <option value="emocionante">Emocionante / Energético</option>
+            <option value="calm">Tranquilo / Narrativo</option>
+            <option value="luxury">Luxury / Sofisticado</option>
+          </select>
+        </div>
+        <div class="qa2-field">
+          <label>Acento</label>
+          <select name="acento">
+            <option value="mx">Mexicano</option>
+            <option value="neutral">Neutro Latinoamérica</option>
+            <option value="us">Americano</option>
+            <option value="es">Español España</option>
+          </select>
+        </div>
+      </div>
+      <div class="qa2-slider-row">
+        <label>Velocidad</label>
+        <div class="qa2-slider-wrap">
+          <input type="range" class="qa2-slider" name="velocidad" min="0.7" max="1.3" value="1.0" step="0.05" oninput="this.closest('.qa2-slider-wrap').querySelector('.qa2-slider-val').textContent=parseFloat(this.value).toFixed(2)+'x'">
+          <span class="qa2-slider-val">1.00x</span>
+        </div>
+      </div>
+      <div class="qa2-check-row">
+        <label class="qa2-check"><input type="checkbox" name="extras" value="timestamps" checked> Incluir timestamps por palabra</label>
+        <label class="qa2-check"><input type="checkbox" name="extras" value="ssml"> Usar SSML avanzado</label>
+      </div>
+    </div>
+
+    <div class="qa2-divider"></div>
+    <div class="qa2-footer">
+      <button class="qa2-exec-btn" onclick="executePopup('voice','voice')">Generar Audio</button>
+      <button class="qa2-cancel-btn" onclick="closePopup('voice')">Cancelar</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL 6: CAPACITACIÓN -->
-<div class="qa-overlay" id="qa-capacitacion" onclick="closeQAIfBackdrop(event,this)">
-  <div class="qa-modal">
-    <button class="qa-close" onclick="closeQA('qa-capacitacion')">✕</button>
-    <div class="qa-modal-header">
-      <div class="qa-modal-icon">
+<div class="qa2-overlay" id="qa-capacitacion" onclick="closeIfBackdrop(event,this)">
+  <div class="qa2-modal">
+    <button class="qa2-close" onclick="closePopup('capacitacion')" aria-label="Cerrar">✕</button>
+    <div class="qa2-header">
+      <div class="qa2-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
       </div>
       <div>
-        <div class="qa-modal-title">Capacitación</div>
-        <div class="qa-modal-sub">VTC · LMS · Módulos · Video Training</div>
+        <div class="qa2-title">Capacitación</div>
+        <div class="qa2-subtitle">VTC · LMS · Módulos · Video Training · ElevenLabs</div>
       </div>
     </div>
-    <div class="qa-section-label">Tipo de material</div>
-    <div class="qa-option-grid">
-      <button class="qa-option" onclick="qaLaunch('vtc','modulo')"><div class="qa-option-name">Módulo de Curso</div><div class="qa-option-desc">Slides + ejercicios + evaluación</div></button>
-      <button class="qa-option" onclick="qaLaunch('vtc','video')"><div class="qa-option-name">Video Capacitación</div><div class="qa-option-desc">HyperFrames + VO sincronizado</div></button>
-      <button class="qa-option" onclick="qaLaunch('vtc','guia')"><div class="qa-option-name">Guía Rápida</div><div class="qa-option-desc">PDF / HTML interactivo</div></button>
-      <button class="qa-option" onclick="qaLaunch('vtc','roleplay')"><div class="qa-option-name">Roleplay IA</div><div class="qa-option-desc">Agente conversacional ElevenLabs</div></button>
+
+    <div class="qa2-label">¿Qué material necesitas? (voz o texto)</div>
+    <div class="qa2-voice-wrap">
+      <textarea class="qa2-voice-input" placeholder="Ej: 'Módulo de capacitación de 45 minutos sobre técnicas de cierre en timeshare. Nivel intermedio. Incluir roleplay, ejercicios y evaluación final con calificación'…" rows="3"></textarea>
+      <button class="qa2-mic-btn" onclick="startListening('capacitacion')" title="Hablar" aria-label="Activar micrófono">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
     </div>
-    <div class="qa-divider"></div>
-    <div class="qa-info-row"><span>Agente VTC:</span><strong>agent_9501k3vkt6svekjs6y0qe5xzcek1</strong></div>
-    <div class="qa-info-row"><span>Reportes a:</span><strong>eldudemateos@gmail.com</strong></div>
-    <div class="qa-info-row"><span>Stack:</span><strong>ElevenLabs · HyperFrames · n8n</strong></div>
-    <div class="qa-cta">
-      <button class="qa-btn-launch" onclick="qaLaunch('vtc','general')">Lanzar Agente VTC</button>
-      <button class="qa-btn-cancel" onclick="closeQA('qa-capacitacion')">Cancelar</button>
+    <div class="qa2-mic-badge"></div>
+
+    <div class="qa2-label">Tipo de material</div>
+    <div class="qa2-option-grid">
+      <button class="qa2-option" data-value="modulo"><div class="qa2-option-name">Módulo de Curso</div><div class="qa2-option-desc">Slides + ejercicios + evaluación</div></button>
+      <button class="qa2-option" data-value="video"><div class="qa2-option-name">Video Capacitación</div><div class="qa2-option-desc">HyperFrames + VO sincronizado</div></button>
+      <button class="qa2-option" data-value="guia"><div class="qa2-option-name">Guía Rápida</div><div class="qa2-option-desc">PDF / HTML interactivo</div></button>
+      <button class="qa2-option" data-value="roleplay"><div class="qa2-option-name">Roleplay IA</div><div class="qa2-option-desc">Agente conversacional ElevenLabs</div></button>
+    </div>
+
+    <div class="qa2-label">Configuración</div>
+    <div class="qa2-cfg">
+      <div class="qa2-cfg-row">
+        <div class="qa2-field">
+          <label>Nivel</label>
+          <select name="nivel">
+            <option value="basico">Básico (sin experiencia)</option>
+            <option value="intermedio" selected>Intermedio</option>
+            <option value="avanzado">Avanzado</option>
+            <option value="experto">Experto / Certificación</option>
+          </select>
+        </div>
+        <div class="qa2-field">
+          <label>Idioma</label>
+          <select name="idioma">
+            <option value="es">Español</option>
+            <option value="en">English</option>
+            <option value="es-en">Bilingüe ES/EN</option>
+          </select>
+        </div>
+      </div>
+      <div class="qa2-cfg-row">
+        <div class="qa2-field">
+          <label>Duración estimada</label>
+          <select name="duracion">
+            <option value="15min">15 minutos</option>
+            <option value="30min">30 minutos</option>
+            <option value="45min" selected>45 minutos</option>
+            <option value="1h">1 hora</option>
+            <option value="2h+">2+ horas</option>
+          </select>
+        </div>
+        <div class="qa2-field">
+          <label>Público objetivo</label>
+          <select name="publico">
+            <option value="vendedores">Vendedores / OPC</option>
+            <option value="gerentes">Gerentes</option>
+            <option value="nuevos">Empleados nuevos</option>
+            <option value="clientes">Clientes finales</option>
+            <option value="todos">Todos los niveles</option>
+          </select>
+        </div>
+      </div>
+      <div class="qa2-check-row">
+        <label class="qa2-check"><input type="checkbox" name="extras" value="evaluacion" checked> Evaluación con calificación</label>
+        <label class="qa2-check"><input type="checkbox" name="extras" value="certificado"> Certificado al aprobar</label>
+        <label class="qa2-check"><input type="checkbox" name="extras" value="roleplay_ia"> Roleplay con IA</label>
+        <label class="qa2-check"><input type="checkbox" name="extras" value="reporte"> Reporte a eldudemateos</label>
+      </div>
+    </div>
+
+    <div class="qa2-label">Materiales existentes (opcional)</div>
+    <div class="qa2-dropzone">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:6px;opacity:0.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <div>Arrastra documentos, PDFs o imágenes de referencia</div>
+    </div>
+    <div class="qa2-previews"></div>
+    <div class="qa2-file-count"></div>
+
+    <div class="qa2-divider"></div>
+    <div class="qa2-footer">
+      <button class="qa2-exec-btn" onclick="executePopup('capacitacion','capacitacion')">Crear Material</button>
+      <button class="qa2-cancel-btn" onclick="closePopup('capacitacion')">Cancelar</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL 7: ADMIN & FINANZAS -->
-<div class="qa-overlay" id="qa-admin" onclick="closeQAIfBackdrop(event,this)">
-  <div class="qa-modal">
-    <button class="qa-close" onclick="closeQA('qa-admin')">✕</button>
-    <div class="qa-modal-header">
-      <div class="qa-modal-icon">
+<div class="qa2-overlay" id="qa-admin" onclick="closeIfBackdrop(event,this)">
+  <div class="qa2-modal">
+    <button class="qa2-close" onclick="closePopup('admin')" aria-label="Cerrar">✕</button>
+    <div class="qa2-header">
+      <div class="qa2-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
       </div>
       <div>
-        <div class="qa-modal-title">Admin &amp; Finanzas</div>
-        <div class="qa-modal-sub">Google Sheets · CRM · Clientes · Facturación</div>
+        <div class="qa2-title">Admin &amp; Finanzas</div>
+        <div class="qa2-subtitle">Google Sheets · CRM · Clientes · Reportes</div>
       </div>
     </div>
-    <div class="qa-section-label">Acciones rápidas</div>
-    <div class="qa-option-grid">
-      <button class="qa-option" onclick="qaLaunch('admin','finanzas')"><div class="qa-option-name">Ver Finanzas</div><div class="qa-option-desc">Ingresos, egresos, margen</div></button>
-      <button class="qa-option" onclick="qaLaunch('admin','clientes')"><div class="qa-option-name">Gestión Clientes</div><div class="qa-option-desc">Pipeline, propuestas, status</div></button>
-      <button class="qa-option" onclick="qaLaunch('admin','propuesta')"><div class="qa-option-name">Nueva Propuesta</div><div class="qa-option-desc">Deck cliente, pricing, plan</div></button>
-      <button class="qa-option" onclick="qaLaunch('admin','reporte')"><div class="qa-option-name">Reporte Semanal</div><div class="qa-option-desc">KPIs, tiempo, facturado</div></button>
+
+    <div class="qa2-label">¿Qué necesitas? (voz o texto)</div>
+    <div class="qa2-voice-wrap">
+      <textarea class="qa2-voice-input" placeholder="Ej: 'Genera reporte semanal de KPIs con comparación vs semana anterior. Incluir: ingresos, horas trabajadas, proyectos completados, tasa de conversión y forecast del mes'…" rows="3"></textarea>
+      <button class="qa2-mic-btn" onclick="startListening('admin')" title="Hablar" aria-label="Activar micrófono">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
     </div>
-    <div class="qa-divider"></div>
-    <div class="qa-info-row"><span>Google Sheet:</span><strong>Finanzas Victor IA</strong></div>
-    <div class="qa-info-row"><span>Egresos:</span><strong>$288,997 MXN</strong></div>
-    <div class="qa-info-row"><span>Por cobrar:</span><strong>$27,971 MXN</strong></div>
-    <div class="qa-cta">
-      <button class="qa-btn-launch" onclick="openFinanzasTab()">Ir a Finanzas</button>
-      <button class="qa-btn-launch" onclick="openCRMTab()" style="background:rgba(255,170,23,0.15);color:var(--amber)">Ir a CRM</button>
-      <button class="qa-btn-cancel" onclick="closeQA('qa-admin')">Cancelar</button>
+    <div class="qa2-mic-badge"></div>
+
+    <div class="qa2-label">Tipo de acción</div>
+    <div class="qa2-option-grid">
+      <button class="qa2-option" data-value="finanzas" onclick="if(typeof setTab==='function'){closeAllPopups();setTab('finanzas')}"><div class="qa2-option-name">Ver Finanzas</div><div class="qa2-option-desc">Ir a módulo de finanzas</div></button>
+      <button class="qa2-option" data-value="clientes" onclick="if(typeof setTab==='function'){closeAllPopups();setTab('crm')}"><div class="qa2-option-name">Gestión Clientes</div><div class="qa2-option-desc">Ir a CRM / Pipeline</div></button>
+      <button class="qa2-option" data-value="propuesta"><div class="qa2-option-name">Nueva Propuesta</div><div class="qa2-option-desc">Deck cliente, pricing, plan</div></button>
+      <button class="qa2-option" data-value="reporte"><div class="qa2-option-name">Reporte IA</div><div class="qa2-option-desc">KPIs, tiempo, facturado</div></button>
+    </div>
+
+    <div class="qa2-label">Configuración del reporte</div>
+    <div class="qa2-cfg">
+      <div class="qa2-cfg-row">
+        <div class="qa2-field">
+          <label>Tipo de reporte</label>
+          <select name="tipo_reporte">
+            <option value="semanal">Semanal</option>
+            <option value="mensual">Mensual</option>
+            <option value="trimestral">Trimestral</option>
+            <option value="anual">Anual</option>
+            <option value="ad-hoc">Ad hoc (personalizado)</option>
+          </select>
+        </div>
+        <div class="qa2-field">
+          <label>Formato output</label>
+          <select name="formato">
+            <option value="html">HTML interactivo</option>
+            <option value="pdf">PDF exportable</option>
+            <option value="sheets">Google Sheets</option>
+            <option value="dashboard">Dashboard visual</option>
+          </select>
+        </div>
+      </div>
+      <div class="qa2-check-row">
+        <label class="qa2-check"><input type="checkbox" name="metricas" value="ingresos" checked> Ingresos</label>
+        <label class="qa2-check"><input type="checkbox" name="metricas" value="egresos" checked> Egresos</label>
+        <label class="qa2-check"><input type="checkbox" name="metricas" value="horas" checked> Horas trabajadas</label>
+        <label class="qa2-check"><input type="checkbox" name="metricas" value="clientes" checked> Clientes activos</label>
+        <label class="qa2-check"><input type="checkbox" name="metricas" value="forecast"> Forecast / Proyección</label>
+        <label class="qa2-check"><input type="checkbox" name="metricas" value="graficos" checked> Gráficos visuales</label>
+        <label class="qa2-check"><input type="checkbox" name="metricas" value="comparacion"> Comparación período anterior</label>
+      </div>
+    </div>
+
+    <div class="qa2-divider"></div>
+    <div class="qa2-footer">
+      <button class="qa2-exec-btn" onclick="executePopup('admin','admin')">Generar Reporte</button>
+      <button class="qa2-cancel-btn" onclick="closePopup('admin')">Cancelar</button>
     </div>
   </div>
 </div>
@@ -14249,87 +14836,18 @@ function studioAttachFile(file){
 })();
 </script>
 
-<!-- ═══════════════════ QUICK ACTIONS — JS ═══════════════════ -->
+<!-- ═══════════════════ POPUPS v2 — script principal ═══════════════════ -->
+<script src="/popups.js"></script>
+<!-- Sincroniza el slider de presentación (doble binding) -->
 <script>
 (function(){
-  /* ── Abrir modal ── */
-  function openQA(id){
-    var el=document.getElementById(id);
-    if(!el) return;
-    el.classList.add('open');
-    document.body.style.overflow='hidden';
-  }
-  /* ── Cerrar modal ── */
-  function closeQA(id){
-    var el=document.getElementById(id);
-    if(!el) return;
-    el.classList.remove('open');
-    document.body.style.overflow='';
-  }
-  /* ── Cerrar al clic en backdrop ── */
-  function closeQAIfBackdrop(e,overlay){
-    if(e.target===overlay) closeQA(overlay.id);
-  }
-  /* ── Acción de lanzar agente: muestra notificación ── */
-  function qaLaunch(agente,tipo){
-    var labels={
-      'higgsfield-imagen':'Higgsfield · Generar Imagen',
-      'higgsfield-video': 'Higgsfield · Generar Video',
-      'hyperframes':      'HyperFrames · Presentación',
-      'web-4o':           'Web 4.0 · Sitio / Landing',
-      'elevenlabs':       'ElevenLabs · Voice / Speech',
-      'vtc':              'VTC · Capacitación',
-      'admin':            'Admin · ' + (tipo||'General'),
-      'dashboard':        'Dashboard · Métricas'
-    };
-    var label=labels[agente]||agente;
-    // Cerrar todos los modales abiertos
-    document.querySelectorAll('.qa-overlay.open').forEach(function(m){ m.classList.remove('open'); });
-    document.body.style.overflow='';
-    // Toast de confirmación
-    showQAToast('Agente lanzado: ' + label + (tipo&&tipo!=='general'?' — '+tipo:''));
-  }
-  /* ── Atajos especiales Admin ── */
-  function openFinanzasTab(){
-    document.querySelectorAll('.qa-overlay.open').forEach(function(m){ m.classList.remove('open'); });
-    document.body.style.overflow='';
-    if(typeof setTab==='function') setTab('finanzas');
-  }
-  function openCRMTab(){
-    document.querySelectorAll('.qa-overlay.open').forEach(function(m){ m.classList.remove('open'); });
-    document.body.style.overflow='';
-    if(typeof setTab==='function') setTab('crm');
-  }
-  /* ── Toast de notificación visual ── */
-  function showQAToast(msg){
-    var t=document.createElement('div');
-    t.style.cssText='position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:99999;background:#FFAA17;color:#070809;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:700;font-family:"Space Grotesk",sans-serif;letter-spacing:0.04em;box-shadow:0 8px 28px rgba(255,170,23,0.45);pointer-events:none;opacity:0;transition:opacity 0.2s,transform 0.2s;transform:translateX(-50%) translateY(8px)';
-    t.textContent=msg;
-    document.body.appendChild(t);
-    requestAnimationFrame(function(){
-      t.style.opacity='1';
-      t.style.transform='translateX(-50%) translateY(0)';
-    });
-    setTimeout(function(){
-      t.style.opacity='0';
-      t.style.transform='translateX(-50%) translateY(8px)';
-      setTimeout(function(){ t.remove(); },250);
-    },2800);
-  }
-  /* ── ESC para cerrar modal activo ── */
-  document.addEventListener('keydown',function(e){
-    if(e.key==='Escape'){
-      var open=document.querySelector('.qa-overlay.open');
-      if(open){ open.classList.remove('open'); document.body.style.overflow=''; }
-    }
+  var s = document.querySelector('#qa-presentacion input[name=slides]');
+  if(s) s.addEventListener('input', function(){
+    var v1 = document.getElementById('slides-val');
+    var v2 = document.getElementById('slides-val-r');
+    if(v1) v1.textContent = s.value;
+    if(v2) v2.textContent = s.value;
   });
-  /* ── Exponer globalmente ── */
-  window.openQA=openQA;
-  window.closeQA=closeQA;
-  window.closeQAIfBackdrop=closeQAIfBackdrop;
-  window.qaLaunch=qaLaunch;
-  window.openFinanzasTab=openFinanzasTab;
-  window.openCRMTab=openCRMTab;
 })();
 </script>
 </body>
