@@ -244,7 +244,7 @@ async function dispatchAdmin({ voice_input, config, jobId }) {
 ─────────────────────────────────────────────────────────────────── */
 async function notifyN8n(action, payload) {
   const webhookBase = process.env.N8N_WEBHOOK_URL ||
-    'https://n8n.srv1013903.hstgr.cloud/webhook/tracker-create';
+    'https://n8n.srv1013903.hstgr.cloud/webhook/c285fc03-6b3a-40be-b605-085e8336d492';
 
   try {
     const resp = await fetch(`${webhookBase}/${action}`, {
