@@ -176,7 +176,10 @@ body::before {
   letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600;
 }
 #topbar .spacer { flex: 1; }
-#topbar .topbar-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+/* topbar-btns ocupa el ancho disponible; las acciones a la izquierda,
+   el trío de iconos (theme/acc/ham) empujado a la derecha con margin-left:auto */
+#topbar .topbar-btns { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; }
+#topbar .topbar-btns #theme-btn { margin-left: auto; }
 #topbar .topbar-btns button {
   background: transparent;
   border: 1px solid var(--border);
@@ -190,43 +193,8 @@ body::before {
   color: var(--amber);
 }
 
-/* ── AI AGENTS BAR (top-right, dorado/accent) ── */
-#topbar .ai-agents-bar {
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-  margin-left: 8px;
-  padding-left: 12px;
-  border-left: 1px solid var(--border);
-}
-#topbar .ai-agents-bar .ai-agent-btn {
-  background: linear-gradient(130deg, #b87834 0%, #e8cc94 48%, #c9a870 100%);
-  background-size: 200%;
-  border: 1px solid transparent;
-  color: #0a0a0a;
-  padding: 8px 13px;
-  font-size: 10px; font-weight: 700;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  cursor: pointer;
-  transition: box-shadow 0.18s, transform 0.18s, background-position 0.3s;
-}
-#topbar .ai-agents-bar .ai-agent-btn:hover {
-  box-shadow: 0 4px 18px rgba(184,120,52,0.45);
-  transform: translateY(-1px);
-  background-position: 100% 0;
-}
-#topbar .ai-agents-bar .ai-agent-btn:focus-visible {
-  outline: 2px solid var(--amber); outline-offset: 2px;
-}
-@media (max-width: 640px) {
-  #topbar .ai-agents-bar {
-    order: 99; width: 100%;
-    margin-left: 0; padding-left: 0;
-    border-left: none;
-    overflow-x: auto; flex-wrap: nowrap;
-    -webkit-overflow-scrolling: touch; scrollbar-width: none;
-  }
-  #topbar .ai-agents-bar::-webkit-scrollbar { display: none; }
-  #topbar .ai-agents-bar .ai-agent-btn { flex-shrink: 0; }
-}
+/* ── AI AGENTS BAR eliminada (duplicaba #via-quick-actions). Las acciones IA
+   viven en la barra única #via-quick-actions, abajo del topbar. ── */
 
 /* ── PERIOD BAR ── */
 #period-bar {
@@ -4646,16 +4614,8 @@ body.client-mode #main { margin-left: 0 !important; }
       </svg>
     </button>
   </div>
-  <!-- spacer empuja los botones IA a la derecha -->
-  <div class="spacer"></div>
-  <!-- RIGHT: botones IA (5 únicos) -->
-  <div class="ai-agents-bar" role="group" aria-label="Agentes de IA">
-    <button class="ai-agent-btn" onclick="openAIAgent('imagen')" aria-label="Generar imagen con IA">Imagen</button>
-    <button class="ai-agent-btn" onclick="openAIAgent('video')" aria-label="Generar video con IA">Video</button>
-    <button class="ai-agent-btn" onclick="openAIAgent('presentacion')" aria-label="Generar presentación con IA">Presentación</button>
-    <button class="ai-agent-btn" onclick="openAIAgent('web')" aria-label="Diseñar web con IA">Web</button>
-    <button class="ai-agent-btn" onclick="openAIAgent('voz')" aria-label="Generar voz con IA">Voz</button>
-  </div>
+  <!-- Las acciones IA viven en la barra única #via-quick-actions (abajo del topbar).
+       Se eliminó la .ai-agents-bar duplicada para evitar botones repetidos. -->
 </div>
 
 <!-- HAMBURGER BACKDROP + PANEL -->
