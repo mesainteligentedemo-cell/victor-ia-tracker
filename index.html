@@ -193,9 +193,9 @@ body::before {
 /* ── AI AGENTS BAR (top-right, dorado/accent) ── */
 #topbar .ai-agents-bar {
   display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-  margin-right: 8px;
-  padding-right: 12px;
-  border-right: 1px solid var(--border);
+  margin-left: 8px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
 }
 #topbar .ai-agents-bar .ai-agent-btn {
   background: linear-gradient(130deg, #b87834 0%, #e8cc94 48%, #c9a870 100%);
@@ -219,8 +219,8 @@ body::before {
 @media (max-width: 640px) {
   #topbar .ai-agents-bar {
     order: 99; width: 100%;
-    margin-right: 0; padding-right: 0;
-    border-right: none;
+    margin-left: 0; padding-left: 0;
+    border-left: none;
     overflow-x: auto; flex-wrap: nowrap;
     -webkit-overflow-scrolling: touch; scrollbar-width: none;
   }
@@ -4608,14 +4608,7 @@ body.client-mode #main { margin-left: 0 !important; }
   </div>
   <span class="badge">v5.11</span>
   <span id="auto-live-indicator" class="auto-live-indicator" title="Auto-tracking activo">LIVE</span>
-  <div class="spacer"></div>
-  <div class="ai-agents-bar" role="group" aria-label="Agentes de IA">
-    <button class="ai-agent-btn" onclick="openAIAgent('imagen')" aria-label="Generar imagen con IA">Imagen</button>
-    <button class="ai-agent-btn" onclick="openAIAgent('video')" aria-label="Generar video con IA">Video</button>
-    <button class="ai-agent-btn" onclick="openAIAgent('presentacion')" aria-label="Generar presentación con IA">Presentación</button>
-    <button class="ai-agent-btn" onclick="openAIAgent('web')" aria-label="Diseñar web con IA">Web</button>
-    <button class="ai-agent-btn" onclick="openAIAgent('voz')" aria-label="Generar voz con IA">Voz</button>
-  </div>
+  <!-- LEFT: filtros y opciones -->
   <div class="topbar-btns">
     <button class="btn-primary-cta" onclick="openAdd()" aria-label="Agregar nueva entrada">+ Entrada</button>
     <button class="btn-desktop" onclick="exportCSV()" aria-label="Exportar datos como CSV">Export CSV</button>
@@ -4652,6 +4645,16 @@ body.client-mode #main { margin-left: 0 !important; }
         <line x1="13" y1="3" x2="3" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
     </button>
+  </div>
+  <!-- spacer empuja los botones IA a la derecha -->
+  <div class="spacer"></div>
+  <!-- RIGHT: botones IA (5 únicos) -->
+  <div class="ai-agents-bar" role="group" aria-label="Agentes de IA">
+    <button class="ai-agent-btn" onclick="openAIAgent('imagen')" aria-label="Generar imagen con IA">Imagen</button>
+    <button class="ai-agent-btn" onclick="openAIAgent('video')" aria-label="Generar video con IA">Video</button>
+    <button class="ai-agent-btn" onclick="openAIAgent('presentacion')" aria-label="Generar presentación con IA">Presentación</button>
+    <button class="ai-agent-btn" onclick="openAIAgent('web')" aria-label="Diseñar web con IA">Web</button>
+    <button class="ai-agent-btn" onclick="openAIAgent('voz')" aria-label="Generar voz con IA">Voz</button>
   </div>
 </div>
 
