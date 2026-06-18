@@ -165,7 +165,8 @@ body::before {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 100;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 .via-logo-wrap { display: flex; align-items: center; flex-shrink: 0; }
 #topbar .badge {
@@ -178,7 +179,7 @@ body::before {
 #topbar .spacer { flex: 1; }
 /* topbar-btns ocupa el ancho disponible; las acciones a la izquierda,
    el trío de iconos (theme/acc/ham) empujado a la derecha con margin-left:auto */
-#topbar .topbar-btns { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; }
+#topbar .topbar-btns { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; flex: 1; overflow: hidden; }
 #topbar .topbar-btns #theme-btn { margin-left: auto; }
 #topbar .topbar-btns button {
   background: transparent;
