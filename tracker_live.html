@@ -4998,6 +4998,10 @@ body.client-mode #main { margin-left: 0 !important; }
   <button class="tab-btn team-tab" onclick="setTab('apollo')">Prospección</button>
   <button class="tab-btn team-tab" onclick="setTab('telemetria')">Telemetría IoT</button>
   <button class="tab-btn" onclick="setTab('graphify')" style="color:#4ade80">Graphify · Observabilidad</button>
+  <button class="tab-btn" onclick="setTab('the-door')" style="color:#c084fc">🚪 The Door (AI Layer)</button>
+  <button class="tab-btn" onclick="setTab('loop-dashboard')" style="color:#60a5fa">🔄 Loop Dashboard</button>
+  <button class="tab-btn" onclick="setTab('context-dashboard')" style="color:#f59e0b">📊 Context</button>
+  <button class="tab-btn" onclick="setTab('cole-medin')" style="color:#14b8a6">📈 Roadmap</button>
 </div>
 
 <!-- QUICK ACTIONS PANEL — 8 acciones IA visibles (restaurado 2026-06-18) -->
@@ -5764,6 +5768,19 @@ body.client-mode #main { margin-left: 0 !important; }
     <div id="view-apollo" class="hidden"></div>
     <div id="view-telemetria" class="hidden"></div>
     <div id="view-graphify" class="hidden"></div>
+
+    <!-- THE DOOR: AI Layer Explorer -->
+    <div id="view-the-door" class="hidden"></div>
+
+    <!-- LOOP DASHBOARD: Automation State -->
+    <div id="view-loop-dashboard" class="hidden"></div>
+
+    <!-- CONTEXT DASHBOARD: Token Management -->
+    <div id="view-context-dashboard" class="hidden"></div>
+
+    <!-- COLE MEDIN: Public Roadmap + Metrics -->
+    <div id="view-cole-medin" class="hidden"></div>
+
   </div>
 </div>
 
@@ -14828,5 +14845,9 @@ function studioAttachFile(file){
   });
 })();
 </script>
+
+<!-- ═══════════════════ THE DOOR: 4 Critical Dashboards ═══════════════════ -->
+<script src="/dashboards-the-door.js"></script>
+
 </body>
 </html>
