@@ -22,36 +22,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-/* ── AUTH GUARD — localStorage-based (evita cross-origin loop) ── */
+/* ── AUTH GUARD — Firebase + localStorage (Perfect fallback) ── */
 (function(){
-  // 1. Leer auth data del hash (viene de victor-ia.xyz/login)
-  var hash = location.hash.slice(1);
-  if (hash) {
-    try {
-      var d = JSON.parse(decodeURIComponent(atob(hash)));
-      if (d && d.role) {
-        localStorage.setItem('via_access_role',    d.role);
-        localStorage.setItem('via_access_name',    d.name    || '');
-        localStorage.setItem('via_access_email',   d.email   || '');
-        localStorage.setItem('via_access_project', d.project || '');
-        history.replaceState(null, '', '/');
-      }
-    } catch(e) {}
-  }
-  // 2. Sin sesión -> sesión viewer por defecto (NUNCA dejar la pagina en blanco).
-  //    El login externo (victor-ia.xyz/login) no existe / responde 404, por lo que
-  //    redirigir ahi dejaba la pagina en blanco. En su lugar se concede acceso
-  //    de solo-lectura por defecto y la pagina siempre renderiza.
-  if (!localStorage.getItem('via_access_role')) {
-    localStorage.setItem('via_access_role',  'viewer');
-    localStorage.setItem('via_access_name',  'Invitado');
-    localStorage.setItem('via_access_email', '');
-    localStorage.setItem('via_access_project', '');
-  }
-
-  // 3. Helper que SIEMPRE restaura la visibilidad de la página.
-  //    Esto es critico: si algo falla (CDN bloqueado, firebase undefined,
-  //    error en initClientMode) la pagina NUNCA debe quedarse en blanco.
+  // Safety net: always show page after timeout
   var _shown = false;
   function revealPage(){
     if (_shown) return;
@@ -59,42 +32,59 @@
     document.documentElement.style.opacity = '1';
   }
 
-  // Ocultar mientras inicializa, pero con red de seguridad multiple.
   document.documentElement.style.opacity = '0';
   document.documentElement.style.transition = 'opacity .25s';
-
-  // Red de seguridad 1: timeout absoluto. Pase lo que pase, a los 2.5s
-  // la pagina se muestra si o si.
   setTimeout(revealPage, 2500);
-
-  // Red de seguridad 2: si cualquier error global salta, mostrar la pagina.
   window.addEventListener('error', revealPage);
 
-  // 4. Inicializar Firebase de forma defensiva (no debe romper el render).
+  // Initialize Firebase
   var cfg={apiKey:"AIzaSyBciNfVGjH5l3szzGVgatXlZvLvaoNsp14",authDomain:"victor-ia-tracker.firebaseapp.com",projectId:"victor-ia-tracker",storageBucket:"victor-ia-tracker.firebasestorage.app",messagingSenderId:"475376340371",appId:"1:475376340371:web:caaf70c5c4063edfcb6c66"};
+
   try {
     if (typeof firebase !== 'undefined' && firebase.initializeApp) {
       if (!firebase.apps.length) firebase.initializeApp(cfg);
+
+      // Real Firebase Auth
+      var auth = firebase.auth();
+      var isAuthChecked = false;
+
+      auth.onAuthStateChanged(function(user) {
+        isAuthChecked = true;
+
+        if (user) {
+          // User is logged in
+          localStorage.setItem('via_access_uid', user.uid);
+          localStorage.setItem('via_access_email', user.email);
+          localStorage.setItem('via_access_name', user.displayName || 'User');
+          localStorage.setItem('via_access_photo', user.photoURL || '');
+          localStorage.setItem('via_access_role', 'viewer'); // default, will be updated from DB
+          localStorage.setItem('via_access_authenticated', 'true');
+
+          revealPage();
+          if (typeof initClientMode === 'function') {
+            try { initClientMode(); } catch(e) { console.warn('[tracker] initClientMode error:', e); }
+          }
+        } else {
+          // Not logged in - redirect to login
+          window.location.href = '/login.html';
+        }
+      });
+
+      // Timeout if auth check takes too long
+      setTimeout(function() {
+        if (!isAuthChecked) {
+          console.warn('[tracker] Auth check timeout');
+          revealPage();
+        }
+      }, 3000);
+
     } else {
-      console.warn('[tracker] Firebase SDK no disponible — la pagina se muestra igual.');
+      console.warn('[tracker] Firebase SDK unavailable');
+      revealPage();
     }
   } catch(e) {
-    console.warn('[tracker] Error inicializando Firebase:', e);
-  }
-
-  // 5. Mostrar la pagina e inicializar la app cuando el DOM este listo.
-  function boot(){
+    console.warn('[tracker] Firebase init error:', e);
     revealPage();
-    try {
-      if (typeof initClientMode === 'function') initClientMode();
-    } catch(e) {
-      console.warn('[tracker] Error en initClientMode:', e);
-    }
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
-  } else {
-    boot();
   }
 })();
 </script>
@@ -4584,6 +4574,8 @@ body.client-mode #main { margin-left: 0 !important; }
   </div>
   <span class="badge">v5.11</span>
   <span id="auto-live-indicator" class="auto-live-indicator" title="Auto-tracking activo">LIVE</span>
+  <!-- AUTH HEADER (inyectado por tracker-auth-integration.js) -->
+  <div id="tracker-auth-header-placeholder"></div>
   <!-- LEFT: filtros y opciones -->
   <div class="topbar-btns">
     <button class="btn-primary-cta" onclick="openAdd()" aria-label="Agregar nueva entrada">+ Entrada</button>
@@ -14932,5 +14924,7 @@ function studioAttachFile(file){
   });
 })();
 </script>
+<!-- ── FIREBASE AUTH INTEGRATION ── -->
+<script src="tracker-auth-integration.js"></script>
 </body>
 </html>
