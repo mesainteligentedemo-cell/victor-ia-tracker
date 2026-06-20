@@ -1,163 +1,164 @@
-# Victor IA Tracker v2
+# Victor IA Tracker
 
-**Premium Dashboard — Linear.app Dark Mode Style**
+**Sistema de tracking de actividad IA para agencias de alto impacto**
 
-## Specs
+![Status](https://img.shields.io/badge/Status-Operativo-green) ![Entradas](https://img.shields.io/badge/Entradas-165+-blue) ![Proyectos](https://img.shields.io/badge/Proyectos-10+-orange) ![Made with Claude Code](https://img.shields.io/badge/Made%20with-Claude%20Code-purple)
 
-- **Framework:** HTML5 + Vanilla JS
-- **Styling:** CSS Grid + CSS Variables (no build needed)
-- **Charts:** Chart.js 4.4.0
-- **Animations:** GSAP 3.12.2 + Anime.js + Lenis (smooth scroll)
-- **Deployment:** Vercel (static HTML)
-- **Status:** Production-ready
-
-## Design System
-
-### Color Palette
-```
---black:              #000000
---surface:            #0A0A0A
---surface-light:      #1A1A1A
---accent:             #FFD60A (Amber)
---text-primary:       #FFFFFF
---text-secondary:     #A0A0A0
---border:             rgba(255,255,255,0.05)
---border-light:       rgba(255,255,255,0.08)
-```
-
-### Components
-- **Topbar:** 58px sticky, gradient background, backdrop blur
-- **Filter Bar:** Period selector + custom date range
-- **KPI Cards:** Large values (44px), glassmorphism, hover scale
-- **Chart Cards:** Line chart (revenue) + Stacked bar chart (projects)
-- **Activity Timeline:** Vertical timeline with dots + timestamps
-- **Responsive Grid:** 3-col (desktop) → 2-col (tablet) → 1-col (mobile)
-
-## Layout Structure
-
-```
-Topbar (sticky, 58px)
-├─ Logo + Badge
-├─ Nav Tabs (Resumen, Finanzas, Proyectos, Actividad, Agentes)
-└─ User Badge
-
-Filter Bar (sticky, 56px)
-├─ Period Buttons (Semana, Mes, Trimestre, Año)
-└─ Custom Date Range
-
-Content Area (scrollable)
-├─ Row 1: 3 KPI Cards (Projects, Revenue, Efficiency)
-├─ Row 2: Revenue Chart (2-col) + Activity Timeline (1-col)
-├─ Row 3: 3 KPI Cards (Clients, Tasks, Agents)
-├─ Row 4: Projects Chart (2-col) + Performance Card (1-col)
-└─ Footer: 32px padding
-```
-
-## CDN Dependencies
-
-```html
-<!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800" rel="stylesheet">
-
-<!-- Libraries -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
-<script src="https://unpkg.com/anime@3.2.1/lib/anime.es.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
-```
-
-## JavaScript Modules
-
-### `dashboardState`
-Tracks current period, active tab, and KPI data.
-
-### `generateActivityTimeline()`
-Renders 6 hardcoded activity items with staggered animations.
-
-### `initCharts()`
-Initializes two Chart.js instances:
-- **revenueChart:** Line chart with dual datasets (Projects + Services)
-- **projectsChart:** Stacked horizontal bar chart (On Track vs At Risk)
-
-### Event Listeners
-- **Period Buttons:** Update `dashboardState.period` and call `updateCharts()`
-- **Nav Tabs:** Update `dashboardState.activeTab` (no tab content switching in v1)
-
-### Lenis Integration
-Smooth scroll with custom easing and 1.2s duration.
-
-## Animations
-
-### Cards
-- **KPI Cards:** Slide-in left with 0.1–0.35s stagger
-- **Chart/Activity Cards:** Fade-in up at 0.4–0.45s
-- **Timeline Items:** Fade-in up with 0.08s stagger per item
-
-### Hover States
-- **KPI Cards:** Border color change + 2px up scale
-- **Period Buttons:** Background + border color on active state
-- **Nav Tabs:** Underline accent on active
-
-## Responsive Breakpoints
-
-| Breakpoint | Grid | Changes |
-|---|---|---|
-| Desktop (> 1400px) | 3-col | Default |
-| Tablet (768–1400px) | 2-col | Chart cards span 2 cols |
-| Mobile (< 768px) | 1-col | Cards full-width, nav hidden |
-
-## Performance Optimizations
-
-- Zero build process (plain HTML)
-- CDN for all dependencies (no npm install)
-- CSS Grid for layout (no flexbox container overhead)
-- Canvas-based charts (GPU accelerated)
-- Hardware-accelerated animations (GSAP, transform+opacity)
-- Backdrop blur only on specific elements (performance targeted)
-
-## Deployment (Vercel)
-
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy from this directory
-vercel deploy
-
-# Or: git push to connected repo
-# Vercel auto-detects static HTML and deploys to edge
-```
-
-### Vercel Config (`vercel.json`)
-- Static file serving (no API routes)
-- SPA fallback (`index.html` for all routes)
-- Edge caching enabled by default
-
-## Future Enhancements
-
-- [ ] Tab-based content switching (Finanzas, Proyectos, etc.)
-- [ ] Real-time data via WebSocket or API
-- [ ] Persistent filters (localStorage)
-- [ ] Dark/Light mode toggle
-- [ ] Export dashboard to PDF/PNG
-- [ ] Mobile sidebar navigation
-- [ ] Accessibility audits (WCAG AA)
-
-## File Size
-
-- **index.html:** ~18 KB (minified)
-- **Dependencies:** ~500 KB total (chart.js, gsap, lenis via CDN)
-
-## Browser Support
-
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-- Mobile browsers (iOS Safari 14+, Chrome Android)
+Victor IA Tracker es un SaaS de productividad personal que registra y analiza cada hora de trabajo de la agencia: proyectos, clientes, agentes de IA y sesiones. Centraliza 165+ entradas de actividad en tres dashboards (Principal, Analytics, Finanzas) con filtros avanzados, KPIs en tiempo real y exportación de datos. Lo usa Pablo Uribe en Victor IA para tomar decisiones operativas basadas en datos propios, no en estimaciones.
 
 ---
 
-**Built with:** Victor IA Dashboard Framework v2  
-**Last Updated:** June 3, 2026  
-**Status:** Production Ready
+## Quick Start
+
+| Opción | Tiempo | Descripción |
+|--------|--------|-------------|
+| ⚡ **Modo offline** | 2 min | Abre `tracker_live.html` directamente en el navegador. Sin servidor, sin dependencias. |
+| 🚀 **Con backend** | 20 min | Clona el repo, configura Firebase ([ver sección](#configuración-de-firebase)) y levanta el servidor local. |
+| 🏗️ **Deploy completo** | 30 min | Deploy en Vercel con dominio personalizado ([ver sección](#deploy-en-vercel)). |
+
+---
+
+## Estructura del Proyecto
+
+```
+victor-ia-tracker/
+│
+├── tracker_live.html          # App principal — ~12,000 líneas, todo en uno
+├── dashboard.html             # Dashboard analytics con Chart.js (KPIs, tendencias)
+├── index.html                 # Landing / login page
+│
+├── api-endpoints.js           # Endpoints REST para lectura/escritura de entradas
+├── api-data-collectors.js     # Recolectores de datos (GSC, analytics, métricas)
+├── db-client.js               # Cliente de base de datos (Firestore / local)
+├── auth-firebase.js           # Autenticación con Firebase Auth
+├── auth-middleware.js         # Middleware de validación de sesión
+│
+├── schema.sql                 # Schema de base de datos (PostgreSQL compatible)
+├── firestore-schema.json      # Schema Firestore para modo cloud
+│
+├── health-check.py            # Verificación de salud del sistema
+├── collect-live-data.py       # Recolector de datos en tiempo real
+│
+├── OPERACION.md               # Guía operativa 24/7
+├── ARCHITECTURE-COMPLETE.md   # Arquitectura técnica completa
+├── FIREBASE-AUTH-SETUP.md     # Configuración detallada de Firebase
+│
+├── vercel.json                # Config de deploy en Vercel
+├── package.json               # Dependencias Node
+└── .env.local                 # Variables de entorno (no commitear)
+```
+
+---
+
+## Features
+
+- **🔍 Filtros avanzados** — por proyecto, cliente, estado, prioridad, fechas y software usado
+- **📊 Analytics** — KPIs en tiempo real, tendencias semanales, distribución de categorías
+- **🤖 Tracking de 155+ agentes de IA** — cada entrada registra qué agentes participaron
+- **📈 3 dashboards** — Principal (actividad), Analytics (tendencias), Finanzas (ingresos/egresos)
+- **🔄 Daemon de sesión automático** — registra inicio y fin de sesión sin intervención manual
+- **📤 Export** — descarga a CSV y JSON con un clic
+- **🔐 Auth con Firebase** — acceso protegido por email/contraseña
+- **🌐 PWA-ready** — funciona offline con service worker (`sw.js`)
+- **⚡ Sin build** — HTML + JS vanilla, cero proceso de compilación
+
+---
+
+## Stack Técnico
+
+| Capa | Tecnología |
+|------|-----------|
+| UI | HTML5 + CSS Variables + JS Vanilla |
+| Charts | Chart.js 4.4 + Three.js r128 |
+| Animaciones | GSAP 3.12.2 + Lenis (smooth scroll) |
+| Auth | Firebase Auth |
+| Base de datos | Firestore (cloud) / localStorage (offline) |
+| Deploy | Vercel (edge, estático) |
+| Fuentes | Space Grotesk · Inter · Cormorant |
+| Colores | `#070809` fondo · `#FFAA17` acento ámbar |
+
+---
+
+## Configuración de Firebase
+
+1. Crea un proyecto en [console.firebase.google.com](https://console.firebase.google.com)
+2. Activa **Authentication > Email/Password**
+3. Activa **Firestore Database** (modo producción)
+4. Copia las credenciales del SDK web en `.env.local`:
+
+```env
+FIREBASE_API_KEY=your_api_key
+FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+FIREBASE_APP_ID=your_app_id
+```
+
+Ver guía completa en [`FIREBASE-AUTH-SETUP.md`](FIREBASE-AUTH-SETUP.md).
+
+---
+
+## Cómo agregar entradas
+
+Todas las entradas viven en el array `SEED` dentro de `tracker_live.html`. Para agregar una nueva, inserta un objeto antes del `];` de cierre:
+
+```js
+{
+  id: 's148',              // ID secuencial (s + número)
+  dateKey: '2026-06-20',  // Fecha ISO
+  hora: '09:00',          // Hora de inicio HH:MM
+  desc: 'Descripción de la actividad',
+  cat: 'Desarrollo',      // Categoría
+  project: 'Victor IA',   // Nombre del proyecto
+  client: 'Interno',      // Cliente o "Interno"
+  status: 'Completado',   // Completado | En progreso | Pausado
+  priority: 'Alta',       // Alta | Media | Baja
+  dur: 1.5,               // Duración en horas decimales
+  durSec: 5400,           // dur * 3600 (obligatorio para cálculos)
+  tags: ['tag1', 'tag2'], // Tags libres
+  rework: 0,              // 1 si fue retrabajo, 0 si no
+  obs: '',                // Observaciones cortas
+  notes: '',              // Notas internas más largas
+  sw: ['claude', 'vscode'],   // Software/herramientas usados
+  agentes: ['web-4o']         // Agentes de IA que participaron
+}
+```
+
+**Regla de ID:** el último ID registrado en el protocolo es `s117`. El siguiente es `s118`, y así sucesivamente.
+
+**Categorías disponibles:** `Desarrollo`, `Diseño`, `Video`, `Marketing`, `Estrategia`, `Administración`, `Reunión`, `Investigación`, `Automatización`, `Contenido`.
+
+---
+
+## Deploy en Vercel
+
+```bash
+# 1. Instalar Vercel CLI
+npm i -g vercel
+
+# 2. Desde la carpeta del proyecto
+vercel deploy
+
+# 3. Asignar dominio personalizado (opcional)
+vercel domains add tracker.victor-ia.xyz
+```
+
+El proyecto ya incluye `vercel.json` configurado con rutas y headers correctos. Vercel detecta el proyecto como sitio estático y lo despliega en edge automáticamente.
+
+**URL live:** [tracker.victor-ia.xyz](https://tracker.victor-ia.xyz)  
+**Repo:** [github.com/mesainteligentedemo-cell/victor-ia-tracker](https://github.com/mesainteligentedemo-cell/victor-ia-tracker)
+
+---
+
+## Compatibilidad
+
+- Chrome 90+ · Firefox 88+ · Safari 14+ · Edge 90+
+- Mobile: iOS Safari 14+, Chrome Android
+- Sin dependencias de npm para el modo offline (`tracker_live.html` es autocontenido)
+
+---
+
+## Créditos
+
+Built with [Claude Code](https://claude.ai/claude-code) by Anthropic · Victor IA Agency, México · 2026

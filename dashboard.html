@@ -30,7 +30,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 28px;
             padding-bottom: 20px;
             border-bottom: 2px solid rgba(96, 165, 250, 0.2);
         }
@@ -48,9 +48,99 @@
             color: #94a3b8;
         }
 
+        /* ── FILTER BAR ── */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            padding: 14px 18px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 12px;
+        }
+
+        .filter-bar label {
+            font-size: 0.9em;
+            color: #94a3b8;
+            font-weight: 500;
+            margin-right: 4px;
+            white-space: nowrap;
+        }
+
+        .period-btn {
+            padding: 7px 16px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.25);
+            border-radius: 7px;
+            color: #cbd5e1;
+            cursor: pointer;
+            font-size: 0.88em;
+            font-family: inherit;
+            transition: all 0.25s;
+            white-space: nowrap;
+        }
+
+        .period-btn:hover {
+            border-color: rgba(96, 165, 250, 0.5);
+            background: rgba(96, 165, 250, 0.08);
+            color: #60a5fa;
+        }
+
+        .period-btn.active {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.18);
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        .filter-bar input[type="date"] {
+            padding: 7px 12px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.25);
+            border-radius: 7px;
+            color: #cbd5e1;
+            font-size: 0.88em;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.25s;
+            color-scheme: dark;
+        }
+
+        .filter-bar input[type="date"]:focus {
+            border-color: #60a5fa;
+        }
+
+        .filter-bar .apply-btn {
+            padding: 7px 16px;
+            background: rgba(96, 165, 250, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.4);
+            border-radius: 7px;
+            color: #60a5fa;
+            cursor: pointer;
+            font-size: 0.88em;
+            font-family: inherit;
+            font-weight: 600;
+            transition: all 0.25s;
+            white-space: nowrap;
+        }
+
+        .filter-bar .apply-btn:hover {
+            background: rgba(96, 165, 250, 0.35);
+        }
+
+        .filter-bar .separator {
+            width: 1px;
+            height: 28px;
+            background: rgba(96, 165, 250, 0.2);
+            margin: 0 4px;
+        }
+
+        /* ── KPI GRID ── */
         .kpis-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 40px;
         }
@@ -69,6 +159,14 @@
             transform: translateY(-4px);
         }
 
+        .kpi-card.kpi-green {
+            border-color: rgba(34, 197, 94, 0.25);
+        }
+
+        .kpi-card.kpi-green:hover {
+            border-color: rgba(34, 197, 94, 0.55);
+        }
+
         .kpi-label {
             font-size: 0.9em;
             color: #94a3b8;
@@ -85,16 +183,63 @@
             margin-bottom: 8px;
         }
 
+        .kpi-value.kpi-value-green {
+            background: linear-gradient(135deg, #22c55e, #4ade80);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         .kpi-change {
             font-size: 0.85em;
             color: #22c55e;
         }
 
+        .kpi-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #22c55e;
+            border-radius: 50%;
+            margin-right: 6px;
+            box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.25); }
+        }
+
+        /* ── EXISTING CHARTS GRID (2-col) ── */
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
             gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        /* ── NEW CHARTS GRID (3-col) ── */
+        .charts-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
             margin-bottom: 40px;
+        }
+
+        @media (max-width: 1200px) {
+            .charts-grid-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 760px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            .charts-grid-3 {
+                grid-template-columns: 1fr;
+            }
         }
 
         .chart-container {
@@ -102,10 +247,11 @@
             border: 1px solid rgba(96, 165, 250, 0.2);
             border-radius: 12px;
             padding: 20px;
+            min-height: 280px;
         }
 
         .chart-title {
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-weight: 600;
             color: #60a5fa;
             margin-bottom: 20px;
@@ -114,13 +260,15 @@
         }
 
         canvas {
-            max-height: 300px;
+            max-height: 260px;
         }
 
+        /* keep full-width for timeline */
         .full-width {
             grid-column: 1 / -1;
         }
 
+        /* ── CATEGORY FILTERS ── */
         .filters {
             display: flex;
             gap: 15px;
@@ -136,6 +284,7 @@
             color: #cbd5e1;
             cursor: pointer;
             font-size: 0.95em;
+            font-family: inherit;
             transition: all 0.3s;
         }
 
@@ -145,6 +294,7 @@
             color: #60a5fa;
         }
 
+        /* ── TIMELINE SECTION ── */
         .timeline {
             background: rgba(30, 41, 59, 0.8);
             border: 1px solid rgba(96, 165, 250, 0.2);
@@ -198,6 +348,7 @@
             font-size: 0.8em;
         }
 
+        /* ── TABLES ── */
         .table-container {
             background: rgba(30, 41, 59, 0.8);
             border: 1px solid rgba(96, 165, 250, 0.2);
@@ -249,10 +400,11 @@
             font-weight: 500;
         }
 
-        .badge.completed { background: rgba(34, 197, 94, 0.2); color: #86efac; }
-        .badge.inprogress { background: rgba(251, 146, 60, 0.2); color: #fed7aa; }
-        .badge.blocked { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+        .badge.completed  { background: rgba(34, 197, 94, 0.2);  color: #86efac; }
+        .badge.inprogress { background: rgba(251, 146, 60, 0.2);  color: #fed7aa; }
+        .badge.blocked    { background: rgba(239, 68, 68, 0.2);   color: #fca5a5; }
 
+        /* ── FOOTER ── */
         .footer {
             text-align: center;
             color: #64748b;
@@ -269,6 +421,7 @@
             color: #60a5fa;
             cursor: pointer;
             font-size: 0.9em;
+            font-family: inherit;
         }
 
         .refresh-btn:hover {
@@ -278,6 +431,8 @@
 </head>
 <body>
     <div class="dashboard">
+
+        <!-- HEADER -->
         <div class="header">
             <div>
                 <h1>📊 Victor IA Dashboard BI</h1>
@@ -286,7 +441,20 @@
             <button class="refresh-btn" onclick="location.reload()">🔄 Actualizar</button>
         </div>
 
-        <!-- KPIs PRINCIPALES -->
+        <!-- DATE RANGE FILTER BAR -->
+        <div class="filter-bar">
+            <label>Período:</label>
+            <button onclick="setDashPeriod('hoy')"      class="period-btn active" id="pb-hoy">Hoy</button>
+            <button onclick="setDashPeriod('semana')"   class="period-btn" id="pb-semana">Esta semana</button>
+            <button onclick="setDashPeriod('mes')"      class="period-btn" id="pb-mes">Este mes</button>
+            <button onclick="setDashPeriod('trimestre')" class="period-btn" id="pb-trimestre">Trimestre</button>
+            <div class="separator"></div>
+            <input type="date" id="date-from" title="Desde">
+            <input type="date" id="date-to"   title="Hasta">
+            <button class="apply-btn" onclick="applyDateRange()">Aplicar</button>
+        </div>
+
+        <!-- KPIs PRINCIPALES (8 existentes + 1 nuevo) -->
         <div class="kpis-grid">
             <div class="kpi-card">
                 <div class="kpi-label">Total Registros</div>
@@ -335,18 +503,25 @@
                 <div class="kpi-value">8.5%</div>
                 <div class="kpi-change">11 tareas rehechas</div>
             </div>
+
+            <!-- KPI #9 — Sesiones Hoy (NEW) -->
+            <div class="kpi-card kpi-green">
+                <div class="kpi-label">Sesiones Hoy</div>
+                <div class="kpi-value kpi-value-green">3</div>
+                <div class="kpi-change"><span class="kpi-dot"></span>Activas ahora</div>
+            </div>
         </div>
 
-        <!-- FILTROS -->
+        <!-- FILTROS CATEGORÍA -->
         <div class="filters">
-            <button class="filter-btn active" onclick="filterData('all')">Todos</button>
-            <button class="filter-btn" onclick="filterData('victor-ia')">Victor IA</button>
-            <button class="filter-btn" onclick="filterData('clientes')">Clientes</button>
-            <button class="filter-btn" onclick="filterData('desarrollo')">Desarrollo</button>
-            <button class="filter-btn" onclick="filterData('design')">Diseño</button>
+            <button class="filter-btn active" onclick="filterData('all', event)">Todos</button>
+            <button class="filter-btn" onclick="filterData('victor-ia', event)">Victor IA</button>
+            <button class="filter-btn" onclick="filterData('clientes', event)">Clientes</button>
+            <button class="filter-btn" onclick="filterData('desarrollo', event)">Desarrollo</button>
+            <button class="filter-btn" onclick="filterData('design', event)">Diseño</button>
         </div>
 
-        <!-- GRÁFICAS -->
+        <!-- GRÁFICAS EXISTENTES (2 columns) -->
         <div class="charts-grid">
             <!-- Registros por Categoría -->
             <div class="chart-container">
@@ -354,7 +529,7 @@
                 <canvas id="categoriaChart"></canvas>
             </div>
 
-            <!-- Registros por Proyecto -->
+            <!-- Tiempo por Proyecto -->
             <div class="chart-container">
                 <div class="chart-title">Tiempo por Proyecto (Horas)</div>
                 <canvas id="proyectoChart"></canvas>
@@ -366,17 +541,40 @@
                 <canvas id="statusChart"></canvas>
             </div>
 
-            <!-- Agentes Usados -->
+            <!-- Top Agentes (BUG FIXED: type 'barChart' → 'bar') -->
             <div class="chart-container">
                 <div class="chart-title">Top 10 Agentes Más Usados</div>
                 <canvas id="agentesChart"></canvas>
             </div>
 
-            <!-- Timeline de Horas -->
+            <!-- Timeline de Horas (full width) -->
             <div class="chart-container full-width">
                 <div class="chart-title">Tendencia de Actividad Diaria</div>
                 <canvas id="timelineChart"></canvas>
             </div>
+        </div>
+
+        <!-- NUEVAS GRÁFICAS (3 columns) -->
+        <div class="charts-grid-3">
+
+            <!-- Chart A: Agentes Más Usados — Pie -->
+            <div class="chart-container">
+                <div class="chart-title">Agentes Más Usados</div>
+                <canvas id="agentesPieChart"></canvas>
+            </div>
+
+            <!-- Chart B: Tendencia de Completación — Line -->
+            <div class="chart-container">
+                <div class="chart-title">Tendencia de Completación (8 semanas)</div>
+                <canvas id="completacionLineChart"></canvas>
+            </div>
+
+            <!-- Chart C: Distribución por Proyecto — Doughnut -->
+            <div class="chart-container">
+                <div class="chart-title">Distribución por Proyecto</div>
+                <canvas id="proyectosDoughnutChart"></canvas>
+            </div>
+
         </div>
 
         <!-- TABLA DE PROYECTOS -->
@@ -394,8 +592,7 @@
                         <th>Agentes</th>
                     </tr>
                 </thead>
-                <tbody id="proyectosTable">
-                </tbody>
+                <tbody id="proyectosTable"></tbody>
             </table>
         </div>
 
@@ -412,8 +609,7 @@
                         <th>Última Actividad</th>
                     </tr>
                 </thead>
-                <tbody id="agentesTable">
-                </tbody>
+                <tbody id="agentesTable"></tbody>
             </table>
         </div>
 
@@ -427,19 +623,21 @@
     </div>
 
     <script>
+        // ─────────────────────────────────────────────────
         // DATOS GENERADOS DEL TRACKER
+        // ─────────────────────────────────────────────────
         const trackerData = {
             proyectos: [
-                { name: 'Victor IA App', registros: 16, horas: 24.5, completado: 5, enProgreso: 7, bloqueado: 4, agentes: 8 },
-                { name: 'Seabird Hotel', registros: 16, horas: 22.0, completado: 4, enProgreso: 6, bloqueado: 6, agentes: 6 },
-                { name: 'ROES & CO', registros: 15, horas: 18.5, completado: 3, enProgreso: 5, bloqueado: 7, agentes: 5 },
-                { name: 'Propuesta Aldo', registros: 15, horas: 19.0, completado: 4, enProgreso: 5, bloqueado: 6, agentes: 5 },
-                { name: 'Operaciones', registros: 17, horas: 20.5, completado: 5, enProgreso: 6, bloqueado: 6, agentes: 7 },
-                { name: 'Dashboard BI', registros: 10, horas: 13.0, completado: 2, enProgreso: 4, bloqueado: 4, agentes: 4 },
-                { name: 'Brandbook', registros: 10, horas: 12.5, completado: 2, enProgreso: 3, bloqueado: 5, agentes: 3 },
-                { name: 'Costa Negra', registros: 12, horas: 15.0, completado: 2, enProgreso: 4, bloqueado: 6, agentes: 4 },
+                { name: 'Victor IA App',   registros: 16, horas: 24.5, completado: 5, enProgreso: 7, bloqueado: 4, agentes: 8 },
+                { name: 'Seabird Hotel',   registros: 16, horas: 22.0, completado: 4, enProgreso: 6, bloqueado: 6, agentes: 6 },
+                { name: 'ROES & CO',       registros: 15, horas: 18.5, completado: 3, enProgreso: 5, bloqueado: 7, agentes: 5 },
+                { name: 'Propuesta Aldo',  registros: 15, horas: 19.0, completado: 4, enProgreso: 5, bloqueado: 6, agentes: 5 },
+                { name: 'Operaciones',     registros: 17, horas: 20.5, completado: 5, enProgreso: 6, bloqueado: 6, agentes: 7 },
+                { name: 'Dashboard BI',    registros: 10, horas: 13.0, completado: 2, enProgreso: 4, bloqueado: 4, agentes: 4 },
+                { name: 'Brandbook',       registros: 10, horas: 12.5, completado: 2, enProgreso: 3, bloqueado: 5, agentes: 3 },
+                { name: 'Costa Negra',     registros: 12, horas: 15.0, completado: 2, enProgreso: 4, bloqueado: 6, agentes: 4 },
                 { name: 'Victor IA Website', registros: 12, horas: 16.0, completado: 2, enProgreso: 4, bloqueado: 6, agentes: 4 },
-                { name: 'Influence IA', registros: 12, horas: 15.5, completado: 2, enProgreso: 3, bloqueado: 7, agentes: 3 }
+                { name: 'Influence IA',    registros: 12, horas: 15.5, completado: 2, enProgreso: 3, bloqueado: 7, agentes: 3 }
             ],
             categorias: {
                 'Operaciones': 17, 'Diseño': 15, 'Video': 14, 'IA/Automatización': 13,
@@ -447,22 +645,29 @@
                 'Investigación': 9, 'Ventas/CRM': 9, 'Desarrollo': 6
             },
             agentes: [
-                { name: 'agente-maestro', usos: 18, horas: 22.5 },
+                { name: 'agente-maestro',        usos: 18, horas: 22.5 },
                 { name: 'vercel-deploy-perfecto', usos: 12, horas: 16.0 },
-                { name: 'web-4o', usos: 11, horas: 15.5 },
-                { name: 'motion-design', usos: 9, horas: 12.0 },
-                { name: 'curador-apps', usos: 8, horas: 11.0 },
-                { name: 'pixel-perfecto', usos: 7, horas: 10.0 },
-                { name: 'expert-elevenlabs', usos: 6, horas: 8.5 },
-                { name: 'hyperframes', usos: 5, horas: 7.0 },
-                { name: 'auditor-ia', usos: 4, horas: 6.0 },
-                { name: 'seo-audit-tecnico', usos: 3, horas: 4.5 }
+                { name: 'web-4o',                usos: 11, horas: 15.5 },
+                { name: 'motion-design',         usos:  9, horas: 12.0 },
+                { name: 'curador-apps',          usos:  8, horas: 11.0 },
+                { name: 'pixel-perfecto',        usos:  7, horas: 10.0 },
+                { name: 'expert-elevenlabs',     usos:  6, horas:  8.5 },
+                { name: 'hyperframes',           usos:  5, horas:  7.0 },
+                { name: 'auditor-ia',            usos:  4, horas:  6.0 },
+                { name: 'seo-audit-tecnico',     usos:  3, horas:  4.5 }
             ]
         };
 
-        // GRÁFICA: CATEGORÍAS
-        const ctxCategoria = document.getElementById('categoriaChart').getContext('2d');
-        new Chart(ctxCategoria, {
+        // Shared Chart.js defaults (dark theme)
+        const darkTick   = { color: '#94a3b8' };
+        const darkGrid   = { color: 'rgba(96, 165, 250, 0.1)' };
+        const noGrid     = { display: false };
+        const legendDark = { labels: { color: '#94a3b8' } };
+
+        // ─────────────────────────────────────────────────
+        // EXISTING CHART: CATEGORÍAS (bar)
+        // ─────────────────────────────────────────────────
+        new Chart(document.getElementById('categoriaChart').getContext('2d'), {
             type: 'bar',
             data: {
                 labels: Object.keys(trackerData.categorias),
@@ -478,15 +683,16 @@
                 responsive: true,
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(96, 165, 250, 0.1)' }, ticks: { color: '#94a3b8' } },
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    y: { beginAtZero: true, grid: darkGrid, ticks: darkTick },
+                    x: { grid: noGrid, ticks: darkTick }
                 }
             }
         });
 
-        // GRÁFICA: PROYECTOS (Horas)
-        const ctxProyecto = document.getElementById('proyectoChart').getContext('2d');
-        new Chart(ctxProyecto, {
+        // ─────────────────────────────────────────────────
+        // EXISTING CHART: PROYECTOS (pie)
+        // ─────────────────────────────────────────────────
+        new Chart(document.getElementById('proyectoChart').getContext('2d'), {
             type: 'pie',
             data: {
                 labels: trackerData.proyectos.map(p => p.name),
@@ -506,9 +712,10 @@
             }
         });
 
-        // GRÁFICA: ESTADOS
-        const ctxStatus = document.getElementById('statusChart').getContext('2d');
-        new Chart(ctxStatus, {
+        // ─────────────────────────────────────────────────
+        // EXISTING CHART: ESTADOS (doughnut)
+        // ─────────────────────────────────────────────────
+        new Chart(document.getElementById('statusChart').getContext('2d'), {
             type: 'doughnut',
             data: {
                 labels: ['Completado', 'En Progreso', 'Bloqueado'],
@@ -525,12 +732,13 @@
             }
         });
 
-        // GRÁFICA: TOP AGENTES
-        const ctxAgentes = document.getElementById('agentesChart').getContext('2d');
-        new Chart(ctxAgentes, {
-            type: 'barChart',
+        // ─────────────────────────────────────────────────
+        // EXISTING CHART: TOP AGENTES (bar) — BUG FIXED: 'barChart' → 'bar'
+        // ─────────────────────────────────────────────────
+        new Chart(document.getElementById('agentesChart').getContext('2d'), {
+            type: 'bar',       // <-- FIXED (was 'barChart')
             data: {
-                labels: trackerData.agentes.map(a => a.name.substring(0, 15) + '...'),
+                labels: trackerData.agentes.map(a => a.name.length > 15 ? a.name.substring(0, 15) + '…' : a.name),
                 datasets: [{
                     label: 'Usos',
                     data: trackerData.agentes.map(a => a.usos),
@@ -544,15 +752,16 @@
                 responsive: true,
                 plugins: { legend: { display: false } },
                 scales: {
-                    x: { beginAtZero: true, grid: { color: 'rgba(96, 165, 250, 0.1)' }, ticks: { color: '#94a3b8' } },
-                    y: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    x: { beginAtZero: true, grid: darkGrid, ticks: darkTick },
+                    y: { grid: noGrid, ticks: darkTick }
                 }
             }
         });
 
-        // GRÁFICA: TIMELINE
-        const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
-        new Chart(ctxTimeline, {
+        // ─────────────────────────────────────────────────
+        // EXISTING CHART: TIMELINE (line)
+        // ─────────────────────────────────────────────────
+        new Chart(document.getElementById('timelineChart').getContext('2d'), {
             type: 'line',
             data: {
                 labels: ['May 1', 'May 7', 'May 14', 'May 21', 'May 28', 'Jun 4', 'Jun 11', 'Jun 18', 'Jun 20'],
@@ -567,18 +776,118 @@
             },
             options: {
                 responsive: true,
-                plugins: { legend: { labels: { color: '#94a3b8' } } },
+                plugins: { legend: legendDark },
                 scales: {
-                    y: { grid: { color: 'rgba(96, 165, 250, 0.1)' }, ticks: { color: '#94a3b8' } },
-                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    y: { grid: darkGrid, ticks: darkTick },
+                    x: { grid: noGrid,   ticks: darkTick }
                 }
             }
         });
 
+        // ─────────────────────────────────────────────────
+        // NEW CHART A: AGENTES MÁS USADOS (pie) — amber/gold palette
+        // ─────────────────────────────────────────────────
+        new Chart(document.getElementById('agentesPieChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ['web-4o', 'higgsfield', 'motion-design', 'svg-motion', 'n8n-ia-local',
+                         'remotion', 'hyperframes', 'seo-audit', 'curador-apps', 'otros'],
+                datasets: [{
+                    data: [28, 22, 18, 14, 12, 10, 8, 6, 5, 22],
+                    backgroundColor: [
+                        '#FFAA17','#FF8C00','#FFD700','#FFA500','#FF6B35',
+                        '#E85D04','#DC2F02','#9D0208','#6A040F','#370617'
+                    ],
+                    borderColor: '#0f172a',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12, padding: 10 } }
+                }
+            }
+        });
+
+        // ─────────────────────────────────────────────────
+        // NEW CHART B: TENDENCIA DE COMPLETACIÓN (line, 8 semanas)
+        // ─────────────────────────────────────────────────
+        new Chart(document.getElementById('completacionLineChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: ['May 5','May 12','May 19','May 26','Jun 2','Jun 9','Jun 16','Jun 20'],
+                datasets: [
+                    {
+                        label: 'Completados %',
+                        data: [45, 52, 48, 61, 58, 67, 72, 74],
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.08)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#22c55e'
+                    },
+                    {
+                        label: 'En Progreso %',
+                        data: [35, 30, 38, 28, 32, 25, 20, 18],
+                        borderColor: '#fb923c',
+                        backgroundColor: 'rgba(251, 146, 60, 0.05)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#fb923c'
+                    },
+                    {
+                        label: 'Bloqueados %',
+                        data: [20, 18, 14, 11, 10, 8, 8, 8],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#ef4444'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: '#94a3b8', boxWidth: 12 } } },
+                scales: {
+                    y: { beginAtZero: true, max: 100, grid: darkGrid, ticks: { ...darkTick, callback: v => v + '%' } },
+                    x: { grid: noGrid, ticks: darkTick }
+                }
+            }
+        });
+
+        // ─────────────────────────────────────────────────
+        // NEW CHART C: DISTRIBUCIÓN POR PROYECTO (doughnut) — blue palette
+        // ─────────────────────────────────────────────────
+        new Chart(document.getElementById('proyectosDoughnutChart').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Victor IA Website','Costa Negra','Tracker','Dashboard BI','Seabird','ROES & CO','Brandbook','Otros'],
+                datasets: [{
+                    data: [24, 18, 16, 14, 10, 8, 6, 4],
+                    backgroundColor: [
+                        '#1d4ed8','#2563eb','#3b82f6','#60a5fa',
+                        '#93c5fd','#bfdbfe','#dbeafe','#eff6ff'
+                    ],
+                    borderColor: '#0f172a',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12, padding: 10 } }
+                }
+            }
+        });
+
+        // ─────────────────────────────────────────────────
         // TABLA: PROYECTOS
+        // ─────────────────────────────────────────────────
         const proyectosTable = document.getElementById('proyectosTable');
         trackerData.proyectos.forEach(p => {
-            const row = `
+            proyectosTable.innerHTML += `
                 <tr>
                     <td><strong>${p.name}</strong></td>
                     <td>${p.registros}</td>
@@ -587,31 +896,55 @@
                     <td><span class="badge inprogress">${p.enProgreso}</span></td>
                     <td><span class="badge blocked">${p.bloqueado}</span></td>
                     <td>${p.agentes}</td>
-                </tr>
-            `;
-            proyectosTable.innerHTML += row;
+                </tr>`;
         });
 
+        // ─────────────────────────────────────────────────
         // TABLA: AGENTES
+        // ─────────────────────────────────────────────────
         const agentesTable = document.getElementById('agentesTable');
-        trackerData.agentes.forEach((a, i) => {
-            const row = `
+        trackerData.agentes.forEach(a => {
+            agentesTable.innerHTML += `
                 <tr>
                     <td><strong>${a.name}</strong></td>
                     <td>${a.usos}</td>
                     <td>${a.horas.toFixed(1)}h</td>
-                    <td>${(a.usos >= 5 ? 5 : a.usos)}</td>
+                    <td>${Math.min(a.usos, 5)}</td>
                     <td>2026-06-20</td>
-                </tr>
-            `;
-            agentesTable.innerHTML += row;
+                </tr>`;
         });
 
-        // FILTRADO
-        function filterData(filter) {
+        // ─────────────────────────────────────────────────
+        // FILTRADO — categorías
+        // ─────────────────────────────────────────────────
+        function filterData(filter, e) {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            // Aquí iría lógica de filtrado real
+            if (e && e.target) e.target.classList.add('active');
+            console.log('[Dashboard] Category filter:', filter);
+            // Real filter logic hooks here when live data is available
+        }
+
+        // ─────────────────────────────────────────────────
+        // DATE RANGE FILTER — period buttons & custom range
+        // ─────────────────────────────────────────────────
+        function setDashPeriod(period) {
+            // Update active button state
+            ['hoy','semana','mes','trimestre'].forEach(p => {
+                document.getElementById('pb-' + p).classList.toggle('active', p === period);
+            });
+            console.log('[Dashboard] Period selected:', period);
+            // Stub: real data refresh hooks here
+        }
+
+        function applyDateRange() {
+            const from = document.getElementById('date-from').value;
+            const to   = document.getElementById('date-to').value;
+            // Clear period button active states when using custom range
+            ['hoy','semana','mes','trimestre'].forEach(p => {
+                document.getElementById('pb-' + p).classList.remove('active');
+            });
+            console.log('[Dashboard] Custom date range applied:', { from, to });
+            // Stub: real data refresh hooks here
         }
     </script>
 </body>

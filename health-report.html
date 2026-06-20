@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Victor IA Tracker — Health Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #070809;
+      color: #e5e7eb;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255,170,23,0.2);
+    }
+    .header-logo {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, #FFAA17, #ff6b00);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+    .header-title { font-size: 22px; font-weight: 600; color: #fff; }
+    .header-sub   { font-size: 13px; color: #6b7280; margin-top: 2px; }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .summary-card {
+      background: #0d0f10;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .summary-card .label {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: #6b7280; margin-bottom: 8px;
+    }
+    .summary-card .value {
+      font-size: 32px; font-weight: 700;
+    }
+    .summary-card .sub {
+      font-size: 12px; color: #6b7280; margin-top: 4px;
+    }
+    .status-card {
+      background: #0d0f10;
+      border: 1px solid #22c55e44;
+      border-left: 4px solid #22c55e;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .status-icon { font-size: 32px; }
+    .status-text { font-size: 20px; font-weight: 600; color: #22c55e; }
+    .status-sub  { font-size: 13px; color: #6b7280; margin-top: 2px; }
+    .table-wrapper {
+      background: #0d0f10;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #6b7280;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    tr:last-child td { border-bottom: none !important; }
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: #374151;
+    }
+    .timestamp {
+      display: inline-block;
+      background: rgba(255,170,23,0.1);
+      color: #FFAA17;
+      border: 1px solid rgba(255,170,23,0.2);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <div class="header-logo">⚡</div>
+      <div>
+        <div class="header-title">Victor IA Tracker — Health Report</div>
+        <div class="header-sub">Diagnóstico completo del sistema de tracking</div>
+      </div>
+      <div style="margin-left:auto;">
+        <span class="timestamp">2026-06-20 14:38:18</span>
+      </div>
+    </div>
+
+    <div class="status-card">
+      <div class="status-icon">✅</div>
+      <div>
+        <div class="status-text">Sistema saludable</div>
+        <div class="status-sub">13/13 verificaciones completadas correctamente</div>
+      </div>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="label">Total checks</div>
+        <div class="value" style="color:#f0f0f0;">13</div>
+        <div class="sub">Verificaciones realizadas</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Passed</div>
+        <div class="value" style="color:#22c55e;">13</div>
+        <div class="sub">Sin errores</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Warnings</div>
+        <div class="value" style="color:#FFAA17;">0</div>
+        <div class="sub">Requieren atención</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Failed</div>
+        <div class="value" style="color:#ef4444;">0</div>
+        <div class="sub">Errores críticos</div>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:48px;"></th>
+            <th>Verificación</th>
+            <th style="width:80px;">Estado</th>
+            <th>Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+        <tr>
+          <td colspan="4" style="padding:20px 16px 8px; color:#FFAA17;
+                                  font-size:11px; font-weight:600;
+                                  letter-spacing:1.5px; text-transform:uppercase;
+                                  border-bottom:1px solid rgba(255,170,23,0.2);">
+            📁 Archivos del sistema
+          </td>
+        </tr>
+        <tr style="background:rgba(34,197,94,0.07); border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:12px 16px; text-align:center; font-size:18px;">✅</td>
+          <td style="padding:12px 16px;">
+            <span style="color:#f0f0f0; font-weight:500;">tracker_live.html (primario)</span>
+          </td>
+          <td style="padding:12px 8px; text-align:center;">
+            <span style="background:#22c55e22; color:#22c55e; border:1px solid #22c55e44;
+                         border-radius:4px; padding:2px 8px; font-size:11px;
+                         font-weight:600; letter-spacing:.5px;">PASS</span>
+          </td>
+          <td style="padding:12px 16px; color:#9ca3af; font-size:13px; font-family:monospace;">
+            Existe | 978 KB | C:\Users\inbou\.agents\tracker_live.html
+          </td>
+        </tr>
+        <tr style="background:rgba(34,197,94,0.07); border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:12px 16px; text-align:center; font-size:18px;">✅</td>
+          <td style="padding:12px 16px;">
+            <span style="color:#f0f0f0; font-weight:500;">tracker_live.html (repo local)</span>
+          </td>
+          <td style="padding:12px 8px; text-align:center;">
+            <span style="background:#22c55e22; color:#22c55e; border:1px solid #22c55e44;
+                         border-radius:4px; padding:2px 8px; font-size:11px;
+                         font-weight:600; letter-spacing:.5px;">PASS</span>
+          </td>
+          <td style="padding:12px 16px; color:#9ca3af; font-size:13px; font-family:monospace;">
+            Existe | 975 KB | C:\Users\inbou\victor-ia-tracker\tracker_live.html
+          </td>
+        </tr>
+        <tr style="background:rgba(34,197,94,0.07); border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:12px 16px; text-align:center; font-size:18px;">✅</td>
+          <td style="padding:12px 16px;">
+            <span style="color:#f0f0f0; font-weight:500;">Archivo: dashboard.html</span>
+          </td>
+          <td style="padding:12px 8px; text-align:center;">
+            <span style="background:#22c55e22; color:#22c55e; border:1px solid #22c55e44;
+                         border-radius:4px; padding:2px 8px; font-size:11px;
+                         font-weight:600; letter-spacing:.5px;">PASS</span>
+          </td>
+          <td style="padding:12px 16px; color:#9ca3af; font-size:13px; font-family:monospace;">
+            Existe | 36 KB
+          </td>
+        </tr>
+        <tr style="background:rgba(34,197,94,0.07); border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:12px 16px; text-align:center; font-size:18px;">✅</td>
+          <td style="padding:12px 16px;">
+            <span style="color:#f0f0f0; font-weight:500;">Archivo: index.html</span>
+          </td>
+          <td style="padding:12px 8px; text-align:center;">
+            <span style="background:#22c55e22; color:#22c55e; border:1px solid #22c55e44;
+                         border-radius:4px; padding:2px 8px; font-size:11px;
+                         font-weight:600; letter-spacing:.5px;">PASS</span>
+          </td>
+          <td style="padding:12px 16px; color:#9ca3af; font-size:13px; font-family:monospace;">
+            Existe | 987 KB
+          </td>
+        </tr>
+        <tr style="background:rgba(34,197,94,0.07); border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:12px 16px; text-align:center; font-size:18px;">✅</td>
+          <td style="padding:12px 16px;">
+            <span style="color:#f0f0f0; font-weight:500;">Archivo: auto-backup.py</span>
+          </td>
+          <td style="padding:12px 8px; text-align:center;">
+            <span style="background:#22c55e22; color:#22c55e; border:1px solid #22c55e44;
+                         border-radius:4px; padding:2px 8px; font-size:11px;
+                         font-weight:600; letter-spacing:.5px;">PASS</span>
+          </td>
+          <td style="padding:12px 16px; color:#9ca3af; font-size:13px; font-family:monospace;">
+            Existe | 16 KB
+          </td>
+        </tr>
+        <tr style="background:rgba(34,197,94,0.07); border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:12px 16px; text-align:center; font-size:18px;">✅</td>
+          <td style="padding:12px 16px;">
+            <span style="color:#f0f0f0; font-weight:500;">Archivo: validator.py</span>
+          </td>
+          <td style="padding:12px 8px; text-align:center;">
+            <span style="background:#22c55e22; color:#22c55e; border:1px solid #22c55e44;
+                         border-radius:4px; padding:2px 8px; font-size:11px;
+                         font-weight:600; letter-spacing:.5px;">PASS</span>
+          </td>
+          <td style="padding:12px 16px; color:#9ca3af; font-size:13px; font-family:monospace;">
+            Existe | 30 KB
+          </td>
+        </tr>
+        <tr style="background:rgba(34,197,94,0.07); border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:12px 16px; text-align:center; font-size:18px;">✅</td>
+          <td style="padding:12px 16px;">
+            <span style="color:#f0f0f0; font-weight:500;">parse_tracker.py (.agents/)</span>
+          </td>
+          <td style="padding:12px 8px; text-align:center;">
+            <span style="background:#22c55e22; color:#22c55e; border:1px solid #22c55e44;
+                         border-radius:4px; padding:2px 8px; font-size:11px;
+                         font-weight:600; letter-spacing:.5px;">PASS</span>
+          </td>
+          <td style="padding:12px 16px; color:#9ca3af; font-size:13px; font-family:monospace;">
+            Existe · C:\Users\inbou\.agents\parse_tracker.py
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4" style="padding:20px 16px 8px; color:#FFAA17;
+                                  font-size:11px; font-weight:600;
+                                  letter-spacing:1.5px; text-transform:uppercase;
+                                  border-bottom:1px solid rgba(255,170,23,0.2);">
+            📊 Integridad de datos
+          </td>
+        </tr>
+        <tr style="background:rgba(34,197,94,0.07); border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:12px 16px; text-align:center; font-size:18px;">✅</td>
+          <td style="padding:12px 16px;">
+            <span style="color:#f0f0f0; font-weight:500;">SEED array — datos presentes</span>
+          </td>
+          <td style="padding:12px 8px; text-align:center;">
+            <span style="background:#22c55e22; color:#22c55e; border:1px solid #22c55e44;
+                         border-radius:4px; padding:2px 8px; font-size:11px;
+                         font-weight:600; letter-spacing:.5px;">PASS</span>
+          </td>
+          <td style="padding:12px 16px; color:#9ca3af; font-size:13px; font-family:monospace;">
+            130 entradas | ultimo ID: s130 | rango: 2026-05-15 a 2026-07-18
+          </td>
+        </tr>
+        <tr style="background:rgba(34,197,94,0.07); border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:12px 16px; text-align:center; font-size:18px;">✅</td>
+          <td style="padding:12px 16px;">
+            <span style="color:#f0f0f0; font-weight:500;">JSON/data válido</span>
+          </td>
+          <td style="padding:12px 8px; text-align:center;">
+            <span style="background:#22c55e22; color:#22c55e; border:1px solid #22c55e44;
+                         border-radius:4px; padding:2px 8px; font-size:11px;
+                         font-weight:600; letter-spacing:.5px;">PASS</span>
+          </td>
+          <td style="padding:12px 16px; color:#9ca3af; font-size:13px; font-family:monospace;">
+            130 entradas detectadas con patrón id:sXXX
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4" style="padding:20px 16px 8px; color:#FFAA17;
+                                  font-size:11px; font-weight:600;
+                                  letter-spacing:1.5px; text-transform:uppercase;
+                                  border-bottom:1px solid rgba(255,170,23,0.2);">
+            ⚡ Runtime & Daemon
+          </td>
+        </tr>
+        <tr style="background:rgba(34,197,94,0.07); border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:12px 16px; text-align:center; font-size:18px;">✅</td>
+          <td style="padding:12px 16px;">
+            <span style="color:#f0f0f0; font-weight:500;">Python 3 disponible</span>
+          </td>
+          <td style="padding:12px 8px; text-align:center;">
+            <span style="background:#22c55e22; color:#22c55e; border:1px solid #22c55e44;
+                         border-radius:4px; padding:2px 8px; font-size:11px;
+                         font-weight:600; letter-spacing:.5px;">PASS</span>
+          </td>
+          <td style="padding:12px 16px; color:#9ca3af; font-size:13px; font-family:monospace;">
+            Python 3.13.7 (python)
+          </td>
+        </tr>
+        <tr style="background:rgba(34,197,94,0.07); border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:12px 16px; text-align:center; font-size:18px;">✅</td>
+          <td style="padding:12px 16px;">
+            <span style="color:#f0f0f0; font-weight:500;">Daemon puede iniciarse</span>
+          </td>
+          <td style="padding:12px 8px; text-align:center;">
+            <span style="background:#22c55e22; color:#22c55e; border:1px solid #22c55e44;
+                         border-radius:4px; padding:2px 8px; font-size:11px;
+                         font-weight:600; letter-spacing:.5px;">PASS</span>
+          </td>
+          <td style="padding:12px 16px; color:#9ca3af; font-size:13px; font-family:monospace;">
+            Python 3 OK + archivos de soporte presentes
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4" style="padding:20px 16px 8px; color:#FFAA17;
+                                  font-size:11px; font-weight:600;
+                                  letter-spacing:1.5px; text-transform:uppercase;
+                                  border-bottom:1px solid rgba(255,170,23,0.2);">
+            🌐 Conectividad
+          </td>
+        </tr>
+        <tr style="background:rgba(34,197,94,0.07); border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:12px 16px; text-align:center; font-size:18px;">✅</td>
+          <td style="padding:12px 16px;">
+            <span style="color:#f0f0f0; font-weight:500;">GitHub repo accesible</span>
+          </td>
+          <td style="padding:12px 8px; text-align:center;">
+            <span style="background:#22c55e22; color:#22c55e; border:1px solid #22c55e44;
+                         border-radius:4px; padding:2px 8px; font-size:11px;
+                         font-weight:600; letter-spacing:.5px;">PASS</span>
+          </td>
+          <td style="padding:12px 16px; color:#9ca3af; font-size:13px; font-family:monospace;">
+            https://github.com/mesainteligentedemo-cell/victor-ia-tracker → HTTP 200
+          </td>
+        </tr>
+        <tr style="background:rgba(34,197,94,0.07); border-bottom:1px solid rgba(255,255,255,0.04);">
+          <td style="padding:12px 16px; text-align:center; font-size:18px;">✅</td>
+          <td style="padding:12px 16px;">
+            <span style="color:#f0f0f0; font-weight:500;">tracker.victor-ia.xyz (live)</span>
+          </td>
+          <td style="padding:12px 8px; text-align:center;">
+            <span style="background:#22c55e22; color:#22c55e; border:1px solid #22c55e44;
+                         border-radius:4px; padding:2px 8px; font-size:11px;
+                         font-weight:600; letter-spacing:.5px;">PASS</span>
+          </td>
+          <td style="padding:12px 16px; color:#9ca3af; font-size:13px; font-family:monospace;">
+            https://tracker.victor-ia.xyz → HTTP 200
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer" style="margin-top:32px;">
+      <p style="color:#374151;">
+        Generado por <strong style="color:#FFAA17;">health-check.py</strong> · Victor IA Tracker System
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>
