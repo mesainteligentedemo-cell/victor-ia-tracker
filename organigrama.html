@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Victor IA — Organigrama 155 Agentes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1a1f35 100%);
+            color: #e2e8f0;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .cadena-mando {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .cadena-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #60a5fa;
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+        }
+
+        .flow-box {
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.2), rgba(167, 139, 250, 0.2));
+            border: 2px solid rgba(96, 165, 250, 0.3);
+            padding: 15px 20px;
+            border-radius: 8px;
+            white-space: nowrap;
+            font-size: 0.95em;
+            font-weight: 500;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .flow-arrow {
+            color: #60a5fa;
+            font-size: 1.5em;
+            flex-shrink: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9em;
+        }
+
+        .categorias-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .categoria-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.15);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .categoria-card:hover {
+            border-color: rgba(96, 165, 250, 0.4);
+            background: rgba(30, 41, 59, 0.95);
+            transform: translateY(-4px);
+        }
+
+        .categoria-header {
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.2), rgba(167, 139, 250, 0.1));
+            padding: 20px;
+            border-bottom: 1px solid rgba(96, 165, 250, 0.2);
+        }
+
+        .categoria-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .categoria-nombre {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 5px;
+        }
+
+        .categoria-count {
+            font-size: 0.9em;
+            color: #94a3b8;
+        }
+
+        .categoria-body {
+            padding: 20px;
+        }
+
+        .agente-item {
+            padding: 10px;
+            margin: 8px 0;
+            background: rgba(96, 165, 250, 0.1);
+            border-left: 3px solid #60a5fa;
+            border-radius: 4px;
+            font-size: 0.9em;
+            word-break: break-word;
+        }
+
+        .agente-item:hover {
+            background: rgba(96, 165, 250, 0.2);
+            padding-left: 12px;
+            transition: all 0.2s;
+        }
+
+        .categoria-keywords {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(96, 165, 250, 0.1);
+            font-size: 0.85em;
+            color: #94a3b8;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            background: rgba(167, 139, 250, 0.2);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 4px 4px 4px 0;
+            font-size: 0.8em;
+        }
+
+        .directores-section {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #60a5fa;
+            border-bottom: 2px solid rgba(96, 165, 250, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .directores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .director-card {
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(167, 139, 250, 0.05));
+            border: 2px solid rgba(96, 165, 250, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .director-role {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 8px;
+        }
+
+        .director-skill {
+            font-size: 0.95em;
+            color: #cbd5e1;
+            margin-bottom: 10px;
+        }
+
+        .director-responsabilidades {
+            font-size: 0.85em;
+            color: #94a3b8;
+            list-style: none;
+        }
+
+        .director-responsabilidades li {
+            padding: 4px 0;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .director-responsabilidades li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #60a5fa;
+        }
+
+        .footer {
+            text-align: center;
+            color: #64748b;
+            margin-top: 60px;
+            padding: 30px;
+            border-top: 1px solid rgba(96, 165, 250, 0.1);
+        }
+
+        .footer-note {
+            font-size: 0.9em;
+            margin: 10px 0;
+        }
+
+        .sync-badge {
+            display: inline-block;
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.5);
+            color: #86efac;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin: 5px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+
+        .tab.active {
+            background: rgba(96, 165, 250, 0.3);
+            border-color: rgba(96, 165, 250, 0.5);
+            color: #60a5fa;
+        }
+
+        .tab:hover {
+            border-color: rgba(96, 165, 250, 0.3);
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏢 Victor IA — Organigrama</h1>
+        <p class="subtitle">155 Agentes / Skills Organizados por Especialidad</p>
+
+        <!-- CADENA DE MANDO -->
+        <div class="cadena-mando">
+            <div class="cadena-title">📊 Cadena de Mando (Flujo de Trabajo)</div>
+            <div class="flow-diagram">
+                <div class="flow-box">👤 Usuario</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">💬 Intérprete<br/>Prompts</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">🤖 Gerente IA<br/>(Orquestación)</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">👔 Directores<br/>(16 Roles)</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">⚙️ Skills<br/>Especializados<br/>(155 Agentes)</div>
+            </div>
+        </div>
+
+        <!-- ESTADÍSTICAS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total de Agentes</div>
+                <div class="stat-number">155</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Categorías</div>
+                <div class="stat-number">27</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Directores (C-Level)</div>
+                <div class="stat-number">16</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Agentes Únicos en Tracker</div>
+                <div class="stat-number">10</div>
+                <div class="stat-label" style="color: #fbbf24; margin-top: 5px;">7.7% en uso actualmente</div>
+            </div>
+        </div>
+
+        <!-- TABS DE VISTA -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchView('directores')">👔 Directores (16)</div>
+            <div class="tab" onclick="switchView('categorias')">📚 Todas las Categorías (155)</div>
+            <div class="tab" onclick="switchView('matriz')">🎯 Matriz de Decisión</div>
+        </div>
+
+        <!-- VISTA: DIRECTORES C-LEVEL -->
+        <div id="directores" class="view-section active">
+            <div class="directores-section">
+                <div class="section-title">👔 16 Directores C-Level</div>
+                <div class="directores-grid">
+                    <div class="director-card">
+                        <div class="director-role">🎯 Director General (CEO)</div>
+                        <div class="director-skill">/director-general</div>
+                        <ul class="director-responsabilidades">
+                            <li>Estrategia global</li>
+                            <li>Decisiones C-level</li>
+                            <li>Visión empresa</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">💻 Director Tecnología (CTO)</div>
+                        <div class="director-skill">/director-tecnologia</div>
+                        <ul class="director-responsabilidades">
+                            <li>Tech stack</li>
+                            <li>Arquitectura</li>
+                            <li>Infraestructura</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">🎨 Director Creativo (CCO)</div>
+                        <div class="director-skill">/director-creativo</div>
+                        <ul class="director-responsabilidades">
+                            <li>Diseño visual</li>
+                            <li>Marca</li>
+                            <li>Campaña creativa</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">📢 Director Marketing (CMO)</div>
+                        <div class="director-skill">/director-marketing</div>
+                        <ul class="director-responsabilidades">
+                            <li>Estrategia marketing</li>
+                            <li>Growth</li>
+                            <li>Campaña</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">🧑 Director Personas (CPO)</div>
+                        <div class="director-skill">/director-personas</div>
+                        <ul class="director-responsabilidades">
+                            <li>RRHH</li>
+                            <li>Talento</li>
+                            <li>Cultura</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">📊 Director Datos & Growth (CDO)</div>
+                        <div class="director-skill">/director-datos-crecimiento</div>
+                        <ul class="director-responsabilidades">
+                            <li>Analytics</li>
+                            <li>Metrics</li>
+                            <li>Forecasting</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">💰 Director Ventas (CSO)</div>
+                        <div class="director-skill">/director-ventas</div>
+                        <ul class="director-responsabilidades">
+                            <li>Pipeline</li>
+                            <li>Deals</li>
+                            <li>Revenue</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">😊 Director Clientes (CXO)</div>
+                        <div class="director-skill">/director-clientes</div>
+                        <ul class="director-responsabilidades">
+                            <li>Satisfacción</li>
+                            <li>Onboarding</li>
+                            <li>Retention</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">⚖️ Director Administrativo (CFO)</div>
+                        <div class="director-skill">/director-administrativo</div>
+                        <ul class="director-responsabilidades">
+                            <li>Finanzas</li>
+                            <li>Legal</li>
+                            <li>Compliance</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">💡 Director Innovación</div>
+                        <div class="director-skill">/director-innovacion</div>
+                        <ul class="director-responsabilidades">
+                            <li>Nuevas tech</li>
+                            <li>Experimentación</li>
+                            <li>R&D</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">🔐 Director Ciberseguridad (CISO)</div>
+                        <div class="director-skill">/director-ciberseguridad</div>
+                        <ul class="director-responsabilidades">
+                            <li>Seguridad</li>
+                            <li>Compliance</li>
+                            <li>Auditoría</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">✅ Director Calidad (CQO)</div>
+                        <div class="director-skill">/director-calidad</div>
+                        <ul class="director-responsabilidades">
+                            <li>QA</li>
+                            <li>Tests</li>
+                            <li>Estándares</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">🔍 Auditor IA</div>
+                        <div class="director-skill">/auditor-ia</div>
+                        <ul class="director-responsabilidades">
+                            <li>Auditoría interna</li>
+                            <li>Compliance</li>
+                            <li>Riesgos</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">🎛️ Gerente IA</div>
+                        <div class="director-skill">/gerente-ia</div>
+                        <ul class="director-responsabilidades">
+                            <li>Orquestación</li>
+                            <li>Workflows</li>
+                            <li>Ejecución</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">🧠 Director Deep Learning</div>
+                        <div class="director-skill">/director-deep-learning</div>
+                        <ul class="director-responsabilidades">
+                            <li>Aprendizaje</li>
+                            <li>Innovación</li>
+                            <li>Mejora continua</li>
+                        </ul>
+                    </div>
+
+                    <div class="director-card">
+                        <div class="director-role">💬 Intérprete Prompts</div>
+                        <div class="director-skill">/interprete-prompts</div>
+                        <ul class="director-responsabilidades">
+                            <li>Desambiguación</li>
+                            <li>Clarificación</li>
+                            <li>NLP</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA: TODAS LAS CATEGORÍAS -->
+        <div id="categorias" class="view-section">
+            <div class="categorias-grid" id="categoriasGrid"></div>
+        </div>
+
+        <!-- VISTA: MATRIZ DE DECISIÓN -->
+        <div id="matriz" class="view-section">
+            <div class="directores-section">
+                <div class="section-title">🎯 Matriz de Decisión — Cuándo Usar Cada Agente</div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; color: #cbd5e1; font-size: 0.9em;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid rgba(96, 165, 250, 0.3); color: #60a5fa;">
+                                <th style="text-align: left; padding: 12px;">Necesidad del Usuario</th>
+                                <th style="text-align: left; padding: 12px;">Director Responsable</th>
+                                <th style="text-align: left; padding: 12px;">Agentes Especializados</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
+                                <td style="padding: 12px;">Crear sitio web / landing</td>
+                                <td style="padding: 12px;">🎨 CCO / 💻 CTO</td>
+                                <td style="padding: 12px;">web-4o, vercel-deploy-perfecto, pixel-perfecto</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
+                                <td style="padding: 12px;">Generar video / animación</td>
+                                <td style="padding: 12px;">🎨 CCO</td>
+                                <td style="padding: 12px;">motion-design, hyperframes, remotion, higgsfield-supercomputer</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
+                                <td style="padding: 12px;">Auditoría SEO / contenido</td>
+                                <td style="padding: 12px;">📢 CMO</td>
+                                <td style="padding: 12px;">seo-audit-tecnico, copy-quiet-luxury</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
+                                <td style="padding: 12px;">Automatización n8n / workflow</td>
+                                <td style="padding: 12px;">💻 CTO</td>
+                                <td style="padding: 12px;">automatizacion-n8n, n8n-ia-local, fingerprint-scrapper</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
+                                <td style="padding: 12px;">Generar imágenes / visuales</td>
+                                <td style="padding: 12px;">🎨 CCO</td>
+                                <td style="padding: 12px;">higgsfield-supercomputer, expert-midjourney</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
+                                <td style="padding: 12px;">Voice over / música</td>
+                                <td style="padding: 12px;">🎨 CCO</td>
+                                <td style="padding: 12px;">expert-elevenlabs, ingeniero-audio, compositor-musica</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
+                                <td style="padding: 12px;">Desarrollo frontend / React</td>
+                                <td style="padding: 12px;">💻 CTO</td>
+                                <td style="padding: 12px;">frontend-architect, expert-framer-motion, expert-gsap</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
+                                <td style="padding: 12px;">Auditoría seguridad</td>
+                                <td style="padding: 12px;">🔐 CISO</td>
+                                <td style="padding: 12px;">backend-architect, auth-hardening, api-security (+ 35 más)</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(96, 165, 250, 0.1);">
+                                <td style="padding: 12px;">CRM / leads / HubSpot</td>
+                                <td style="padding: 12px;">💰 CSO</td>
+                                <td style="padding: 12px;">workflows-leads-emails, expert-ghl, expert-airtable</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px;">Análisis datos / BI</td>
+                                <td style="padding: 12px;">📊 CDO</td>
+                                <td style="padding: 12px;">director-datos-crecimiento, dashboard-empresa</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SINCRONIZACIÓN CON TRACKER -->
+        <div class="directores-section" style="margin-top: 40px;">
+            <div class="section-title">🔄 Sincronización con Tracker</div>
+            <p style="color: #cbd5e1; margin-bottom: 15px;">
+                Cada agente usado en una tarea se registra automáticamente en el tracker con los 155 agentes disponibles.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); padding: 15px; border-radius: 8px;">
+                    <div style="color: #60a5fa; font-weight: 600; margin-bottom: 8px;">📊 Tracker Status</div>
+                    <div style="font-size: 0.9em; color: #94a3b8;">✅ 57 registros con agentes mapeados</div>
+                    <div style="font-size: 0.9em; color: #94a3b8;">✅ 112 agentes asignados</div>
+                    <div style="font-size: 0.9em; color: #94a3b8;">✅ 10 agentes únicos en uso</div>
+                </div>
+                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); padding: 15px; border-radius: 8px;">
+                    <div style="color: #60a5fa; font-weight: 600; margin-bottom: 8px;">🎯 Próximas Fases</div>
+                    <div style="font-size: 0.9em; color: #94a3b8;">• Completar 130 registros históricos</div>
+                    <div style="font-size: 0.9em; color: #94a3b8;">• Ampliar cobertura de 155 agentes</div>
+                    <div style="font-size: 0.9em; color: #94a3b8;">• Dashboard de analytics</div>
+                </div>
+                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); padding: 15px; border-radius: 8px;">
+                    <div style="color: #60a5fa; font-weight: 600; margin-bottom: 8px;">🔗 URLs</div>
+                    <div style="font-size: 0.9em; color: #94a3b8;">Tracker: tracker.victor-ia.xyz</div>
+                    <div style="font-size: 0.9em; color: #94a3b8;">Organigrama: aquí (esta página)</div>
+                    <div style="font-size: 0.9em; color: #94a3b8;">Dashboard: en construcción</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <div class="footer-note"><strong>155 Agentes / Skills</strong> integrados en la estructura organizacional de Victor IA</div>
+            <div class="footer-note">Actualizado: 2026-06-19</div>
+            <div class="footer-note" style="margin-top: 20px;">
+                <span class="sync-badge">✅ Tracker Sincronizado</span>
+                <span class="sync-badge">🎯 155 Agentes Mapeados</span>
+                <span class="sync-badge">📊 Cadena de Mando Activa</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de categorías (155 agentes)
+        const categorias = [
+            {
+                icon: "🤖",
+                nombre: "Agente Maestro",
+                count: 17,
+                keywords: ["estrategia", "decisión", "ceo", "liderazgo"],
+                agentes: [
+                    "director-general", "director-tecnologia", "director-creativo",
+                    "director-marketing", "director-personas", "director-datos-crecimiento",
+                    "director-ventas", "director-clientes", "director-administrativo",
+                    "director-innovacion", "director-ciberseguridad", "director-calidad",
+                    "auditor-ia", "gerente-ia", "director-deep-learning",
+                    "agente-memoria", "interprete-prompts"
+                ]
+            },
+            {
+                icon: "⚙️",
+                nombre: "Automatización",
+                count: 5,
+                keywords: ["automatización", "workflow", "n8n", "integración"],
+                agentes: [
+                    "automatizacion-n8n", "expert-n8n-avanzado", "fingerprint-scrapper",
+                    "n8n-ia-local", "youtube-transcript"
+                ]
+            },
+            {
+                icon: "🎨",
+                nombre: "Diseño & Interfaces",
+                count: 6,
+                keywords: ["diseño", "ui/ux", "figma", "interfaz"],
+                agentes: [
+                    "curador-apps", "coach-premios-web", "director-influence-ia",
+                    "diseno-experiencia-usuario", "expert-canva-pro", "codigo-interfaces-glm"
+                ]
+            },
+            {
+                icon: "👨‍💻",
+                nombre: "Dev & Código",
+                count: 8,
+                keywords: ["desarrollo", "código", "frontend", "backend"],
+                agentes: [
+                    "superpowers", "codex-openrouter", "curador-codex",
+                    "expert-framer-motion", "expert-gsap", "frontend-architect",
+                    "system-architect", "rendimiento-vscode"
+                ]
+            },
+            {
+                icon: "📺",
+                nombre: "Producción Creativa",
+                count: 15,
+                keywords: ["video", "imagen", "audio", "generativo"],
+                agentes: [
+                    "higgsfield-supercomputer", "expert-higgsfield", "expert-elevenlabs",
+                    "expert-runway", "expert-midjourney", "expert-ltx-studio",
+                    "expert-seedance", "adobe-suite-completo", "editor-after-effects",
+                    "editor-premiere-pro", "editor-capcut", "compositor-musica",
+                    "ingeniero-audio", "hacer-cine", "sketches-peliculas"
+                ]
+            },
+            {
+                icon: "🌐",
+                nombre: "Sitios & Publicación",
+                count: 4,
+                keywords: ["web", "sitio", "landing", "vercel"],
+                agentes: [
+                    "sitio-claude-design", "sitio-con-codigo", "publicar-vercel-github",
+                    "scraper-web-completo"
+                ]
+            },
+            {
+                icon: "✍️",
+                nombre: "Copy & Marketing",
+                count: 2,
+                keywords: ["copy", "redacción", "marketing"],
+                agentes: [
+                    "copy-quiet-luxury", "copy-web-pnl"
+                ]
+            },
+            {
+                icon: "🎬",
+                nombre: "Video & Medios",
+                count: 6,
+                keywords: ["video", "frame", "animación"],
+                agentes: [
+                    "hyperframes", "remotion", "scroll-cinematic",
+                    "video-sitio-scroll", "prompts-video-loop", "frames-inicio-fin"
+                ]
+            },
+            {
+                icon: "🎮",
+                nombre: "Videojuegos & 3D",
+                count: 4,
+                keywords: ["3d", "r3f", "juego", "ar"],
+                agentes: [
+                    "expert-r3f-threejs", "modelos-3d", "realidad-aumentada",
+                    "videojuegos-desarrollo"
+                ]
+            },
+            {
+                icon: "📊",
+                nombre: "HubSpot & CRM",
+                count: 6,
+                keywords: ["hubspot", "crm", "leads"],
+                agentes: [
+                    "workflows-leads-emails", "landings-hubspot", "expert-ghl",
+                    "expert-airtable", "expert-blotato", "whatsapp-hubspot"
+                ]
+            },
+            {
+                icon: "🏠",
+                nombre: "Inmobiliaria",
+                count: 11,
+                keywords: ["propiedad", "broker", "qr"],
+                agentes: [
+                    "agente-califica-leads", "analisis-mercado-roi", "app-brokers-campo",
+                    "dashboard-kpis-ventas", "fotos-propiedades-pro", "genera-pdfs-brochures",
+                    "inventario-base-datos", "legal-fideicomiso-mexico", "seguridad-aml-datos",
+                    "seo-luxury-qr", "tests-evals-sistema"
+                ]
+            },
+            {
+                icon: "🔐",
+                nombre: "Seguridad (38 skills)",
+                count: 38,
+                keywords: ["seguridad", "autenticación", "hardening"],
+                agentes: [
+                    "backend-architect", "auth-hardening", "api-security",
+                    "postgresql-hardening", "vps-hardening", "cloudflare-hardening",
+                    "docker-container-security", "kubernetes-security", "nextjs-security",
+                    "wordpress-hardening", "ios-security", "file-upload-security",
+                    "backup-disaster-recovery", "github-actions-security", "codebase-audit",
+                    "dependency-supply-chain", "llm-coding-failure-modes", "message-bus-security",
+                    "log-strategy", "llm-app-security", "prompt-injection-defense",
+                    "mcp-security", "stripe-webhook-security", "email-deliverability-security",
+                    "payload-cms-security", "gdpr-technical-controls", "dach-compliance",
+                    "incident-response", "honeypot-tarpits", "qa-engineering",
+                    "site-server-audit", "distributed-system-audit", "agent-client-security",
+                    "ai-agent-guardrails", "cryptography", "zero-trust-architecture",
+                    "penetration-testing", "compliance-monitoring"
+                ]
+            },
+            {
+                icon: "💻",
+                nombre: "IT & Tecnología",
+                count: 5,
+                keywords: ["infraestructura", "devops", "iot"],
+                agentes: [
+                    "ollama-cliente-setup", "openrouter-cliente", "groq-api-setup",
+                    "it-infraestructura", "telemetria-iot"
+                ]
+            },
+            {
+                icon: "🎓",
+                nombre: "Liderazgo",
+                count: 3,
+                keywords: ["liderazgo", "dirección", "management"],
+                agentes: [
+                    "director-proyecto", "gerente-general", "subgerente"
+                ]
+            },
+            {
+                icon: "🧠",
+                nombre: "Neurociencias",
+                count: 1,
+                keywords: ["neurociencia", "cognición"],
+                agentes: [
+                    "neurociencias-cognitivas"
+                ]
+            },
+            {
+                icon: "💼",
+                nombre: "Negocios & Estrategia",
+                count: 1,
+                keywords: ["negocio", "estrategia"],
+                agentes: [
+                    "estrategia-negocio"
+                ]
+            },
+            {
+                icon: "📈",
+                nombre: "Ventas & Marketing Sectorial",
+                count: 13,
+                keywords: ["venta", "mentor", "comercial"],
+                agentes: [
+                    "timeshare-mentor", "vtc-capacitacion", "agente-viajes",
+                    "agente-inmobiliario", "agente-automotriz", "agente-educacion",
+                    "agente-tecnologia", "agente-moda", "agente-turismo",
+                    "agente-finanzas", "agente-salud", "agente-construccion",
+                    "agente-eventos"
+                ]
+            },
+            {
+                icon: "📚",
+                nombre: "SEO & Contenido",
+                count: 1,
+                keywords: ["seo", "contenido"],
+                agentes: [
+                    "seo-audit-tecnico"
+                ]
+            },
+            {
+                icon: "🎯",
+                nombre: "Diseño Especializado",
+                count: 5,
+                keywords: ["diseño", "svg", "accesibilidad"],
+                agentes: [
+                    "pixel-perfecto", "svg-motion", "brain-tracker-ux",
+                    "skill-inclusivo", "web-assets-deploy"
+                ]
+            },
+            {
+                icon: "🏭",
+                nombre: "Fábrica de Contenido",
+                count: 1,
+                keywords: ["contenido", "factory"],
+                agentes: [
+                    "higgsfield-content-factory"
+                ]
+            },
+            {
+                icon: "🚀",
+                nombre: "Vercel Deploy",
+                count: 1,
+                keywords: ["vercel", "deploy"],
+                agentes: [
+                    "vercel-deploy-perfecto"
+                ]
+            },
+            {
+                icon: "🌐",
+                nombre: "Web 4.0",
+                count: 1,
+                keywords: ["web", "r3f"],
+                agentes: [
+                    "web-4o"
+                ]
+            },
+            {
+                icon: "✨",
+                nombre: "Motion Design",
+                count: 1,
+                keywords: ["motion", "campaña"],
+                agentes: [
+                    "motion-design"
+                ]
+            }
+        ];
+
+        // Renderizar categorías
+        function renderCategorias() {
+            const grid = document.getElementById('categoriasGrid');
+            grid.innerHTML = categorias.map(cat => `
+                <div class="categoria-card">
+                    <div class="categoria-header">
+                        <div class="categoria-icon">${cat.icon}</div>
+                        <div class="categoria-nombre">${cat.nombre}</div>
+                        <div class="categoria-count">${cat.count} agentes</div>
+                    </div>
+                    <div class="categoria-body">
+                        ${cat.agentes.map(a => `<div class="agente-item">${a}</div>`).join('')}
+                        <div class="categoria-keywords">
+                            <strong>Keywords:</strong><br/>
+                            ${cat.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Cambiar vista
+        function switchView(viewName) {
+            // Ocultar todas las vistas
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+            // Mostrar vista seleccionada
+            document.getElementById(viewName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Renderizar categorías si es necesario
+            if (viewName === 'categorias' && !document.getElementById('categoriasGrid').innerHTML) {
+                renderCategorias();
+            }
+        }
+
+        // Inicializar
+        renderCategorias();
+    </script>
+</body>
+</html>
