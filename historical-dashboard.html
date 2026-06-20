@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>THE DOOR - Historical Analytics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #070809;
+      --surface: #0E0F12;
+      --amber: #FFAA17;
+      --bone: #F8F7F5;
+      --bone2: rgba(248,247,245,0.65);
+      --green: #4ade80;
+      --border: rgba(248,247,245,0.07);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #FFFFFF;
+        --surface: #F9FAFB;
+        --bone: #070809;
+        --bone2: rgba(7,8,9,0.65);
+        --border: rgba(0,0,0,0.08);
+      }
+    }
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--bone);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { font-size: 28px; margin-bottom: 8px; color: var(--amber); }
+    .subtitle { font-size: 12px; color: var(--bone2); margin-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 20px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 20px;
+    }
+    .card h3 {
+      font-size: 12px;
+      color: var(--amber);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 16px;
+    }
+    .chart-container { position: relative; height: 300px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .kpi-card {
+      background: rgba(255,170,23,0.05);
+      border: 1px solid rgba(255,170,23,0.15);
+      border-radius: 4px;
+      padding: 16px;
+    }
+    .kpi-label { font-size: 10px; color: var(--bone2); text-transform: uppercase; margin-bottom: 8px; }
+    .kpi-value { font-size: 24px; font-weight: 600; color: var(--amber); }
+    .kpi-sub { font-size: 11px; color: var(--bone2); margin-top: 4px; }
+    .prediction {
+      background: rgba(236,72,153,0.05);
+      border-left: 3px solid #ec4899;
+      padding: 12px;
+      border-radius: 2px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--bone2);
+      margin-top: 12px;
+    }
+    .loading { text-align: center; padding: 40px; color: var(--bone2); }
+    .error { color: #f87171; padding: 12px; background: rgba(248, 113, 113, 0.1); border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📈 Historical Analytics & Predictions</h1>
+    <p class="subtitle">Phase 6: Trend analysis, ML predictions, and long-term monitoring</p>
+
+    <div id="content" class="loading">Loading analytics...</div>
+  </div>
+
+  <script>
+    async function initAnalytics() {
+      // Wait for historical analytics to load
+      if (!window.HistoricalAnalytics) {
+        setTimeout(initAnalytics, 500);
+        return;
+      }
+
+      const analytics = window.HistoricalAnalytics;
+
+      // Get data
+      const loopsTrends7d = analytics.getLoopsTrends(7);
+      const contextTrends7d = analytics.getContextTrends(7);
+      const projectsTrends30d = analytics.getProjectsTrends(30);
+      const alertsSummary = analytics.getAlertsSummary(7);
+      const statsData = analytics.getStatistics();
+
+      // Predictions
+      const tokenPrediction = analytics.predictTokenBudgetDepletion();
+      const loopsHealth = analytics.predictLoopsHealth();
+
+      const html = `
+        <div class="grid">
+          <!-- Loops Trends Chart -->
+          <div class="card">
+            <h3>Loop Health Trends (7 days)</h3>
+            <div class="chart-container">
+              <canvas id="loopsChart"></canvas>
+            </div>
+            ${loopsHealth ? `
+              <div class="prediction">
+                <strong>Prediction:</strong> ${loopsHealth.prediction.toUpperCase()}<br>
+                Current: ${loopsHealth.currentRate}% | Avg: ${loopsHealth.avgSuccessRate}%<br>
+                Trend: ${loopsHealth.trend}
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Token Budget Chart -->
+          <div class="card">
+            <h3>Token Usage Trend (7 days)</h3>
+            <div class="chart-container">
+              <canvas id="contextChart"></canvas>
+            </div>
+            ${tokenPrediction ? `
+              <div class="prediction">
+                <strong>Budget Depletion:</strong><br>
+                Days Remaining: ${tokenPrediction.daysRemaining.toFixed(1)}<br>
+                Current Rate: ${tokenPrediction.currentRate}<br>
+                Confidence: ${tokenPrediction.confidence}
+              </div>
+            ` : '<div class="prediction">Need more data for predictions...</div>'}
+          </div>
+
+          <!-- Projects Chart -->
+          <div class="card">
+            <h3>Projects Progress (30 days)</h3>
+            <div class="chart-container">
+              <canvas id="projectsChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Alerts Summary -->
+          <div class="card">
+            <h3>Alerts Summary (7 days)</h3>
+            <div class="kpi-grid">
+              <div class="kpi-card">
+                <div class="kpi-label">Critical</div>
+                <div class="kpi-value" style="color: #f87171">${alertsSummary.bySeverity.critical}</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Warnings</div>
+                <div class="kpi-value" style="color: #f59e0b">${alertsSummary.bySeverity.warning}</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Total Alerts</div>
+                <div class="kpi-value">${alertsSummary.totalAlerts}</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Avg/Day</div>
+                <div class="kpi-value">${alertsSummary.avgAlertsPerDay}</div>
+              </div>
+            </div>
+            <div class="prediction">
+              Trend: ${alertsSummary.trend.toUpperCase()}<br>
+              Most common: ${Object.entries(alertsSummary.byType).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'}
+            </div>
+          </div>
+
+          <!-- Storage Stats -->
+          <div class="card">
+            <h3>Data Storage & Stats</h3>
+            <div class="kpi-grid">
+              <div class="kpi-card">
+                <div class="kpi-label">Loops Records</div>
+                <div class="kpi-value">${statsData.loopsRecords}</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Context Records</div>
+                <div class="kpi-value">${statsData.contextRecords}</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Storage Size</div>
+                <div class="kpi-value" style="font-size: 16px">${(statsData.storageSize / 1024).toFixed(1)} KB</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-label">Max Retention</div>
+                <div class="kpi-value" style="font-size: 12px">90 days</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('content').innerHTML = html;
+
+      // Initialize charts
+      if (loopsTrends7d.datasets[0].data.length > 0) {
+        new Chart(document.getElementById('loopsChart'), {
+          type: 'line',
+          data: loopsTrends7d,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: true }, filler: { propagate: true } },
+            scales: { y: { min: 0, max: 100 } }
+          }
+        });
+      }
+
+      if (contextTrends7d.datasets[0].data.length > 0) {
+        new Chart(document.getElementById('contextChart'), {
+          type: 'line',
+          data: contextTrends7d,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: true } },
+            scales: { y: { min: 0, max: 100 } }
+          }
+        });
+      }
+
+      if (projectsTrends30d.datasets[0].data.length > 0) {
+        new Chart(document.getElementById('projectsChart'), {
+          type: 'line',
+          data: projectsTrends30d,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: true } }
+          }
+        });
+      }
+    }
+
+    // Load historical analytics script first
+    const script = document.createElement('script');
+    script.src = '/historical-analytics.js';
+    script.onload = initAnalytics;
+    document.head.appendChild(script);
+  </script>
+</body>
+</html>
