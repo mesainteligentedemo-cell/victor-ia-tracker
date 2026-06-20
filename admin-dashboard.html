@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ADMIN PANEL — THE DOOR</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #070809;
+      --surface: #0E0F12;
+      --amber: #FFAA17;
+      --bone: #F8F7F5;
+      --bone2: rgba(248,247,245,0.65);
+      --green: #4ade80;
+      --red: #f87171;
+      --border: rgba(248,247,245,0.07);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #FFFFFF;
+        --surface: #F9FAFB;
+        --bone: #070809;
+        --bone2: rgba(7,8,9,0.65);
+        --border: rgba(0,0,0,0.08);
+      }
+    }
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--bone);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { font-size: 28px; margin-bottom: 8px; color: var(--amber); }
+    .subtitle { font-size: 12px; color: var(--bone2); margin-bottom: 24px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .tab-btn {
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      color: var(--bone2);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      color: var(--amber);
+      border-bottom-color: var(--amber);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px;
+    }
+    .stat-value { font-size: 24px; font-weight: 600; color: var(--amber); }
+    .stat-label { font-size: 11px; color: var(--bone2); text-transform: uppercase; }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .table th {
+      background: rgba(255,170,23,0.05);
+      padding: 12px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--amber);
+      font-weight: 600;
+    }
+    .table td {
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .table tr:hover { background: rgba(255,170,23,0.02); }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 2px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-admin { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+    .badge-editor { background: rgba(59,130,246,0.1); color: #3b82f6; }
+    .badge-viewer { background: rgba(107,114,128,0.1); color: #6b7280; }
+    .badge-active { background: rgba(74,222,128,0.1); color: var(--green); }
+    .badge-inactive { background: rgba(248,113,113,0.1); color: var(--red); }
+    .btn {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--bone);
+      border-radius: 2px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(255,170,23,0.1); border-color: var(--amber); }
+    .btn-primary {
+      background: var(--amber);
+      color: var(--bg);
+      border-color: var(--amber);
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-danger { color: var(--red); border-color: var(--red); }
+    .btn-danger:hover { background: rgba(248,113,113,0.1); }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 11px; text-transform: uppercase; color: var(--amber); margin-bottom: 4px; }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--bone);
+      border-radius: 2px;
+      font-size: 12px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-close {
+      float: right;
+      cursor: pointer;
+      font-size: 24px;
+      color: var(--bone2);
+    }
+    .success { color: var(--green); }
+    .error { color: var(--red); }
+    .loading { opacity: 0.5; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 ADMIN PANEL — User Management</h1>
+    <p class="subtitle">Manage users, roles, and permissions for THE DOOR system</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('users')">👥 Users</button>
+      <button class="tab-btn" onclick="switchTab('invite')">📧 Invite User</button>
+      <button class="tab-btn" onclick="switchTab('audit')">📋 Audit Log</button>
+      <button class="tab-btn" onclick="switchTab('stats')">📊 Statistics</button>
+    </div>
+
+    <!-- USERS TAB -->
+    <div id="users" class="tab-content active">
+      <div style="margin-bottom: 16px;">
+        <button class="btn btn-primary" onclick="openInviteModal()">+ Invite New User</button>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Last Login</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="usersList">
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 24px; color: var(--bone2);">
+              Loading users...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- INVITE TAB -->
+    <div id="invite" class="tab-content">
+      <div class="card" style="max-width: 500px;">
+        <h2 style="color: var(--amber); margin-bottom: 16px; font-size: 16px;">Invite New User</h2>
+        <form id="inviteForm" onsubmit="handleInvite(event)">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="inviteEmail" required placeholder="user@example.com">
+          </div>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="inviteName" placeholder="John Doe">
+          </div>
+          <div class="form-group">
+            <label>Role</label>
+            <select id="inviteRole" required>
+              <option value="">-- Select Role --</option>
+              <option value="viewer">Viewer</option>
+              <option value="editor">Editor</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Send Invite</button>
+        </form>
+        <div id="inviteResult" style="margin-top: 16px;"></div>
+      </div>
+    </div>
+
+    <!-- AUDIT LOG TAB -->
+    <div id="audit" class="tab-content">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Entity</th>
+            <th>IP Address</th>
+          </tr>
+        </thead>
+        <tbody id="auditList">
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 24px; color: var(--bone2);">
+              Loading audit log...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- STATISTICS TAB -->
+    <div id="stats" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="totalUsers">-</div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Active Users</div>
+          <div class="stat-value" id="activeUsers">-</div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Admins</div>
+          <div class="stat-value" id="adminCount">-</div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Editors</div>
+          <div class="stat-value" id="editorCount">-</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2 style="color: var(--amber); margin-bottom: 16px; font-size: 14px;">Recent Activities</h2>
+        <div id="recentActivities" style="font-size: 12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVITE MODAL -->
+  <div id="inviteModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeInviteModal()">&times;</span>
+      <h2 style="color: var(--amber); margin-bottom: 16px;">Invite User to THE DOOR</h2>
+      <form id="modalInviteForm" onsubmit="handleModalInvite(event)">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="modalEmail" required>
+        </div>
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="modalName">
+        </div>
+        <div class="form-group">
+          <label>Role</label>
+          <select id="modalRole" required>
+            <option value="">-- Select --</option>
+            <option value="viewer">Viewer (Read-only)</option>
+            <option value="editor">Editor (Read/Write)</option>
+            <option value="admin">Admin (Full Access)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Send Invite</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Simulate API calls (replace with real API when available)
+    const mockUsers = [
+      { id: '1', email: 'admin@victor-ia.xyz', name: 'Admin User', role: 'admin', status: 'active', lastLogin: '2026-06-20 14:30' },
+      { id: '2', email: 'editor@victor-ia.xyz', name: 'Editor User', role: 'editor', status: 'active', lastLogin: '2026-06-20 12:15' },
+      { id: '3', email: 'viewer@victor-ia.xyz', name: 'Viewer User', role: 'viewer', status: 'active', lastLogin: '2026-06-19 09:45' }
+    ];
+
+    const mockAudit = [
+      { timestamp: '2026-06-20 14:35', user: 'admin@victor-ia.xyz', action: 'user_invited', entity: 'newuser@example.com', ip: '192.168.1.1' },
+      { timestamp: '2026-06-20 14:30', user: 'editor@victor-ia.xyz', action: 'dashboard_view', entity: 'loops', ip: '192.168.1.2' },
+      { timestamp: '2026-06-20 12:15', user: 'admin@victor-ia.xyz', action: 'user_role_update', entity: 'viewer@victor-ia.xyz', ip: '192.168.1.1' }
+    ];
+
+    // Tab switching
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tab).classList.add('active');
+      event.target.classList.add('active');
+
+      if (tab === 'users') loadUsers();
+      if (tab === 'audit') loadAuditLog();
+      if (tab === 'stats') loadStats();
+    }
+
+    // Load Users
+    function loadUsers() {
+      const list = document.getElementById('usersList');
+      list.innerHTML = mockUsers.map(u => `
+        <tr>
+          <td>${u.email}</td>
+          <td>${u.name}</td>
+          <td><span class="badge badge-${u.role}">${u.role}</span></td>
+          <td><span class="badge badge-${u.status}">${u.status}</span></td>
+          <td>${u.lastLogin}</td>
+          <td>
+            <button class="btn" onclick="editUser('${u.id}')">Edit</button>
+            <button class="btn btn-danger" onclick="disableUser('${u.id}')">Disable</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Load Audit Log
+    function loadAuditLog() {
+      const list = document.getElementById('auditList');
+      list.innerHTML = mockAudit.map(a => `
+        <tr>
+          <td>${a.timestamp}</td>
+          <td>${a.user}</td>
+          <td>${a.action}</td>
+          <td>${a.entity}</td>
+          <td>${a.ip}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Load Statistics
+    function loadStats() {
+      const active = mockUsers.filter(u => u.status === 'active').length;
+      const admins = mockUsers.filter(u => u.role === 'admin').length;
+      const editors = mockUsers.filter(u => u.role === 'editor').length;
+
+      document.getElementById('totalUsers').textContent = mockUsers.length;
+      document.getElementById('activeUsers').textContent = active;
+      document.getElementById('adminCount').textContent = admins;
+      document.getElementById('editorCount').textContent = editors;
+
+      document.getElementById('recentActivities').innerHTML = mockAudit.slice(0, 5).map(a =>
+        `<div style="padding: 8px; border-bottom: 1px solid var(--border);">
+          <strong>${a.user}</strong> — ${a.action} (${a.timestamp})
+        </div>`
+      ).join('');
+    }
+
+    // Modal functions
+    function openInviteModal() {
+      document.getElementById('inviteModal').classList.add('active');
+    }
+
+    function closeInviteModal() {
+      document.getElementById('inviteModal').classList.remove('active');
+    }
+
+    // Handle invite
+    function handleInvite(event) {
+      event.preventDefault();
+      const email = document.getElementById('inviteEmail').value;
+      const name = document.getElementById('inviteName').value;
+      const role = document.getElementById('inviteRole').value;
+
+      const result = document.getElementById('inviteResult');
+      result.innerHTML = `<div class="success">✅ Invitation sent to ${email} with role: ${role}</div>`;
+
+      setTimeout(() => {
+        document.getElementById('inviteForm').reset();
+        result.innerHTML = '';
+      }, 3000);
+    }
+
+    function handleModalInvite(event) {
+      event.preventDefault();
+      const email = document.getElementById('modalEmail').value;
+      const role = document.getElementById('modalRole').value;
+
+      alert(`✅ Invitation sent to ${email}\nRole: ${role}`);
+      closeInviteModal();
+      document.getElementById('modalInviteForm').reset();
+      loadUsers();
+    }
+
+    // User actions
+    function editUser(userId) {
+      alert(`Edit user ${userId} - (API will be connected)`);
+    }
+
+    function disableUser(userId) {
+      if (confirm('Are you sure you want to disable this user?')) {
+        alert(`User disabled - (API will be connected)`);
+      }
+    }
+
+    // Initial load
+    loadUsers();
+    loadStats();
+  </script>
+</body>
+</html>
