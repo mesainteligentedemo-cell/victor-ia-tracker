@@ -9,16 +9,20 @@
  * URL: http://localhost:3456/api/...
  */
 
-const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
-const WebSocket = require('ws');
-const http = require('http');
+import express from 'express';
+import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
+import { WebSocketServer } from 'ws';
+import http from 'http';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocketServer({ server });
 
 app.use(cors());
 app.use(express.json());
@@ -411,4 +415,4 @@ process.on('SIGINT', () => {
   setTimeout(() => process.exit(1), 5000);
 });
 
-module.exports = { app, wss, dataCache };
+export { app, wss, dataCache };
