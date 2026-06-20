@@ -1,0 +1,32 @@
+{
+  "name": "the-door-api-server",
+  "version": "1.0.0",
+  "description": "Real-time API server for THE DOOR dashboards",
+  "main": "api-endpoints.js",
+  "scripts": {
+    "start": "node api-endpoints.js",
+    "dev": "nodemon api-endpoints.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "api",
+    "websocket",
+    "real-time",
+    "tracker",
+    "dashboards"
+  ],
+  "author": "Victor IA",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "ws": "^8.13.0",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
