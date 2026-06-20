@@ -9,7 +9,14 @@
     "analytics": "node api/server.js",
     "analytics:prod": "NODE_ENV=production node api/server.js",
     "build": "echo 'No build step needed — static HTML'",
-    "start": "npx http-server -p 8000 --cors"
+    "start": "npx http-server -p 8000 --cors",
+    "test": "node tests.js",
+    "test:watch": "nodemon tests.js",
+    "api": "node api-endpoints.js",
+    "collect": "python collect-live-data.py",
+    "lint": "eslint *.js || true",
+    "verify": "npm run test && npm run lint",
+    "ci": "npm install && npm run verify && npm run build"
   },
   "keywords": [
     "dashboard",
@@ -34,11 +41,13 @@
   },
   "homepage": "https://victor-ia-tracker.vercel.app",
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
-    "firebase-admin": "^13.10.0"
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^4.22.2",
+    "firebase-admin": "^13.10.0",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.1.14"
   }
 }
