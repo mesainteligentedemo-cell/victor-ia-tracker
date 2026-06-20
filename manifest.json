@@ -1,0 +1,113 @@
+{
+  "name": "THE DOOR — Real-time Tracker",
+  "short_name": "THE DOOR",
+  "description": "Enterprise monitoring system with real-time dashboards, analytics, and team collaboration",
+  "start_url": "/tracker_live.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#070809",
+  "background_color": "#FFFFFF",
+  "categories": ["business", "productivity"],
+  "screenshots": [
+    {
+      "src": "https://tracker.victor-ia.xyz/screenshots/dashboard-1.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "purpose": "any"
+    },
+    {
+      "src": "https://tracker.victor-ia.xyz/screenshots/dashboard-2.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "purpose": "any"
+    }
+  ],
+  "icons": [
+    {
+      "src": "https://tracker.victor-ia.xyz/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://tracker.victor-ia.xyz/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://tracker.victor-ia.xyz/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://tracker.victor-ia.xyz/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "The Door Dashboard",
+      "short_name": "Door",
+      "description": "View AI layer status and agents",
+      "url": "/tracker_live.html?tab=door",
+      "icons": [
+        {
+          "src": "https://tracker.victor-ia.xyz/shortcut-door-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Loops Dashboard",
+      "short_name": "Loops",
+      "description": "Monitor automation loops",
+      "url": "/tracker_live.html?tab=loops",
+      "icons": [
+        {
+          "src": "https://tracker.victor-ia.xyz/shortcut-loops-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Admin Panel",
+      "short_name": "Admin",
+      "description": "Manage users and settings",
+      "url": "/admin-dashboard.html",
+      "icons": [
+        {
+          "src": "https://tracker.victor-ia.xyz/shortcut-admin-96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "data",
+          "accept": ["application/json"]
+        }
+      ]
+    }
+  },
+  "prefer_related_applications": false,
+  "related_applications": []
+}
