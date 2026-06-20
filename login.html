@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login — THE DOOR</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #070809;
+      --surface: #0E0F12;
+      --amber: #FFAA17;
+      --bone: #F8F7F5;
+      --bone2: rgba(248,247,245,0.65);
+      --green: #4ade80;
+      --border: rgba(248,247,245,0.07);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #FFFFFF;
+        --surface: #F9FAFB;
+        --bone: #070809;
+        --bone2: rgba(7,8,9,0.65);
+        --border: rgba(0,0,0,0.08);
+      }
+    }
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--bone);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 400px; width: 100%; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 32px;
+    }
+    .logo { font-size: 32px; margin-bottom: 16px; }
+    h1 { font-size: 24px; color: var(--amber); margin-bottom: 8px; }
+    .subtitle { font-size: 12px; color: var(--bone2); margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--bone);
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    input:focus { outline: none; border-color: var(--amber); }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--amber);
+      color: var(--bg);
+      border: none;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+      gap: 12px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .divider-text { font-size: 12px; color: var(--bone2); }
+    .social-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .social-btn {
+      padding: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--bone);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .social-btn:hover { background: rgba(255,170,23,0.1); border-color: var(--amber); }
+    .link {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 12px;
+    }
+    .link a {
+      color: var(--amber);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .link a:hover { text-decoration: underline; }
+    .error {
+      color: #f87171;
+      font-size: 12px;
+      margin-bottom: 16px;
+      padding: 8px;
+      background: rgba(248,113,113,0.1);
+      border-radius: 4px;
+      display: none;
+    }
+    .error.show { display: block; }
+    .loading { position: relative; }
+    .loading::after {
+      content: '';
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,170,23,0.3);
+      border-top-color: var(--amber);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="logo">🚪</div>
+      <h1>THE DOOR</h1>
+      <p class="subtitle">Real-time monitoring system</p>
+
+      <div class="error" id="errorMsg"></div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="email" required placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn" id="loginBtn">Sign In</button>
+      </form>
+
+      <div class="divider">
+        <span class="divider-text">OR</span>
+      </div>
+
+      <div class="social-buttons">
+        <button class="social-btn" onclick="loginWithGoogle()">Google</button>
+        <button class="social-btn" onclick="loginWithGithub()">GitHub</button>
+      </div>
+
+      <div class="link">
+        Don't have an account? <a onclick="goToSignup()">Sign up</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDxxx...", // Replace with your Firebase config
+      authDomain: "your-project.firebaseapp.com",
+      projectId: "your-project",
+      storageBucket: "your-project.appspot.com",
+      messagingSenderId: "xxx",
+      appId: "1:xxx:web:xxx"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Check if already logged in
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        window.location.href = '/dashboard.html';
+      }
+    });
+
+    // Email/Password login
+    async function handleLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('loginBtn');
+      const error = document.getElementById('errorMsg');
+
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+      error.classList.remove('show');
+
+      try {
+        const result = await auth.signInWithEmailAndPassword(email, password);
+        console.log('✅ Logged in:', result.user.email);
+        window.location.href = '/tracker_live.html';
+      } catch (err) {
+        console.error('Login error:', err);
+        error.classList.add('show');
+        error.textContent = err.message;
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+      }
+    }
+
+    // Google login
+    async function loginWithGoogle() {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
+        window.location.href = '/tracker_live.html';
+      } catch (err) {
+        console.error('Google login error:', err);
+        document.getElementById('errorMsg').classList.add('show');
+        document.getElementById('errorMsg').textContent = err.message;
+      }
+    }
+
+    // GitHub login
+    async function loginWithGithub() {
+      try {
+        const provider = new firebase.auth.GithubAuthProvider();
+        await auth.signInWithPopup(provider);
+        window.location.href = '/tracker_live.html';
+      } catch (err) {
+        console.error('GitHub login error:', err);
+        document.getElementById('errorMsg').classList.add('show');
+        document.getElementById('errorMsg').textContent = err.message;
+      }
+    }
+
+    // Go to signup
+    function goToSignup() {
+      window.location.href = '/signup.html';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign Up — THE DOOR</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #070809;
+      --surface: #0E0F12;
+      --amber: #FFAA17;
+      --bone: #F8F7F5;
+      --bone2: rgba(248,247,245,0.65);
+      --green: #4ade80;
+      --border: rgba(248,247,245,0.07);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #FFFFFF;
+        --surface: #F9FAFB;
+        --bone: #070809;
+        --bone2: rgba(7,8,9,0.65);
+        --border: rgba(0,0,0,0.08);
+      }
+    }
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--bone);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 400px; width: 100%; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 32px;
+    }
+    .logo { font-size: 32px; margin-bottom: 16px; }
+    h1 { font-size: 24px; color: var(--amber); margin-bottom: 8px; }
+    .subtitle { font-size: 12px; color: var(--bone2); margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--bone);
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    input:focus { outline: none; border-color: var(--amber); }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--amber);
+      color: var(--bg);
+      border: none;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+      gap: 12px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .divider-text { font-size: 12px; color: var(--bone2); }
+    .social-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .social-btn {
+      padding: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--bone);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .social-btn:hover { background: rgba(255,170,23,0.1); border-color: var(--amber); }
+    .link {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 12px;
+    }
+    .link a {
+      color: var(--amber);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .link a:hover { text-decoration: underline; }
+    .error {
+      color: #f87171;
+      font-size: 12px;
+      margin-bottom: 16px;
+      padding: 8px;
+      background: rgba(248,113,113,0.1);
+      border-radius: 4px;
+      display: none;
+    }
+    .error.show { display: block; }
+    .success {
+      color: var(--green);
+      font-size: 12px;
+      margin-bottom: 16px;
+      padding: 8px;
+      background: rgba(74,222,128,0.1);
+      border-radius: 4px;
+      display: none;
+    }
+    .success.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="logo">🚪</div>
+      <h1>Create Account</h1>
+      <p class="subtitle">Join THE DOOR monitoring system</p>
+
+      <div class="error" id="errorMsg"></div>
+      <div class="success" id="successMsg"></div>
+
+      <form id="signupForm" onsubmit="handleSignup(event)">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="fullName" required placeholder="Your Name">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="email" required placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" required placeholder="••••••••" minlength="6">
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="confirmPassword" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn" id="signupBtn">Create Account</button>
+      </form>
+
+      <div class="divider">
+        <span class="divider-text">OR</span>
+      </div>
+
+      <div class="social-buttons">
+        <button type="button" class="social-btn" onclick="signupWithGoogle()">Google</button>
+        <button type="button" class="social-btn" onclick="signupWithGithub()">GitHub</button>
+      </div>
+
+      <div class="link">
+        Already have an account? <a onclick="goToLogin()">Sign in</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDxxx...", // Replace with your Firebase config
+      authDomain: "your-project.firebaseapp.com",
+      projectId: "your-project",
+      storageBucket: "your-project.appspot.com",
+      messagingSenderId: "xxx",
+      appId: "1:xxx:web:xxx"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Check if already logged in
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        window.location.href = '/tracker_live.html';
+      }
+    });
+
+    // Email/Password signup
+    async function handleSignup(event) {
+      event.preventDefault();
+      const fullName = document.getElementById('fullName').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const btn = document.getElementById('signupBtn');
+      const error = document.getElementById('errorMsg');
+      const success = document.getElementById('successMsg');
+
+      // Validate passwords match
+      if (password !== confirmPassword) {
+        error.classList.add('show');
+        error.textContent = 'Passwords do not match';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Creating account...';
+      error.classList.remove('show');
+      success.classList.remove('show');
+
+      try {
+        // Create auth user
+        const result = await auth.createUserWithEmailAndPassword(email, password);
+        const user = result.user;
+
+        // Update profile
+        await user.updateProfile({
+          displayName: fullName
+        });
+
+        // Create user document in Firestore
+        await db.collection('users').doc(user.uid).set({
+          uid: user.uid,
+          email: email,
+          displayName: fullName,
+          role: 'viewer', // Default role
+          status: 'active',
+          createdAt: new Date(),
+          lastLogin: new Date()
+        });
+
+        console.log('✅ Account created:', email);
+        success.classList.add('show');
+        success.textContent = 'Account created! Redirecting...';
+
+        setTimeout(() => {
+          window.location.href = '/tracker_live.html';
+        }, 2000);
+      } catch (err) {
+        console.error('Signup error:', err);
+        error.classList.add('show');
+        error.textContent = err.message;
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+      }
+    }
+
+    // Google signup
+    async function signupWithGoogle() {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+
+        // Create user document
+        await db.collection('users').doc(user.uid).set({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          role: 'viewer',
+          status: 'active',
+          createdAt: new Date(),
+          lastLogin: new Date()
+        }, { merge: true });
+
+        window.location.href = '/tracker_live.html';
+      } catch (err) {
+        console.error('Google signup error:', err);
+        document.getElementById('errorMsg').classList.add('show');
+        document.getElementById('errorMsg').textContent = err.message;
+      }
+    }
+
+    // GitHub signup
+    async function signupWithGithub() {
+      try {
+        const provider = new firebase.auth.GithubAuthProvider();
+        const result = await auth.signInWithPopup(provider);
+        const user = result.user;
+
+        // Create user document
+        await db.collection('users').doc(user.uid).set({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          role: 'viewer',
+          status: 'active',
+          createdAt: new Date(),
+          lastLogin: new Date()
+        }, { merge: true });
+
+        window.location.href = '/tracker_live.html';
+      } catch (err) {
+        console.error('GitHub signup error:', err);
+        document.getElementById('errorMsg').classList.add('show');
+        document.getElementById('errorMsg').textContent = err.message;
+      }
+    }
+
+    // Go to login
+    function goToLogin() {
+      window.location.href = '/login.html';
+    }
+  </script>
+</body>
+</html>
