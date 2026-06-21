@@ -5440,6 +5440,10 @@ body.client-mode #main { margin-left: 0 !important; }
   <!-- LEFT: filtros y opciones -->
   <div class="topbar-btns">
     <button class="btn-primary-cta" onclick="openAdd()" aria-label="Agregar nueva entrada">+ Entrada</button>
+    <button class="btn-tour-cta" id="tour-start-btn" onclick="ViaTour.start()" aria-label="Iniciar tour guiado con voz" title="Tour guiado con voz">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Tour Guiado
+    </button>
     <button class="btn-desktop" onclick="exportCSV()" aria-label="Exportar datos como CSV">Export CSV</button>
     <button class="btn-desktop" onclick="toggleSidebar()" aria-label="Mostrar u ocultar filtros avanzados">Filtros</button>
     <button class="btn-desktop" onclick="openFileModal()" aria-label="Abrir módulo de planeación">Planeación</button>
@@ -16795,5 +16799,504 @@ function studioAttachFile(file){
 <script src="tracker-auth-integration.js"></script>
 <!-- ── PWA INITIALIZATION ── -->
 <script src="pwa-init.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     TOUR GUIADO CON VOZ — THE DOOR · Victor IA Tracker
+     Narración (ElevenLabs + Web Speech fallback) · 17 pasos · auto-navegación
+     ═══════════════════════════════════════════════════════════════════════ -->
+<style>
+/* ── TOUR · botón en topbar ── */
+.btn-tour-cta{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,rgba(255,170,23,.18),rgba(255,170,23,.06));
+  color:var(--amber);border:1px solid rgba(255,170,23,.32);
+  border-radius:var(--radius);padding:7px 12px;font-size:12px;font-weight:700;
+  letter-spacing:.01em;cursor:pointer;white-space:nowrap;
+  transition:all .18s ease;font-family:'Space Grotesk',sans-serif;
+}
+.btn-tour-cta:hover{ background:rgba(255,170,23,.26); box-shadow:0 0 0 1px rgba(255,170,23,.4),0 6px 22px rgba(255,170,23,.18); transform:translateY(-1px); }
+.btn-tour-cta svg{ flex-shrink:0; }
+
+/* ── TOUR · backdrop + spotlight ── */
+#via-tour-root{ position:fixed; inset:0; z-index:99990; display:none; pointer-events:none; }
+#via-tour-root.on{ display:block; }
+#via-tour-backdrop{
+  position:fixed; inset:0; pointer-events:auto;
+  background:rgba(5,6,8,.72); backdrop-filter:blur(2px) saturate(120%);
+  transition:opacity .35s ease; opacity:0;
+}
+#via-tour-root.on #via-tour-backdrop{ opacity:1; }
+/* spotlight ring drawn around highlighted element */
+#via-tour-spot{
+  position:fixed; pointer-events:none; border-radius:8px; z-index:99991;
+  box-shadow:0 0 0 4px rgba(255,170,23,.85), 0 0 0 9999px rgba(5,6,8,.74), 0 0 40px 8px rgba(255,170,23,.35);
+  transition:all .55s cubic-bezier(.4,0,.2,1); opacity:0;
+}
+#via-tour-spot.show{ opacity:1; }
+@keyframes viaTourPulse{ 0%,100%{ box-shadow:0 0 0 4px rgba(255,170,23,.85),0 0 0 9999px rgba(5,6,8,.74),0 0 40px 8px rgba(255,170,23,.35);} 50%{ box-shadow:0 0 0 6px rgba(255,170,23,.55),0 0 0 9999px rgba(5,6,8,.74),0 0 55px 14px rgba(255,170,23,.5);} }
+#via-tour-spot.pulse{ animation:viaTourPulse 2.2s ease-in-out infinite; }
+
+/* ── TOUR · panel de control ── */
+#via-tour-panel{
+  position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px);
+  width:min(680px,calc(100vw - 32px)); pointer-events:auto; z-index:99993;
+  background:linear-gradient(180deg,rgba(19,20,24,.98),rgba(11,12,15,.98));
+  border:1px solid rgba(255,170,23,.22); border-radius:14px;
+  box-shadow:0 24px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(248,247,245,.04) inset;
+  padding:18px 20px 16px; opacity:0; transition:all .4s cubic-bezier(.4,0,.2,1);
+  font-family:'Space Grotesk',sans-serif;
+}
+#via-tour-root.on #via-tour-panel{ opacity:1; transform:translateX(-50%) translateY(0); }
+.via-tour-topline{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+.via-tour-step-badge{
+  display:inline-flex; align-items:center; gap:8px; font-size:11px; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--amber);
+}
+.via-tour-step-badge .dot{ width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber); animation:viaTourDot 1.6s ease-in-out infinite; }
+@keyframes viaTourDot{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+.via-tour-close{ background:none;border:none;color:var(--bone2);cursor:pointer;font-size:18px;line-height:1;padding:4px;border-radius:6px;transition:.15s; }
+.via-tour-close:hover{ color:var(--bone); background:rgba(248,247,245,.08); }
+
+.via-tour-title{ font-size:18px; font-weight:800; color:var(--bone); letter-spacing:-.01em; margin-bottom:6px; }
+.via-tour-subtitle{
+  font-size:13.5px; line-height:1.55; color:var(--bone); min-height:42px;
+  font-family:'Inter',sans-serif; font-weight:400;
+}
+.via-tour-subtitle .cursor{ display:inline-block;width:2px;height:1em;background:var(--amber);margin-left:1px;vertical-align:text-bottom;animation:viaTourDot 1s steps(2) infinite; }
+
+/* progress bar */
+.via-tour-prog{ height:4px; background:var(--bone3); border-radius:99px; overflow:hidden; margin:12px 0 14px; }
+.via-tour-prog-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--amber),#ffd27a); border-radius:99px; transition:width .5s ease; }
+
+/* controls row */
+.via-tour-controls{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.via-tour-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  background:rgba(248,247,245,.06); color:var(--bone); border:1px solid var(--border);
+  border-radius:8px; padding:8px 12px; font-size:12.5px; font-weight:600; cursor:pointer;
+  transition:.15s; font-family:'Space Grotesk',sans-serif; min-height:38px;
+}
+.via-tour-btn:hover{ background:rgba(248,247,245,.12); border-color:rgba(248,247,245,.18); }
+.via-tour-btn:disabled{ opacity:.35; cursor:not-allowed; }
+.via-tour-btn.primary{ background:var(--amber); color:#070809; border-color:var(--amber); font-weight:800; }
+.via-tour-btn.primary:hover{ background:#ffbb43; }
+.via-tour-btn svg{ flex-shrink:0; }
+.via-tour-spacer{ flex:1; }
+.via-tour-speed{
+  display:inline-flex; align-items:center; gap:0; background:rgba(248,247,245,.05);
+  border:1px solid var(--border); border-radius:8px; overflow:hidden;
+}
+.via-tour-speed button{
+  background:none;border:none;color:var(--bone2);cursor:pointer;font-size:11.5px;font-weight:700;
+  padding:8px 9px;transition:.15s;font-family:'Space Grotesk',sans-serif;
+}
+.via-tour-speed button.on{ background:var(--amber); color:#070809; }
+.via-tour-speed button:hover:not(.on){ color:var(--bone); }
+.via-tour-voicebadge{ font-size:10px; color:var(--bone2); letter-spacing:.04em; display:flex;align-items:center;gap:5px; }
+.via-tour-voicebadge .eq{ display:inline-flex;gap:2px;align-items:flex-end;height:11px; }
+.via-tour-voicebadge .eq i{ width:2px;background:var(--amber);border-radius:2px;height:4px; }
+#via-tour-root.speaking .via-tour-voicebadge .eq i{ animation:viaEq .7s ease-in-out infinite; }
+#via-tour-root.speaking .via-tour-voicebadge .eq i:nth-child(2){ animation-delay:.15s; }
+#via-tour-root.speaking .via-tour-voicebadge .eq i:nth-child(3){ animation-delay:.3s; }
+@keyframes viaEq{ 0%,100%{height:3px;} 50%{height:11px;} }
+
+@media (max-width:560px){
+  #via-tour-panel{ bottom:12px; padding:14px 14px 12px; border-radius:12px; }
+  .via-tour-title{ font-size:16px; }
+  .via-tour-controls .label-txt{ display:none; }
+  .via-tour-btn{ padding:8px 10px; }
+}
+</style>
+
+<div id="via-tour-root" role="dialog" aria-modal="true" aria-label="Tour guiado del tracker">
+  <div id="via-tour-backdrop"></div>
+  <div id="via-tour-spot"></div>
+  <div id="via-tour-panel">
+    <div class="via-tour-topline">
+      <span class="via-tour-step-badge"><span class="dot"></span><span id="via-tour-stepnum">Paso 1 de 17</span></span>
+      <div class="via-tour-voicebadge"><span class="eq"><i></i><i></i><i></i></span><span id="via-tour-voicelabel">Voz</span></div>
+      <button class="via-tour-close" onclick="ViaTour.stop()" aria-label="Cerrar tour">✕</button>
+    </div>
+    <div class="via-tour-title" id="via-tour-title">Bienvenido</div>
+    <div class="via-tour-subtitle" id="via-tour-sub"></div>
+    <div class="via-tour-prog"><div class="via-tour-prog-fill" id="via-tour-progfill"></div></div>
+    <div class="via-tour-controls">
+      <button class="via-tour-btn" id="via-tour-prev" onclick="ViaTour.prev()" aria-label="Paso anterior">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <span class="label-txt">Anterior</span>
+      </button>
+      <button class="via-tour-btn primary" id="via-tour-play" onclick="ViaTour.togglePlay()" aria-label="Reproducir o pausar">
+        <span id="via-tour-play-ico"></span><span class="label-txt" id="via-tour-play-txt">Pausar</span>
+      </button>
+      <button class="via-tour-btn" id="via-tour-next" onclick="ViaTour.next()" aria-label="Paso siguiente">
+        <span class="label-txt">Siguiente</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <button class="via-tour-btn" id="via-tour-stop" onclick="ViaTour.stop()" aria-label="Detener tour">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+        <span class="label-txt">Detener</span>
+      </button>
+      <span class="via-tour-spacer"></span>
+      <div class="via-tour-speed" role="group" aria-label="Velocidad de narración">
+        <button data-speed="1" class="on" onclick="ViaTour.setSpeed(1,this)">1x</button>
+        <button data-speed="1.5" onclick="ViaTour.setSpeed(1.5,this)">1.5x</button>
+        <button data-speed="2" onclick="ViaTour.setSpeed(2,this)">2x</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════ ViaTour — motor del tour guiado ═══════════════════ */
+(function(){
+  // ── Credencial ElevenLabs (voz Victor) — fallback a Web Speech ──
+  var EL_KEY   = 'sk_87d5a7899d6c489c94232248c4880a0c4fe317adb3701e67';
+  var EL_VOICE = 'iDEmt5MnqUotdwCIVplo';
+  var EL_MODEL = 'eleven_multilingual_v2';
+
+  var ICON_PAUSE = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
+  var ICON_PLAY  = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
+
+  // ── Definición de los 17 pasos ──
+  // tab: pestaña principal a activar · ifx: subpanel de Infra · sel: elemento a resaltar
+  var STEPS = [
+    { tab:'dashboard', sel:'#topbar',
+      title:'Bienvenido al Tracker Victor IA',
+      say:'Bienvenido al Tracker de Victor IA, tu centro de control inteligente. Soy tu guía, y en los próximos minutos voy a llevarte de la mano por cada rincón de este sistema. Esto no es una simple hoja de cálculo: es el cerebro operativo de tu negocio. Aquí conviven, en un solo lugar, tus proyectos, tus finanzas, tus clientes, tus reportes y toda la infraestructura de inteligencia artificial que trabaja para ti las veinticuatro horas. Lo que estás viendo arriba es la barra superior, tu punto de partida. Desde aquí registras una nueva entrada, exportas datos, ajustas la configuración y, por supuesto, lanzas este tour. Mi recomendación es simple: relájate, no toques nada y deja que la narración avance sola. Voy a abrir cada sección por ti, resaltar lo importante y explicarte para qué sirve. Cuando quieras, puedes pausar, retroceder o adelantar con los controles de abajo. Empecemos este recorrido.' },
+
+    { tab:'dashboard', sel:'#view-dashboard',
+      title:'Dashboard — El pulso del negocio',
+      say:'Estamos en el Dashboard, la vista principal y la primera que ves al entrar. Piensa en esto como el tablero de un automóvil: de un solo vistazo conoces el estado de toda la operación. Cada una de estas tarjetas es un indicador clave de desempeño, lo que en el mundo de los negocios llamamos un KPI. Verás las horas totales trabajadas, el número de actividades registradas, tu tasa de cumplimiento, el promedio de horas por día y el costo estimado de tu operación. Lo más poderoso es que estos números están vivos: cada vez que registras una nueva entrada, el dashboard se recalcula automáticamente en tiempo real. También encontrarás tu racha de días activos, tu proyecto y cliente principal por horas invertidas, y el margen de rentabilidad global. Es tu termómetro diario para saber, en segundos y sin esfuerzo, exactamente cómo va el negocio hoy.' },
+
+    { tab:'analytics', sel:'#view-analytics',
+      title:'Analytics — Gráficos y tendencias',
+      say:'Ahora pasamos a la sección de Analytics, donde los datos en bruto se transforman en historias visuales. Aquí cada número se convierte en una gráfica que puedes interpretar de inmediato. Encontrarás la distribución de tu tiempo por proyecto, la actividad por hora del día para descubrir cuándo eres más productivo, la evolución semana a semana de tu carga de trabajo, y comparativas detalladas entre tus distintos clientes. Estas visualizaciones no son decorativas: son herramientas de decisión. Te permiten detectar patrones que a simple vista pasarían desapercibidos, identificar tus horas pico de productividad, reconocer qué proyectos consumen más recursos de lo previsto y anticipar tendencias antes de que se conviertan en problemas. En resumen, Analytics te ayuda a tomar decisiones con evidencia sólida, no con corazonadas.' },
+
+    { tab:'finanzas', sel:'#view-finanzas',
+      title:'Finanzas — Costos por API',
+      say:'Llegamos a Finanzas, una de las secciones más importantes para la salud de tu empresa. Aquí se desglosa el costo real de operar, con un nivel de detalle que pocas herramientas ofrecen. Verás el gasto por cada interfaz de programación, o API, que el sistema utiliza, como ElevenLabs para las voces, Higgsfield para imágenes y video, y los distintos modelos de inteligencia artificial que procesan tu trabajo. Pero no se queda en los costos: esta sección también calcula el precio de venta, el margen y la rentabilidad de cada actividad y de cada proyecto. Así sabes, con números claros y honestos, cuánto te cuesta producir, cuánto cobras y, lo más importante, cuánto dinero realmente te deja cada cliente. Es la sección que convierte tu intuición financiera en certeza.' },
+
+    { tab:'organigrama', sel:'#view-organigrama',
+      title:'Organigrama — Arquitectura del sistema',
+      say:'Esta vista es el Organigrama, y aquí está el corazón inteligente de Victor IA. Lo que ves es la arquitectura completa del sistema: todos los agentes especializados, sus roles definidos y cómo se conectan entre sí para trabajar en equipo. En la cima está el Gerente, que evalúa y delega; debajo están los directores de cada área, como tecnología, creatividad y operaciones; y más abajo, los implementadores que ejecutan las tareas concretas, junto a los revisores que verifican la calidad. Este modelo, inspirado en una empresa real, permite que el sistema orqueste trabajo complejo de forma ordenada, igual que lo haría un equipo humano bien coordinado. Es el mapa que te muestra cómo cada pieza colabora para entregarte resultados profesionales y consistentes.' },
+
+    { tab:'software', sel:'#view-software',
+      title:'Software y APIs — Integraciones',
+      say:'Estamos ahora en Software y APIs, el inventario tecnológico de toda tu operación. Aquí encuentras, organizadas y a la vista, todas las herramientas e integraciones que mantienen el sistema funcionando. Verás las licencias de software que pagas mes con mes, las interfaces de programación conectadas, los servicios externos y las plataformas que potencian cada capacidad del tracker. Esta sección te da control total: puedes consultar qué estás usando, cuánto cuesta cada servicio y cómo se integra al ecosistema. Tener este inventario centralizado evita gastos duplicados, te ayuda a renegociar licencias y asegura que sepas, en todo momento, exactamente de qué herramientas depende tu negocio.' },
+
+    { tab:'entradas', sel:'#view-entradas',
+      title:'Entradas — Ingreso de datos',
+      say:'Esta es la sección de Entradas, y me atrevo a decir que es el corazón de todo el sistema. Aquí se captura cada actividad de trabajo con su hora exacta, su descripción, su categoría, el proyecto y el cliente asociado, la duración, el estado y las etiquetas. Cada entrada que registras aquí es la materia prima que alimenta absolutamente todas las demás secciones: el dashboard, los gráficos de analytics, los cálculos de finanzas y los reportes. Por eso existe una regla de oro en esta operación: lo que no se registra, no se mide, y lo que no se mide, no se puede mejorar. Mantener esta sección actualizada con disciplina es lo que convierte al tracker en una fuente de verdad confiable. Tómate el hábito de registrar todo, y el sistema te lo devolverá multiplicado en claridad.' },
+
+    { tab:'reportes', sel:'#view-reportes',
+      title:'Reportes — Generación automática',
+      say:'Pasamos a Reportes, la sección que te ahorra horas de trabajo manual. Con apenas un clic, el sistema genera reportes profesionales y elegantes filtrados por día, por semana, por mes o por año. Estos documentos sintetizan toda tu actividad registrada en un formato claro, ordenado y listo para compartir, ya sea con un cliente que quiere ver avances, con un socio que pide cuentas o para tu propio archivo. En lugar de pasar horas armando resúmenes en una hoja de cálculo, el tracker hace el trabajo pesado por ti en segundos, manteniendo siempre la misma calidad visual y la coherencia de los datos. Reportar deja de ser una carga y se vuelve un superpoder de tu operación.' },
+
+    { tab:'crm', sel:'#view-crm',
+      title:'CRM — Gestión de leads',
+      say:'Esta es la sección de CRM, las siglas en inglés de gestión de relaciones con clientes. Aquí administras todos tus prospectos y leads a lo largo del embudo de ventas, desde el primer contacto hasta el cierre del trato. Cada lead tiene su propia ficha con su nombre, su empresa, su estado actual en el proceso y un historial completo de interacciones. Esto significa que nunca más perderás el rastro de una oportunidad: sabrás exactamente en qué etapa está cada cliente potencial, cuándo fue el último contacto y cuál es el siguiente paso a dar. Un CRM bien usado es la diferencia entre cerrar tratos de forma sistemática y depender de la suerte. Aquí, ningún prospecto valioso se te escapa.' },
+
+    { tab:'apollo', sel:'#view-apollo',
+      title:'Prospección — Apollo y LinkedIn',
+      say:'Llegamos a Prospección, el motor que llena tu embudo de ventas con clientes nuevos. Esta sección se conecta con fuentes profesionales como Apollo y LinkedIn para encontrar prospectos de forma sistemática y a gran escala. El proceso es metódico: primero defines tu nicho ideal y la fuente de datos, luego recolectas los contactos, después los limpias eliminando duplicados, y finalmente verificas que la información sea válida y accionable. En lugar de buscar clientes uno por uno de manera artesanal, aquí construyes un flujo constante de oportunidades de calidad. Es la diferencia entre esperar a que los clientes lleguen y salir activamente a conquistarlos con una estrategia clara y repetible.' },
+
+    { tab:'telemetria', sel:'#view-telemetria',
+      title:'Telemetría IoT — Sensores',
+      say:'Esta es la sección de Telemetría del internet de las cosas, lo que técnicamente conocemos como IoT. Aquí el tracker se asoma al mundo físico, monitoreando en tiempo real sensores y dispositivos conectados. Verás datos industriales, métricas de equipos, lecturas de temperatura, consumo, rendimiento y los flujos de información que provienen de hardware en operación. Toda esta data alimenta análisis predictivos que pueden anticipar fallas antes de que ocurran y optimizar el funcionamiento de equipos. Es una ventana directa al mundo físico conectado, y representa la capacidad del sistema para integrar no solo información digital, sino también señales del mundo real, todo en un mismo panel de control.' },
+
+    { tab:'graphify', sel:'#view-graphify',
+      title:'Observabilidad — Graphify',
+      say:'Ahora pasamos a Observabilidad, una sección impulsada por una tecnología llamada Graphify. Aquí el conocimiento del sistema deja de ser una lista plana de archivos y se representa como grafos, es decir, como redes de nodos interconectados. Esto tiene dos beneficios enormes. Primero, eficiencia: consultar la memoria en forma de grafo permite ahorrar hasta cinco veces en tokens, lo que se traduce directamente en menores costos de inteligencia artificial. Segundo, inteligencia: el sistema entiende cómo se relacionan entre sí tus proyectos, tus skills, tus clientes y tus datos, descubriendo conexiones que de otro modo permanecerían ocultas. Es, en esencia, la capa que le da memoria y contexto profundo a todo el ecosistema.' },
+
+    { tab:'infrastructure', ifx:'skills', sel:'#ifx-panel-skills',
+      title:'Infraestructura — Skills',
+      say:'Entramos ahora a la sección de Infraestructura, y comenzamos por los Skills. Aquí está la verdadera fuerza de trabajo del sistema: más de doscientos veintiséis agentes especializados, cada uno experto en una tarea concreta. Están organizados por categorías que cubren prácticamente todo lo que tu negocio podría necesitar: diseño y experiencia de usuario, producción de video, generación de imágenes, desarrollo de código, automatización de procesos, seguridad informática, marketing, contenido y mucho más. Puedes usar el buscador para encontrar cualquier skill por su nombre o descripción, y filtrar por categoría. Piensa en esto como tener un equipo enorme de especialistas siempre disponibles, listos para activarse en el momento exacto en que tu proyecto los requiera.' },
+
+    { tab:'infrastructure', ifx:'loops', sel:'#ifx-panel-loops',
+      title:'Infraestructura — Loops',
+      say:'Continuamos en Infraestructura con los Loops, una de las características más fascinantes del sistema. Son veinte ciclos autónomos que ejecutan tareas de manera continua, sin que tú tengas que intervenir. Estos loops se encargan del aprendizaje constante, de la optimización de costos, de la evaluación de calidad de los resultados, de la convergencia hacia mejores soluciones y del monitoreo del propio sistema. En la práctica, esto significa que el tracker no es estático: mejora solo, día tras día, refinando sus procesos mientras tú te dedicas a lo que de verdad importa. Cada loop tiene una tarea asignada y se ejecuta en su propio ritmo, formando en conjunto un organismo que se cuida y se perfecciona a sí mismo de forma automática.' },
+
+    { tab:'infrastructure', ifx:'costs', sel:'#ifx-panel-costs',
+      title:'Infraestructura — Costos',
+      say:'Esta es la vista de Costos dentro de Infraestructura, y complementa lo que vimos antes en Finanzas, pero enfocada en la tecnología. Aquí se presentan, mediante gráficos financieros claros, los gastos reales de cada servicio y cada API que sostiene la operación. De un solo vistazo identificas dónde se concentra tu inversión tecnológica, qué servicios consumen más presupuesto y cuáles ofrecen el mejor retorno. Esta transparencia es clave para optimizar: te permite detectar gastos innecesarios, comparar alternativas más económicas y asegurar que cada peso invertido en tecnología esté generando valor real. Control financiero total sobre la infraestructura que hace posible todo el sistema.' },
+
+    { tab:'infrastructure', ifx:'system', sel:'#ifx-panel-system',
+      title:'Infraestructura — Sistema',
+      say:'Cerramos la sección de Infraestructura con la pestaña de Sistema. Aquí encuentras la información general sobre el estado de salud de todo el ecosistema. Verás las versiones del sistema, las conexiones que están activas en este momento, los MCPs integrados, que son los protocolos que conectan al sistema con herramientas externas, y un panorama técnico completo del funcionamiento general. Piensa en esta pestaña como el chequeo médico del tracker: te confirma, de un vistazo, que todos los componentes están operando correctamente y que la maquinaria detrás de escena funciona como debe. Es la tranquilidad de saber que el sistema está sano y listo para trabajar.' },
+
+    { tab:'dashboard', sel:'#tabs',
+      title:'Navegación libre',
+      say:'Antes de cerrar, quiero que recuerdes algo importante. Todas las secciones que acabamos de recorrer están siempre a un solo clic de distancia, justo aquí en la barra de navegación superior. No necesitas seguir ningún orden: puedes saltar al Dashboard, a Finanzas, al CRM o a Infraestructura cuando quieras, según lo que necesites en ese momento. Y si en algún punto te sientes perdido o simplemente quieres repasar, puedes volver a lanzar este tour completo desde el botón Tour Guiado, en la barra superior. El sistema recordará tu progreso, así que siempre podrás retomar justo donde lo dejaste. La navegación es totalmente libre y está pensada para acompañarte, no para limitarte.' },
+
+    { tab:'dashboard', sel:'#topbar',
+      title:'Tour completado',
+      say:'Y con esto, hemos llegado al final del recorrido. Ahora conoces el Tracker de Victor IA de principio a fin: el dashboard que mide el pulso de tu negocio, los gráficos de analytics, el detalle financiero, el organigrama de agentes inteligentes, tus integraciones, el registro de actividades, los reportes automáticos, la gestión de clientes, la prospección, la telemetría y toda la infraestructura de skills, loops, costos y estado del sistema. Has visto cómo cada pieza se conecta para darte claridad, control y poder de decisión. Ahora todo está en tus manos: explora con confianza, registra con disciplina y deja que este sistema trabaje incansablemente para ti. Gracias por acompañarme en este recorrido, y bienvenido oficialmente a tu centro de control inteligente. Que tengas mucho éxito.' }
+  ];
+
+  var TOTAL = STEPS.length;
+
+  var T = {
+    idx: 0,
+    playing: false,
+    speed: 1,
+    audio: null,
+    typer: null,
+    stepTimer: null,
+    speakToken: 0,
+    elFailed: false,
+
+    el: function(id){ return document.getElementById(id); },
+
+    start: function(){
+      // resume from saved step (offer) or restart
+      var saved = parseInt(localStorage.getItem('via_tour_last') || '-1', 10);
+      this.idx = (saved > 0 && saved < TOTAL - 1) ? saved : 0;
+      this.el('via-tour-root').classList.add('on');
+      document.body.style.overflow = 'hidden';
+      this.playing = true;
+      this.render();
+      this.go(this.idx, true);
+    },
+
+    stop: function(){
+      this.playing = false;
+      this._cancelSpeech();
+      clearTimeout(this.stepTimer);
+      clearTimeout(this.typer);
+      this.el('via-tour-root').classList.remove('on','speaking');
+      this.el('via-tour-spot').classList.remove('show','pulse');
+      document.body.style.overflow = '';
+      // mark completed if at last step
+      if(this.idx >= TOTAL - 1) localStorage.removeItem('via_tour_last');
+    },
+
+    togglePlay: function(){
+      this.playing = !this.playing;
+      this.el('via-tour-play-ico').innerHTML = this.playing ? ICON_PAUSE : ICON_PLAY;
+      this.el('via-tour-play-txt').textContent = this.playing ? 'Pausar' : 'Reproducir';
+      if(this.playing){
+        this.go(this.idx, true);  // replay current step
+      } else {
+        this._cancelSpeech();
+        clearTimeout(this.stepTimer);
+      }
+    },
+
+    next: function(){
+      this._cancelSpeech();
+      clearTimeout(this.stepTimer);
+      if(this.idx < TOTAL - 1){ this.idx++; this.go(this.idx, this.playing); }
+      else { this.stop(); }
+    },
+
+    prev: function(){
+      this._cancelSpeech();
+      clearTimeout(this.stepTimer);
+      if(this.idx > 0){ this.idx--; this.go(this.idx, this.playing); }
+    },
+
+    setSpeed: function(s, btn){
+      this.speed = s;
+      document.querySelectorAll('.via-tour-speed button').forEach(function(b){ b.classList.toggle('on', b===btn); });
+      // apply live if audio playing
+      if(this.audio){ try{ this.audio.playbackRate = s; }catch(e){} }
+      if(window.speechSynthesis){ /* rate applied on next utterance */ }
+    },
+
+    // navigate to a step: switch tab, scroll, highlight, narrate
+    go: function(i, autoplay){
+      var self = this;
+      var step = STEPS[i];
+      this.idx = i;
+      localStorage.setItem('via_tour_last', i);
+      this.render();
+
+      // 1) switch main tab (auto-click navigation)
+      if(typeof setTab === 'function' && typeof currentTab !== 'undefined' && currentTab !== step.tab){
+        try { setTab(step.tab); } catch(e){}
+      } else if(typeof setTab === 'function' && step.tab === 'dashboard' && i === 0){
+        try { setTab('dashboard'); } catch(e){}
+      }
+
+      // 2) infra subtab if needed (auto-click)
+      var subDelay = 0;
+      if(step.tab === 'infrastructure' && step.ifx){
+        subDelay = 360;
+        setTimeout(function(){
+          var view = document.getElementById('view-infrastructure');
+          if(!view) return;
+          var btn = view.querySelector('.ifx-subtab[data-panel="'+step.ifx+'"]');
+          if(btn) btn.click();
+        }, 300);
+      }
+
+      // 3) highlight + scroll after layout settles
+      clearTimeout(this.typer);
+      setTimeout(function(){
+        self._spotlight(step.sel);
+      }, 220 + subDelay);
+
+      // 4) narrate
+      this._typeAndSpeak(step.say, autoplay);
+    },
+
+    render: function(){
+      var step = STEPS[this.idx];
+      this.el('via-tour-stepnum').textContent = 'Paso ' + (this.idx + 1) + ' de ' + TOTAL;
+      this.el('via-tour-title').textContent = step.title;
+      this.el('via-tour-progfill').style.width = Math.round(((this.idx + 1) / TOTAL) * 100) + '%';
+      this.el('via-tour-prev').disabled = (this.idx === 0);
+      this.el('via-tour-next').innerHTML = (this.idx === TOTAL - 1)
+        ? '<span class="label-txt">Terminar</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '<span class="label-txt">Siguiente</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+      this.el('via-tour-play-ico').innerHTML = this.playing ? ICON_PAUSE : ICON_PLAY;
+      this.el('via-tour-play-txt').textContent = this.playing ? 'Pausar' : 'Reproducir';
+    },
+
+    // ── Spotlight an element ──
+    _spotlight: function(sel){
+      var spot = this.el('via-tour-spot');
+      var elm = document.querySelector(sel);
+      if(!elm){ spot.classList.remove('show','pulse'); return; }
+      // scroll into view (smooth)
+      try { elm.scrollIntoView({ behavior:'smooth', block:'center' }); } catch(e){ elm.scrollIntoView(); }
+      var self = this;
+      setTimeout(function(){
+        var r = elm.getBoundingClientRect();
+        var pad = 8;
+        // clamp to viewport so the ring stays visible
+        var top = Math.max(6, r.top - pad);
+        var left = Math.max(6, r.left - pad);
+        var w = Math.min(window.innerWidth - left - 6, r.width + pad*2);
+        var h = Math.min(window.innerHeight - top - 6, r.height + pad*2);
+        // if element is huge (full view), frame the top portion
+        if(h > window.innerHeight * 0.7){ h = Math.min(h, window.innerHeight * 0.55); }
+        spot.style.top = top + 'px';
+        spot.style.left = left + 'px';
+        spot.style.width = w + 'px';
+        spot.style.height = h + 'px';
+        spot.classList.add('show','pulse');
+      }, 420);
+    },
+
+    // ── Type subtitle + speak narration ──
+    _typeAndSpeak: function(text, autoplay){
+      var self = this;
+      var subEl = this.el('via-tour-sub');
+      // typewriter subtitle
+      clearTimeout(this.typer);
+      subEl.innerHTML = '';
+      var n = 0;
+      (function type(){
+        if(n <= text.length){
+          subEl.innerHTML = text.slice(0, n) + '<span class="cursor"></span>';
+          n += 2;
+          self.typer = setTimeout(type, 14);
+        } else {
+          subEl.textContent = text;
+        }
+      })();
+      if(autoplay) this._speak(text);
+    },
+
+    _cancelSpeech: function(){
+      this.speakToken++;
+      this.el('via-tour-root').classList.remove('speaking');
+      if(this.audio){ try{ this.audio.pause(); this.audio.src=''; }catch(e){} this.audio = null; }
+      if(window.speechSynthesis){ try{ window.speechSynthesis.cancel(); }catch(e){} }
+    },
+
+    _onSpeechEnd: function(){
+      var self = this;
+      this.el('via-tour-root').classList.remove('speaking');
+      if(!this.playing) return;
+      // advance after a short pause, unless last step
+      if(this.idx < TOTAL - 1){
+        this.stepTimer = setTimeout(function(){ if(self.playing) self.next(); }, 900);
+      }
+    },
+
+    // ── Speak: ElevenLabs first, Web Speech fallback ──
+    _speak: function(text){
+      var self = this;
+      this._cancelSpeech();
+      var token = this.speakToken;
+      this.el('via-tour-root').classList.add('speaking');
+
+      if(this.elFailed || !EL_KEY){ this._speakWeb(text, token); return; }
+
+      this.el('via-tour-voicelabel').textContent = 'Victor';
+      fetch('https://api.elevenlabs.io/v1/text-to-speech/' + EL_VOICE, {
+        method:'POST',
+        headers:{ 'xi-api-key': EL_KEY, 'Content-Type':'application/json', 'Accept':'audio/mpeg' },
+        body: JSON.stringify({
+          text: text,
+          model_id: EL_MODEL,
+          voice_settings:{ stability:0.5, similarity_boost:0.75, style:0.15, use_speaker_boost:true }
+        })
+      })
+      .then(function(r){ if(!r.ok) throw new Error('EL ' + r.status); return r.blob(); })
+      .then(function(blob){
+        if(token !== self.speakToken) return; // stale
+        var url = URL.createObjectURL(blob);
+        var a = new Audio(url);
+        a.playbackRate = self.speed;
+        self.audio = a;
+        a.onended = function(){ URL.revokeObjectURL(url); if(token===self.speakToken) self._onSpeechEnd(); };
+        a.onerror = function(){ if(token===self.speakToken){ self.elFailed = true; self._speakWeb(text, token); } };
+        a.play().catch(function(){ if(token===self.speakToken){ self.elFailed = true; self._speakWeb(text, token); } });
+      })
+      .catch(function(){
+        if(token !== self.speakToken) return;
+        self.elFailed = true;
+        self._speakWeb(text, token);
+      });
+    },
+
+    _speakWeb: function(text, token){
+      var self = this;
+      this.el('via-tour-voicelabel').textContent = 'Voz (sistema)';
+      if(!('speechSynthesis' in window)){ this._onSpeechEnd(); return; }
+      try { window.speechSynthesis.cancel(); } catch(e){}
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'es-MX';
+      u.rate = Math.min(2, 0.98 * this.speed);
+      u.pitch = 1.0;
+      // pick a Spanish voice if available
+      var voices = window.speechSynthesis.getVoices() || [];
+      var esVoice = voices.find(function(v){ return /es[-_]MX/i.test(v.lang); })
+                 || voices.find(function(v){ return /^es/i.test(v.lang); });
+      if(esVoice) u.voice = esVoice;
+      u.onend = function(){ if(token===self.speakToken) self._onSpeechEnd(); };
+      u.onerror = function(){ if(token===self.speakToken) self._onSpeechEnd(); };
+      window.speechSynthesis.speak(u);
+    }
+  };
+
+  // preload voices for Web Speech fallback
+  if('speechSynthesis' in window){
+    window.speechSynthesis.onvoiceschanged = function(){};
+    try { window.speechSynthesis.getVoices(); } catch(e){}
+  }
+
+  // keyboard controls while tour is open
+  document.addEventListener('keydown', function(e){
+    if(!document.getElementById('via-tour-root').classList.contains('on')) return;
+    if(e.key === 'Escape'){ T.stop(); }
+    else if(e.key === 'ArrowRight'){ T.next(); }
+    else if(e.key === 'ArrowLeft'){ T.prev(); }
+    else if(e.key === ' '){ e.preventDefault(); T.togglePlay(); }
+  });
+
+  // reposition spotlight on resize
+  window.addEventListener('resize', function(){
+    if(document.getElementById('via-tour-root').classList.contains('on')){
+      T._spotlight(STEPS[T.idx].sel);
+    }
+  });
+
+  window.ViaTour = T;
+})();
+</script>
 </body>
 </html>
