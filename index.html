@@ -16613,21 +16613,94 @@ function studioAttachFile(file){
 /* ── TOUR · backdrop + spotlight ── */
 #via-tour-root{ position:fixed; inset:0; z-index:99990; display:none; pointer-events:none; }
 #via-tour-root.on{ display:block; }
+/* Fondo: oscurece + DESENFOCA todo lo que NO es el elemento explicado */
 #via-tour-backdrop{
   position:fixed; inset:0; pointer-events:auto;
-  background:rgba(5,6,8,.72); backdrop-filter:blur(2px) saturate(120%);
-  transition:opacity .35s ease; opacity:0;
+  background:radial-gradient(circle at 50% 45%, rgba(5,6,8,.55), rgba(3,4,6,.86) 70%);
+  backdrop-filter:blur(5px) saturate(85%) brightness(.62);
+  -webkit-backdrop-filter:blur(5px) saturate(85%) brightness(.62);
+  transition:opacity .4s ease; opacity:0;
 }
 #via-tour-root.on #via-tour-backdrop{ opacity:1; }
-/* spotlight ring drawn around highlighted element */
+
+/* ── Elemento explicado: NÍTIDO, elevado sobre el blur, brillando ── */
+/* La clase se aplica al elemento real para sacarlo del desenfoque y darle glow */
+.via-tour-target{
+  position:relative !important;
+  z-index:99992 !important;
+  border-radius:10px;
+  transition:box-shadow .45s ease, filter .45s ease, transform .45s ease;
+  filter:drop-shadow(0 0 14px rgba(255,170,23,.55)) brightness(1.06) saturate(1.08);
+  animation:viaTargetGlow 2.4s ease-in-out infinite;
+}
+@keyframes viaTargetGlow{
+  0%,100%{
+    box-shadow:0 0 0 2px rgba(255,170,23,.9),
+               0 0 22px 4px rgba(255,170,23,.45),
+               0 0 60px 10px rgba(255,170,23,.22);
+    filter:drop-shadow(0 0 12px rgba(255,170,23,.5)) brightness(1.05) saturate(1.06);
+  }
+  50%{
+    box-shadow:0 0 0 3px rgba(255,200,90,1),
+               0 0 34px 8px rgba(255,170,23,.6),
+               0 0 90px 18px rgba(255,170,23,.34);
+    filter:drop-shadow(0 0 20px rgba(255,170,23,.7)) brightness(1.1) saturate(1.12);
+  }
+}
+
+/* spotlight: ANILLO LUMINOSO que rodea el elemento (refuerza el aura) */
 #via-tour-spot{
-  position:fixed; pointer-events:none; border-radius:8px; z-index:99991;
-  box-shadow:0 0 0 4px rgba(255,170,23,.85), 0 0 0 9999px rgba(5,6,8,.74), 0 0 40px 8px rgba(255,170,23,.35);
-  transition:all .55s cubic-bezier(.4,0,.2,1); opacity:0;
+  position:fixed; pointer-events:none; border-radius:12px; z-index:99991;
+  border:2px solid rgba(255,170,23,.95);
+  box-shadow:0 0 0 2px rgba(255,200,90,.55),
+             0 0 26px 6px rgba(255,170,23,.5),
+             0 0 70px 16px rgba(255,170,23,.3),
+             inset 0 0 22px 2px rgba(255,170,23,.28);
+  transition:top .55s cubic-bezier(.4,0,.2,1), left .55s cubic-bezier(.4,0,.2,1),
+             width .55s cubic-bezier(.4,0,.2,1), height .55s cubic-bezier(.4,0,.2,1),
+             opacity .4s ease; opacity:0;
+}
+#via-tour-spot::after{
+  content:''; position:absolute; inset:-6px; border-radius:16px; pointer-events:none;
+  background:radial-gradient(closest-side, rgba(255,170,23,.18), transparent 78%);
+  opacity:.9;
 }
 #via-tour-spot.show{ opacity:1; }
-@keyframes viaTourPulse{ 0%,100%{ box-shadow:0 0 0 4px rgba(255,170,23,.85),0 0 0 9999px rgba(5,6,8,.74),0 0 40px 8px rgba(255,170,23,.35);} 50%{ box-shadow:0 0 0 6px rgba(255,170,23,.55),0 0 0 9999px rgba(5,6,8,.74),0 0 55px 14px rgba(255,170,23,.5);} }
+@keyframes viaTourPulse{
+  0%,100%{
+    box-shadow:0 0 0 2px rgba(255,200,90,.55),
+               0 0 26px 6px rgba(255,170,23,.5),
+               0 0 70px 16px rgba(255,170,23,.3),
+               inset 0 0 22px 2px rgba(255,170,23,.28);
+    border-color:rgba(255,170,23,.95);
+  }
+  50%{
+    box-shadow:0 0 0 4px rgba(255,200,90,.85),
+               0 0 40px 12px rgba(255,170,23,.66),
+               0 0 110px 26px rgba(255,170,23,.42),
+               inset 0 0 30px 4px rgba(255,170,23,.4);
+    border-color:rgba(255,210,120,1);
+  }
+}
 #via-tour-spot.pulse{ animation:viaTourPulse 2.2s ease-in-out infinite; }
+/* barrido de brillo (shine) que recorre el anillo */
+#via-tour-spot.pulse::before{
+  content:''; position:absolute; inset:0; border-radius:12px; pointer-events:none; overflow:hidden;
+  background:linear-gradient(115deg, transparent 35%, rgba(255,235,180,.45) 50%, transparent 65%);
+  background-size:250% 250%;
+  animation:viaTourShine 3.2s ease-in-out infinite;
+  mix-blend-mode:screen;
+}
+@keyframes viaTourShine{
+  0%{ background-position:200% 0; opacity:0; }
+  35%{ opacity:1; }
+  100%{ background-position:-80% 0; opacity:0; }
+}
+@media (prefers-reduced-motion: reduce){
+  .via-tour-target{ animation:none; }
+  #via-tour-spot.pulse{ animation:none; }
+  #via-tour-spot.pulse::before{ animation:none; display:none; }
+}
 
 /* ── TOUR · panel de control ── */
 #via-tour-panel{
@@ -16974,6 +17047,7 @@ function studioAttachFile(file){
       clearTimeout(this._actTimer);
       this.el('via-tour-root').classList.remove('on','speaking');
       this.el('via-tour-spot').classList.remove('show','pulse');
+      this._clearTarget();
       document.body.style.overflow = '';
       // mark completed if at last step
       if(this.idx >= TOTAL - 1) localStorage.removeItem('via_tour_last');
@@ -17070,17 +17144,32 @@ function studioAttachFile(file){
       this.el('via-tour-play-txt').textContent = this.playing ? 'Pausar' : 'Reproducir';
     },
 
+    // ── Quita el realce (clase + glow) del elemento previo ──
+    _clearTarget: function(){
+      if(this._targetEl){
+        try{ this._targetEl.classList.remove('via-tour-target'); }catch(e){}
+        this._targetEl = null;
+      }
+    },
+
     // ── Spotlight an element ──
     _spotlight: function(sel){
       var spot = this.el('via-tour-spot');
-      var elm = document.querySelector(sel);
+      var elm = sel ? document.querySelector(sel) : null;
+      // limpia realce anterior siempre
+      this._clearTarget();
       if(!elm){ spot.classList.remove('show','pulse'); return; }
       // scroll into view (smooth)
       try { elm.scrollIntoView({ behavior:'smooth', block:'center' }); } catch(e){ elm.scrollIntoView(); }
       var self = this;
       setTimeout(function(){
+        // doble verificación: el elemento sigue existiendo en el DOM
+        if(!elm || !document.body.contains(elm)){ spot.classList.remove('show','pulse'); return; }
+        // hace NÍTIDO y BRILLANTE el elemento real (lo eleva sobre el blur del fondo)
+        elm.classList.add('via-tour-target');
+        self._targetEl = elm;
         var r = elm.getBoundingClientRect();
-        var pad = 8;
+        var pad = 10;
         // clamp to viewport so the ring stays visible
         var top = Math.max(6, r.top - pad);
         var left = Math.max(6, r.left - pad);
