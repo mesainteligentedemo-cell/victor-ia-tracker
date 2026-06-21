@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>VICTOR IA — Tracker Login</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -13,8 +14,9 @@
       --surface: #0E0F12;
       --amber: #FFAA17;
       --bone: #F8F7F5;
-      --bone2: rgba(248,247,245,0.65);
+      --bone2: rgba(248,247,245,0.55);
       --green: #4ade80;
+      --red: #f87171;
       --border: rgba(248,247,245,0.07);
     }
     @media (prefers-color-scheme: light) {
@@ -22,12 +24,13 @@
         --bg: #FFFFFF;
         --surface: #F9FAFB;
         --bone: #070809;
-        --bone2: rgba(7,8,9,0.65);
+        --bone2: rgba(7,8,9,0.6);
         --border: rgba(0,0,0,0.08);
+        --amber: #B87834;
       }
     }
     body {
-      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
       color: var(--bone);
       display: flex;
@@ -35,104 +38,82 @@
       justify-content: center;
       min-height: 100vh;
       padding: 20px;
+      -webkit-font-smoothing: antialiased;
     }
-    .container { max-width: 400px; width: 100%; }
+    .container { max-width: 380px; width: 100%; }
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 32px;
+      border-radius: 10px;
+      padding: 36px 32px;
     }
-    .logo { font-size: 32px; margin-bottom: 16px; }
-    h1 { font-size: 24px; color: var(--amber); margin-bottom: 8px; }
-    .subtitle { font-size: 12px; color: var(--bone2); margin-bottom: 24px; }
+    .logo { font-size: 34px; margin-bottom: 18px; line-height: 1; }
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--amber);
+      margin-bottom: 6px;
+    }
+    .subtitle { font-size: 12px; color: var(--bone2); margin-bottom: 28px; }
     .form-group { margin-bottom: 16px; }
-    label { display: block; font-size: 12px; text-transform: uppercase; color: var(--amber); margin-bottom: 6px; }
+    label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--bone2);
+      margin-bottom: 7px;
+    }
     input {
       width: 100%;
-      padding: 10px;
+      padding: 11px 12px;
       border: 1px solid var(--border);
-      background: transparent;
+      background: rgba(255,255,255,0.02);
       color: var(--bone);
-      border-radius: 4px;
+      border-radius: 6px;
       font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s;
     }
+    input::placeholder { color: var(--bone2); }
     input:focus { outline: none; border-color: var(--amber); }
     .btn {
       width: 100%;
       padding: 12px;
+      margin-top: 8px;
       background: var(--amber);
       color: var(--bg);
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       font-weight: 600;
-      cursor: pointer;
       font-size: 14px;
-      transition: opacity 0.2s;
+      font-family: inherit;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
     }
-    .btn:hover { opacity: 0.9; }
+    .btn:hover { opacity: 0.92; }
+    .btn:active { transform: scale(0.99); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .divider {
-      display: flex;
-      align-items: center;
-      margin: 20px 0;
-      gap: 12px;
-    }
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-    .divider-text { font-size: 12px; color: var(--bone2); }
-    .social-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .social-btn {
-      padding: 10px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--bone);
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s;
-    }
-    .social-btn:hover { background: rgba(255,170,23,0.1); border-color: var(--amber); }
-    .link {
-      text-align: center;
-      margin-top: 16px;
-      font-size: 12px;
-    }
-    .link a {
-      color: var(--amber);
-      text-decoration: none;
-      cursor: pointer;
-    }
-    .link a:hover { text-decoration: underline; }
     .error {
-      color: #f87171;
+      color: var(--red);
       font-size: 12px;
       margin-bottom: 16px;
-      padding: 8px;
+      padding: 9px 11px;
       background: rgba(248,113,113,0.1);
-      border-radius: 4px;
+      border: 1px solid rgba(248,113,113,0.2);
+      border-radius: 6px;
       display: none;
     }
     .error.show { display: block; }
-    .loading { position: relative; }
-    .loading::after {
-      content: '';
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255,170,23,0.3);
-      border-top-color: var(--amber);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    .footnote {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 11px;
+      color: var(--bone2);
+      line-height: 1.5;
     }
-    @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -144,110 +125,100 @@
 
       <div class="error" id="errorMsg"></div>
 
-      <form id="loginForm" onsubmit="handleLogin(event)">
+      <form id="loginForm" autocomplete="on">
         <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="email" required placeholder="you@example.com">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required autocomplete="username" placeholder="you@example.com">
         </div>
         <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="password" required placeholder="••••••••">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••">
         </div>
         <button type="submit" class="btn" id="loginBtn">Sign In</button>
       </form>
 
-      <div class="divider">
-        <span class="divider-text">OR</span>
-      </div>
-
-      <div class="social-buttons">
-        <button class="social-btn" onclick="loginWithGoogle()">Google</button>
-        <button class="social-btn" onclick="loginWithGithub()">GitHub</button>
-      </div>
-
-      <div class="link">
-        Don't have an account? <a onclick="goToSignup()">Sign up</a>
-      </div>
+      <p class="footnote">Acceso seguro · Tracker Victor IA</p>
     </div>
   </div>
 
   <script>
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyBciNfVGjH5l3szzGVgatXlZvLvaoNsp14",
-      authDomain: "victor-ia-tracker.firebaseapp.com",
-      projectId: "victor-ia-tracker",
-      storageBucket: "victor-ia-tracker.firebasestorage.app",
-      messagingSenderId: "475376340371",
-      appId: "1:475376340371:web:caaf70c5c4063edfcb6c66"
-    };
+    /* ── Login local (sin Firebase) — escribe via_access_* y redirige a / ── */
+    (function () {
+      'use strict';
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+      var form = document.getElementById('loginForm');
+      var emailEl = document.getElementById('email');
+      var passEl = document.getElementById('password');
+      var btn = document.getElementById('loginBtn');
+      var errorEl = document.getElementById('errorMsg');
 
-    // Check if already logged in
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        window.location.href = '/';
-      }
-    });
-
-    // Email/Password login
-    async function handleLogin(event) {
-      event.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const btn = document.getElementById('loginBtn');
-      const error = document.getElementById('errorMsg');
-
-      btn.disabled = true;
-      btn.textContent = 'Signing in...';
-      error.classList.remove('show');
-
+      // Si ya hay sesión local activa, ir directo al tracker.
       try {
-        const result = await auth.signInWithEmailAndPassword(email, password);
-        console.log('✅ Logged in:', result.user.email);
-        window.location.href = '/';
-      } catch (err) {
-        console.error('Login error:', err);
-        error.classList.add('show');
-        error.textContent = err.message;
-        btn.disabled = false;
-        btn.textContent = 'Sign In';
-      }
-    }
+        if (localStorage.getItem('via_access_authenticated') === 'true') {
+          window.location.replace('/index.html');
+          return;
+        }
+      } catch (e) { /* localStorage bloqueado: continuar al formulario */ }
 
-    // Google login
-    async function loginWithGoogle() {
-      try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        await auth.signInWithPopup(provider);
-        window.location.href = '/';
-      } catch (err) {
-        console.error('Google login error:', err);
-        document.getElementById('errorMsg').classList.add('show');
-        document.getElementById('errorMsg').textContent = err.message;
+      function showError(msg) {
+        errorEl.textContent = msg;
+        errorEl.classList.add('show');
       }
-    }
-
-    // GitHub login
-    async function loginWithGithub() {
-      try {
-        const provider = new firebase.auth.GithubAuthProvider();
-        await auth.signInWithPopup(provider);
-        window.location.href = '/';
-      } catch (err) {
-        console.error('GitHub login error:', err);
-        document.getElementById('errorMsg').classList.add('show');
-        document.getElementById('errorMsg').textContent = err.message;
+      function clearError() {
+        errorEl.classList.remove('show');
+        errorEl.textContent = '';
       }
-    }
 
-    // Go to signup
-    function goToSignup() {
-      window.location.href = '/signup.html';
-    }
+      // Nombre legible a partir del email (antes de @)
+      function nameFromEmail(email) {
+        var raw = (email.split('@')[0] || 'Usuario').replace(/[._-]+/g, ' ').trim();
+        return raw.replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+      }
+
+      // UID determinista simple (sin dependencias)
+      function uidFromEmail(email) {
+        var h = 0;
+        for (var i = 0; i < email.length; i++) {
+          h = ((h << 5) - h + email.charCodeAt(i)) | 0;
+        }
+        return 'local_' + Math.abs(h).toString(36);
+      }
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        clearError();
+
+        var email = (emailEl.value || '').trim().toLowerCase();
+        var password = passEl.value || '';
+
+        if (!email || email.indexOf('@') === -1) {
+          showError('Ingresa un email válido.');
+          return;
+        }
+        if (password.length < 4) {
+          showError('La contraseña debe tener al menos 4 caracteres.');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Entrando...';
+
+        try {
+          localStorage.setItem('via_access_uid', uidFromEmail(email));
+          localStorage.setItem('via_access_email', email);
+          localStorage.setItem('via_access_name', nameFromEmail(email));
+          localStorage.setItem('via_access_photo', '');
+          localStorage.setItem('via_access_role', 'viewer');
+          localStorage.setItem('via_access_authenticated', 'true');
+
+          window.location.replace('/index.html');
+        } catch (e) {
+          btn.disabled = false;
+          btn.textContent = 'Sign In';
+          showError('No se pudo guardar la sesión. Habilita el almacenamiento local del navegador.');
+        }
+      });
+    })();
   </script>
 </body>
 </html>

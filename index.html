@@ -39,7 +39,26 @@
   setTimeout(revealPage, 2500);
   window.addEventListener('error', revealPage);
 
-  // Initialize Firebase
+  // ── localStorage session helpers (Firebase-independent) ──
+  function hasLocalSession(){
+    try { return localStorage.getItem('via_access_authenticated') === 'true'; }
+    catch(e){ return false; }
+  }
+  function gotoLogin(){
+    // Only redirect if there is no local session (avoids login <-> tracker loop)
+    if (!hasLocalSession()) window.location.href = '/login.html';
+  }
+  function startClientMode(){
+    revealPage();
+    if (typeof initClientMode === 'function') {
+      try { initClientMode(); } catch(e) { console.warn('[tracker] initClientMode error:', e); }
+    }
+  }
+
+  // If a local session already exists, reveal immediately — no Firebase needed.
+  if (hasLocalSession()) { startClientMode(); }
+
+  // Initialize Firebase (optional enhancement; localStorage is the source of truth)
   var cfg={apiKey:"AIzaSyBciNfVGjH5l3szzGVgatXlZvLvaoNsp14",authDomain:"victor-ia-tracker.firebaseapp.com",projectId:"victor-ia-tracker",storageBucket:"victor-ia-tracker.firebasestorage.app",messagingSenderId:"475376340371",appId:"1:475376340371:web:caaf70c5c4063edfcb6c66"};
 
   try {
@@ -54,39 +73,40 @@
         isAuthChecked = true;
 
         if (user) {
-          // User is logged in
+          // User is logged in via Firebase
           localStorage.setItem('via_access_uid', user.uid);
           localStorage.setItem('via_access_email', user.email);
           localStorage.setItem('via_access_name', user.displayName || 'User');
           localStorage.setItem('via_access_photo', user.photoURL || '');
-          localStorage.setItem('via_access_role', 'viewer'); // default, will be updated from DB
+          if (!localStorage.getItem('via_access_role')) localStorage.setItem('via_access_role', 'viewer');
           localStorage.setItem('via_access_authenticated', 'true');
-
-          revealPage();
-          if (typeof initClientMode === 'function') {
-            try { initClientMode(); } catch(e) { console.warn('[tracker] initClientMode error:', e); }
-          }
+          startClientMode();
         } else {
-          // Not logged in - redirect to login
-          window.location.href = '/login.html';
+          // No Firebase user — fall back to localStorage session, else go to login
+          if (hasLocalSession()) { startClientMode(); }
+          else { gotoLogin(); }
         }
       });
 
-      // Timeout if auth check takes too long
+      // Timeout if auth check takes too long — rely on localStorage
       setTimeout(function() {
         if (!isAuthChecked) {
           console.warn('[tracker] Auth check timeout');
-          revealPage();
+          if (hasLocalSession()) { startClientMode(); }
+          else { gotoLogin(); }
         }
       }, 3000);
 
     } else {
-      console.warn('[tracker] Firebase SDK unavailable');
-      revealPage();
+      // Firebase SDK unavailable — pure localStorage mode
+      console.warn('[tracker] Firebase SDK unavailable, using localStorage session');
+      if (hasLocalSession()) { startClientMode(); }
+      else { gotoLogin(); }
     }
   } catch(e) {
     console.warn('[tracker] Firebase init error:', e);
-    revealPage();
+    if (hasLocalSession()) { startClientMode(); }
+    else { gotoLogin(); }
   }
 })();
 </script>
