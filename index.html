@@ -5126,6 +5126,33 @@ body.client-mode #main { margin-left: 0 !important; }
 .lpf-prog { height:5px; background:var(--bone3); border-radius:6px; overflow:hidden; margin:12px 0 14px; }
 .lpf-prog span { display:block; height:100%; background:linear-gradient(90deg,var(--amber),#34d399); border-radius:6px; transition:width .5s; }
 
+/* historial de ejecuciones (últimas 5) */
+.lpf-hist { margin:14px 0 4px; padding:14px 0 2px; border-top:1px solid var(--bone3); }
+.lpf-hist-t { font-size:10px; text-transform:uppercase; letter-spacing:.6px; color:var(--bone2); font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:7px; }
+.lpf-hist-t svg { width:13px; height:13px; color:var(--bone2); }
+.lpf-hist-list { display:flex; flex-direction:column; gap:5px; }
+.lpf-hrow { display:flex; align-items:center; gap:10px; font-size:12px; padding:6px 10px; background:var(--bg); border:1px solid var(--bone3); border-left-width:3px; border-radius:8px; }
+.lpf-hrow.r-ok   { border-left-color:#34d399; }
+.lpf-hrow.r-warn { border-left-color:#fbbf24; }
+.lpf-hrow.r-err  { border-left-color:#f87171; }
+.lpf-hrow .h-ic { width:16px; height:16px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0; }
+.lpf-hrow.r-ok   .h-ic { background:rgba(52,211,153,.16); color:#34d399; }
+.lpf-hrow.r-warn .h-ic { background:rgba(251,191,36,.16); color:#fbbf24; }
+.lpf-hrow.r-err  .h-ic { background:rgba(248,113,113,.16); color:#f87171; }
+.lpf-hrow .h-ts { color:var(--bone2); font-variant-numeric:tabular-nums; flex-shrink:0; min-width:108px; }
+.lpf-hrow .h-msg { color:var(--bone); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lpf-hrow .h-dur { color:var(--bone2); font-variant-numeric:tabular-nums; flex-shrink:0; }
+
+/* títulos de sección (Skills / Harness) */
+.lpf-sec-h { display:flex; align-items:center; gap:11px; margin:26px 0 14px; }
+.lpf-sec-h:first-of-type { margin-top:4px; }
+.lpf-sec-h .s-ic { width:34px; height:34px; border-radius:10px; background:var(--amber2); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.lpf-sec-h .s-ic svg { width:18px; height:18px; color:var(--amber); }
+.lpf-sec-h .s-tx { flex:1; min-width:0; }
+.lpf-sec-h .s-tt { font-size:15px; font-weight:800; color:var(--bone); line-height:1.2; }
+.lpf-sec-h .s-sb { font-size:11.5px; color:var(--bone2); margin-top:2px; }
+.lpf-sec-h .s-cn { font-size:11px; font-weight:700; color:var(--amber); background:var(--amber2); padding:4px 11px; border-radius:20px; flex-shrink:0; }
+
 /* controles */
 .lpf-ctrls { display:flex; gap:10px; flex-wrap:wrap; }
 .lpf-btn { display:inline-flex; align-items:center; gap:7px; font-family:inherit; font-size:12.5px; font-weight:700; padding:8px 15px; border-radius:9px; cursor:pointer; transition:.16s; border:1px solid var(--bone3); }
@@ -15816,7 +15843,7 @@ function studioAttachFile(file){
         '<p class="ifx-sub">Ecosistema Victor IA — skills, loops autonomos y estado del sistema. Tema THE DOOR.</p>'+
         '<div class="ifx-subtabs">'+
           '<button class="ifx-subtab on" data-panel="skills">Skills <span class="ifx-count" id="ifx-skill-count">…</span></button>'+
-          '<button class="ifx-subtab" data-panel="loops">Loops <span class="ifx-count">15</span></button>'+
+          '<button class="ifx-subtab" data-panel="loops">Loops <span class="ifx-count">20</span></button>'+
           '<button class="ifx-subtab" data-panel="costs">Costos <span class="ifx-count" id="ifx-cost-count">…</span></button>'+
           '<button class="ifx-subtab" data-panel="system">Sistema</button>'+
         '</div>'+
@@ -16071,34 +16098,159 @@ function studioAttachFile(file){
         ] }
     ],
 
+    // ====== LOOPS HARNESS — datos reales (~/.agents/.harness/loops/*.json) ======
+    // tasks = pasos reason→act→observe del JSON · state desde loop-states/ · history desde loop-logs/
+    // status por tarea: 'done' | 'run' (en progreso) | 'wait' (pendiente)
+    HARNESS_LOOPS: [
+      { id:'video_production', name:'Video Production Loop', icon:'video',
+        src:'~/.agents/.harness/loops/loop_video_production.json',
+        every:'On-demand · máx 8 iter · 120m', cron:'on_demand', enabled:true, demo:false,
+        last:'Hoy 11:42', lastResult:'ok', success:90,
+        tasks:[
+          {n:'reason · Planificación',   dur:'~', st:'done'},
+          {n:'act · Implementación',     dur:'~', st:'done'},
+          {n:'observe · Verificación',   dur:'~', st:'run'}
+        ],
+        history:[
+          {ts:'Hoy 11:42',    r:'ok',   dur:'35m', msg:'LATIVA_final.mp4 + VTT · 10/10 checks pass'},
+          {ts:'Ayer 18:05',   r:'ok',   dur:'41m', msg:'Spot 4K · audio sync 92ms · 8 escenas únicas'},
+          {ts:'19 jun 14:20', r:'warn', dur:'52m', msg:'Render OK · color delta_E 2.4 (>2.0) iter 3'},
+          {ts:'17 jun 09:33', r:'ok',   dur:'33m', msg:'Reel vertical · 60fps · subtítulos accurate'},
+          {ts:'15 jun 22:11', r:'err',  dur:'—',   msg:'Max iteraciones (8) → escalado a Revisor manual'}
+        ] },
+      { id:'web_deploy', name:'Web Deployment Loop', icon:'web',
+        src:'~/.agents/.harness/loops/loop_web_deploy.json',
+        every:'On-demand · máx 6 iter · 30m', cron:'on_demand', enabled:true, demo:false,
+        last:'Hoy 09:08', lastResult:'ok', success:93,
+        tasks:[
+          {n:'reason · Pre-Deploy Analysis', dur:'~', st:'done'},
+          {n:'act · Deploy Execution',       dur:'~', st:'done'},
+          {n:'observe · Post-Deploy Valid.', dur:'~', st:'done'}
+        ],
+        history:[
+          {ts:'Hoy 09:08',    r:'ok',   dur:'8m',  msg:'victor-ia-website · Lighthouse 94 · CWV verdes'},
+          {ts:'Ayer 16:40',   r:'ok',   dur:'7m',  msg:'roes-co-website · 0 404s · dark mode OK'},
+          {ts:'19 jun 11:02', r:'warn', dur:'12m', msg:'Lighthouse 78 (<80) → CSS audit iter 2 → 86'},
+          {ts:'18 jun 20:15', r:'ok',   dur:'9m',  msg:'tracker · build OK · responsive mobile OK'},
+          {ts:'16 jun 13:50', r:'ok',   dur:'6m',  msg:'brandbook · todas imágenes loading · LCP 1.9s'}
+        ] },
+      { id:'design_polish', name:'Design Polish Loop', icon:'design',
+        src:'~/.agents/.harness/loops/loop_design_polish.json',
+        every:'On-demand · máx 7 iter · 60m', cron:'on_demand', enabled:true, demo:false,
+        last:'Hoy 12:30', lastResult:'warn', success:87,
+        tasks:[
+          {n:'reason · Design Analysis', dur:'~', st:'done'},
+          {n:'act · Implementation',     dur:'~', st:'run'},
+          {n:'observe · Visual QA',      dur:'~', st:'wait'}
+        ],
+        history:[
+          {ts:'Hoy 12:30',    r:'warn', dur:'45m', msg:'CSS Quality 48/53 (<50) → feedback al Designer'},
+          {ts:'Ayer 10:18',   r:'ok',   dur:'38m', msg:'Homepage · 51/53 · animaciones 60fps · grid 4px'},
+          {ts:'19 jun 15:44', r:'ok',   dur:'52m', msg:'Pricing cards · contraste WCAG AA · dark mode'},
+          {ts:'18 jun 09:05', r:'ok',   dur:'41m', msg:'Hero redesign · pixel-perfect vs Figma · 50/53'},
+          {ts:'15 jun 21:30', r:'warn', dur:'58m', msg:'Responsive roto en 768px → Mobile UX expert'}
+        ] },
+      { id:'skill_creation', name:'Skill Creation Loop', icon:'neuro',
+        src:'~/.agents/.harness/loops/loop_skill_creation.json',
+        every:'On-demand · máx 8 iter · 90m', cron:'on_demand', enabled:true, demo:false,
+        last:'Ayer 23:14', lastResult:'ok', success:91,
+        tasks:[
+          {n:'reason · Requirements Analysis', dur:'~', st:'done'},
+          {n:'act · Skill Implementation',     dur:'~', st:'done'},
+          {n:'observe · Quality Validation',   dur:'~', st:'done'}
+        ],
+        history:[
+          {ts:'Ayer 23:14',   r:'ok',   dur:'75m', msg:'svg-motion-advanced · tests pass · en MEMORY.md'},
+          {ts:'18 jun 17:50', r:'ok',   dur:'68m', msg:'youtube-transcript · examples runnable · bitácora'},
+          {ts:'16 jun 14:22', r:'warn', dur:'82m', msg:'cov 0.74 (<0.8) → QA engineer → tests añadidos'},
+          {ts:'14 jun 11:10', r:'ok',   dur:'71m', msg:'ollama-cliente-setup · docs 0.96 · 0 secrets'},
+          {ts:'12 jun 20:05', r:'ok',   dur:'63m', msg:'groq-api-setup · integración harness OK'}
+        ] },
+      { id:'client_workflow', name:'Client Workflow Loop', icon:'crm',
+        src:'~/.agents/.harness/loops/loop_client_workflow.json',
+        every:'On-demand · máx 5 iter · 480m', cron:'on_demand', enabled:true, demo:false,
+        last:'Hoy 10:00', lastResult:'ok', success:88,
+        tasks:[
+          {n:'reason · Client Assessment',    dur:'~', st:'done'},
+          {n:'act · Proposal & Execution',    dur:'~', st:'run'},
+          {n:'observe · Quality & Satisfac.', dur:'~', st:'wait'}
+        ],
+        history:[
+          {ts:'Hoy 10:00',    r:'ok',   dur:'3 sem', msg:'ROES & CO · sitio live · pagado · NPS 9'},
+          {ts:'18 jun 09:30', r:'ok',   dur:'2 sem', msg:'Aldo Rendón · propuesta aprobada · firmada'},
+          {ts:'14 jun 12:00', r:'warn', dur:'4 sem', msg:'Pago retrasado → escalado a Finance'},
+          {ts:'10 jun 16:45', r:'ok',   dur:'3 sem', msg:'Seabird · deliverables OK · sign-off cliente'},
+          {ts:'05 jun 11:20', r:'err',  dur:'—',     msg:'Propuesta rechazada → Sales specialist'}
+        ] }
+    ],
+
     // estados runtime de UI (ejecutar/pausar) sobre la copia LOOPS
     loopState: {},
+
+    // acceso unificado a ambos arrays (skills + harness)
+    _allLoops: function(){ return this.LOOPS.concat(this.HARNESS_LOOPS); },
+    _findLoop: function(id){
+      return this._allLoops().filter(function(x){return x.id===id;})[0];
+    },
 
     _stTxt: { done:'Completada', run:'En progreso', wait:'Pendiente' },
     _stIco: { done:'✓', run:'⏳', wait:'○' },
 
     renderLoops: function(){
       var self = this;
-      var loops = this.LOOPS;
-      var total = loops.length;
-      var active = loops.filter(function(l){ return self._enabled(l); }).length;
+      var all = this._allLoops();
+      var total = all.length;
+      var active = all.filter(function(l){ return self._enabled(l); }).length;
       var paused = total - active;
-      var avg = Math.round(loops.filter(function(l){return self._enabled(l);})
+      var avg = Math.round(all.filter(function(l){return self._enabled(l);})
                   .reduce(function(a,l){return a+l.success;},0) / (active||1));
 
       var html = ''+
-        '<p class="lpf-note">Cada loop ejecuta una secuencia de tareas repetitivas. '+
-          'Fuente: <code>~/.claude/skills/loops/schedule.json</code>. Estado y horarios en vivo.</p>'+
+        '<p class="lpf-note">Cada loop ejecuta una secuencia de tareas repetitivas con verificación automática. '+
+          'Fuentes: <code>~/.claude/skills/loops/schedule.json</code> (Skills) y '+
+          '<code>~/.agents/.harness/loops/</code> (Harness). Estado y horarios en vivo.</p>'+
         '<div class="ifx-stats">'+
-          '<div class="ifx-stat"><div class="v">'+total+'</div><div class="l">Loops configurados</div></div>'+
+          '<div class="ifx-stat"><div class="v">'+total+'</div><div class="l">Loops totales (15+5)</div></div>'+
           '<div class="ifx-stat"><div class="v">'+active+'</div><div class="l">Activos ahora</div></div>'+
           '<div class="ifx-stat"><div class="v">'+paused+'</div><div class="l">Pausados</div></div>'+
           '<div class="ifx-stat"><div class="v">'+avg+'%</div><div class="l">Success rate prom.</div></div>'+
         '</div>'+
-        '<div class="lpf-list" id="lpf-list">';
-      loops.forEach(function(l){ html += self._loopCard(l); });
+        '<div class="lpf-list" id="lpf-list">'+
+          this._sectionHeader('loop','Loops Skills','Programados por cron · '+this.LOOPS.length+' loops autónomos del sistema', this.LOOPS.length);
+      this.LOOPS.forEach(function(l){ html += self._loopCard(l); });
+      html += this._sectionHeader('sys','Loops Harness','Ciclos reason → act → observe del harness · '+this.HARNESS_LOOPS.length+' loops on-demand', this.HARNESS_LOOPS.length);
+      this.HARNESS_LOOPS.forEach(function(l){ html += self._loopCard(l); });
       html += '</div>';
       return html;
+    },
+
+    _sectionHeader: function(icon, title, sub, count){
+      return ''+
+      '<div class="lpf-sec-h">'+
+        '<div class="s-ic">'+svg(icon)+'</div>'+
+        '<div class="s-tx"><div class="s-tt">'+esc(title)+'</div><div class="s-sb">'+esc(sub)+'</div></div>'+
+        '<span class="s-cn">'+count+'</span>'+
+      '</div>';
+    },
+
+    // historial de últimas 5 ejecuciones (solo loops harness)
+    _historyHtml: function(l){
+      if(!l.history || !l.history.length) return '';
+      var rmap = { ok:'✓', warn:'!', err:'×' };
+      var rows = l.history.slice(0,5).map(function(h){
+        return '<div class="lpf-hrow r-'+h.r+'">'+
+            '<span class="h-ic">'+(rmap[h.r]||'•')+'</span>'+
+            '<span class="h-ts">'+esc(h.ts)+'</span>'+
+            '<span class="h-msg">'+esc(h.msg)+'</span>'+
+            '<span class="h-dur">'+esc(h.dur)+'</span>'+
+          '</div>';
+      }).join('');
+      return '<div class="lpf-hist">'+
+          '<div class="lpf-hist-t">'+
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>'+
+            'Historial · últimas 5 ejecuciones</div>'+
+          '<div class="lpf-hist-list">'+rows+'</div>'+
+        '</div>';
     },
 
     _enabled: function(l){
@@ -16108,6 +16260,7 @@ function studioAttachFile(file){
 
     _nextRun: function(l){
       if(l.cron==='after_each_loop') return 'Tras próximo loop';
+      if(l.cron==='on_demand') return 'Bajo demanda (trigger)';
       // texto legible derivado de "every"
       return l.every.replace(/^Cada día · /,'Mañana ').replace(/^L-V · /,'Próx. día hábil ')
                      .replace(/^Lunes · /,'Próx. lunes ').replace(/^Domingo · /,'Próx. domingo ')
@@ -16168,6 +16321,8 @@ function studioAttachFile(file){
 
         '<div class="lpf-prog"><span style="width:'+prog+'%"></span></div>'+
 
+        this._historyHtml(l)+
+
         '<div class="lpf-ctrls">'+
           '<button class="lpf-btn run" data-act="run" '+(on?'':'disabled')+'>'+
             '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg> Ejecutar ahora</button>'+
@@ -16198,7 +16353,7 @@ function studioAttachFile(file){
     },
 
     _toggleLoop: function(id){
-      var l = this.LOOPS.filter(function(x){return x.id===id;})[0];
+      var l = this._findLoop(id);
       if(!l) return;
       var cur = this._enabled(l);
       this.loopState[id] = this.loopState[id] || {};
@@ -16208,7 +16363,7 @@ function studioAttachFile(file){
 
     _runLoop: function(id, card){
       var self = this;
-      var l = this.LOOPS.filter(function(x){return x.id===id;})[0];
+      var l = this._findLoop(id);
       if(!l || !this._enabled(l)) return;
       // animación de "corrida": resetear tareas a wait y avanzar una por una
       l.tasks.forEach(function(t){ t.st='wait'; });
@@ -16237,13 +16392,15 @@ function studioAttachFile(file){
       var list = document.getElementById('lpf-list');
       if(!list) return;
       var self = this;
-      var html = '';
+      var html = this._sectionHeader('loop','Loops Skills','Programados por cron · '+this.LOOPS.length+' loops autónomos del sistema', this.LOOPS.length);
       this.LOOPS.forEach(function(l){ html += self._loopCard(l); });
+      html += this._sectionHeader('sys','Loops Harness','Ciclos reason → act → observe del harness · '+this.HARNESS_LOOPS.length+' loops on-demand', this.HARNESS_LOOPS.length);
+      this.HARNESS_LOOPS.forEach(function(l){ html += self._loopCard(l); });
       list.innerHTML = html;
     },
 
     _repaintOne: function(id){
-      var l = this.LOOPS.filter(function(x){return x.id===id;})[0];
+      var l = this._findLoop(id);
       var card = document.querySelector('.lpf-card[data-loop="'+id+'"]');
       if(!l || !card) return;
       var wasRun = card.classList.contains('running');
@@ -16476,7 +16633,7 @@ function studioAttachFile(file){
           '<div class="ifx-stat"><div class="v">v1.2</div><div class="l">Version del sistema</div></div>'+
           '<div class="ifx-stat"><div class="v">99.9%</div><div class="l">Uptime</div></div>'+
           '<div class="ifx-stat"><div class="v">226</div><div class="l">Skills cargados</div></div>'+
-          '<div class="ifx-stat"><div class="v">14</div><div class="l">Loops</div></div>'+
+          '<div class="ifx-stat"><div class="v">20</div><div class="l">Loops</div></div>'+
         '</div>'+
         '<div class="ifx-sys-grid">'+
           '<div class="ifx-sys-card"><h4>Sistema</h4>'+
@@ -16488,7 +16645,7 @@ function studioAttachFile(file){
           '</div>'+
           '<div class="ifx-sys-card"><h4>Capacidades</h4>'+
             '<div class="ifx-sys-row"><span class="k">Skills activos</span><span class="val amber">226</span></div>'+
-            '<div class="ifx-sys-row"><span class="k">Loops autonomos</span><span class="val">14</span></div>'+
+            '<div class="ifx-sys-row"><span class="k">Loops autonomos</span><span class="val">20 (15 skills + 5 harness)</span></div>'+
             '<div class="ifx-sys-row"><span class="k">MCPs conectados</span><span class="val">13</span></div>'+
             '<div class="ifx-sys-row"><span class="k">Agentes paralelos</span><span class="val green">Si</span></div>'+
             '<div class="ifx-sys-row"><span class="k">Auto-aprendizaje</span><span class="val green">Activo</span></div>'+
