@@ -5404,9 +5404,9 @@ body.client-mode #main { margin-left: 0 !important; }
   <!-- LEFT: filtros y opciones -->
   <div class="topbar-btns">
     <button class="btn-primary-cta" onclick="openAdd()" aria-label="Agregar nueva entrada">+ Entrada</button>
-    <button class="btn-tour-cta" id="tour-start-btn" onclick="ViaTour.start()" aria-label="Iniciar tour guiado con voz" title="Tour guiado con voz">
+    <button class="btn-tour-cta" id="tour-start-btn" onclick="ViaTour.toggle()" aria-label="Iniciar o detener tour guiado con voz" title="Tour guiado con voz">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      Tour Guiado
+      Tour
     </button>
     <button class="btn-desktop" onclick="exportCSV()" aria-label="Exportar datos como CSV">Export CSV</button>
     <button class="btn-desktop" onclick="toggleSidebar()" aria-label="Mostrar u ocultar filtros avanzados">Filtros</button>
@@ -16699,114 +16699,17 @@ function studioAttachFile(file){
   #via-tour-spot.pulse::before{ animation:none; display:none; }
 }
 
-/* ── TOUR · panel de control ── */
-#via-tour-panel{
-  position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px);
-  width:min(680px,calc(100vw - 32px)); pointer-events:auto; z-index:99993;
-  background:linear-gradient(180deg,rgba(19,20,24,.98),rgba(11,12,15,.98));
-  border:1px solid rgba(255,170,23,.22); border-radius:14px;
-  box-shadow:0 24px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(248,247,245,.04) inset;
-  padding:18px 20px 16px; opacity:0; transition:all .4s cubic-bezier(.4,0,.2,1);
-  font-family:'Space Grotesk',sans-serif;
-}
-#via-tour-root.on #via-tour-panel{ opacity:1; transform:translateX(-50%) translateY(0); }
-.via-tour-topline{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
-.via-tour-step-badge{
-  display:inline-flex; align-items:center; gap:8px; font-size:11px; font-weight:700;
-  letter-spacing:.08em; text-transform:uppercase; color:var(--amber);
-}
-.via-tour-step-badge .dot{ width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber); animation:viaTourDot 1.6s ease-in-out infinite; }
-@keyframes viaTourDot{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
-.via-tour-close{ background:none;border:none;color:var(--bone2);cursor:pointer;font-size:18px;line-height:1;padding:4px;border-radius:6px;transition:.15s; }
-.via-tour-close:hover{ color:var(--bone); background:rgba(248,247,245,.08); }
-
-.via-tour-title{ font-size:18px; font-weight:800; color:var(--bone); letter-spacing:-.01em; margin-bottom:6px; }
-.via-tour-subtitle{
-  font-size:13.5px; line-height:1.55; color:var(--bone); min-height:42px;
-  font-family:'Inter',sans-serif; font-weight:400;
-}
-.via-tour-subtitle .cursor{ display:inline-block;width:2px;height:1em;background:var(--amber);margin-left:1px;vertical-align:text-bottom;animation:viaTourDot 1s steps(2) infinite; }
-
-/* progress bar */
-.via-tour-prog{ height:4px; background:var(--bone3); border-radius:99px; overflow:hidden; margin:12px 0 14px; }
-.via-tour-prog-fill{ height:100%; width:0%; background:linear-gradient(90deg,var(--amber),#ffd27a); border-radius:99px; transition:width .5s ease; }
-
-/* controls row */
-.via-tour-controls{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.via-tour-btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  background:rgba(248,247,245,.06); color:var(--bone); border:1px solid var(--border);
-  border-radius:8px; padding:8px 12px; font-size:12.5px; font-weight:600; cursor:pointer;
-  transition:.15s; font-family:'Space Grotesk',sans-serif; min-height:38px;
-}
-.via-tour-btn:hover{ background:rgba(248,247,245,.12); border-color:rgba(248,247,245,.18); }
-.via-tour-btn:disabled{ opacity:.35; cursor:not-allowed; }
-.via-tour-btn.primary{ background:var(--amber); color:#070809; border-color:var(--amber); font-weight:800; }
-.via-tour-btn.primary:hover{ background:#ffbb43; }
-.via-tour-btn svg{ flex-shrink:0; }
-.via-tour-spacer{ flex:1; }
-.via-tour-speed{
-  display:inline-flex; align-items:center; gap:0; background:rgba(248,247,245,.05);
-  border:1px solid var(--border); border-radius:8px; overflow:hidden;
-}
-.via-tour-speed button{
-  background:none;border:none;color:var(--bone2);cursor:pointer;font-size:11.5px;font-weight:700;
-  padding:8px 9px;transition:.15s;font-family:'Space Grotesk',sans-serif;
-}
-.via-tour-speed button.on{ background:var(--amber); color:#070809; }
-.via-tour-speed button:hover:not(.on){ color:var(--bone); }
-.via-tour-voicebadge{ font-size:10px; color:var(--bone2); letter-spacing:.04em; display:flex;align-items:center;gap:5px; }
-.via-tour-voicebadge .eq{ display:inline-flex;gap:2px;align-items:flex-end;height:11px; }
-.via-tour-voicebadge .eq i{ width:2px;background:var(--amber);border-radius:2px;height:4px; }
-#via-tour-root.speaking .via-tour-voicebadge .eq i{ animation:viaEq .7s ease-in-out infinite; }
-#via-tour-root.speaking .via-tour-voicebadge .eq i:nth-child(2){ animation-delay:.15s; }
-#via-tour-root.speaking .via-tour-voicebadge .eq i:nth-child(3){ animation-delay:.3s; }
-@keyframes viaEq{ 0%,100%{height:3px;} 50%{height:11px;} }
-
-@media (max-width:560px){
-  #via-tour-panel{ bottom:12px; padding:14px 14px 12px; border-radius:12px; }
-  .via-tour-title{ font-size:16px; }
-  .via-tour-controls .label-txt{ display:none; }
-  .via-tour-btn{ padding:8px 10px; }
+/* ── TOUR MINIMALISTA · solo marco + voz · sin panel, sin texto, sin controles ── */
+/* Estado activo del botón en topbar mientras el tour corre */
+.btn-tour-cta.tour-active{
+  background:var(--amber); color:#070809; border-color:var(--amber);
+  box-shadow:0 0 0 1px rgba(255,170,23,.6),0 0 22px rgba(255,170,23,.4);
 }
 </style>
 
 <div id="via-tour-root" role="dialog" aria-modal="true" aria-label="Tour guiado del tracker">
   <div id="via-tour-backdrop"></div>
   <div id="via-tour-spot"></div>
-  <div id="via-tour-panel">
-    <div class="via-tour-topline">
-      <span class="via-tour-step-badge"><span class="dot"></span><span id="via-tour-stepnum">Paso 1 de 33</span></span>
-      <div class="via-tour-voicebadge"><span class="eq"><i></i><i></i><i></i></span><span id="via-tour-voicelabel">Voz</span></div>
-      <button class="via-tour-close" onclick="ViaTour.stop()" aria-label="Cerrar tour">✕</button>
-    </div>
-    <div class="via-tour-title" id="via-tour-title">Bienvenido</div>
-    <div class="via-tour-subtitle" id="via-tour-sub"></div>
-    <div class="via-tour-prog"><div class="via-tour-prog-fill" id="via-tour-progfill"></div></div>
-    <div class="via-tour-controls">
-      <button class="via-tour-btn" id="via-tour-prev" onclick="ViaTour.prev()" aria-label="Paso anterior">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        <span class="label-txt">Anterior</span>
-      </button>
-      <button class="via-tour-btn primary" id="via-tour-play" onclick="ViaTour.togglePlay()" aria-label="Reproducir o pausar">
-        <span id="via-tour-play-ico"></span><span class="label-txt" id="via-tour-play-txt">Pausar</span>
-      </button>
-      <button class="via-tour-btn" id="via-tour-next" onclick="ViaTour.next()" aria-label="Paso siguiente">
-        <span class="label-txt">Siguiente</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-      <button class="via-tour-btn" id="via-tour-stop" onclick="ViaTour.stop()" aria-label="Detener tour">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
-        <span class="label-txt">Detener</span>
-      </button>
-      <span class="via-tour-spacer"></span>
-      <div class="via-tour-speed" role="group" aria-label="Velocidad de narración">
-        <button data-speed="1" class="on" onclick="ViaTour.setSpeed(1,this)">1x</button>
-        <button data-speed="1.5" onclick="ViaTour.setSpeed(1.5,this)">1.5x</button>
-        <button data-speed="2" onclick="ViaTour.setSpeed(2,this)">2x</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -17018,21 +16921,25 @@ function studioAttachFile(file){
     playing: false,
     speed: 1,
     audio: null,
-    typer: null,
     stepTimer: null,
     speakToken: 0,
     elFailed: false,
 
     el: function(id){ return document.getElementById(id); },
 
+    // un solo botón: si está corriendo, detiene; si no, arranca
+    toggle: function(){
+      if(this.playing) this.stop();
+      else this.start();
+    },
+
     start: function(){
-      // resume from saved step (offer) or restart
-      var saved = parseInt(localStorage.getItem('via_tour_last') || '-1', 10);
-      this.idx = (saved > 0 && saved < TOTAL - 1) ? saved : 0;
+      // siempre desde el inicio (experiencia limpia, sin "paso X de Y")
+      this.idx = 0;
       this.el('via-tour-root').classList.add('on');
+      var btn = this.el('tour-start-btn'); if(btn) btn.classList.add('tour-active');
       /* sin bloquear scroll ni oscurecer: la pantalla queda 100% visible y usable */
       this.playing = true;
-      this.render();
       this.go(this.idx, true);
     },
 
@@ -17040,25 +16947,11 @@ function studioAttachFile(file){
       this.playing = false;
       this._cancelSpeech();
       clearTimeout(this.stepTimer);
-      clearTimeout(this.typer);
       clearTimeout(this._actTimer);
       this.el('via-tour-root').classList.remove('on','speaking');
       this.el('via-tour-spot').classList.remove('show','pulse');
+      var btn = this.el('tour-start-btn'); if(btn) btn.classList.remove('tour-active');
       this._clearTarget();
-      // mark completed if at last step
-      if(this.idx >= TOTAL - 1) localStorage.removeItem('via_tour_last');
-    },
-
-    togglePlay: function(){
-      this.playing = !this.playing;
-      this.el('via-tour-play-ico').innerHTML = this.playing ? ICON_PAUSE : ICON_PLAY;
-      this.el('via-tour-play-txt').textContent = this.playing ? 'Pausar' : 'Reproducir';
-      if(this.playing){
-        this.go(this.idx, true);  // replay current step
-      } else {
-        this._cancelSpeech();
-        clearTimeout(this.stepTimer);
-      }
     },
 
     next: function(){
@@ -17068,27 +16961,11 @@ function studioAttachFile(file){
       else { this.stop(); }
     },
 
-    prev: function(){
-      this._cancelSpeech();
-      clearTimeout(this.stepTimer);
-      if(this.idx > 0){ this.idx--; this.go(this.idx, this.playing); }
-    },
-
-    setSpeed: function(s, btn){
-      this.speed = s;
-      document.querySelectorAll('.via-tour-speed button').forEach(function(b){ b.classList.toggle('on', b===btn); });
-      // apply live if audio playing
-      if(this.audio){ try{ this.audio.playbackRate = s; }catch(e){} }
-      if(window.speechSynthesis){ /* rate applied on next utterance */ }
-    },
-
     // navigate to a step: switch tab, scroll, highlight, narrate
     go: function(i, autoplay){
       var self = this;
       var step = STEPS[i];
       this.idx = i;
-      localStorage.setItem('via_tour_last', i);
-      this.render();
 
       // 1) switch main tab (auto-click navigation)
       if(typeof setTab === 'function' && typeof currentTab !== 'undefined' && currentTab !== step.tab){
@@ -17110,13 +16987,12 @@ function studioAttachFile(file){
       }
 
       // 3) highlight + scroll after layout settles
-      clearTimeout(this.typer);
       setTimeout(function(){
         self._spotlight(step.sel);
       }, 220 + subDelay);
 
-      // 4) narrate
-      this._typeAndSpeak(step.say, autoplay);
+      // 4) narrate (solo voz — sin texto en pantalla)
+      if(autoplay) this._speak(step.say);
 
       // 5) ejecutar interacción real (click/input/scroll) sincronizada con la narración
       clearTimeout(this._actTimer);
@@ -17125,19 +17001,6 @@ function studioAttachFile(file){
           if(self.playing && self.idx === i){ try{ TOUR_ACTIONS[step.act](); }catch(e){} }
         }, 1300 + subDelay);
       }
-    },
-
-    render: function(){
-      var step = STEPS[this.idx];
-      this.el('via-tour-stepnum').textContent = 'Paso ' + (this.idx + 1) + ' de ' + TOTAL;
-      this.el('via-tour-title').textContent = step.title;
-      this.el('via-tour-progfill').style.width = Math.round(((this.idx + 1) / TOTAL) * 100) + '%';
-      this.el('via-tour-prev').disabled = (this.idx === 0);
-      this.el('via-tour-next').innerHTML = (this.idx === TOTAL - 1)
-        ? '<span class="label-txt">Terminar</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
-        : '<span class="label-txt">Siguiente</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
-      this.el('via-tour-play-ico').innerHTML = this.playing ? ICON_PAUSE : ICON_PLAY;
-      this.el('via-tour-play-txt').textContent = this.playing ? 'Pausar' : 'Reproducir';
     },
 
     // ── Quita el realce (clase + glow) del elemento previo ──
@@ -17181,26 +17044,6 @@ function studioAttachFile(file){
       }, 420);
     },
 
-    // ── Type subtitle + speak narration ──
-    _typeAndSpeak: function(text, autoplay){
-      var self = this;
-      var subEl = this.el('via-tour-sub');
-      // typewriter subtitle
-      clearTimeout(this.typer);
-      subEl.innerHTML = '';
-      var n = 0;
-      (function type(){
-        if(n <= text.length){
-          subEl.innerHTML = text.slice(0, n) + '<span class="cursor"></span>';
-          n += 2;
-          self.typer = setTimeout(type, 14);
-        } else {
-          subEl.textContent = text;
-        }
-      })();
-      if(autoplay) this._speak(text);
-    },
-
     _cancelSpeech: function(){
       this.speakToken++;
       this.el('via-tour-root').classList.remove('speaking');
@@ -17227,7 +17070,6 @@ function studioAttachFile(file){
 
       if(this.elFailed || !EL_KEY){ this._speakWeb(text, token); return; }
 
-      this.el('via-tour-voicelabel').textContent = 'Victor';
       fetch('https://api.elevenlabs.io/v1/text-to-speech/' + EL_VOICE, {
         method:'POST',
         headers:{ 'xi-api-key': EL_KEY, 'Content-Type':'application/json', 'Accept':'audio/mpeg' },
@@ -17257,7 +17099,6 @@ function studioAttachFile(file){
 
     _speakWeb: function(text, token){
       var self = this;
-      this.el('via-tour-voicelabel').textContent = 'Voz (sistema)';
       if(!('speechSynthesis' in window)){ this._onSpeechEnd(); return; }
       try { window.speechSynthesis.cancel(); } catch(e){}
       var u = new SpeechSynthesisUtterance(text);
@@ -17281,13 +17122,10 @@ function studioAttachFile(file){
     try { window.speechSynthesis.getVoices(); } catch(e){}
   }
 
-  // keyboard controls while tour is open
+  // tour minimalista: ESC detiene (única tecla)
   document.addEventListener('keydown', function(e){
     if(!document.getElementById('via-tour-root').classList.contains('on')) return;
     if(e.key === 'Escape'){ T.stop(); }
-    else if(e.key === 'ArrowRight'){ T.next(); }
-    else if(e.key === 'ArrowLeft'){ T.prev(); }
-    else if(e.key === ' '){ e.preventDefault(); T.togglePlay(); }
   });
 
   // reposition spotlight on resize
