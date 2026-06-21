@@ -20,7 +20,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700;800&family=Cormorant+Display:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@r128/build/three.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -7297,8 +7296,14 @@ const VIA_FIREBASE=(function(){
   function init(cfg){
     if(!cfg||!cfg.apiKey||!cfg.projectId)return;
     try{
-      if(!firebase.apps.length)firebase.initializeApp(cfg);
-      db=firebase.firestore();
+      // Firebase already initialized in AUTH GUARD (line 48)
+      // Only initialize if not already done
+      if(typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
+        firebase.initializeApp(cfg);
+      }
+      if(typeof firebase !== 'undefined' && firebase.firestore) {
+        db=firebase.firestore();
+      }
       ready=true;
       console.log('[VIA] Firebase conectado ',cfg.projectId);
       const el=document.getElementById('s-fb-status');
