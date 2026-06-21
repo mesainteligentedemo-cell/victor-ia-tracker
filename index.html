@@ -16626,13 +16626,23 @@ function studioAttachFile(file){
 
 /* ── Elemento explicado: SOLO marco + glow suave en el borde ──
    No se cambia brillo, saturación ni filtros del contenido: se ve normal,
-   únicamente enmarcado con un resplandor dorado suave. */
+   únicamente enmarcado con un resplandor dorado suave.
+   FADE-IN/OUT QUIRÚRGICO: el realce entra y sale con una curva suave,
+   nunca aparece ni desaparece de golpe. */
 .via-tour-target{
   position:relative !important;
   z-index:99992 !important;
   border-radius:10px;
-  transition:box-shadow .45s ease;
-  animation:viaTargetGlow 2.4s ease-in-out infinite;
+  /* transición base para el momento de salida (cuando se quita la clase) */
+  transition:box-shadow .55s cubic-bezier(0.16,1,0.3,1);
+  box-shadow:0 0 0 0 rgba(255,170,23,0), 0 0 0 0 rgba(255,170,23,0);
+  animation:viaTargetIn .55s cubic-bezier(0.16,1,0.3,1) forwards,
+            viaTargetGlow 2.6s ease-in-out 0.55s infinite;
+}
+/* entrada suave del realce del propio elemento */
+@keyframes viaTargetIn{
+  from{ box-shadow:0 0 0 0 rgba(255,170,23,0), 0 0 0 0 rgba(255,170,23,0); }
+  to{   box-shadow:0 0 0 2px rgba(255,170,23,.85), 0 0 14px 2px rgba(255,170,23,.35); }
 }
 @keyframes viaTargetGlow{
   0%,100%{
@@ -16645,7 +16655,8 @@ function studioAttachFile(file){
   }
 }
 
-/* spotlight: ANILLO LUMINOSO que rodea el elemento (refuerza el aura) */
+/* spotlight: ANILLO LUMINOSO que rodea el elemento (refuerza el aura)
+   Fade + scale suaves en entrada/salida; reposicionamiento elegante entre pasos. */
 #via-tour-spot{
   position:fixed; pointer-events:none; border-radius:12px; z-index:99991;
   border:2px solid rgba(255,170,23,.95);
@@ -16653,16 +16664,22 @@ function studioAttachFile(file){
              0 0 26px 6px rgba(255,170,23,.5),
              0 0 70px 16px rgba(255,170,23,.3),
              inset 0 0 22px 2px rgba(255,170,23,.28);
-  transition:top .55s cubic-bezier(.4,0,.2,1), left .55s cubic-bezier(.4,0,.2,1),
-             width .55s cubic-bezier(.4,0,.2,1), height .55s cubic-bezier(.4,0,.2,1),
-             opacity .4s ease; opacity:0;
+  transition:top .6s cubic-bezier(0.16,1,0.3,1), left .6s cubic-bezier(0.16,1,0.3,1),
+             width .6s cubic-bezier(0.16,1,0.3,1), height .6s cubic-bezier(0.16,1,0.3,1),
+             opacity .42s cubic-bezier(0.16,1,0.3,1), transform .42s cubic-bezier(0.16,1,0.3,1);
+  opacity:0; transform:scale(1.035);
 }
 #via-tour-spot::after{
   content:''; position:absolute; inset:-6px; border-radius:16px; pointer-events:none;
   background:radial-gradient(closest-side, rgba(255,170,23,.18), transparent 78%);
   opacity:.9;
 }
-#via-tour-spot.show{ opacity:1; }
+#via-tour-spot.show{ opacity:1; transform:scale(1); }
+/* mientras el anillo sigue al elemento durante el scroll, sin transición de posición
+   para que quede pegado sin lag; conserva la transición de opacidad. */
+#via-tour-spot.following{
+  transition:opacity .42s cubic-bezier(0.16,1,0.3,1), transform .42s cubic-bezier(0.16,1,0.3,1);
+}
 @keyframes viaTourPulse{
   0%,100%{
     box-shadow:0 0 0 2px rgba(255,200,90,.55),
@@ -16720,22 +16737,47 @@ function studioAttachFile(file){
 #via-tour-root.on ~ #via-tour-controls,
 #via-tour-controls.on{ display:flex; opacity:1; transform:translateX(-50%) translateY(0); }
 .via-tc-btn{
+  position:relative; overflow:hidden;
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
   height:42px; padding:0 16px; border-radius:11px; cursor:pointer;
   font:600 13px/1 'Inter',system-ui,sans-serif; letter-spacing:.2px;
   color:#e9edf2; background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.12);
-  transition:background .2s ease, border-color .2s ease, color .2s ease, transform .12s ease;
+  transition:background .22s cubic-bezier(0.16,1,0.3,1), border-color .22s cubic-bezier(0.16,1,0.3,1),
+             color .22s ease, transform .16s cubic-bezier(0.16,1,0.3,1), box-shadow .22s ease;
   -webkit-tap-highlight-color:transparent;
 }
-.via-tc-btn:hover{ background:rgba(255,170,23,.16); border-color:rgba(255,170,23,.45); color:#fff; transform:translateY(-1px); }
-.via-tc-btn:active{ transform:translateY(0); }
-.via-tc-btn svg{ flex-shrink:0; }
+.via-tc-btn:hover{ background:rgba(255,170,23,.16); border-color:rgba(255,170,23,.45); color:#fff; transform:translateY(-2px); box-shadow:0 6px 18px rgba(255,170,23,.18); }
+.via-tc-btn:active{ transform:translateY(0) scale(.96); }
+.via-tc-btn:focus-visible{ outline:2px solid rgba(255,200,90,.8); outline-offset:2px; }
+.via-tc-btn svg{ flex-shrink:0; transition:transform .2s cubic-bezier(0.16,1,0.3,1); }
+.via-tc-btn:hover svg{ transform:scale(1.12); }
+/* Ripple de feedback al hacer clic (se dispara desde JS añadiendo .clicked) */
+.via-tc-btn.clicked::after{
+  content:''; position:absolute; left:50%; top:50%;
+  width:8px; height:8px; border-radius:50%;
+  background:rgba(255,200,90,.55);
+  transform:translate(-50%,-50%) scale(0);
+  animation:viaTcRipple .5s cubic-bezier(0.16,1,0.3,1) forwards;
+  pointer-events:none;
+}
+@keyframes viaTcRipple{
+  to{ transform:translate(-50%,-50%) scale(16); opacity:0; }
+}
 /* Play/Reanudar destacado en ámbar */
-.via-tc-btn.primary{ background:rgba(255,170,23,.22); border-color:rgba(255,170,23,.5); color:#ffd27a; }
+.via-tc-btn.primary{ background:rgba(255,170,23,.22); border-color:rgba(255,170,23,.5); color:#ffd27a; box-shadow:0 0 0 1px rgba(255,170,23,.25),0 0 18px rgba(255,170,23,.18); }
 .via-tc-btn.primary:hover{ background:rgba(255,170,23,.34); color:#fff; }
+/* Botón en pausa (estado activo) con pulso sutil */
+.via-tc-btn.primary.is-paused{ animation:viaTcPausePulse 2s ease-in-out infinite; }
+@keyframes viaTcPausePulse{
+  0%,100%{ box-shadow:0 0 0 1px rgba(255,170,23,.25),0 0 18px rgba(255,170,23,.18); }
+  50%{ box-shadow:0 0 0 1px rgba(255,170,23,.5),0 0 26px rgba(255,170,23,.4); }
+}
 /* Detener en rojo sutil */
-.via-tc-btn.danger:hover{ background:rgba(239,68,68,.2); border-color:rgba(239,68,68,.5); color:#ffd9d9; }
+.via-tc-btn.danger:hover{ background:rgba(239,68,68,.2); border-color:rgba(239,68,68,.5); color:#ffd9d9; box-shadow:0 6px 18px rgba(239,68,68,.18); }
+/* Botones deshabilitados al inicio/fin del tour (sin retroceso/avance posible) */
+.via-tc-btn[disabled]{ opacity:.35; cursor:not-allowed; transform:none; box-shadow:none; }
+.via-tc-btn[disabled]:hover{ background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.12); color:#e9edf2; transform:none; box-shadow:none; }
 /* solo-ícono en pantallas chicas */
 @media (max-width:640px){
   #via-tour-controls{ bottom:16px; gap:6px; padding:8px 10px; }
@@ -16990,6 +17032,7 @@ function studioAttachFile(file){
     audio: null,
     stepTimer: null,
     speakToken: 0,
+    _navToken: 0,
     elFailed: false,
 
     el: function(id){ return document.getElementById(id); },
@@ -17014,27 +17057,41 @@ function studioAttachFile(file){
     },
 
     stop: function(){
+      this._ripple('via-tc-stop');
       this.playing = false;
       this.paused = false;
       this._cancelSpeech();
       clearTimeout(this.stepTimer);
       clearTimeout(this._actTimer);
+      clearTimeout(this._spotTimer);
+      clearTimeout(this._scrollTimer);
+      clearTimeout(this._revealFallback);
+      this._navToken++; // invalida cualquier transición en vuelo
+      // primero desvanece el anillo, luego cierra el contenedor para una salida suave
+      var spot = this.el('via-tour-spot'); if(spot) spot.classList.remove('show');
+      this._clearTarget();
+      var self = this;
+      setTimeout(function(){ spot && spot.classList.remove('pulse'); }, 420);
       this.el('via-tour-root').classList.remove('on','speaking');
       this.el('via-tour-controls').classList.remove('on');
-      this.el('via-tour-spot').classList.remove('show','pulse');
       var btn = this.el('tour-start-btn'); if(btn) btn.classList.remove('tour-active');
-      this._clearTarget();
       this._syncPlayBtn();
     },
 
-    // Pausa: detiene la voz pero mantiene el marco y el tour abierto
+    // Pausa: detiene la voz; el marco se desvanece suavemente pero el elemento
+    // resaltado se mantiene visible (sigue con su glow propio), tal como se pidió.
     pause: function(){
+      this._ripple('via-tc-pause');
       if(!this.playing) return;
       this.playing = false;
       this.paused = true;
       this._cancelSpeech();
       clearTimeout(this.stepTimer);
       clearTimeout(this._actTimer);
+      clearTimeout(this._revealFallback);
+      // desvanece el anillo, conserva el realce del elemento
+      var spot = this.el('via-tour-spot');
+      if(spot){ spot.classList.remove('show'); }
       this._syncPlayBtn();
     },
 
@@ -17053,12 +17110,14 @@ function studioAttachFile(file){
 
     // Play: arranca desde cero si está cerrado; reanuda si está en pausa; ignora si ya reproduce
     play: function(){
+      this._ripple('via-tc-play');
       if(this.playing) return;
       if(this.paused){ this.resume(); }
       else { this.start(); }
     },
 
     next: function(){
+      this._ripple('via-tc-next');
       var wasPlaying = this.playing || this.paused;
       this._cancelSpeech();
       clearTimeout(this.stepTimer);
@@ -17075,6 +17134,7 @@ function studioAttachFile(file){
 
     // Anterior: retrocede un paso (sin cerrar el tour)
     prev: function(){
+      this._ripple('via-tc-prev');
       this._cancelSpeech();
       clearTimeout(this.stepTimer);
       clearTimeout(this._actTimer);
@@ -17093,15 +17153,45 @@ function studioAttachFile(file){
     _syncPlayBtn: function(){
       var playBtn = this.el('via-tc-play');
       var pauseBtn = this.el('via-tc-pause');
-      if(playBtn){ playBtn.classList.toggle('primary', this.playing); }
-      if(pauseBtn){ pauseBtn.classList.toggle('primary', this.paused); }
+      if(playBtn){ playBtn.classList.toggle('primary', this.playing); playBtn.classList.remove('is-paused'); }
+      if(pauseBtn){
+        pauseBtn.classList.toggle('primary', this.paused);
+        pauseBtn.classList.toggle('is-paused', this.paused);
+      }
+      this._refreshNavButtons();
+    },
+
+    // feedback visual de clic (ripple) en cualquier botón de control
+    _ripple: function(id){
+      var b = this.el(id); if(!b) return;
+      b.classList.remove('clicked');
+      // reflow para reiniciar la animación si se hace clic rápido
+      void b.offsetWidth;
+      b.classList.add('clicked');
+      setTimeout(function(){ if(b) b.classList.remove('clicked'); }, 520);
     },
 
     // navigate to a step: switch tab, scroll, highlight, narrate
+    // SECUENCIA QUIRÚRGICA Y SINCRONIZADA:
+    //   1) cambia tab (+ subtab infra)  → 2) desvanece el marco anterior
+    //   3) hace scroll suave al elemento → 4) precarga el audio
+    //   5) cuando el audio EMPIEZA A SONAR, aparece el marco EXACTAMENTE (sync perfecto)
+    //   6) la interacción real se dispara poco después de que arranca la voz
     go: function(i, autoplay){
       var self = this;
       var step = STEPS[i];
       this.idx = i;
+      var navToken = ++this._navToken; // invalida transiciones de pasos previos
+
+      // limpia timers/realce/voz de cualquier paso anterior para evitar solapamientos
+      clearTimeout(this._actTimer);
+      clearTimeout(this._spotTimer);
+      clearTimeout(this._scrollTimer);
+      this._cancelSpeech();
+      // desvanece el marco anterior con gracia antes de mover nada
+      this._fadeOutSpot();
+
+      this._refreshNavButtons();
 
       // 1) switch main tab (auto-click navigation)
       if(typeof setTab === 'function' && typeof currentTab !== 'undefined' && currentTab !== step.tab){
@@ -17113,8 +17203,9 @@ function studioAttachFile(file){
       // 2) infra subtab if needed (auto-click)
       var subDelay = 0;
       if(step.tab === 'infrastructure' && step.ifx){
-        subDelay = 360;
+        subDelay = 380;
         setTimeout(function(){
+          if(navToken !== self._navToken) return;
           var view = document.getElementById('view-infrastructure');
           if(!view) return;
           var btn = view.querySelector('.ifx-subtab[data-panel="'+step.ifx+'"]');
@@ -17122,21 +17213,68 @@ function studioAttachFile(file){
         }, 300);
       }
 
-      // 3) highlight + scroll after layout settles
-      setTimeout(function(){
-        self._spotlight(step.sel);
-      }, 220 + subDelay);
+      // 3) scroll suave hacia el elemento una vez que el layout se asienta
+      this._scrollTimer = setTimeout(function(){
+        if(navToken !== self._navToken) return;
+        self._scrollToTarget(step.sel);
+      }, 200 + subDelay);
 
-      // 4) narrate (solo voz — sin texto en pantalla)
-      if(autoplay) this._speak(step.say);
+      // 4+5) narrar y SINCRONIZAR la aparición del marco con el inicio real de la voz
+      if(autoplay){
+        // fallback de seguridad: si la voz tarda demasiado en empezar (red lenta),
+        // mostramos el marco igual a los 700ms para no dejar pausa visual muerta.
+        var revealed = false;
+        var reveal = function(){
+          if(revealed || navToken !== self._navToken) return;
+          revealed = true;
+          self._spotlight(step.sel);
+        };
+        this._revealFallback = setTimeout(reveal, 700 + subDelay);
+        // cuando el audio ARRANCA → marco aparece exactamente en ese instante
+        this._speak(step.say, function(){
+          if(navToken !== self._navToken) return;
+          clearTimeout(self._revealFallback);
+          reveal();
+        });
+      } else {
+        // navegación manual sin voz: muestra el marco tras el scroll
+        this._spotTimer = setTimeout(function(){
+          if(navToken !== self._navToken) return;
+          self._spotlight(step.sel);
+        }, 460 + subDelay);
+      }
 
-      // 5) ejecutar interacción real (click/input/scroll) sincronizada con la narración
-      clearTimeout(this._actTimer);
+      // 6) ejecutar interacción real (click/input/scroll) sincronizada con la narración
       if(step.act && TOUR_ACTIONS[step.act]){
         this._actTimer = setTimeout(function(){
-          if(self.playing && self.idx === i){ try{ TOUR_ACTIONS[step.act](); }catch(e){} }
-        }, 1300 + subDelay);
+          if(navToken === self._navToken && self.playing && self.idx === i){
+            try{ TOUR_ACTIONS[step.act](); }catch(e){}
+          }
+        }, 1600 + subDelay);
       }
+    },
+
+    // refresca el estado habilitado/deshabilitado de Anterior/Siguiente
+    _refreshNavButtons: function(){
+      var prev = this.el('via-tc-prev');
+      var next = this.el('via-tc-next');
+      if(prev) prev.disabled = (this.idx <= 0);
+      if(next) next.disabled = (this.idx >= TOTAL - 1);
+    },
+
+    // scroll suave al elemento (separado del realce para sincronía precisa)
+    _scrollToTarget: function(sel){
+      var elm = sel ? document.querySelector(sel) : null;
+      if(!elm || !document.body.contains(elm)) return;
+      try { elm.scrollIntoView({ behavior:'smooth', block:'center' }); }
+      catch(e){ try{ elm.scrollIntoView(); }catch(e2){} }
+    },
+
+    // desvanece el anillo actual con gracia (no lo reposiciona de golpe)
+    _fadeOutSpot: function(){
+      var spot = this.el('via-tour-spot');
+      if(spot){ spot.classList.remove('show'); }
+      this._clearTarget();
     },
 
     // ── Quita el realce (clase + glow) del elemento previo ──
@@ -17147,43 +17285,44 @@ function studioAttachFile(file){
       }
     },
 
-    // ── Spotlight an element ──
+    // ── Spotlight an element ── (posiciona y revela el marco; el scroll ya ocurrió antes)
     _spotlight: function(sel){
       var spot = this.el('via-tour-spot');
       var elm = sel ? document.querySelector(sel) : null;
       // limpia realce anterior siempre
       this._clearTarget();
-      if(!elm){ spot.classList.remove('show','pulse'); return; }
-      // scroll into view (smooth)
-      try { elm.scrollIntoView({ behavior:'smooth', block:'center' }); } catch(e){ elm.scrollIntoView(); }
+      if(!elm || !document.body.contains(elm)){ spot.classList.remove('show','pulse'); return; }
       var self = this;
-      setTimeout(function(){
-        // doble verificación: el elemento sigue existiendo en el DOM
-        if(!elm || !document.body.contains(elm)){ spot.classList.remove('show','pulse'); return; }
-        // hace NÍTIDO y BRILLANTE el elemento real (lo eleva sobre el blur del fondo)
-        elm.classList.add('via-tour-target');
-        self._targetEl = elm;
-        var r = elm.getBoundingClientRect();
-        var pad = 10;
-        // clamp to viewport so the ring stays visible
-        var top = Math.max(6, r.top - pad);
-        var left = Math.max(6, r.left - pad);
-        var w = Math.min(window.innerWidth - left - 6, r.width + pad*2);
-        var h = Math.min(window.innerHeight - top - 6, r.height + pad*2);
-        // if element is huge (full view), frame the top portion
-        if(h > window.innerHeight * 0.7){ h = Math.min(h, window.innerHeight * 0.55); }
-        spot.style.top = top + 'px';
-        spot.style.left = left + 'px';
-        spot.style.width = w + 'px';
-        spot.style.height = h + 'px';
-        spot.classList.add('show','pulse');
-      }, 420);
+      // posiciona en el siguiente frame para leer una geometría ya asentada (rAF = timing preciso)
+      window.requestAnimationFrame(function(){
+        window.requestAnimationFrame(function(){
+          if(!elm || !document.body.contains(elm)){ spot.classList.remove('show','pulse'); return; }
+          // realza el elemento real con su fade-in suave
+          elm.classList.add('via-tour-target');
+          self._targetEl = elm;
+          var r = elm.getBoundingClientRect();
+          var pad = 10;
+          // clamp to viewport so the ring stays visible
+          var top = Math.max(6, r.top - pad);
+          var left = Math.max(6, r.left - pad);
+          var w = Math.min(window.innerWidth - left - 6, r.width + pad*2);
+          var h = Math.min(window.innerHeight - top - 6, r.height + pad*2);
+          // if element is huge (full view), frame the top portion
+          if(h > window.innerHeight * 0.7){ h = Math.min(h, window.innerHeight * 0.55); }
+          spot.style.top = top + 'px';
+          spot.style.left = left + 'px';
+          spot.style.width = w + 'px';
+          spot.style.height = h + 'px';
+          // fade + scale-in suave + pulso continuo
+          spot.classList.add('show','pulse');
+        });
+      });
     },
 
     _cancelSpeech: function(){
       this.speakToken++;
       this.el('via-tour-root').classList.remove('speaking');
-      if(this.audio){ try{ this.audio.pause(); this.audio.src=''; }catch(e){} this.audio = null; }
+      if(this.audio){ try{ this.audio.onplaying=null; this.audio.onended=null; this.audio.onerror=null; this.audio.pause(); this.audio.src=''; }catch(e){} this.audio = null; }
       if(window.speechSynthesis){ try{ window.speechSynthesis.cancel(); }catch(e){} }
     },
 
@@ -17191,20 +17330,33 @@ function studioAttachFile(file){
       var self = this;
       this.el('via-tour-root').classList.remove('speaking');
       if(!this.playing) return;
+      // al terminar la narración, el marco se desvanece con gracia antes de avanzar
+      this._fadeOutSpot();
       // advance after a short pause, unless last step
       if(this.idx < TOTAL - 1){
-        this.stepTimer = setTimeout(function(){ if(self.playing) self.next(); }, 900);
+        this.stepTimer = setTimeout(function(){ if(self.playing) self.next(); }, 620);
+      } else {
+        // último paso: cierre elegante automático
+        this.stepTimer = setTimeout(function(){ if(self.playing) self.stop(); }, 900);
       }
     },
 
     // ── Speak: ElevenLabs first, Web Speech fallback ──
-    _speak: function(text){
+    // onStart() se invoca EXACTAMENTE cuando el audio empieza a sonar → sync perfecto con el marco.
+    _speak: function(text, onStart){
       var self = this;
       this._cancelSpeech();
       var token = this.speakToken;
       this.el('via-tour-root').classList.add('speaking');
+      // garantiza que onStart se llame una sola vez
+      var started = false;
+      var fireStart = function(){
+        if(started || token !== self.speakToken) return;
+        started = true;
+        if(typeof onStart === 'function') onStart();
+      };
 
-      if(this.elFailed || !EL_KEY){ this._speakWeb(text, token); return; }
+      if(this.elFailed || !EL_KEY){ this._speakWeb(text, token, fireStart); return; }
 
       fetch('https://api.elevenlabs.io/v1/text-to-speech/' + EL_VOICE, {
         method:'POST',
@@ -17222,20 +17374,23 @@ function studioAttachFile(file){
         var a = new Audio(url);
         a.playbackRate = self.speed;
         self.audio = a;
+        // 'playing' es el evento más fiel al primer instante de sonido real
+        a.onplaying = function(){ fireStart(); };
         a.onended = function(){ URL.revokeObjectURL(url); if(token===self.speakToken) self._onSpeechEnd(); };
-        a.onerror = function(){ if(token===self.speakToken){ self.elFailed = true; self._speakWeb(text, token); } };
-        a.play().catch(function(){ if(token===self.speakToken){ self.elFailed = true; self._speakWeb(text, token); } });
+        a.onerror = function(){ if(token===self.speakToken){ self.elFailed = true; self._speakWeb(text, token, fireStart); } };
+        a.play().then(function(){ fireStart(); }).catch(function(){ if(token===self.speakToken){ self.elFailed = true; self._speakWeb(text, token, fireStart); } });
       })
       .catch(function(){
         if(token !== self.speakToken) return;
         self.elFailed = true;
-        self._speakWeb(text, token);
+        self._speakWeb(text, token, fireStart);
       });
     },
 
-    _speakWeb: function(text, token){
+    _speakWeb: function(text, token, onStart){
       var self = this;
-      if(!('speechSynthesis' in window)){ this._onSpeechEnd(); return; }
+      var fireStart = function(){ if(typeof onStart === 'function' && token===self.speakToken) onStart(); };
+      if(!('speechSynthesis' in window)){ fireStart(); this._onSpeechEnd(); return; }
       try { window.speechSynthesis.cancel(); } catch(e){}
       var u = new SpeechSynthesisUtterance(text);
       u.lang = 'es-MX';
@@ -17246,9 +17401,12 @@ function studioAttachFile(file){
       var esVoice = voices.find(function(v){ return /es[-_]MX/i.test(v.lang); })
                  || voices.find(function(v){ return /^es/i.test(v.lang); });
       if(esVoice) u.voice = esVoice;
+      u.onstart = function(){ fireStart(); };
       u.onend = function(){ if(token===self.speakToken) self._onSpeechEnd(); };
-      u.onerror = function(){ if(token===self.speakToken) self._onSpeechEnd(); };
+      u.onerror = function(){ if(token===self.speakToken){ fireStart(); self._onSpeechEnd(); } };
       window.speechSynthesis.speak(u);
+      // Web Speech a veces no dispara onstart: respaldo a 320ms
+      setTimeout(fireStart, 320);
     }
   };
 
@@ -17264,12 +17422,37 @@ function studioAttachFile(file){
     if(e.key === 'Escape'){ T.stop(); }
   });
 
-  // reposition spotlight on resize
-  window.addEventListener('resize', function(){
-    if(document.getElementById('via-tour-root').classList.contains('on')){
-      T._spotlight(STEPS[T.idx].sel);
-    }
-  });
+  // Reposiciona el anillo de forma QUIRÚRGICA mientras la página hace scroll suave
+  // o cambia de tamaño, sin re-disparar el fade (solo recoloca, se mantiene pegado).
+  function repositionSpot(){
+    if(!document.getElementById('via-tour-root').classList.contains('on')) return;
+    var spot = T.el('via-tour-spot');
+    var elm = T._targetEl;
+    if(!spot || !elm || !document.body.contains(elm) || !spot.classList.contains('show')) return;
+    var r = elm.getBoundingClientRect();
+    var pad = 10;
+    var top = Math.max(6, r.top - pad);
+    var left = Math.max(6, r.left - pad);
+    var w = Math.min(window.innerWidth - left - 6, r.width + pad*2);
+    var h = Math.min(window.innerHeight - top - 6, r.height + pad*2);
+    if(h > window.innerHeight * 0.7){ h = Math.min(h, window.innerHeight * 0.55); }
+    spot.style.top = top + 'px';
+    spot.style.left = left + 'px';
+    spot.style.width = w + 'px';
+    spot.style.height = h + 'px';
+  }
+  // sigue al elemento durante el scroll suave (rAF para fluidez)
+  var _spotRaf = null, _followTimer = null;
+  function scheduleReposition(){
+    var spot = T.el('via-tour-spot');
+    if(spot){ spot.classList.add('following'); } // sin lag de posición mientras sigue
+    if(_followTimer) clearTimeout(_followTimer);
+    _followTimer = setTimeout(function(){ if(spot) spot.classList.remove('following'); }, 140);
+    if(_spotRaf) return;
+    _spotRaf = window.requestAnimationFrame(function(){ _spotRaf = null; repositionSpot(); });
+  }
+  window.addEventListener('scroll', scheduleReposition, true);
+  window.addEventListener('resize', scheduleReposition);
 
   window.ViaTour = T;
 })();
