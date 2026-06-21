@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&family=Cormorant+Display:ital,wght@1,400&display=swap" rel="stylesheet">
 
-  <!-- Firebase SDK v10.12.2 compat (matches index.html) -->
+  <!-- Firebase SDK v10.12.2 compat (matches index.html) — usado solo para Email/Password -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
@@ -106,12 +106,43 @@
     .brand h1 b { color: var(--amber); font-weight: 600; }
     .brand p {
       margin-top: 7px;
-      font-size: 12.5px;
       color: var(--bone2);
       font-family: 'Cormorant Display', serif;
       font-style: italic;
       font-size: 15px;
     }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 22px;
+    }
+    .tab {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--bone2);
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 500;
+      padding: 9px 10px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: background .18s, color .18s;
+    }
+    .tab.active {
+      background: var(--surface2);
+      color: var(--bone);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .pane { display: none; }
+    .pane.active { display: block; }
 
     .field { margin-bottom: 14px; }
     .field label {
@@ -166,14 +197,22 @@
     }
     .btn-primary:hover:not(:disabled) { box-shadow: 0 10px 30px -8px rgba(255,170,23,0.65); }
 
-    .btn-oauth {
+    .btn-ghost {
       background: var(--bg);
       color: var(--bone);
       border: 1px solid var(--border2);
+      margin-top: 6px;
     }
-    .btn-oauth:hover:not(:disabled) { border-color: var(--amber); background: var(--surface2); }
-    .btn-oauth svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .btn-ghost:hover:not(:disabled) { border-color: var(--amber); background: var(--surface2); }
 
+    .hint {
+      font-size: 12px;
+      color: var(--bone2);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    /* OAuth (disabled placeholder while Google Cloud Console is configured) */
     .divider {
       display: flex;
       align-items: center;
@@ -192,6 +231,28 @@
     }
 
     .oauth-row { display: flex; flex-direction: column; gap: 10px; }
+    .btn-oauth {
+      background: var(--bg);
+      color: var(--bone2);
+      border: 1px dashed var(--border2);
+      cursor: not-allowed;
+      opacity: 0.6;
+      position: relative;
+    }
+    .btn-oauth svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .btn-oauth .soon {
+      position: absolute;
+      right: 12px;
+      font-size: 9.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--amber);
+      background: rgba(255,170,23,0.12);
+      border: 1px solid rgba(255,170,23,0.25);
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
 
     .msg {
       margin-top: 16px;
@@ -210,7 +271,6 @@
       border-radius: 50%;
       animation: spin .7s linear infinite;
     }
-    .btn-oauth .spinner { border: 2px solid var(--border2); border-top-color: var(--amber); }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .foot {
@@ -242,29 +302,52 @@
       <p>Cruza la puerta</p>
     </div>
 
-    <form id="loginForm" autocomplete="on">
-      <div class="field">
-        <label for="email">Correo</label>
-        <input type="email" id="email" name="email" placeholder="tu@correo.com" required autocomplete="email">
-      </div>
-      <div class="field">
-        <label for="password">Contraseña</label>
-        <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
-      </div>
-      <button type="submit" class="btn btn-primary" id="btnEmail">Entrar</button>
-    </form>
+    <!-- Selector: 2 opciones -->
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab active" id="tabEmail" role="tab" aria-selected="true">Acceso con email</button>
+      <button type="button" class="tab" id="tabQuick" role="tab" aria-selected="false">Acceso rápido</button>
+    </div>
 
-    <div class="divider">o continúa con</div>
+    <!-- Pane 1: Email / Password (Firebase) -->
+    <div class="pane active" id="paneEmail" role="tabpanel">
+      <form id="loginForm" autocomplete="on">
+        <div class="field">
+          <label for="email">Correo</label>
+          <input type="email" id="email" name="email" placeholder="tu@correo.com" required autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password" minlength="6">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btnEmail">Entrar</button>
+      </form>
 
-    <div class="oauth-row">
-      <button type="button" class="btn btn-oauth" id="btnGoogle">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/></svg>
-        Google
-      </button>
-      <button type="button" class="btn btn-oauth" id="btnGithub">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.23c-3.34.73-4.04-1.42-4.04-1.42-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.11-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6.01 0c2.29-1.55 3.3-1.23 3.3-1.23.65 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 24 12.5C24 5.87 18.63.5 12 .5z"/></svg>
-        GitHub
-      </button>
+      <!-- OAuth en configuración (deshabilitado mientras se configura Google Cloud Console) -->
+      <div class="divider">próximamente</div>
+      <div class="oauth-row">
+        <button type="button" class="btn btn-oauth" id="btnGoogle" disabled aria-disabled="true" title="En configuración">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/></svg>
+          Google
+          <span class="soon">En configuración</span>
+        </button>
+        <button type="button" class="btn btn-oauth" id="btnGithub" disabled aria-disabled="true" title="En configuración">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.23c-3.34.73-4.04-1.42-4.04-1.42-.55-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.11-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6.01 0c2.29-1.55 3.3-1.23 3.3-1.23.65 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.8 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 24 12.5C24 5.87 18.63.5 12 .5z"/></svg>
+          GitHub
+          <span class="soon">En configuración</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Pane 2: Acceso rápido (sin Firebase, solo localStorage) -->
+    <div class="pane" id="paneQuick" role="tabpanel">
+      <p class="hint">Entra al panel sin servidor. Tu acceso se guarda solo en este dispositivo. Ideal mientras se termina de configurar el inicio de sesión completo.</p>
+      <form id="quickForm" autocomplete="off">
+        <div class="field">
+          <label for="quickName">Tu nombre</label>
+          <input type="text" id="quickName" name="quickName" placeholder="Pablo" required autocomplete="name">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btnQuick">Entrar al panel</button>
+      </form>
     </div>
 
     <div class="msg" id="msg"></div>
@@ -278,7 +361,16 @@
   (function(){
     "use strict";
 
-    /* ── Firebase config (victor-ia-tracker) ── */
+    /* ===========================================================
+       VICTOR IA Tracker — Login
+       OAuth (Google/GitHub) está DESHABILITADO temporalmente:
+       causa "redirect_uri_mismatch" hasta configurar Google Cloud
+       Console. El código para re-habilitarlo está al final, comentado.
+       Métodos activos: (1) Email/Password vía Firebase, (2) Acceso
+       rápido vía localStorage (sin servidor).
+       =========================================================== */
+
+    /* ── Firebase config (victor-ia-tracker) — solo Email/Password ── */
     var cfg = {
       apiKey: "AIzaSyBciNfVGjH5l3szzGVgatXlZvLvaoNsp14",
       authDomain: "victor-ia-tracker.firebaseapp.com",
@@ -288,19 +380,33 @@
       appId: "1:475376340371:web:caaf70c5c4063edfcb6c66"
     };
 
-    if (!firebase.apps.length) firebase.initializeApp(cfg);
-    var auth = firebase.auth();
-    try { auth.useDeviceLanguage(); } catch(e){}
+    var auth = null;
+    try {
+      if (window.firebase && firebase.auth) {
+        if (!firebase.apps.length) firebase.initializeApp(cfg);
+        auth = firebase.auth();
+        try { auth.useDeviceLanguage(); } catch(e){}
+      }
+    } catch(e){ console.warn('Firebase init falló — Email/Password no disponible, usa Acceso rápido.', e); }
 
     /* ── DOM refs ── */
-    var form     = document.getElementById('loginForm');
-    var emailEl  = document.getElementById('email');
-    var passEl   = document.getElementById('password');
-    var btnEmail = document.getElementById('btnEmail');
-    var btnGoogle= document.getElementById('btnGoogle');
-    var btnGithub= document.getElementById('btnGithub');
-    var msgEl    = document.getElementById('msg');
+    var tabEmail  = document.getElementById('tabEmail');
+    var tabQuick  = document.getElementById('tabQuick');
+    var paneEmail = document.getElementById('paneEmail');
+    var paneQuick = document.getElementById('paneQuick');
 
+    var form      = document.getElementById('loginForm');
+    var emailEl   = document.getElementById('email');
+    var passEl    = document.getElementById('password');
+    var btnEmail  = document.getElementById('btnEmail');
+
+    var quickForm = document.getElementById('quickForm');
+    var quickName = document.getElementById('quickName');
+    var btnQuick  = document.getElementById('btnQuick');
+
+    var msgEl     = document.getElementById('msg');
+
+    /* ── Helpers ── */
     function setMsg(text, type){
       msgEl.textContent = text || '';
       msgEl.className = 'msg' + (type ? ' ' + type : '');
@@ -315,25 +421,37 @@
         if (btn.dataset.label) btn.innerHTML = btn.dataset.label;
       }
     }
-    function disableAll(on){
-      [btnEmail, btnGoogle, btnGithub].forEach(function(b){ b.disabled = on; });
-    }
 
-    /* ── Persist session like index.html expects, then redirect ── */
-    function persistAndGo(user){
+    /* ── Tabs ── */
+    function selectTab(which){
+      var isEmail = which === 'email';
+      tabEmail.classList.toggle('active', isEmail);
+      tabQuick.classList.toggle('active', !isEmail);
+      tabEmail.setAttribute('aria-selected', isEmail ? 'true' : 'false');
+      tabQuick.setAttribute('aria-selected', isEmail ? 'false' : 'true');
+      paneEmail.classList.toggle('active', isEmail);
+      paneQuick.classList.toggle('active', !isEmail);
+      setMsg('');
+    }
+    tabEmail.addEventListener('click', function(){ selectTab('email'); });
+    tabQuick.addEventListener('click', function(){ selectTab('quick'); });
+
+    /* ── Persistir sesión (formato que index.html espera) y redirigir ── */
+    function persistAndGo(data){
       try {
-        localStorage.setItem('via_access_uid', user.uid);
-        localStorage.setItem('via_access_email', user.email || '');
-        localStorage.setItem('via_access_name', user.displayName || (user.email ? user.email.split('@')[0] : 'User'));
-        localStorage.setItem('via_access_photo', user.photoURL || '');
+        localStorage.setItem('via_access_uid',   data.uid || ('local-' + Date.now()));
+        localStorage.setItem('via_access_email', data.email || '');
+        localStorage.setItem('via_access_name',  data.name || (data.email ? data.email.split('@')[0] : 'Usuario'));
+        localStorage.setItem('via_access_photo', data.photo || '');
+        localStorage.setItem('via_access_method', data.method || 'email');
         if (!localStorage.getItem('via_access_role')) localStorage.setItem('via_access_role', 'viewer');
         localStorage.setItem('via_access_authenticated', 'true');
       } catch(e){ console.warn('localStorage error', e); }
       setMsg('Acceso concedido. Entrando…', 'ok');
-      setTimeout(function(){ window.location.href = '/'; }, 500);
+      setTimeout(function(){ window.location.href = '/index.html'; }, 450);
     }
 
-    /* ── Spanish error mapping ── */
+    /* ── Mapeo de errores Firebase a español ── */
     function esError(err){
       var code = (err && err.code) || '';
       var map = {
@@ -346,91 +464,131 @@
         'auth/missing-password': 'Escribe tu contraseña.',
         'auth/too-many-requests': 'Demasiados intentos. Espera un momento e inténtalo de nuevo.',
         'auth/network-request-failed': 'Error de red. Revisa tu conexión.',
-        'auth/popup-closed-by-user': 'Cerraste la ventana antes de terminar.',
-        'auth/cancelled-popup-request': 'Se canceló la ventana anterior.',
-        'auth/popup-blocked': 'El navegador bloqueó la ventana. Permite pop-ups e inténtalo de nuevo.',
-        'auth/account-exists-with-different-credential': 'Ya existe una cuenta con ese correo usando otro método de acceso.',
         'auth/unauthorized-domain': 'Este dominio no está autorizado en Firebase. Avisa al administrador.',
         'auth/operation-not-allowed': 'Este método de acceso no está habilitado. Avisa al administrador.'
       };
       return map[code] || ('No se pudo iniciar sesión. (' + (code || 'error desconocido') + ')');
     }
 
-    /* ── Email / Password ── */
+    /* ── Email / Password (Firebase) ── */
     form.addEventListener('submit', function(e){
       e.preventDefault();
       setMsg('');
       var email = emailEl.value.trim();
       var pass  = passEl.value;
       if (!email || !pass){ setMsg('Escribe tu correo y contraseña.', 'error'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setMsg('El correo no es válido.', 'error'); return; }
+      if (pass.length < 6){ setMsg('La contraseña debe tener al menos 6 caracteres.', 'error'); return; }
+
+      if (!auth){
+        setMsg('El acceso con email no está disponible ahora. Usa "Acceso rápido".', 'error');
+        return;
+      }
 
       loadingBtn(btnEmail, true, 'Entrando…');
-      disableAll(true);
       auth.signInWithEmailAndPassword(email, pass)
-        .then(function(cred){ persistAndGo(cred.user); })
+        .then(function(cred){
+          var u = cred.user;
+          persistAndGo({
+            uid: u.uid,
+            email: u.email || email,
+            name: u.displayName || (u.email ? u.email.split('@')[0] : ''),
+            photo: u.photoURL || '',
+            method: 'email'
+          });
+        })
         .catch(function(err){
           console.warn('email login error', err);
           setMsg(esError(err), 'error');
           loadingBtn(btnEmail, false);
-          disableAll(false);
         });
     });
 
-    /* ── OAuth (popup, with redirect fallback) ── */
-    function oauth(provider, btn){
+    /* ── Acceso rápido (sin Firebase, solo localStorage) ── */
+    quickForm.addEventListener('submit', function(e){
+      e.preventDefault();
       setMsg('');
-      loadingBtn(btn, true, 'Conectando…');
-      disableAll(true);
-      auth.signInWithPopup(provider)
-        .then(function(result){ persistAndGo(result.user); })
-        .catch(function(err){
-          console.warn('oauth popup error', err);
-          if (err && (err.code === 'auth/popup-blocked')){
-            // Fallback to full-page redirect
-            auth.signInWithRedirect(provider).catch(function(err2){
-              setMsg(esError(err2), 'error');
-              loadingBtn(btn, false);
-              disableAll(false);
+      var name = quickName.value.trim();
+      if (!name){ setMsg('Escribe tu nombre para entrar.', 'error'); return; }
+      loadingBtn(btnQuick, true, 'Entrando…');
+      persistAndGo({
+        uid: 'local-' + Date.now(),
+        email: '',
+        name: name,
+        photo: '',
+        method: 'quick'
+      });
+    });
+
+    /* ── Si ya hay sesión Firebase activa, saltar el formulario ── */
+    if (auth){
+      try {
+        auth.onAuthStateChanged(function(user){
+          if (user && localStorage.getItem('via_access_authenticated') !== 'true'){
+            persistAndGo({
+              uid: user.uid,
+              email: user.email || '',
+              name: user.displayName || (user.email ? user.email.split('@')[0] : ''),
+              photo: user.photoURL || '',
+              method: 'email'
             });
-            return;
           }
-          setMsg(esError(err), 'error');
-          loadingBtn(btn, false);
-          disableAll(false);
         });
+      } catch(e){}
     }
 
-    btnGoogle.addEventListener('click', function(){
-      var p = new firebase.auth.GoogleAuthProvider();
-      p.setCustomParameters({ prompt: 'select_account' });
-      oauth(p, btnGoogle);
-    });
+    /* ===========================================================
+       RE-HABILITAR GOOGLE / GITHUB OAUTH (producción)
+       Una vez configurado Google Cloud Console (OAuth consent +
+       Authorized redirect URIs que incluyan:
+         https://victor-ia-tracker.firebaseapp.com/__/auth/handler
+       y tu dominio del tracker), haz lo siguiente:
 
-    btnGithub.addEventListener('click', function(){
-      var p = new firebase.auth.GithubAuthProvider();
-      p.addScope('read:user');
-      p.addScope('user:email');
-      oauth(p, btnGithub);
-    });
+       1) En el HTML, quita los atributos  disabled  aria-disabled
+          y el <span class="soon">…</span> de #btnGoogle y #btnGithub.
+          Cambia la clase  btn-oauth  a un estilo activo si quieres.
+          Cambia el texto del divider "próximamente" por "o continúa con".
 
-    /* ── Handle redirect-based OAuth return + already-signed-in ── */
-    auth.getRedirectResult()
-      .then(function(result){
-        if (result && result.user){ persistAndGo(result.user); }
-      })
-      .catch(function(err){
-        if (err && err.code && err.code !== 'auth/no-auth-event'){
-          console.warn('redirect result error', err);
-          setMsg(esError(err), 'error');
-        }
-      });
+       2) Descomenta el bloque de abajo:
 
-    // If a Firebase session already exists, skip the form.
-    auth.onAuthStateChanged(function(user){
-      if (user && localStorage.getItem('via_access_authenticated') !== 'true'){
-        persistAndGo(user);
-      }
-    });
+       function oauth(provider, btn){
+         setMsg('');
+         loadingBtn(btn, true, 'Conectando…');
+         auth.signInWithPopup(provider)
+           .then(function(result){
+             var u = result.user;
+             persistAndGo({ uid:u.uid, email:u.email||'', name:u.displayName||'', photo:u.photoURL||'', method:'oauth' });
+           })
+           .catch(function(err){
+             if (err && err.code === 'auth/popup-blocked'){
+               auth.signInWithRedirect(provider).catch(function(err2){
+                 setMsg(esError(err2), 'error'); loadingBtn(btn, false);
+               });
+               return;
+             }
+             setMsg(esError(err), 'error'); loadingBtn(btn, false);
+           });
+       }
+       document.getElementById('btnGoogle').addEventListener('click', function(){
+         var p = new firebase.auth.GoogleAuthProvider();
+         p.setCustomParameters({ prompt: 'select_account' });
+         oauth(p, this);
+       });
+       document.getElementById('btnGithub').addEventListener('click', function(){
+         var p = new firebase.auth.GithubAuthProvider();
+         p.addScope('read:user'); p.addScope('user:email');
+         oauth(p, this);
+       });
+       // Y maneja el retorno por redirect:
+       auth.getRedirectResult().then(function(result){
+         if (result && result.user){
+           var u = result.user;
+           persistAndGo({ uid:u.uid, email:u.email||'', name:u.displayName||'', photo:u.photoURL||'', method:'oauth' });
+         }
+       }).catch(function(err){
+         if (err && err.code && err.code !== 'auth/no-auth-event'){ setMsg(esError(err), 'error'); }
+       });
+       =========================================================== */
   })();
   </script>
 </body>
