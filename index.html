@@ -16957,81 +16957,196 @@ function studioAttachFile(file){
   var ICON_PAUSE = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
   var ICON_PLAY  = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
 
-  // ── Definición de los 17 pasos ──
+  // ── Definición del tour completo (cobertura total: topbar, controles, 12 módulos, infra 4 sub-paneles, interacciones reales) ──
   // tab: pestaña principal a activar · ifx: subpanel de Infra · sel: elemento a resaltar
+  // act: función opcional que ejecuta una INTERACCIÓN real (click, input, scroll) sincronizada con la narración
   var STEPS = [
+    // ── 1. BIENVENIDA ──
     { tab:'dashboard', sel:'#topbar',
       title:'Bienvenido al Tracker Victor IA',
-      say:'Bienvenido al Tracker de Victor IA, tu centro de control inteligente. Soy tu guía, y en los próximos minutos voy a llevarte de la mano por cada rincón de este sistema. Esto no es una simple hoja de cálculo: es el cerebro operativo de tu negocio. Aquí conviven, en un solo lugar, tus proyectos, tus finanzas, tus clientes, tus reportes y toda la infraestructura de inteligencia artificial que trabaja para ti las veinticuatro horas. Lo que estás viendo arriba es la barra superior, tu punto de partida. Desde aquí registras una nueva entrada, exportas datos, ajustas la configuración y, por supuesto, lanzas este tour. Mi recomendación es simple: relájate, no toques nada y deja que la narración avance sola. Voy a abrir cada sección por ti, resaltar lo importante y explicarte para qué sirve. Cuando quieras, puedes pausar, retroceder o adelantar con los controles de abajo. Empecemos este recorrido.' },
+      say:'Bienvenido al Tracker de Victor IA, tu centro de control inteligente. Soy tu guía, y en los próximos minutos voy a llevarte de la mano por cada rincón de este sistema. Esto no es una simple hoja de cálculo: es el cerebro operativo de tu negocio. Aquí conviven, en un solo lugar, tus proyectos, tus finanzas, tus clientes, tus reportes y toda la infraestructura de inteligencia artificial que trabaja para ti las veinticuatro horas. Mi recomendación es simple: relájate, no toques nada y deja que la narración avance sola. Voy a abrir cada sección por ti, voy a hacer clics reales, resaltar lo importante y explicarte para qué sirve cada cosa. Cuando quieras, puedes pausar, retroceder o adelantar con los controles de abajo. Empecemos este recorrido.' },
 
+    // ── 2. BARRA SUPERIOR (resumen) ──
+    { tab:'dashboard', sel:'.topbar-btns',
+      title:'Barra superior — Tu punto de partida',
+      say:'Lo primero que vamos a conocer es la barra superior, tu punto de partida en todo momento. Desde aquí, sin importar en qué sección estés, tienes a la mano las acciones más importantes del sistema: registrar una nueva entrada, lanzar este tour, exportar tus datos, abrir los filtros avanzados, entrar al módulo de planeación con inteligencia artificial, activar la vista para clientes, cambiar el tema visual, ajustar la accesibilidad y abrir el menú de herramientas. Te voy a presentar cada uno de estos controles, uno por uno, para que sepas exactamente qué hace cada botón antes de empezar a navegar por los módulos.' },
+
+    // ── 3. NUEVA ENTRADA ──
+    { tab:'dashboard', sel:'.btn-primary-cta',
+      title:'Nueva Entrada — El botón clave',
+      say:'Este es el botón más importante de todo el tracker: Nueva Entrada. Cada vez que terminas una tarea, un diseño, un video, una llamada con un cliente o cualquier actividad de trabajo, la registras aquí. Capturas qué se hizo, por qué, para qué, cuánto tiempo tomó, a qué proyecto y cliente pertenece, su categoría y su prioridad. Recuerda la regla de oro: lo que no se registra, no se mide. Este pequeño botón es la fuente de la que se alimentan absolutamente todas las métricas que verás más adelante.' },
+
+    // ── 4. EXPORTAR + FILTROS + PLANEACIÓN ──
+    { tab:'dashboard', sel:'.topbar-btns .btn-desktop',
+      title:'Exportar, Filtros y Planeación',
+      say:'Junto al botón de entrada tienes tres herramientas de poder. Exportar C S V descarga toda tu información en un archivo de hoja de cálculo, ideal para respaldos o para compartir con tu contador. El botón de Filtros abre un panel lateral para segmentar los datos por cualquier criterio. Y Planeación es uno de los módulos más impresionantes: usa inteligencia artificial para generar cotizaciones, planear nuevos proyectos, preparar entregables y hasta solicitar dummies de diseño. Incluso tiene un agente de voz que llena los formularios automáticamente mientras tú simplemente hablas.' },
+
+    // ── 5. VISTA CLIENTE ──
+    { tab:'dashboard', sel:'#client-mode-btn',
+      title:'Vista Cliente — Modo presentación',
+      say:'Este botón activa la Vista Cliente, una función pensada para cuando presentas resultados frente a un cliente. Al encenderla, el tracker oculta automáticamente toda la información sensible, como tus costos internos y tus márgenes de ganancia, y muestra únicamente los precios de venta y los entregables. Así puedes proyectar tu pantalla con total confianza, sabiendo que tu cliente solo verá lo que debe ver, con una presentación limpia y profesional, sin revelar jamás los números internos de tu operación.' },
+
+    // ── 6. THEME TOGGLE ──
+    { tab:'dashboard', sel:'#theme-btn', act:'theme',
+      title:'Tema claro y oscuro',
+      say:'Aquí tienes el control del tema visual. Con un solo clic, que voy a dar ahora mismo para que lo veas, toda la plataforma cambia entre modo oscuro y modo claro. El modo oscuro es ideal para trabajar de noche o por largas horas, cuidando tu vista. El modo claro funciona mejor con mucha luz ambiental o para presentaciones impresas. El sistema recuerda tu preferencia, así que la próxima vez que entres, el tracker se verá exactamente como a ti te gusta.' },
+
+    // ── 7. ACCESIBILIDAD + MENÚ ──
+    { tab:'dashboard', sel:'#acc-btn',
+      title:'Accesibilidad y herramientas',
+      say:'Este ícono abre el panel de accesibilidad, que te da control total sobre la experiencia: puedes aumentar el tamaño del texto, activar alto contraste para mayor legibilidad, elegir modos para distintos tipos de daltonismo, reducir las animaciones e incluso navegar la plataforma con comandos de voz, sin usar el teclado ni el ratón. Justo al lado está el menú de herramientas, que en pantallas pequeñas agrupa todas las acciones para que nada te quede fuera del alcance. La plataforma está diseñada para que cualquier persona, sin importar sus capacidades, pueda usarla con comodidad.' },
+
+    // ── 8. ACCIONES IA (Generar Imagen / Video) ──
+    { tab:'dashboard', sel:'#via-quick-actions',
+      title:'Acciones IA — Producción en un clic',
+      say:'Debajo de la barra superior vive la barra de Acciones de inteligencia artificial, tu estudio de producción instantáneo. Desde aquí lanzas, con un solo clic, las capacidades creativas más potentes del sistema: Generar Imagen con Higgsfield en alta resolución, Generar Video, crear una Presentación animada, construir una página Web o landing, producir Voz y locución, armar material de Capacitación, gestionar Administración y finanzas, y abrir la Biblioteca de recursos. Es, literalmente, un equipo creativo completo a un clic de distancia, listo para producir en el momento en que lo necesites.' },
+
+    // ── 9. BARRA DE PERÍODO ──
+    { tab:'dashboard', sel:'#period-bar',
+      title:'Período de tiempo — Filtra todo',
+      say:'Esta es la barra de períodos, y controla el rango de tiempo de absolutamente todos los datos de la plataforma. Puedes filtrar por esta hora, por hoy, por ayer, por esta semana, por este mes, por este año, ver todo el historial completo, o definir un rango de fechas personalizado para análisis específicos. Cuando cambias el período aquí, el dashboard, las gráficas, las finanzas y los reportes se recalculan al instante para mostrarte solo la información de ese rango. Es tu lente para hacer zoom en el tiempo, desde el detalle de una hora hasta el panorama de un año entero.' },
+
+    // ── 10. SELECTOR DE PROYECTO ──
+    { tab:'dashboard', sel:'#project-bar',
+      title:'Selector de proyecto — Aísla los datos',
+      say:'Justo debajo está el selector de proyecto. Al elegir un proyecto en particular, todos los indicadores, gráficas, reportes y entradas del tracker se filtran automáticamente para mostrarte únicamente la información de ese cliente o iniciativa. Esto te permite responder, en segundos, preguntas críticas: cuántas horas llevo invertidas en este cliente, cuánto me ha costado, cuál es su rentabilidad real. Cada proyecto vive aislado, sin mezclar sus números con los demás, para que tu análisis sea siempre limpio y preciso.' },
+
+    // ── 11. MÓDULOS / TABS ──
+    { tab:'dashboard', sel:'#tabs',
+      title:'Los módulos del tracker',
+      say:'Aquí tienes la barra de módulos, el menú principal de navegación. Son doce secciones que cubren toda tu operación: Dashboard con métricas en vivo, Analytics profundo, Finanzas, el Organigrama de agentes de inteligencia artificial, el catálogo de Software y A P Is, el registro de Entradas, los Reportes, el C R M de clientes, Prospección, Telemetría del internet de las cosas, Observabilidad, e Infraestructura. Voy a abrir cada una de estas secciones por ti, en orden, haciendo clics reales para que veas cómo el sistema responde. Comencemos el recorrido por los módulos.' },
+
+    // ── 12. DASHBOARD KPIs ──
+    { tab:'dashboard', sel:'.kpi-grid',
+      title:'Dashboard — KPIs en vivo',
+      say:'Estamos en el Dashboard, la vista principal y la primera que ves al entrar. Piensa en esto como el tablero de un automóvil: de un solo vistazo conoces el estado de toda la operación. Cada una de estas tarjetas es un indicador clave de desempeño, lo que en los negocios llamamos un K P I. Verás las horas totales trabajadas, el valor económico generado, los prompts de inteligencia artificial ejecutados, tu tasa de cumplimiento, tu racha de días activos y el total de acciones registradas. Y lo más poderoso: estos números están vivos. Cada vez que registras una entrada nueva, el dashboard se recalcula solo, en tiempo real.' },
+
+    // ── 13. DASHBOARD actividad / gráficos ──
     { tab:'dashboard', sel:'#view-dashboard',
-      title:'Dashboard — El pulso del negocio',
-      say:'Estamos en el Dashboard, la vista principal y la primera que ves al entrar. Piensa en esto como el tablero de un automóvil: de un solo vistazo conoces el estado de toda la operación. Cada una de estas tarjetas es un indicador clave de desempeño, lo que en el mundo de los negocios llamamos un KPI. Verás las horas totales trabajadas, el número de actividades registradas, tu tasa de cumplimiento, el promedio de horas por día y el costo estimado de tu operación. Lo más poderoso es que estos números están vivos: cada vez que registras una nueva entrada, el dashboard se recalcula automáticamente en tiempo real. También encontrarás tu racha de días activos, tu proyecto y cliente principal por horas invertidas, y el margen de rentabilidad global. Es tu termómetro diario para saber, en segundos y sin esfuerzo, exactamente cómo va el negocio hoy.' },
+      title:'Dashboard — Actividad y flujos',
+      say:'Más abajo en el Dashboard encontrarás el flujo de información entre las áreas de la agencia, las gráficas de distribución por categoría y por proyecto, y la bitácora completa de actividad, con cada entrada del período actualizándose en tiempo real. Esta vista combinada te da, en una sola pantalla, tanto el resumen numérico de arriba como el detalle vivo de abajo. Es tu termómetro diario para saber, en segundos y sin esfuerzo, exactamente cómo va el negocio hoy y qué se ha estado trabajando.' },
 
+    // ── 14. ANALYTICS ──
     { tab:'analytics', sel:'#view-analytics',
       title:'Analytics — Gráficos y tendencias',
-      say:'Ahora pasamos a la sección de Analytics, donde los datos en bruto se transforman en historias visuales. Aquí cada número se convierte en una gráfica que puedes interpretar de inmediato. Encontrarás la distribución de tu tiempo por proyecto, la actividad por hora del día para descubrir cuándo eres más productivo, la evolución semana a semana de tu carga de trabajo, y comparativas detalladas entre tus distintos clientes. Estas visualizaciones no son decorativas: son herramientas de decisión. Te permiten detectar patrones que a simple vista pasarían desapercibidos, identificar tus horas pico de productividad, reconocer qué proyectos consumen más recursos de lo previsto y anticipar tendencias antes de que se conviertan en problemas. En resumen, Analytics te ayuda a tomar decisiones con evidencia sólida, no con corazonadas.' },
+      say:'Ahora pasamos a la sección de Analytics, donde los datos en bruto se transforman en historias visuales. Aquí cada número se convierte en una gráfica que puedes interpretar de inmediato. Encontrarás el mapa de calor de productividad por horas y días, el análisis de eficiencia en tu uso de la inteligencia artificial, la evolución de tu carga de trabajo y comparativas detalladas por proyecto y por cliente. Estas visualizaciones no son decorativas: son herramientas de decisión. Te permiten detectar patrones invisibles a simple vista, identificar tus horas pico de productividad y anticipar tendencias antes de que se conviertan en problemas. Analytics te ayuda a decidir con evidencia, no con corazonadas.' },
 
+    // ── 15. FINANZAS (vista) ──
     { tab:'finanzas', sel:'#view-finanzas',
-      title:'Finanzas — Costos por API',
-      say:'Llegamos a Finanzas, una de las secciones más importantes para la salud de tu empresa. Aquí se desglosa el costo real de operar, con un nivel de detalle que pocas herramientas ofrecen. Verás el gasto por cada interfaz de programación, o API, que el sistema utiliza, como ElevenLabs para las voces, Higgsfield para imágenes y video, y los distintos modelos de inteligencia artificial que procesan tu trabajo. Pero no se queda en los costos: esta sección también calcula el precio de venta, el margen y la rentabilidad de cada actividad y de cada proyecto. Así sabes, con números claros y honestos, cuánto te cuesta producir, cuánto cobras y, lo más importante, cuánto dinero realmente te deja cada cliente. Es la sección que convierte tu intuición financiera en certeza.' },
+      title:'Finanzas — Salud económica total',
+      say:'Llegamos a Finanzas, una de las secciones más importantes para la salud de tu empresa. Aquí se desglosa el costo real de operar, con un nivel de detalle que pocas herramientas ofrecen. Verás el gasto por cada interfaz de programación, o A P I, que el sistema utiliza, junto al estado de resultados, los ingresos y egresos del período y los márgenes por proyecto. Esta sección calcula cuánto te cuesta producir, cuánto cobras y, lo más importante, cuánto dinero realmente te deja cada cliente. Es la sección que convierte tu intuición financiera en certeza absoluta. Nada está oculto.' },
 
+    // ── 16. FINANZAS — cambiar período (interacción real) ──
+    { tab:'finanzas', sel:'#period-bar', act:'finMonth',
+      title:'Finanzas — Cambiando el filtro',
+      say:'Déjame mostrarte algo en vivo. Voy a cambiar el filtro de período a este mes, haciendo clic justo aquí. Observa cómo, en el instante en que cambio el rango de tiempo, todos los números financieros se recalculan automáticamente: los costos, los ingresos, los márgenes, absolutamente todo se actualiza para reflejar únicamente el mes en curso. Esta es la magia de tener un sistema reactivo: un solo clic te da una fotografía financiera completamente nueva, sin fórmulas, sin esperas y sin margen de error.' },
+
+    // ── 17. ORGANIGRAMA ──
     { tab:'organigrama', sel:'#view-organigrama',
-      title:'Organigrama — Arquitectura del sistema',
-      say:'Esta vista es el Organigrama, y aquí está el corazón inteligente de Victor IA. Lo que ves es la arquitectura completa del sistema: todos los agentes especializados, sus roles definidos y cómo se conectan entre sí para trabajar en equipo. En la cima está el Gerente, que evalúa y delega; debajo están los directores de cada área, como tecnología, creatividad y operaciones; y más abajo, los implementadores que ejecutan las tareas concretas, junto a los revisores que verifican la calidad. Este modelo, inspirado en una empresa real, permite que el sistema orqueste trabajo complejo de forma ordenada, igual que lo haría un equipo humano bien coordinado. Es el mapa que te muestra cómo cada pieza colabora para entregarte resultados profesionales y consistentes.' },
+      title:'Organigrama — Arquitectura de agentes',
+      say:'Esta vista es el Organigrama, y aquí está el corazón inteligente de Victor IA. Lo que ves es la arquitectura completa del sistema: todos los agentes especializados, sus roles definidos y cómo se conectan entre sí para trabajar en equipo. En la cima está el Gerente, que evalúa y delega; debajo, los directores de cada área, como tecnología, creatividad, marketing y finanzas; y más abajo, los implementadores que ejecutan y los revisores que verifican la calidad. Cada nodo muestra qué recibe, qué entrega y cómo enlaza con las demás áreas. Es un modelo inspirado en una empresa real, que permite orquestar trabajo complejo de forma ordenada, igual que un equipo humano bien coordinado.' },
 
+    // ── 18. SOFTWARE & APIs ──
     { tab:'software', sel:'#view-software',
       title:'Software y APIs — Integraciones',
-      say:'Estamos ahora en Software y APIs, el inventario tecnológico de toda tu operación. Aquí encuentras, organizadas y a la vista, todas las herramientas e integraciones que mantienen el sistema funcionando. Verás las licencias de software que pagas mes con mes, las interfaces de programación conectadas, los servicios externos y las plataformas que potencian cada capacidad del tracker. Esta sección te da control total: puedes consultar qué estás usando, cuánto cuesta cada servicio y cómo se integra al ecosistema. Tener este inventario centralizado evita gastos duplicados, te ayuda a renegociar licencias y asegura que sepas, en todo momento, exactamente de qué herramientas depende tu negocio.' },
+      say:'Estamos ahora en Software y A P Is, el inventario tecnológico de toda tu operación. Aquí encuentras, organizadas y a la vista, todas las herramientas activas de Victor IA: Claude, ElevenLabs, Runway, Adobe Creative Cloud, HubSpot, n ocho n y muchas más. Verás el costo mensual de cada una, su categoría y los agentes especializados asignados a ella. Tener este inventario centralizado te da control total: evita gastos duplicados, te ayuda a renegociar licencias y asegura que sepas, en todo momento, exactamente de qué herramientas depende tu negocio y cuánto te cuesta cada una.' },
 
+    // ── 19. ENTRADAS ──
     { tab:'entradas', sel:'#view-entradas',
-      title:'Entradas — Ingreso de datos',
-      say:'Esta es la sección de Entradas, y me atrevo a decir que es el corazón de todo el sistema. Aquí se captura cada actividad de trabajo con su hora exacta, su descripción, su categoría, el proyecto y el cliente asociado, la duración, el estado y las etiquetas. Cada entrada que registras aquí es la materia prima que alimenta absolutamente todas las demás secciones: el dashboard, los gráficos de analytics, los cálculos de finanzas y los reportes. Por eso existe una regla de oro en esta operación: lo que no se registra, no se mide, y lo que no se mide, no se puede mejorar. Mantener esta sección actualizada con disciplina es lo que convierte al tracker en una fuente de verdad confiable. Tómate el hábito de registrar todo, y el sistema te lo devolverá multiplicado en claridad.' },
+      title:'Entradas — La fuente de verdad',
+      say:'Esta es la sección de Entradas, el registro maestro de toda la actividad de la agencia y, me atrevo a decir, el corazón de todo el sistema. Cada entrada tiene descripción detallada, hora exacta, proyecto, cliente, categoría, estado, prioridad y si hubo retrabajo. Cada registro que capturas aquí es la materia prima que alimenta el dashboard, las gráficas de analytics, los cálculos de finanzas y los reportes. Es la fuente de verdad de todo el sistema. Mantenerla actualizada con disciplina es lo que convierte al tracker en una herramienta confiable: tómate el hábito de registrar todo, y el sistema te lo devolverá multiplicado en claridad.' },
 
+    // ── 20. ENTRADAS — filtros avanzados (interacción: abrir sidebar) ──
+    { tab:'entradas', sel:'#sidebar', act:'sidebar',
+      title:'Filtros avanzados — Segmenta todo',
+      say:'Voy a abrir ahora el panel de filtros avanzados, para que veas su poder. Desde aquí puedes segmentar tus datos por cualquier combinación de criterios: categoría, proyecto, cliente, estado de la tarea, prioridad, duración mínima, retrabajo y software utilizado. Lo mejor es que los filtros se aplican en tiempo real a todas las vistas del módulo: en cuanto eliges un criterio, la lista de entradas y los totales se ajustan al instante. Es como tener un microscopio para tus datos, capaz de aislar exactamente la información que buscas en cualquier momento.' },
+
+    // ── 21. REPORTES ──
     { tab:'reportes', sel:'#view-reportes',
       title:'Reportes — Generación automática',
-      say:'Pasamos a Reportes, la sección que te ahorra horas de trabajo manual. Con apenas un clic, el sistema genera reportes profesionales y elegantes filtrados por día, por semana, por mes o por año. Estos documentos sintetizan toda tu actividad registrada en un formato claro, ordenado y listo para compartir, ya sea con un cliente que quiere ver avances, con un socio que pide cuentas o para tu propio archivo. En lugar de pasar horas armando resúmenes en una hoja de cálculo, el tracker hace el trabajo pesado por ti en segundos, manteniendo siempre la misma calidad visual y la coherencia de los datos. Reportar deja de ser una carga y se vuelve un superpoder de tu operación.' },
+      say:'Pasamos a Reportes, la sección que te ahorra horas de trabajo manual. Con apenas un clic, el sistema genera vistas consolidadas de tu rendimiento: resumen día a día, distribución de productividad por día de la semana, estadísticas por categoría y comparativas entre períodos. Estos documentos sintetizan toda tu actividad en un formato claro, ordenado y listo para compartir, ya sea con un cliente que quiere ver avances o para tu propia reunión de equipo. En lugar de pasar horas armando resúmenes a mano, el tracker hace el trabajo pesado por ti en segundos. Reportar deja de ser una carga y se vuelve un superpoder.' },
 
+    // ── 22. CRM ──
     { tab:'crm', sel:'#view-crm',
-      title:'CRM — Gestión de leads',
-      say:'Esta es la sección de CRM, las siglas en inglés de gestión de relaciones con clientes. Aquí administras todos tus prospectos y leads a lo largo del embudo de ventas, desde el primer contacto hasta el cierre del trato. Cada lead tiene su propia ficha con su nombre, su empresa, su estado actual en el proceso y un historial completo de interacciones. Esto significa que nunca más perderás el rastro de una oportunidad: sabrás exactamente en qué etapa está cada cliente potencial, cuándo fue el último contacto y cuál es el siguiente paso a dar. Un CRM bien usado es la diferencia entre cerrar tratos de forma sistemática y depender de la suerte. Aquí, ningún prospecto valioso se te escapa.' },
+      title:'CRM — Pipeline y contactos',
+      say:'Esta es la sección de C R M, la gestión de relaciones con clientes. Aquí administras todos tus prospectos y leads a lo largo del embudo de ventas, desde el primer contacto hasta el cierre del trato. Verás tu pipeline organizado por etapas, con la probabilidad y el valor económico estimado de cada oportunidad, además de la ficha completa de cada cliente con su historial de interacciones. Esto significa que nunca más perderás el rastro de una oportunidad: sabrás en qué etapa está cada prospecto, cuándo fue el último contacto y cuál es el siguiente paso. Aquí, ningún negocio valioso se te escapa.' },
 
+    // ── 23. PROSPECCIÓN ──
     { tab:'apollo', sel:'#view-apollo',
       title:'Prospección — Apollo y LinkedIn',
-      say:'Llegamos a Prospección, el motor que llena tu embudo de ventas con clientes nuevos. Esta sección se conecta con fuentes profesionales como Apollo y LinkedIn para encontrar prospectos de forma sistemática y a gran escala. El proceso es metódico: primero defines tu nicho ideal y la fuente de datos, luego recolectas los contactos, después los limpias eliminando duplicados, y finalmente verificas que la información sea válida y accionable. En lugar de buscar clientes uno por uno de manera artesanal, aquí construyes un flujo constante de oportunidades de calidad. Es la diferencia entre esperar a que los clientes lleguen y salir activamente a conquistarlos con una estrategia clara y repetible.' },
+      say:'Llegamos a Prospección, el motor que llena tu embudo de ventas con clientes nuevos. Esta sección se conecta con fuentes profesionales como Apollo y LinkedIn para encontrar prospectos de forma sistemática y a gran escala. El proceso es metódico: defines tu nicho ideal y la fuente, recolectas los contactos, los limpias eliminando duplicados y verificas que la información sea válida y accionable. En lugar de buscar clientes uno por uno de manera artesanal, aquí construyes un flujo constante de oportunidades de calidad. Es la diferencia entre esperar a que los clientes lleguen y salir activamente a conquistarlos con una estrategia clara y repetible.' },
 
+    // ── 24. TELEMETRÍA IoT ──
     { tab:'telemetria', sel:'#view-telemetria',
       title:'Telemetría IoT — Sensores',
-      say:'Esta es la sección de Telemetría del internet de las cosas, lo que técnicamente conocemos como IoT. Aquí el tracker se asoma al mundo físico, monitoreando en tiempo real sensores y dispositivos conectados. Verás datos industriales, métricas de equipos, lecturas de temperatura, consumo, rendimiento y los flujos de información que provienen de hardware en operación. Toda esta data alimenta análisis predictivos que pueden anticipar fallas antes de que ocurran y optimizar el funcionamiento de equipos. Es una ventana directa al mundo físico conectado, y representa la capacidad del sistema para integrar no solo información digital, sino también señales del mundo real, todo en un mismo panel de control.' },
+      say:'Esta es la sección de Telemetría del internet de las cosas, lo que técnicamente conocemos como I o T. Aquí el tracker se asoma al mundo físico, monitoreando en tiempo real sensores y dispositivos conectados. Verás datos industriales, métricas de equipos, lecturas de temperatura, consumo y rendimiento, junto a los flujos de información que provienen de hardware en operación. Toda esta data alimenta análisis predictivos que pueden anticipar fallas antes de que ocurran y optimizar el funcionamiento de los equipos. Es una ventana directa al mundo físico conectado, integrando no solo información digital, sino también señales del mundo real, todo en un mismo panel.' },
 
+    // ── 25. OBSERVABILIDAD / GRAPHIFY ──
     { tab:'graphify', sel:'#view-graphify',
       title:'Observabilidad — Graphify',
-      say:'Ahora pasamos a Observabilidad, una sección impulsada por una tecnología llamada Graphify. Aquí el conocimiento del sistema deja de ser una lista plana de archivos y se representa como grafos, es decir, como redes de nodos interconectados. Esto tiene dos beneficios enormes. Primero, eficiencia: consultar la memoria en forma de grafo permite ahorrar hasta cinco veces en tokens, lo que se traduce directamente en menores costos de inteligencia artificial. Segundo, inteligencia: el sistema entiende cómo se relacionan entre sí tus proyectos, tus skills, tus clientes y tus datos, descubriendo conexiones que de otro modo permanecerían ocultas. Es, en esencia, la capa que le da memoria y contexto profundo a todo el ecosistema.' },
+      say:'Ahora pasamos a Observabilidad, una sección impulsada por una tecnología llamada Graphify. Aquí el conocimiento del sistema deja de ser una lista plana de archivos y se representa como grafos, es decir, redes de nodos interconectados. Esto tiene dos beneficios enormes. Primero, eficiencia: consultar la memoria en forma de grafo permite ahorrar hasta cinco veces en tokens, lo que se traduce directamente en menores costos de inteligencia artificial. Segundo, inteligencia: el sistema entiende cómo se relacionan entre sí tus proyectos, tus skills, tus clientes y tus datos, descubriendo conexiones que de otro modo permanecerían ocultas. Es la capa que le da memoria y contexto profundo a todo el ecosistema.' },
 
+    // ── 26. INFRA — Skills (vista) ──
     { tab:'infrastructure', ifx:'skills', sel:'#ifx-panel-skills',
       title:'Infraestructura — Skills',
-      say:'Entramos ahora a la sección de Infraestructura, y comenzamos por los Skills. Aquí está la verdadera fuerza de trabajo del sistema: más de doscientos veintiséis agentes especializados, cada uno experto en una tarea concreta. Están organizados por categorías que cubren prácticamente todo lo que tu negocio podría necesitar: diseño y experiencia de usuario, producción de video, generación de imágenes, desarrollo de código, automatización de procesos, seguridad informática, marketing, contenido y mucho más. Puedes usar el buscador para encontrar cualquier skill por su nombre o descripción, y filtrar por categoría. Piensa en esto como tener un equipo enorme de especialistas siempre disponibles, listos para activarse en el momento exacto en que tu proyecto los requiera.' },
+      say:'Entramos ahora a la sección de Infraestructura, y comenzamos por los Skills. Aquí está la verdadera fuerza de trabajo del sistema: más de doscientos veintiséis agentes especializados, cada uno experto en una tarea concreta. Están organizados por categorías que cubren prácticamente todo lo que tu negocio podría necesitar: diseño y experiencia de usuario, producción de video, generación de imágenes, desarrollo de código, automatización, seguridad informática, marketing, contenido y mucho más. Piensa en esto como tener un equipo enorme de especialistas siempre disponibles, listos para activarse en el momento exacto en que tu proyecto los requiera.' },
 
+    // ── 27. INFRA — Skills búsqueda (interacción: escribir en el buscador) ──
+    { tab:'infrastructure', ifx:'skills', sel:'#ifx-search-input', act:'skillSearch',
+      title:'Skills — Buscador en acción',
+      say:'Déjame mostrarte el buscador en vivo. Voy a escribir aquí la palabra video, y observa lo que pasa. Al instante, el sistema filtra los más de doscientos agentes y te muestra únicamente los relacionados con producción de video: motion design, remotion, hyperframes, scroll cinematográfico y más. Así de rápido encuentras al especialista exacto que necesitas, entre cientos, en menos de un segundo. También puedes filtrar por categoría con el menú desplegable de al lado. Buscar y activar el talento adecuado nunca había sido tan inmediato.' },
+
+    // ── 28. INFRA — Loops (vista) ──
     { tab:'infrastructure', ifx:'loops', sel:'#ifx-panel-loops',
       title:'Infraestructura — Loops',
-      say:'Continuamos en Infraestructura con los Loops, una de las características más fascinantes del sistema. Son veinte ciclos autónomos que ejecutan tareas de manera continua, sin que tú tengas que intervenir. Estos loops se encargan del aprendizaje constante, de la optimización de costos, de la evaluación de calidad de los resultados, de la convergencia hacia mejores soluciones y del monitoreo del propio sistema. En la práctica, esto significa que el tracker no es estático: mejora solo, día tras día, refinando sus procesos mientras tú te dedicas a lo que de verdad importa. Cada loop tiene una tarea asignada y se ejecuta en su propio ritmo, formando en conjunto un organismo que se cuida y se perfecciona a sí mismo de forma automática.' },
+      say:'Continuamos en Infraestructura con los Loops, una de las características más fascinantes del sistema. Son veinte ciclos autónomos que ejecutan tareas de manera continua, sin que tú tengas que intervenir. Estos loops se encargan del aprendizaje constante, de la optimización de costos, de la evaluación de calidad de los resultados y del monitoreo del propio sistema. Cada loop muestra su intervalo de ejecución, su próxima corrida, su última corrida, su tasa de éxito y el historial de sus ejecuciones. En la práctica, esto significa que el tracker no es estático: mejora solo, día tras día, mientras tú te dedicas a lo que de verdad importa.' },
 
+    // ── 29. INFRA — Loops ejecutar (interacción: click en "Ejecutar ahora") ──
+    { tab:'infrastructure', ifx:'loops', sel:'#lpf-list .lpf-card', act:'runLoop',
+      title:'Loops — Ejecutar ahora',
+      say:'Y ahora viene lo mejor: voy a ejecutar un loop en vivo, frente a ti. Hago clic en el botón Ejecutar ahora del primer loop, y observa cómo arranca su secuencia de tareas. El loop comienza a procesar cada paso de su checklist, uno por uno, mostrando su progreso en tiempo real, y al terminar registra automáticamente su resultado en el tracker. Esto demuestra el verdadero poder del sistema: tareas repetitivas que antes te robaban horas, ahora se ejecutan solas, con verificación automática y dejando un registro completo de lo que hicieron. Esto es automatización de verdad, trabajando para ti.' },
+
+    // ── 30. INFRA — Costos (interacción: ya cargado) ──
     { tab:'infrastructure', ifx:'costs', sel:'#ifx-panel-costs',
       title:'Infraestructura — Costos',
-      say:'Esta es la vista de Costos dentro de Infraestructura, y complementa lo que vimos antes en Finanzas, pero enfocada en la tecnología. Aquí se presentan, mediante gráficos financieros claros, los gastos reales de cada servicio y cada API que sostiene la operación. De un solo vistazo identificas dónde se concentra tu inversión tecnológica, qué servicios consumen más presupuesto y cuáles ofrecen el mejor retorno. Esta transparencia es clave para optimizar: te permite detectar gastos innecesarios, comparar alternativas más económicas y asegurar que cada peso invertido en tecnología esté generando valor real. Control financiero total sobre la infraestructura que hace posible todo el sistema.' },
+      say:'Esta es la vista de Costos dentro de Infraestructura, y complementa lo que vimos en Finanzas, pero enfocada en la tecnología. Aquí se presentan, mediante gráficos financieros claros, los gastos reales de cada servicio y cada A P I que sostiene la operación. De un solo vistazo identificas dónde se concentra tu inversión tecnológica, qué servicios consumen más presupuesto y cuáles ofrecen el mejor retorno. Esta transparencia es clave para optimizar: te permite detectar gastos innecesarios, comparar alternativas más económicas y asegurar que cada peso invertido en tecnología esté generando valor real.' },
 
+    // ── 31. INFRA — Sistema ──
     { tab:'infrastructure', ifx:'system', sel:'#ifx-panel-system',
       title:'Infraestructura — Sistema',
-      say:'Cerramos la sección de Infraestructura con la pestaña de Sistema. Aquí encuentras la información general sobre el estado de salud de todo el ecosistema. Verás las versiones del sistema, las conexiones que están activas en este momento, los MCPs integrados, que son los protocolos que conectan al sistema con herramientas externas, y un panorama técnico completo del funcionamiento general. Piensa en esta pestaña como el chequeo médico del tracker: te confirma, de un vistazo, que todos los componentes están operando correctamente y que la maquinaria detrás de escena funciona como debe. Es la tranquilidad de saber que el sistema está sano y listo para trabajar.' },
+      say:'Cerramos la sección de Infraestructura con la pestaña de Sistema. Aquí encuentras la información general sobre el estado de salud de todo el ecosistema. Verás las versiones del sistema, las conexiones activas en este momento, los M C Ps integrados, que son los protocolos que conectan al sistema con herramientas externas, y un panorama técnico completo del funcionamiento general. Piensa en esta pestaña como el chequeo médico del tracker: te confirma, de un vistazo, que todos los componentes están operando correctamente y que la maquinaria detrás de escena funciona como debe. Es la tranquilidad de saber que el sistema está sano y listo para trabajar.' },
 
+    // ── 32. NAVEGACIÓN LIBRE ──
     { tab:'dashboard', sel:'#tabs',
       title:'Navegación libre',
-      say:'Antes de cerrar, quiero que recuerdes algo importante. Todas las secciones que acabamos de recorrer están siempre a un solo clic de distancia, justo aquí en la barra de navegación superior. No necesitas seguir ningún orden: puedes saltar al Dashboard, a Finanzas, al CRM o a Infraestructura cuando quieras, según lo que necesites en ese momento. Y si en algún punto te sientes perdido o simplemente quieres repasar, puedes volver a lanzar este tour completo desde el botón Tour Guiado, en la barra superior. El sistema recordará tu progreso, así que siempre podrás retomar justo donde lo dejaste. La navegación es totalmente libre y está pensada para acompañarte, no para limitarte.' },
+      say:'Antes de cerrar, quiero que recuerdes algo importante. Todas las secciones que acabamos de recorrer están siempre a un solo clic de distancia, justo aquí en la barra de navegación. No necesitas seguir ningún orden: puedes saltar al Dashboard, a Finanzas, al C R M o a Infraestructura cuando quieras, según lo que necesites en ese momento. Y si en algún punto quieres repasar, puedes volver a lanzar este tour completo desde el botón Tour Guiado en la barra superior. El sistema recordará tu progreso, así que siempre podrás retomar justo donde lo dejaste. La navegación es totalmente libre, pensada para acompañarte, no para limitarte.' },
 
+    // ── 33. TOUR COMPLETADO ──
     { tab:'dashboard', sel:'#topbar',
       title:'Tour completado',
-      say:'Y con esto, hemos llegado al final del recorrido. Ahora conoces el Tracker de Victor IA de principio a fin: el dashboard que mide el pulso de tu negocio, los gráficos de analytics, el detalle financiero, el organigrama de agentes inteligentes, tus integraciones, el registro de actividades, los reportes automáticos, la gestión de clientes, la prospección, la telemetría y toda la infraestructura de skills, loops, costos y estado del sistema. Has visto cómo cada pieza se conecta para darte claridad, control y poder de decisión. Ahora todo está en tus manos: explora con confianza, registra con disciplina y deja que este sistema trabaje incansablemente para ti. Gracias por acompañarme en este recorrido, y bienvenido oficialmente a tu centro de control inteligente. Que tengas mucho éxito.' }
+      say:'Y con esto, hemos llegado al final del recorrido. Ahora conoces el Tracker de Victor IA de principio a fin: la barra superior con todos sus controles, el dashboard que mide el pulso de tu negocio, los gráficos de analytics, el detalle financiero, el organigrama de agentes inteligentes, tus integraciones de software, el registro de actividades, los reportes automáticos, el C R M, la prospección, la telemetría, la observabilidad y toda la infraestructura de skills, loops, costos y estado del sistema. Viste interacciones reales: cambié temas, filtré finanzas, busqué un skill y ejecuté un loop. Ahora todo está en tus manos: explora con confianza, registra con disciplina y deja que este sistema trabaje incansablemente para ti. Gracias por acompañarme, y bienvenido oficialmente a tu centro de control inteligente. Que tengas mucho éxito.' }
   ];
+
+  // ── Acciones interactivas reales que el tour ejecuta, sincronizadas con la narración ──
+  // Se disparan ~1.3s después de iniciar la narración para que el usuario alcance a oír la intención.
+  var TOUR_ACTIONS = {
+    theme: function(){ try{ if(typeof toggleTheme==='function') toggleTheme(); setTimeout(function(){ if(typeof toggleTheme==='function') toggleTheme(); }, 3500); }catch(e){} },
+    finMonth: function(){ try{ if(typeof setPeriod==='function') setPeriod('month'); }catch(e){} },
+    sidebar: function(){ try{ var sb=document.getElementById('sidebar'); var open=sb&&(sb.classList.contains('open')||getComputedStyle(sb).display!=='none'); if(!open&&typeof toggleSidebar==='function') toggleSidebar(); }catch(e){} },
+    skillSearch: function(){
+      try{
+        var inp=document.getElementById('ifx-search-input'); if(!inp) return;
+        inp.focus(); var word='video', n=0;
+        var t=setInterval(function(){ n++; inp.value=word.slice(0,n); inp.dispatchEvent(new Event('input',{bubbles:true})); if(n>=word.length) clearInterval(t); }, 180);
+      }catch(e){}
+    },
+    runLoop: function(){
+      try{
+        var card=document.querySelector('#lpf-list .lpf-card'); if(!card) return;
+        var btn=card.querySelector('.lpf-btn.run'); if(btn && !btn.disabled) btn.click();
+      }catch(e){}
+    }
+  };
 
   var TOTAL = STEPS.length;
 
@@ -17063,6 +17178,7 @@ function studioAttachFile(file){
       this._cancelSpeech();
       clearTimeout(this.stepTimer);
       clearTimeout(this.typer);
+      clearTimeout(this._actTimer);
       this.el('via-tour-root').classList.remove('on','speaking');
       this.el('via-tour-spot').classList.remove('show','pulse');
       document.body.style.overflow = '';
@@ -17138,6 +17254,14 @@ function studioAttachFile(file){
 
       // 4) narrate
       this._typeAndSpeak(step.say, autoplay);
+
+      // 5) ejecutar interacción real (click/input/scroll) sincronizada con la narración
+      clearTimeout(this._actTimer);
+      if(step.act && TOUR_ACTIONS[step.act]){
+        this._actTimer = setTimeout(function(){
+          if(self.playing && self.idx === i){ try{ TOUR_ACTIONS[step.act](); }catch(e){} }
+        }, 1300 + subDelay);
+      }
     },
 
     render: function(){
