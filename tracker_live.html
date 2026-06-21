@@ -4949,10 +4949,6 @@ body.client-mode #main { margin-left: 0 !important; }
   }
 }
 </style>
-<!-- Firebase Auth SDK (compat) -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
-<script defer src="https://victor-ia-brain-tracker.vercel.app/vi-track.js" data-site="victor-ia-tracker"></script>
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
   <defs>
     <symbol id="icon-robot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 8V5"/><circle cx="12" cy="4" r="1"/><circle cx="9" cy="13" r="1.25" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.25" fill="currentColor" stroke="none"/><path d="M9.5 17.5h5"/><path d="M4 12H2M22 12h-2"/></symbol>
@@ -14967,12 +14963,8 @@ function studioAttachFile(file){
     },
 
     load() {
-      Promise.race([
-        fetch('https://victor-ia-dashboard.vercel.app/api/tokens', {mode:'cors'}).then(r => r.json()),
-        new Promise((_, reject) => setTimeout(() => reject('timeout'), 3000))
-      ])
-        .then(data => GraphifyUI.render(data))
-        .catch(() => GraphifyUI.render(GraphifyUI.getMockData()));
+      // Use local mock data (no external API calls)
+      GraphifyUI.render(GraphifyUI.getMockData());
     },
 
     getMockData() {
