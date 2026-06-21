@@ -4977,6 +4977,97 @@ body.client-mode #main { margin-left: 0 !important; }
     display: none;
   }
 }
+
+/* ==========================================
+   INFRA TAB — Skills / Loops / Sistema (v2)
+   THE DOOR theme · amber #FFAA17 · dark
+   ========================================== */
+#view-infrastructure { padding: 20px 18px 60px; }
+.ifx-wrap { max-width: 1240px; margin: 0 auto; color: var(--bone); animation: fadeIn .45s ease; }
+.ifx-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:6px; }
+.ifx-title { display:flex; align-items:center; gap:12px; }
+.ifx-title h1 { font-size:22px; font-weight:700; margin:0; color:var(--amber); letter-spacing:.2px; }
+.ifx-title .ifx-dot { width:9px; height:9px; border-radius:50%; background:#34d399; box-shadow:0 0 10px #34d399; animation:ifxPulse 2s infinite; }
+@keyframes ifxPulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+.ifx-sub { font-size:12.5px; color:var(--bone2); margin:2px 0 0; }
+
+/* sub-tabs */
+.ifx-subtabs { display:flex; gap:6px; flex-wrap:wrap; margin:18px 0 20px; border-bottom:1px solid var(--bone3); padding-bottom:0; }
+.ifx-subtab { background:none; border:none; color:var(--bone2); font-size:13.5px; font-weight:600; padding:9px 16px; cursor:pointer; border-bottom:2px solid transparent; transition:.18s; border-radius:6px 6px 0 0; font-family:inherit; }
+.ifx-subtab:hover { color:var(--bone); background:var(--amber3); }
+.ifx-subtab.on { color:var(--amber); border-bottom-color:var(--amber); }
+.ifx-subtab .ifx-count { font-size:11px; background:var(--amber2); color:var(--amber); padding:1px 7px; border-radius:20px; margin-left:6px; font-weight:700; }
+.ifx-panel { display:none; animation:fadeIn .35s ease; }
+.ifx-panel.on { display:block; }
+
+/* stat strip */
+.ifx-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:22px; }
+.ifx-stat { background:linear-gradient(160deg,var(--amber3),transparent); border:1px solid var(--bone3); border-radius:14px; padding:16px 18px; }
+.ifx-stat .v { font-size:26px; font-weight:800; color:var(--amber); line-height:1; }
+.ifx-stat .l { font-size:11.5px; color:var(--bone2); margin-top:7px; text-transform:uppercase; letter-spacing:.6px; }
+
+/* search + filter */
+.ifx-controls { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; align-items:center; }
+.ifx-search { position:relative; flex:1; min-width:220px; }
+.ifx-search input { width:100%; background:var(--bg); border:1px solid var(--bone3); color:var(--bone); border-radius:10px; padding:11px 14px 11px 38px; font-size:14px; font-family:inherit; outline:none; transition:.18s; }
+.ifx-search input:focus { border-color:var(--amber); box-shadow:0 0 0 3px var(--amber3); }
+.ifx-search svg { position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--bone2); pointer-events:none; }
+.ifx-catfilter { background:var(--bg); border:1px solid var(--bone3); color:var(--bone); border-radius:10px; padding:11px 14px; font-size:13.5px; font-family:inherit; outline:none; cursor:pointer; min-width:180px; }
+.ifx-catfilter:focus { border-color:var(--amber); }
+
+/* category groups */
+.ifx-cat { margin-bottom:26px; }
+.ifx-cat-h { display:flex; align-items:center; gap:10px; margin:0 0 12px; cursor:pointer; user-select:none; }
+.ifx-cat-h .chev { width:16px; height:16px; color:var(--amber); transition:transform .2s; flex-shrink:0; }
+.ifx-cat.collapsed .chev { transform:rotate(-90deg); }
+.ifx-cat.collapsed .ifx-grid { display:none; }
+.ifx-cat-h h3 { font-size:14.5px; font-weight:700; margin:0; color:var(--bone); }
+.ifx-cat-h .n { font-size:11px; color:var(--amber); background:var(--amber2); padding:1px 8px; border-radius:20px; font-weight:700; }
+.ifx-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+
+/* skill card */
+.ifx-card { background:var(--bg); border:1px solid var(--bone3); border-radius:12px; padding:14px 15px; transition:.16s; position:relative; }
+.ifx-card:hover { border-color:var(--amber); transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.35); }
+.ifx-card-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:7px; }
+.ifx-card-name { font-size:13.5px; font-weight:700; color:var(--bone); word-break:break-word; }
+.ifx-state { display:inline-flex; align-items:center; gap:5px; font-size:10.5px; font-weight:700; color:#34d399; flex-shrink:0; }
+.ifx-state .s-dot { width:7px; height:7px; border-radius:50%; background:#34d399; box-shadow:0 0 6px #34d399; }
+.ifx-state.off { color:var(--bone2); }
+.ifx-state.off .s-dot { background:var(--bone2); box-shadow:none; }
+.ifx-card-desc { font-size:12px; color:var(--bone2); line-height:1.5; }
+
+/* loops list */
+.ifx-loop { background:var(--bg); border:1px solid var(--bone3); border-radius:12px; padding:15px 17px; margin-bottom:10px; display:flex; align-items:flex-start; gap:14px; transition:.16s; }
+.ifx-loop:hover { border-color:var(--amber); }
+.ifx-loop .lp-ic { width:38px; height:38px; border-radius:10px; background:var(--amber2); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.ifx-loop .lp-ic svg { width:19px; height:19px; color:var(--amber); }
+.ifx-loop .lp-body { flex:1; min-width:0; }
+.ifx-loop .lp-name { font-size:14px; font-weight:700; color:var(--bone); margin-bottom:3px; }
+.ifx-loop .lp-desc { font-size:12px; color:var(--bone2); line-height:1.5; }
+.ifx-loop .lp-state { font-size:11px; font-weight:700; color:#34d399; display:inline-flex; align-items:center; gap:5px; flex-shrink:0; white-space:nowrap; }
+.ifx-loop .lp-state .s-dot { width:7px; height:7px; border-radius:50%; background:#34d399; box-shadow:0 0 6px #34d399; }
+
+/* system panel */
+.ifx-sys-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+.ifx-sys-card { background:var(--bg); border:1px solid var(--bone3); border-radius:14px; padding:18px 20px; }
+.ifx-sys-card h4 { font-size:12px; color:var(--bone2); margin:0 0 12px; text-transform:uppercase; letter-spacing:.6px; }
+.ifx-sys-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--bone3); font-size:13px; }
+.ifx-sys-row:last-child { border-bottom:none; }
+.ifx-sys-row .k { color:var(--bone2); }
+.ifx-sys-row .val { color:var(--bone); font-weight:700; }
+.ifx-sys-row .val.amber { color:var(--amber); }
+.ifx-sys-row .val.green { color:#34d399; }
+.ifx-empty { text-align:center; padding:40px 20px; color:var(--bone2); font-size:13px; }
+
+@media (max-width:640px){
+  #view-infrastructure { padding:14px 12px 50px; }
+  .ifx-title h1 { font-size:19px; }
+  .ifx-grid { grid-template-columns:1fr; }
+  .ifx-controls { flex-direction:column; align-items:stretch; }
+  .ifx-catfilter { width:100%; }
+  .ifx-subtab { padding:8px 11px; font-size:12.5px; }
+  .ifx-loop { flex-wrap:wrap; }
+}
 </style>
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
   <defs>
@@ -5636,7 +5727,7 @@ body.client-mode #main { margin-left: 0 !important; }
   <button class="tab-btn team-tab" onclick="setTab('apollo')">Prospección</button>
   <button class="tab-btn team-tab" onclick="setTab('telemetria')">Telemetría IoT</button>
   <button class="tab-btn" onclick="setTab('graphify')" style="color:#4ade80">Observabilidad</button>
-  <button class="tab-btn" onclick="setTab('infrastructure')" style="color:#FF9800">🏗️ Infrastructure</button>
+  <button class="tab-btn" onclick="setTab('infrastructure')" style="color:#FFAA17">Infra</button>
 </div>
 
 <!-- QUICK ACTIONS PANEL — 8 acciones IA visibles (restaurado 2026-06-18) -->
@@ -15557,6 +15648,266 @@ function studioAttachFile(file){
   window.showGraphifyDetail = (date, data) => {
     alert(` ${date}\n Costo: $${data.cost.toFixed(4)}\n<span class="icon-csv"></span> Tokens: ${(data.tokens/1000).toFixed(1)}k\n Acciones: ${data.count}`);
   };
+})();
+</script>
+
+<!-- ═══════════════════ INFRA TAB — Skills / Loops / Sistema ═══════════════════ -->
+<script>
+(function(){
+  var ICONS = {
+    agent:'<path d="M4 8h16v12H4z"/><path d="M12 8V5"/><circle cx="12" cy="4" r="1"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/><path d="M9.5 17h5"/>',
+    auto:'<path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3"/>',
+    code:'<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+    design:'<circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c1 0 1.5-.8 1.5-1.5 0-.4-.2-.7-.4-1-.3-.3-.4-.6-.4-1 0-.8.7-1.5 1.5-1.5H16c3.3 0 6-2.7 6-6 0-4.9-4.5-9-10-9z"/>',
+    copy:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/>',
+    docs:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    crm:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    real:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    it:'<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+    lead:'<polygon points="12 2 15 8.5 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 8.5"/>',
+    loop:'<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+    neuro:'<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2z"/>',
+    video:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>',
+    seo:'<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+    sec:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    sys:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.2.61.78 1 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+    sales:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+    web:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+    '3d':'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>'
+  };
+  function svg(key){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[key]||ICONS.sys)+'</svg>'; }
+  function esc(s){ return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  // Fallback (small) en caso de que el JSON no cargue
+  var FALLBACK = [{n:'gerente-ia',d:'Orquestador maestro de Victor IA.',c:'Agentes Maestros',i:'agent'}];
+
+  var Infra = {
+    skills: null,
+    rendered: false,
+    activePanel: 'skills',
+    search: '',
+    cat: '',
+
+    boot: function(){
+      var view = document.getElementById('view-infrastructure');
+      if(!view) return;
+      if(this.rendered){ return; }
+      this.rendered = true;
+      view.innerHTML = this.shell();
+      this.bindShell();
+      this.loadSkills();
+    },
+
+    loadSkills: function(){
+      var self = this;
+      if(window.INFRA_SKILLS && window.INFRA_SKILLS.length){
+        self.skills = window.INFRA_SKILLS; self.renderSkills(); return;
+      }
+      fetch('infra-skills.json').then(function(r){ return r.json(); })
+        .then(function(j){ self.skills = j; self.renderSkills(); })
+        .catch(function(){ self.skills = FALLBACK; self.renderSkills(); });
+    },
+
+    shell: function(){
+      return ''+
+      '<div class="ifx-wrap">'+
+        '<div class="ifx-head">'+
+          '<div class="ifx-title"><span class="ifx-dot"></span><h1>Infraestructura</h1></div>'+
+        '</div>'+
+        '<p class="ifx-sub">Ecosistema Victor IA — skills, loops autonomos y estado del sistema. Tema THE DOOR.</p>'+
+        '<div class="ifx-subtabs">'+
+          '<button class="ifx-subtab on" data-panel="skills">Skills <span class="ifx-count" id="ifx-skill-count">…</span></button>'+
+          '<button class="ifx-subtab" data-panel="loops">Loops <span class="ifx-count">14</span></button>'+
+          '<button class="ifx-subtab" data-panel="system">Sistema</button>'+
+        '</div>'+
+        '<div class="ifx-panel on" id="ifx-panel-skills"><div class="ifx-empty">Cargando skills…</div></div>'+
+        '<div class="ifx-panel" id="ifx-panel-loops">'+this.renderLoops()+'</div>'+
+        '<div class="ifx-panel" id="ifx-panel-system">'+this.renderSystem()+'</div>'+
+      '</div>';
+    },
+
+    bindShell: function(){
+      var self = this;
+      var view = document.getElementById('view-infrastructure');
+      view.querySelectorAll('.ifx-subtab').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var p = btn.getAttribute('data-panel');
+          view.querySelectorAll('.ifx-subtab').forEach(function(b){ b.classList.toggle('on', b===btn); });
+          view.querySelectorAll('.ifx-panel').forEach(function(pn){ pn.classList.toggle('on', pn.id==='ifx-panel-'+p); });
+          self.activePanel = p;
+        });
+      });
+    },
+
+    renderSkills: function(){
+      var self = this;
+      var panel = document.getElementById('ifx-panel-skills');
+      var sk = this.skills || [];
+      document.getElementById('ifx-skill-count').textContent = sk.length;
+      // unique cats
+      var cats = {};
+      sk.forEach(function(s){ cats[s.c] = (cats[s.c]||0)+1; });
+      var catNames = Object.keys(cats).sort();
+      var opts = '<option value="">Todas las categorias ('+sk.length+')</option>';
+      catNames.forEach(function(c){ opts += '<option value="'+esc(c)+'">'+esc(c)+' ('+cats[c]+')</option>'; });
+
+      panel.innerHTML = ''+
+        '<div class="ifx-stats">'+
+          '<div class="ifx-stat"><div class="v">'+sk.length+'</div><div class="l">Skills totales</div></div>'+
+          '<div class="ifx-stat"><div class="v">'+catNames.length+'</div><div class="l">Categorias</div></div>'+
+          '<div class="ifx-stat"><div class="v">'+sk.length+'</div><div class="l">Activos</div></div>'+
+          '<div class="ifx-stat"><div class="v">13</div><div class="l">MCPs conectados</div></div>'+
+        '</div>'+
+        '<div class="ifx-controls">'+
+          '<div class="ifx-search">'+
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'+
+            '<input type="text" id="ifx-search-input" placeholder="Buscar skill por nombre o descripcion…" autocomplete="off">'+
+          '</div>'+
+          '<select class="ifx-catfilter" id="ifx-cat-select">'+opts+'</select>'+
+        '</div>'+
+        '<div id="ifx-skills-list"></div>';
+
+      var input = document.getElementById('ifx-search-input');
+      var sel = document.getElementById('ifx-cat-select');
+      var debounce;
+      input.addEventListener('input', function(){
+        clearTimeout(debounce);
+        debounce = setTimeout(function(){ self.search = input.value.toLowerCase().trim(); self.paintList(); }, 130);
+      });
+      sel.addEventListener('change', function(){ self.cat = sel.value; self.paintList(); });
+      this.paintList();
+    },
+
+    paintList: function(){
+      var self = this;
+      var list = document.getElementById('ifx-skills-list');
+      if(!list) return;
+      var q = this.search, cf = this.cat;
+      var filtered = (this.skills||[]).filter(function(s){
+        if(cf && s.c !== cf) return false;
+        if(q && (s.n.toLowerCase().indexOf(q)<0 && (s.d||'').toLowerCase().indexOf(q)<0)) return false;
+        return true;
+      });
+      if(!filtered.length){ list.innerHTML = '<div class="ifx-empty">Sin resultados para tu busqueda.</div>'; return; }
+      // group by cat
+      var groups = {};
+      filtered.forEach(function(s){ (groups[s.c]=groups[s.c]||[]).push(s); });
+      var html = '';
+      Object.keys(groups).sort().forEach(function(c){
+        var arr = groups[c];
+        html += '<div class="ifx-cat">'+
+          '<div class="ifx-cat-h" data-toggle>'+
+            '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'+
+            '<h3>'+esc(c)+'</h3><span class="n">'+arr.length+'</span>'+
+          '</div>'+
+          '<div class="ifx-grid">';
+        arr.forEach(function(s){
+          html += '<div class="ifx-card">'+
+            '<div class="ifx-card-top">'+
+              '<span class="ifx-card-name">'+esc(s.n)+'</span>'+
+              '<span class="ifx-state"><span class="s-dot"></span>activo</span>'+
+            '</div>'+
+            '<div class="ifx-card-desc">'+esc(s.d)+'</div>'+
+          '</div>';
+        });
+        html += '</div></div>';
+      });
+      list.innerHTML = html;
+      list.querySelectorAll('[data-toggle]').forEach(function(h){
+        h.addEventListener('click', function(){ h.parentNode.classList.toggle('collapsed'); });
+      });
+    },
+
+    renderLoops: function(){
+      var loops = [
+        ['documentation-sync','Verifica que toda la documentacion refleje la implementacion actual. Actualiza docs stale y abre PR.','Programado'],
+        ['fresh-clone-validator','Clona el repo en entorno limpio, sigue solo el README y valida ready state. Corrige docs/setup.','Programado'],
+        ['performance-optimizer','Mide page-load en condiciones repetibles y optimiza cada pagina hasta <50ms. Auto-commit.','Activo'],
+        ['pipeline-sla-monitor','Monitorea leads en pipeline.json y alerta si alguno excede su SLA. Genera reminders y follow-ups.','Activo'],
+        ['pr-health-monitor','Monitorea CI + threads de review en proyectos activos. Auto-fix linting y alerta blockers.','Activo'],
+        ['production-log-auditor','Revisa logs de produccion buscando errores accionables. Trace root cause, fix y PR.','Activo'],
+        ['prompt-optimizer','Mejora system prompts y configuraciones. Un cambio por ronda; promueve solo si supera baseline.','Programado'],
+        ['red-team-reviewer','Red-team automatico de la arquitectura. Registra objeciones, impacto y estado.','Programado'],
+        ['repo-maintenance-triage','Triage de repos: limpia branches stale, PRs viejos y worktrees. Requiere CI green.','Programado'],
+        ['scenario-testing-qa','Crea y ejecuta escenarios realistas cubriendo todas las capacidades. Itera hasta 100% pass.','Activo'],
+        ['seo-content-motor-daily','Verifica que el motor genero 2+ articulos hoy. Si no, dispara generacion y alerta.','Activo'],
+        ['seo-geo-auditor','Auditoria SEO/GEO completa. Rankea gaps por impacto y corrige el de mayor leverage.','Programado'],
+        ['skill-learning-synthesis','Compila bitacoras de todas las skills y sintetiza patrones de aprendizaje.','Programado'],
+        ['tracker-session-logger','Registra automaticamente cada ejecucion de loop en el tracker con campos completos.','Activo']
+      ];
+      var html = ''+
+        '<div class="ifx-stats">'+
+          '<div class="ifx-stat"><div class="v">14</div><div class="l">Loops configurados</div></div>'+
+          '<div class="ifx-stat"><div class="v">8</div><div class="l">Activos ahora</div></div>'+
+          '<div class="ifx-stat"><div class="v">15</div><div class="l">Loops validados</div></div>'+
+          '<div class="ifx-stat"><div class="v">85%</div><div class="l">Success rate</div></div>'+
+        '</div>';
+      loops.forEach(function(l){
+        var on = l[2]==='Activo';
+        html += '<div class="ifx-loop">'+
+          '<div class="lp-ic">'+svg('loop')+'</div>'+
+          '<div class="lp-body">'+
+            '<div class="lp-name">'+esc(l[0])+'</div>'+
+            '<div class="lp-desc">'+esc(l[1])+'</div>'+
+          '</div>'+
+          '<span class="lp-state"'+(on?'':' style="color:var(--bone2)"')+'>'+
+            '<span class="s-dot"'+(on?'':' style="background:var(--bone2);box-shadow:none"')+'></span>'+esc(l[2])+
+          '</span>'+
+        '</div>';
+      });
+      return html;
+    },
+
+    renderSystem: function(){
+      var now = new Date();
+      return ''+
+        '<div class="ifx-stats">'+
+          '<div class="ifx-stat"><div class="v">v1.2</div><div class="l">Version del sistema</div></div>'+
+          '<div class="ifx-stat"><div class="v">99.9%</div><div class="l">Uptime</div></div>'+
+          '<div class="ifx-stat"><div class="v">226</div><div class="l">Skills cargados</div></div>'+
+          '<div class="ifx-stat"><div class="v">14</div><div class="l">Loops</div></div>'+
+        '</div>'+
+        '<div class="ifx-sys-grid">'+
+          '<div class="ifx-sys-card"><h4>Sistema</h4>'+
+            '<div class="ifx-sys-row"><span class="k">Plataforma</span><span class="val">THE DOOR</span></div>'+
+            '<div class="ifx-sys-row"><span class="k">Version</span><span class="val amber">v1.2</span></div>'+
+            '<div class="ifx-sys-row"><span class="k">Estado</span><span class="val green">Operativo</span></div>'+
+            '<div class="ifx-sys-row"><span class="k">Uptime</span><span class="val">99.9%</span></div>'+
+            '<div class="ifx-sys-row"><span class="k">Ultimo deploy</span><span class="val">'+now.toLocaleDateString('es-MX')+'</span></div>'+
+          '</div>'+
+          '<div class="ifx-sys-card"><h4>Capacidades</h4>'+
+            '<div class="ifx-sys-row"><span class="k">Skills activos</span><span class="val amber">226</span></div>'+
+            '<div class="ifx-sys-row"><span class="k">Loops autonomos</span><span class="val">14</span></div>'+
+            '<div class="ifx-sys-row"><span class="k">MCPs conectados</span><span class="val">13</span></div>'+
+            '<div class="ifx-sys-row"><span class="k">Agentes paralelos</span><span class="val green">Si</span></div>'+
+            '<div class="ifx-sys-row"><span class="k">Auto-aprendizaje</span><span class="val green">Activo</span></div>'+
+          '</div>'+
+          '<div class="ifx-sys-card"><h4>Stats de uso</h4>'+
+            '<div class="ifx-sys-row"><span class="k">Success rate loops</span><span class="val green">85%</span></div>'+
+            '<div class="ifx-sys-row"><span class="k">Convergencia media</span><span class="val">3 min</span></div>'+
+            '<div class="ifx-sys-row"><span class="k">Eficiencia tokens</span><span class="val amber">31%</span></div>'+
+            '<div class="ifx-sys-row"><span class="k">Ahorro Graphify</span><span class="val">4-5x</span></div>'+
+            '<div class="ifx-sys-row"><span class="k">Categorias skills</span><span class="val">24</span></div>'+
+          '</div>'+
+        '</div>';
+    }
+  };
+
+  window.InfraTab = Infra;
+
+  // Hook lazy-load on setTab (igual patron que Graphify)
+  (function hook(){
+    if(typeof window.setTab === 'function'){
+      var orig = window.setTab;
+      window.setTab = function(t){ orig(t); if(t==='infrastructure'){ Infra.boot(); } };
+    } else {
+      setTimeout(hook, 200);
+    }
+  })();
+  // si el tab ya esta activo al cargar
+  document.addEventListener('DOMContentLoaded', function(){
+    if(typeof currentTab !== 'undefined' && currentTab === 'infrastructure'){ Infra.boot(); }
+  });
 })();
 </script>
 
