@@ -16654,6 +16654,12 @@ function studioAttachFile(file){
                0 0 22px 5px rgba(255,170,23,.5);
   }
 }
+/* Cuando el target es un MÓDULO completo, el marco grande (#via-tour-spot.module)
+   es el único frame; se suprime el borde propio del elemento para no duplicar. */
+.via-tour-target.module-target{
+  animation:none !important;
+  box-shadow:none !important;
+}
 
 /* spotlight: ANILLO LUMINOSO que rodea el elemento (refuerza el aura)
    Fade + scale suaves en entrada/salida; reposicionamiento elegante entre pasos. */
@@ -16675,6 +16681,19 @@ function studioAttachFile(file){
   opacity:.9;
 }
 #via-tour-spot.show{ opacity:1; transform:scale(1); }
+/* ── MARCO DE MÓDULO/SECCIÓN COMPLETA ──
+   Cuando el paso resalta TODO un módulo (Dashboard, Analytics, CRM, Infra…),
+   el marco se vuelve más grande, con borde dorado más grueso y mayor radio,
+   para que englobe el área completa de la sección. */
+#via-tour-spot.module{
+  border-width:4px;
+  border-radius:18px;
+  box-shadow:0 0 0 3px rgba(255,200,90,.55),
+             0 0 34px 8px rgba(255,170,23,.5),
+             0 0 90px 22px rgba(255,170,23,.3),
+             inset 0 0 30px 4px rgba(255,170,23,.22);
+}
+#via-tour-spot.module::after{ inset:-8px; border-radius:24px; }
 /* mientras el anillo sigue al elemento durante el scroll, sin transición de posición
    para que quede pegado sin lag; conserva la transición de opacidad. */
 #via-tour-spot.following{
@@ -16697,6 +16716,24 @@ function studioAttachFile(file){
   }
 }
 #via-tour-spot.pulse{ animation:viaTourPulse 2.2s ease-in-out infinite; }
+/* pulso ampliado para marco de módulo (borde grueso + glow más amplio) */
+@keyframes viaTourPulseModule{
+  0%,100%{
+    box-shadow:0 0 0 3px rgba(255,200,90,.55),
+               0 0 34px 8px rgba(255,170,23,.5),
+               0 0 90px 22px rgba(255,170,23,.3),
+               inset 0 0 30px 4px rgba(255,170,23,.22);
+    border-color:rgba(255,170,23,.95);
+  }
+  50%{
+    box-shadow:0 0 0 5px rgba(255,200,90,.85),
+               0 0 52px 16px rgba(255,170,23,.66),
+               0 0 140px 34px rgba(255,170,23,.42),
+               inset 0 0 40px 6px rgba(255,170,23,.34);
+    border-color:rgba(255,210,120,1);
+  }
+}
+#via-tour-spot.module.pulse{ animation:viaTourPulseModule 2.6s ease-in-out infinite; }
 /* barrido de brillo (shine) que recorre el anillo */
 #via-tour-spot.pulse::before{
   content:''; position:absolute; inset:0; border-radius:12px; pointer-events:none; overflow:hidden;
@@ -17266,7 +17303,15 @@ function studioAttachFile(file){
     _scrollToTarget: function(sel){
       var elm = sel ? document.querySelector(sel) : null;
       if(!elm || !document.body.contains(elm)) return;
-      try { elm.scrollIntoView({ behavior:'smooth', block:'center' }); }
+      // Módulos: alinear al inicio (el marco cubre toda la sección desde arriba).
+      // Si el módulo cabe entero en pantalla, centrarlo se ve mejor.
+      var isMod = this._isModuleSel(sel);
+      var blockPos = 'center';
+      if(isMod){
+        var h = elm.getBoundingClientRect().height;
+        blockPos = (h > window.innerHeight * 0.85) ? 'start' : 'center';
+      }
+      try { elm.scrollIntoView({ behavior:'smooth', block:blockPos }); }
       catch(e){ try{ elm.scrollIntoView(); }catch(e2){} }
     },
 
@@ -17280,9 +17325,68 @@ function studioAttachFile(file){
     // ── Quita el realce (clase + glow) del elemento previo ──
     _clearTarget: function(){
       if(this._targetEl){
-        try{ this._targetEl.classList.remove('via-tour-target'); }catch(e){}
+        try{ this._targetEl.classList.remove('via-tour-target','module-target'); }catch(e){}
         this._targetEl = null;
+        this._targetSel = null;
       }
+    },
+
+    // ── ¿El selector apunta a un MÓDULO / SECCIÓN COMPLETA? ──
+    // Para esos pasos el marco debe cubrir TODA el área de la sección,
+    // no solo un elemento individual. Detecta vistas (#view-*), paneles de
+    // infra (#ifx-panel-*) y las grandes barras estructurales.
+    _isModuleSel: function(sel){
+      if(!sel) return false;
+      return /^#view-/.test(sel) ||
+             /^#ifx-panel-/.test(sel) ||
+             sel === '#topbar' ||
+             sel === '#tabs' ||
+             sel === '#period-bar' ||
+             sel === '#project-bar' ||
+             sel === '#via-quick-actions' ||
+             sel === '#sidebar';
+    },
+
+    // ── Geometría ÚNICA del marco (usada por _spotlight y repositionSpot) ──
+    // Devuelve {top,left,w,h,module}. Para módulos: padding amplio + sin recorte
+    // al 55%; se enmarca TODA la sección visible (clamp generoso al viewport).
+    // Para elementos: marco ajustado al elemento.
+    _computeFrame: function(elm, sel){
+      var isMod = this._isModuleSel(sel);
+      var r = elm.getBoundingClientRect();
+      var vw = window.innerWidth, vh = window.innerHeight;
+      if(isMod){
+        // Padding interior generoso para que el marco rodee todo el módulo
+        // sin tocar sus bordes; márgenes de seguridad respecto al viewport.
+        var padM = 16;
+        var marginX = 14;          // aire lateral respecto a la pantalla
+        var marginTop = 12;        // aire superior
+        var marginBottom = 96;     // deja espacio para la barra de controles abajo
+        var top = Math.max(marginTop, r.top - padM);
+        var left = Math.max(marginX, r.left - padM);
+        var right = Math.min(vw - marginX, r.right + padM);
+        var bottom = Math.min(vh - marginBottom, r.bottom + padM);
+        // si la sección es más alta que el viewport, enmarca la franja visible
+        // completa (todo lo que cabe en pantalla), no una porción pequeña.
+        return {
+          top: top,
+          left: left,
+          w: Math.max(120, right - left),
+          h: Math.max(120, bottom - top),
+          module: true
+        };
+      }
+      // Elemento individual: marco ajustado
+      var pad = 10;
+      var t = Math.max(6, r.top - pad);
+      var l = Math.max(6, r.left - pad);
+      return {
+        top: t,
+        left: l,
+        w: Math.min(vw - l - 6, r.width + pad*2),
+        h: Math.min(vh - t - 6, r.height + pad*2),
+        module: false
+      };
     },
 
     // ── Spotlight an element ── (posiciona y revela el marco; el scroll ya ocurrió antes)
@@ -17291,28 +17395,24 @@ function studioAttachFile(file){
       var elm = sel ? document.querySelector(sel) : null;
       // limpia realce anterior siempre
       this._clearTarget();
-      if(!elm || !document.body.contains(elm)){ spot.classList.remove('show','pulse'); return; }
+      if(!elm || !document.body.contains(elm)){ spot.classList.remove('show','pulse','module'); return; }
       var self = this;
       // posiciona en el siguiente frame para leer una geometría ya asentada (rAF = timing preciso)
       window.requestAnimationFrame(function(){
         window.requestAnimationFrame(function(){
-          if(!elm || !document.body.contains(elm)){ spot.classList.remove('show','pulse'); return; }
+          if(!elm || !document.body.contains(elm)){ spot.classList.remove('show','pulse','module'); return; }
           // realza el elemento real con su fade-in suave
           elm.classList.add('via-tour-target');
           self._targetEl = elm;
-          var r = elm.getBoundingClientRect();
-          var pad = 10;
-          // clamp to viewport so the ring stays visible
-          var top = Math.max(6, r.top - pad);
-          var left = Math.max(6, r.left - pad);
-          var w = Math.min(window.innerWidth - left - 6, r.width + pad*2);
-          var h = Math.min(window.innerHeight - top - 6, r.height + pad*2);
-          // if element is huge (full view), frame the top portion
-          if(h > window.innerHeight * 0.7){ h = Math.min(h, window.innerHeight * 0.55); }
-          spot.style.top = top + 'px';
-          spot.style.left = left + 'px';
-          spot.style.width = w + 'px';
-          spot.style.height = h + 'px';
+          self._targetSel = sel;
+          var f = self._computeFrame(elm, sel);
+          // módulo → un solo marco grande (suprime el borde propio del elemento)
+          elm.classList.toggle('module-target', f.module);
+          spot.classList.toggle('module', f.module);
+          spot.style.top = f.top + 'px';
+          spot.style.left = f.left + 'px';
+          spot.style.width = f.w + 'px';
+          spot.style.height = f.h + 'px';
           // fade + scale-in suave + pulso continuo
           spot.classList.add('show','pulse');
         });
@@ -17429,17 +17529,13 @@ function studioAttachFile(file){
     var spot = T.el('via-tour-spot');
     var elm = T._targetEl;
     if(!spot || !elm || !document.body.contains(elm) || !spot.classList.contains('show')) return;
-    var r = elm.getBoundingClientRect();
-    var pad = 10;
-    var top = Math.max(6, r.top - pad);
-    var left = Math.max(6, r.left - pad);
-    var w = Math.min(window.innerWidth - left - 6, r.width + pad*2);
-    var h = Math.min(window.innerHeight - top - 6, r.height + pad*2);
-    if(h > window.innerHeight * 0.7){ h = Math.min(h, window.innerHeight * 0.55); }
-    spot.style.top = top + 'px';
-    spot.style.left = left + 'px';
-    spot.style.width = w + 'px';
-    spot.style.height = h + 'px';
+    // misma geometría que _spotlight (módulo vs elemento) → sincronía idéntica
+    var f = T._computeFrame(elm, T._targetSel);
+    spot.classList.toggle('module', f.module);
+    spot.style.top = f.top + 'px';
+    spot.style.left = f.left + 'px';
+    spot.style.width = f.w + 'px';
+    spot.style.height = f.h + 'px';
   }
   // sigue al elemento durante el scroll suave (rAF para fluidez)
   var _spotRaf = null, _followTimer = null;
