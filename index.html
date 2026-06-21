@@ -15199,6 +15199,57 @@ function studioAttachFile(file){
       sortOrder: 'desc'
     },
 
+    // Execute loop in real-time via API
+    executeLoopReal(loopId, loopType, loopName, btnEl) {
+      if (!btnEl) return;
+      btnEl.disabled = true;
+      btnEl.textContent = '⏳ Ejecutando...';
+
+      fetch('/api/loops/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loopId, loopType, goal: loopName })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          btnEl.textContent = '✅ ' + (data.status === 'ok' ? 'Completado' : 'Terminado');
+          btnEl.style.background = '#4ade80';
+          console.log('Loop ejecutado:', data);
+          // Auto-refresh history después de 2s
+          setTimeout(() => {
+            btnEl.textContent = '▶ Ejecutar ahora';
+            btnEl.disabled = false;
+            btnEl.style.background = '';
+            // Reload loops panel si está visible
+            const view = document.getElementById('view-infrastructure');
+            if (view && view.style.display !== 'none') {
+              // Trigger refresh of loops
+              window.setTab('infrastructure');
+            }
+          }, 2000);
+        } else {
+          btnEl.textContent = '❌ Error: ' + (data.error || 'desconocido');
+          btnEl.style.background = '#f87171';
+          setTimeout(() => {
+            btnEl.textContent = '▶ Ejecutar ahora';
+            btnEl.disabled = false;
+            btnEl.style.background = '';
+          }, 3000);
+        }
+      })
+      .catch(err => {
+        console.error('Loop execution error:', err);
+        btnEl.textContent = '❌ Error de conexión';
+        btnEl.style.background = '#f87171';
+        setTimeout(() => {
+          btnEl.textContent = '▶ Ejecutar ahora';
+          btnEl.disabled = false;
+          btnEl.style.background = '';
+        }, 3000);
+      });
+    },
+
     init() {
       if (typeof setTab === 'function') {
         const origSetTab = window.setTab;
