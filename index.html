@@ -16412,10 +16412,17 @@ function studioAttachFile(file){
       this._repaintLoops();
     },
 
+    // ¿es loop harness (true) o skills (false)? Determinado por el array de origen.
+    _isHarness: function(id){
+      return this.HARNESS_LOOPS.some(function(x){ return x.id === id; });
+    },
+
     _runLoop: function(id, card){
       var self = this;
       var l = this._findLoop(id);
       if(!l || !this._enabled(l)) return;
+      var loopType = this._isHarness(id) ? 'harness' : 'skills';
+
       // animación de "corrida": resetear tareas a wait y avanzar una por una
       l.tasks.forEach(function(t){ t.st='wait'; });
       this._repaintLoops();
@@ -16432,11 +16439,50 @@ function studioAttachFile(file){
         } else {
           var nc = document.querySelector('.lpf-card[data-loop="'+id+'"]');
           if(nc) nc.classList.remove('running');
-          l.last = 'Justo ahora'; l.lastResult='ok';
           self._repaintOne(id);
         }
       };
       setTimeout(step, 260);
+
+      // EJECUCIÓN REAL contra el backend (/api/loops/execute → loop-runner.py).
+      // La animación de arriba es solo feedback visual mientras llega la respuesta.
+      fetch('/api/loops/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loopId: id, loopType: loopType, goal: l.name })
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var nc = document.querySelector('.lpf-card[data-loop="'+id+'"]');
+        if(nc) nc.classList.remove('running');
+        var ok = data && (data.success === true);
+        l.last = 'Justo ahora';
+        l.lastResult = ok ? (data.status === 'warning' ? 'warn' : 'ok') : 'err';
+        // Insertar la corrida real en el historial visible
+        if(l.history){
+          l.history.unshift({
+            ts: 'Justo ahora',
+            r: l.lastResult,
+            dur: (data && data.duration != null) ? (data.duration + 's') : '—',
+            msg: ok
+              ? ((data.score != null ? ('score ' + data.score + '/10 · ') : '') + 'runId ' + (data.runId || '—'))
+              : ('Error: ' + ((data && (data.error || (data.logs||'').slice(0,80))) || 'desconocido'))
+          });
+          l.history = l.history.slice(0, 6);
+        }
+        self._repaintOne(id);
+      })
+      .catch(function(err){
+        var nc = document.querySelector('.lpf-card[data-loop="'+id+'"]');
+        if(nc) nc.classList.remove('running');
+        l.last = 'Justo ahora'; l.lastResult = 'err';
+        if(l.history){
+          l.history.unshift({ ts:'Justo ahora', r:'err', dur:'—', msg:'Error de conexión con el backend de loops' });
+          l.history = l.history.slice(0, 6);
+        }
+        self._repaintOne(id);
+        console.error('Loop execution error:', err);
+      });
     },
 
     _repaintLoops: function(){
