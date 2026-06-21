@@ -16,6 +16,15 @@
   ],
   "headers": [
     {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "x-vercel-skip-deployment-protection",
+          "value": "true"
+        }
+      ]
+    },
+    {
       "source": "/sw.js",
       "headers": [
         {
