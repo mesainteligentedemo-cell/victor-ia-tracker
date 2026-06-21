@@ -3807,42 +3807,6 @@ body.cb-gray    { filter: url(#cb-gray); }
 .amd-feed-item.active .amd-feed-text { color: rgba(248,247,245,0.65); }
 .amd-feed-time { font-size: 0.49rem; color: rgba(248,247,245,0.17); white-space: nowrap; }
 
-/* ── GUIDED TOUR v2 ── */
-@keyframes tourPulse {
-  0%,100% { box-shadow:0 0 0 4000px rgba(0,0,0,0.62),0 0 22px 5px rgba(255,170,23,0.50); border-color:#FFAA17; }
-  50%      { box-shadow:0 0 0 4000px rgba(0,0,0,0.62),0 0 40px 14px rgba(232,204,148,0.68); border-color:#e8cc94; }
-}
-#tour-box {
-  position:fixed; z-index:9998; pointer-events:none;
-  border:2.5px solid #FFAA17; border-radius:5px; display:none;
-  transition:top .48s cubic-bezier(.16,1,.3,1),left .48s cubic-bezier(.16,1,.3,1),
-             width .48s cubic-bezier(.16,1,.3,1),height .48s cubic-bezier(.16,1,.3,1);
-  animation:tourPulse 1.8s ease-in-out infinite;
-}
-#tour-hud {
-  position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
-  z-index:9999; display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:center;
-  background:rgba(8,9,13,0.94); border:1px solid rgba(255,170,23,0.38); border-radius:14px;
-  padding:11px 20px; backdrop-filter:blur(18px);
-  font-family:'Inter',sans-serif; pointer-events:all;
-  min-width:260px; max-width:500px; box-shadow:0 8px 36px rgba(0,0,0,0.65);
-}
-#tour-hud .th-step {
-  font-size:9px; color:var(--amber); font-weight:600;
-  letter-spacing:.25em; text-transform:uppercase; white-space:nowrap;
-}
-#tour-hud .th-sep { color:rgba(248,247,245,.2); font-size:13px; }
-#tour-hud .th-label {
-  font-size:11px; color:rgba(248,247,245,.6); letter-spacing:.15em; text-transform:uppercase;
-}
-#tour-hud .th-stop {
-  background:rgba(248,247,245,.06); border:1px solid rgba(248,247,245,.13);
-  color:rgba(248,247,245,.5); padding:5px 14px; border-radius:7px;
-  font-size:11px; cursor:pointer; font-family:'Inter',sans-serif;
-  white-space:nowrap; flex-shrink:0; transition:all .2s;
-}
-#tour-hud .th-stop:hover { color:var(--bone); border-color:rgba(248,247,245,.28); }
-
 /* ── btn-desktop mejorados ── */
 #topbar .topbar-btns button:not(.btn-primary-cta) {
   min-height: 34px; border-radius: 2px; position: relative; overflow: hidden;
@@ -5621,7 +5585,7 @@ body.client-mode #main { margin-left: 0 !important; }
       <span id="acc-voice-badge" class="aab-badge" style="display:none">Activo</span>
     </button>
 
-    <button class="acc-action-btn" onclick="startGuidedTour()" aria-label="Tour guiado con voz">
+    <button class="acc-action-btn" onclick="closeAccPanel();if(window.ViaTour)ViaTour.start()" aria-label="Tour guiado con voz">
       <span class="aab-icon"></span>
       <span>Tour guiado con voz</span>
     </button>
@@ -7980,11 +7944,11 @@ function handleVoiceCommand(cmd){
     setColorblind('normal'); speakFeedback('Visión normal restaurada'); return;
   }
   // Tour guiado
-  if(cmd.includes('tour')||cmd.includes('recorrido')||cmd.includes('guiado')){
-    startGuidedTour(); return;
-  }
   if(cmd.includes('detener tour')||cmd.includes('parar tour')||cmd.includes('stop tour')){
-    stopGuidedTour(); speakFeedback('Tour detenido'); return;
+    if(window.ViaTour) ViaTour.stop(); speakFeedback('Tour detenido'); return;
+  }
+  if(cmd.includes('tour')||cmd.includes('recorrido')||cmd.includes('guiado')){
+    if(window.ViaTour) ViaTour.start(); return;
   }
   // Sin animaciones
   if(cmd.includes('sin animaciones')||cmd.includes('quitar animaciones')){
@@ -8002,177 +7966,6 @@ function speakFeedback(text){
   window.speechSynthesis.speak(utt);
 }
 
-// ── Guided tour v2 — ElevenLabs TTS + pre-carga paralela + baja latencia ──
-var TOUR_EL_VOICE='iDEmt5MnqUotdwCIVplo'; // Enrique Mondragón
-var TOUR_EL_MODEL='eleven_turbo_v2_5';     // menor latencia, calidad premium
-var tourIdx=0, tourActive=false, tourAudio=null, tourBox=null, tourHud=null;
-var tourCache={};                           // {idx: Promise<blobURL|null>}
-
-var TOUR_STEPS=[
-  {tab:null,sel:null,label:'Bienvenida',
-   text:'Hola. Bienvenido al Tracker de Victor IA, la plataforma de control y rendimiento de toda la agencia: proyectos, tiempo, finanzas, clientes y desempeño en un solo lugar. Te guío por cada módulo.'},
-  {tab:null,sel:'#topbar',label:'Barra superior',
-   text:'Esta es la barra de navegación principal. Desde aquí accedes a todas las acciones: registrar trabajo, exportar datos en CSV, gestionar filtros avanzados, abrir el módulo de planeación con inteligencia artificial, activar la vista para clientes y configurar la plataforma.'},
-  {tab:null,sel:'.btn-primary-cta',label:'Nueva Entrada',
-   text:'El botón más importante del tracker: Nueva Entrada. Aquí registras cada tarea o actividad realizada. Capturas qué se hizo, por qué, para qué, cuánto tiempo tomó, el proyecto, el cliente, la categoría y la prioridad.'},
-  {tab:null,sel:'button[aria-label="Abrir módulo de planeación"]',label:'Planeación IA',
-   text:'El módulo de Planeación usa inteligencia artificial para generar cotizaciones, planear nuevos proyectos, preparar entregables para clientes y solicitar dummies de diseño. También tiene un agente de voz que llena los formularios automáticamente mientras tú hablas.'},
-  {tab:null,sel:'#period-bar',label:'Período de tiempo',
-   text:'La barra de períodos controla el rango de tiempo de todos los datos. Filtra por esta hora, hoy, ayer, esta semana, este mes, este año, todo el historial, o define un rango de fechas personalizado para análisis específicos.'},
-  {tab:null,sel:'#project-bar',label:'Selector de proyecto',
-   text:'Aquí seleccionas el proyecto activo. Al elegirlo, todos los KPIs, gráficas, reportes y entradas del tracker se filtran automáticamente para mostrar solo la información de ese proyecto en particular.'},
-  {tab:null,sel:'#tabs',label:'Módulos del tracker',
-   text:'Los nueve módulos de la plataforma. Dashboard con métricas en tiempo real, Analytics profundo, Finanzas, Organigrama de agentes de inteligencia artificial, catálogo de Software y APIs, registro de Entradas, Reportes, CRM de clientes y módulo de Prospección.'},
-  {tab:'dashboard',sel:'.kpi-grid',label:'Dashboard — KPIs',
-   text:'Estamos en el Dashboard. Los indicadores clave muestran en tiempo real: horas totales trabajadas, valor económico generado en el período, prompts de inteligencia artificial ejecutados, tasa de completado de tareas, racha de días activos consecutivos y total de acciones registradas.'},
-  {tab:'dashboard',sel:'#view-dashboard',label:'Dashboard — Actividad',
-   text:'Más abajo en el Dashboard verás el flujo de información entre áreas de la agencia, gráficas de distribución por categoría y proyecto, y la bitácora completa de actividad con cada entrada del período actualizada en tiempo real.'},
-  {tab:'analytics',sel:'#view-analytics',label:'Analytics',
-   text:'Analytics ofrece una visión profunda del rendimiento. Aquí encuentras el mapa de calor de productividad por horas y días de la semana, el análisis de eficiencia en prompt engineering, tendencias de producción y distribución de actividades por categoría.'},
-  {tab:'finanzas',sel:'#view-finanzas',label:'Finanzas',
-   text:'Finanzas muestra la salud económica completa de la agencia: estado de resultados, balance general, ingresos y egresos del período, costos operativos, márgenes de ganancia por proyecto y transparencia total en todos los cálculos financieros. Nada está oculto.'},
-  {tab:'organigrama',sel:'#view-organigrama',label:'Organigrama',
-   text:'El Organigrama muestra la estructura completa de agentes de inteligencia artificial que operan la agencia: CEO, CTO, CMO, CFO y más. Cada nodo tiene sus responsabilidades definidas, lo que recibe, lo que entrega y cómo conecta con las demás áreas.'},
-  {tab:'software',sel:'#view-software',label:'Software & APIs',
-   text:'El catálogo de Software y APIs lista todas las herramientas activas de Victor IA: Claude, ElevenLabs, Runway, Adobe Creative Cloud, HubSpot, n8n y muchas más. Verás el costo mensual de cada una, su categoría y los agentes especializados asignados a ella.'},
-  {tab:'entradas',sel:'#view-entradas',label:'Entradas',
-   text:'El módulo de Entradas es el registro maestro de toda la actividad de la agencia. Cada entrada tiene descripción detallada, tiempo exacto, proyecto, cliente, categoría, estado, prioridad y si hubo retrabajo. Es la fuente de verdad de todo el sistema.'},
-  {tab:'entradas',sel:'#sidebar',label:'Filtros avanzados',showSidebar:true,
-   text:'Los filtros avanzados permiten segmentar por cualquier combinación de criterios: categoría, proyecto, cliente, estado de tarea, prioridad, duración mínima, retrabajo y software utilizado. Se aplican en tiempo real a todas las vistas del módulo.'},
-  {tab:'reportes',sel:'#view-reportes',label:'Reportes',
-   text:'Reportes genera vistas consolidadas del rendimiento: resumen día a día, distribución de productividad por día de la semana, estadísticas por categoría y comparativas entre períodos. Perfecto para reuniones de equipo o presentaciones ejecutivas.'},
-  {tab:'crm',sel:'#view-crm',label:'CRM',
-   text:'El CRM gestiona todas las relaciones comerciales de la agencia: clientes activos, prospectos en seguimiento, estado de cada proyecto, historial de interacciones y el pipeline de ventas con sus etapas, probabilidades y valores económicos estimados.'},
-  {tab:'apollo',sel:'#view-apollo',label:'Prospección',
-   text:'Prospección es el módulo de generación de nuevos negocios. Integra Apollo para identificar prospectos calificados, gestionar campañas de acercamiento y dar seguimiento a cada oportunidad hasta convertirla en cliente activo de la agencia.'},
-  {tab:'dashboard',sel:'#chatbot-btn',label:'Asistente IA',
-   text:'El asistente de inteligencia artificial está disponible en toda la plataforma. Puedes consultarle métricas, pedirle análisis comparativos, sugerencias de optimización o cualquier pregunta sobre los datos del tracker. Responde en lenguaje natural con tu información real.'},
-  {tab:'dashboard',sel:'#acc-btn',label:'Accesibilidad',
-   text:'El panel de accesibilidad da control total sobre la experiencia visual: tamaño de texto, alto contraste para mayor legibilidad, modos de daltonismo para diferentes tipos de visión, y comandos de voz para navegar la plataforma sin usar teclado ni ratón.'},
-  {tab:null,sel:null,label:'Tour completado',
-   text:'Y eso es todo el tour. Has recorrido los nueve módulos del Tracker de Victor IA. Esta plataforma está diseñada para darte control y claridad total sobre cada hora trabajada, cada peso invertido y cada decisión estratégica de tu agencia. Bienvenido a bordo.'}
-];
-
-// Pre-carga un paso como Promise<blobURL|null>
-function tourPrefetch(idx){
-  if(idx<0||idx>=TOUR_STEPS.length||tourCache[idx]) return;
-  var key=settings.elevenLabsKey;
-  if(!key){tourCache[idx]=Promise.resolve(null);return;}
-  var step=TOUR_STEPS[idx];
-  tourCache[idx]=fetch('https://api.elevenlabs.io/v1/text-to-speech/'+TOUR_EL_VOICE+'/stream',{
-    method:'POST',
-    headers:{'xi-api-key':key,'Content-Type':'application/json'},
-    body:JSON.stringify({text:step.text,model_id:TOUR_EL_MODEL,
-      voice_settings:{stability:0.40,similarity_boost:0.88,style:0.52,use_speaker_boost:true}})
-  }).then(function(r){return r.ok?r.blob():Promise.reject(r.status);})
-  .then(function(b){return URL.createObjectURL(b);})
-  .catch(function(){return null;});
-}
-
-function tourCreateUI(){
-  tourBox=document.createElement('div');tourBox.id='tour-box';
-  document.body.appendChild(tourBox);
-  tourHud=document.createElement('div');tourHud.id='tour-hud';
-  tourHud.innerHTML='<span class="th-step" id="th-step">Cargando...</span>'
-    +'<span class="th-sep">·</span>'
-    +'<span class="th-label" id="th-label">Preparando audio</span>'
-    +'<button class="th-stop" onclick="stopGuidedTour()"> Detener</button>';
-  document.body.appendChild(tourHud);
-}
-function tourDestroyUI(){
-  if(tourBox){tourBox.remove();tourBox=null;}
-  if(tourHud){tourHud.remove();tourHud=null;}
-}
-
-function startGuidedTour(){
-  closeAccPanel();
-  if(tourActive) stopGuidedTour();
-  tourIdx=0;tourActive=true;tourCache={};
-  tourCreateUI();
-  // Pre-cargar todos los audios en paralelo desde el inicio
-  TOUR_STEPS.forEach(function(_,i){tourPrefetch(i);});
-  // Arrancar en cuanto el paso 0 esté listo
-  tourCache[0].then(function(){if(tourActive) tourRunStep();});
-}
-
-function stopGuidedTour(){
-  tourActive=false;
-  if(tourAudio){tourAudio.pause();tourAudio=null;}
-  if(window.speechSynthesis) window.speechSynthesis.cancel();
-  // Liberar URLs de blob
-  Object.keys(tourCache).forEach(function(k){
-    var p=tourCache[k];
-    if(p&&p.then) p.then(function(url){if(url) URL.revokeObjectURL(url);});
-  });
-  tourCache={};
-  tourDestroyUI();
-}
-
-function tourMoveBox(sel){
-  if(!tourBox) return;
-  if(!sel){tourBox.style.display='none';return;}
-  var el=document.querySelector(sel);
-  if(!el){tourBox.style.display='none';return;}
-  el.scrollIntoView({behavior:'smooth',block:'nearest'});
-  setTimeout(function(){
-    if(!el||!tourBox) return;
-    var r=el.getBoundingClientRect(),pad=7;
-    tourBox.style.display='block';
-    tourBox.style.top=(r.top-pad)+'px';
-    tourBox.style.left=(r.left-pad)+'px';
-    tourBox.style.width=(r.width+pad*2)+'px';
-    tourBox.style.height=(r.height+pad*2)+'px';
-  },110);
-}
-
-function tourUpdateHUD(idx){
-  var s=TOUR_STEPS[idx];
-  var se=document.getElementById('th-step');
-  var le=document.getElementById('th-label');
-  if(se) se.textContent='Paso '+(idx+1)+' / '+TOUR_STEPS.length;
-  if(le) le.textContent=s.label;
-}
-
-// Reproduce desde caché — sin latencia si ya estaba pre-cargado
-function tourSpeakCached(idx,text,onEnd){
-  var p=tourCache[idx];
-  if(!p){tourPrefetch(idx);p=tourCache[idx];}
-  if(!p){tourSpeakFallback(text,onEnd);return;}
-  p.then(function(url){
-    if(!tourActive) return;
-    if(!url){tourSpeakFallback(text,onEnd);return;}
-    tourAudio=new Audio(url);
-    tourAudio.onended=function(){
-      URL.revokeObjectURL(url);
-      delete tourCache[idx];
-      if(tourActive) setTimeout(onEnd,550);
-    };
-    tourAudio.onerror=function(){if(tourActive) tourSpeakFallback(text,onEnd);};
-    tourAudio.play();
-  });
-}
-
-function tourSpeakFallback(text,onEnd){
-  if(!window.speechSynthesis){setTimeout(onEnd,2000);return;}
-  var utt=new SpeechSynthesisUtterance(text);
-  utt.lang='es-MX';utt.rate=0.94;
-  utt.onend=function(){if(tourActive) setTimeout(onEnd,550);};
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(utt);
-}
-
-function tourRunStep(){
-  if(!tourActive||tourIdx>=TOUR_STEPS.length){stopGuidedTour();return;}
-  var step=TOUR_STEPS[tourIdx];
-  tourUpdateHUD(tourIdx);
-  function go(){
-    tourMoveBox(step.sel);
-    tourSpeakCached(tourIdx,step.text,function(){tourIdx++;tourRunStep();});
-  }
-  if(step.showSidebar&&!sidebarVisible){sidebarVisible=true;}
-  if(step.tab&&step.tab!==currentTab){setTab(step.tab);setTimeout(go,820);}
-  else{go();}
-}
 
 // ── Voice commands modal ──
 function showVoiceCommands(){
