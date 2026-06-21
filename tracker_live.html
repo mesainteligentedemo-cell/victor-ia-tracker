@@ -255,20 +255,28 @@ body::before {
 
 /* ── TABS ── */
 #tabs {
-  display: flex; gap: 0;
+  display: flex;
   flex-wrap: wrap;
+  gap: 0;
   padding: 0 clamp(1.2rem,3vw,2.5rem);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  position: sticky; top: 130px; z-index: 98;
+  position: sticky;
+  top: 130px;
+  z-index: 98;
 }
 .tab-btn {
   padding: 12px 18px;
-  font-size: 11px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
   color: var(--bone2);
   background: transparent;
   border-bottom: 1px solid transparent;
-  transition: all 0.15s cubic-bezier(0.16,1,0.3,1); white-space: nowrap;
+  transition: all 0.15s cubic-bezier(0.16,1,0.3,1);
+  white-space: nowrap;
+  flex-shrink: 1;
 }
 .tab-btn:hover { color: var(--bone); }
 .tab-btn.active { color: var(--amber); border-bottom-color: var(--amber); }
