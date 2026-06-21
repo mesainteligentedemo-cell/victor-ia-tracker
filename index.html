@@ -5000,6 +5000,34 @@ body.client-mode #main { margin-left: 0 !important; }
 .ifx-panel { display:none; animation:fadeIn .35s ease; }
 .ifx-panel.on { display:block; }
 
+/* ===== COSTOS ===== */
+.cst-demo { font-size:11px; color:var(--bone2); background:var(--amber3); border:1px solid var(--bone3); border-left:3px solid var(--amber); border-radius:8px; padding:8px 12px; margin-bottom:16px; letter-spacing:.2px; }
+.cst-filters { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; margin-bottom:20px; }
+.cst-fg { display:flex; flex-direction:column; gap:5px; }
+.cst-fg label { font-size:10.5px; text-transform:uppercase; letter-spacing:.7px; color:var(--bone2); font-weight:700; }
+.cst-fg select { background:#1a1714; border:1px solid var(--bone3); color:var(--bone); font-size:13px; font-family:inherit; padding:8px 12px; border-radius:8px; min-width:170px; cursor:pointer; }
+.cst-fg select:focus { outline:none; border-color:var(--amber); }
+.cst-clear { background:none; border:1px solid var(--bone3); color:var(--bone2); font-size:12px; font-weight:600; padding:8px 14px; border-radius:8px; cursor:pointer; font-family:inherit; transition:.18s; }
+.cst-clear:hover { color:var(--amber); border-color:var(--amber); }
+.cst-charts { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px; }
+.cst-chart-card { background:linear-gradient(160deg,var(--amber3),transparent); border:1px solid var(--bone3); border-radius:14px; padding:16px 18px; }
+.cst-chart-card h4 { margin:0 0 12px; font-size:13px; font-weight:700; color:var(--bone); letter-spacing:.3px; }
+.cst-cwrap { position:relative; height:260px; }
+.cst-table-card { background:linear-gradient(160deg,var(--amber3),transparent); border:1px solid var(--bone3); border-radius:14px; padding:16px 18px; margin-bottom:18px; }
+.cst-table-card h4 { margin:0 0 14px; font-size:13px; font-weight:700; color:var(--bone); letter-spacing:.3px; }
+.cst-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+.cst-table thead th { text-align:left; color:var(--bone2); font-size:10.5px; text-transform:uppercase; letter-spacing:.7px; font-weight:700; padding:0 12px 10px; border-bottom:1px solid var(--bone3); }
+.cst-table thead th:nth-child(2),.cst-table thead th:nth-child(3){ text-align:right; }
+.cst-table tbody td { padding:11px 12px; border-bottom:1px solid rgba(245,241,232,.05); color:var(--bone); vertical-align:middle; }
+.cst-table tbody tr:hover td { background:rgba(255,170,23,.04); }
+.cst-skname { font-weight:600; color:var(--amber); font-family:'SF Mono',ui-monospace,monospace; font-size:12px; }
+.cst-num { text-align:right; font-variant-numeric:tabular-nums; }
+.cst-bar { display:inline-block; width:90px; height:7px; background:rgba(245,241,232,.08); border-radius:6px; overflow:hidden; vertical-align:middle; }
+.cst-bar span { display:block; height:100%; background:linear-gradient(90deg,var(--amber),#34d399); border-radius:6px; }
+.cst-table td i { font-style:normal; font-size:11px; color:var(--bone2); margin-left:8px; }
+.cst-empty { text-align:center; color:var(--bone2); padding:24px; }
+@media(max-width:760px){ .cst-charts{ grid-template-columns:1fr; } .cst-fg select{ min-width:140px; } .cst-cwrap{ height:230px; } }
+
 /* stat strip */
 .ifx-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:22px; }
 .ifx-stat { background:linear-gradient(160deg,var(--amber3),transparent); border:1px solid var(--bone3); border-radius:14px; padding:16px 18px; }
@@ -15696,6 +15724,8 @@ function studioAttachFile(file){
       view.innerHTML = this.shell();
       this.bindShell();
       this.loadSkills();
+      var cc = document.getElementById('ifx-cost-count');
+      if(cc) cc.textContent = this.COSTS.apis.length;
     },
 
     loadSkills: function(){
@@ -15718,10 +15748,12 @@ function studioAttachFile(file){
         '<div class="ifx-subtabs">'+
           '<button class="ifx-subtab on" data-panel="skills">Skills <span class="ifx-count" id="ifx-skill-count">…</span></button>'+
           '<button class="ifx-subtab" data-panel="loops">Loops <span class="ifx-count">14</span></button>'+
+          '<button class="ifx-subtab" data-panel="costs">Costos <span class="ifx-count" id="ifx-cost-count">…</span></button>'+
           '<button class="ifx-subtab" data-panel="system">Sistema</button>'+
         '</div>'+
         '<div class="ifx-panel on" id="ifx-panel-skills"><div class="ifx-empty">Cargando skills…</div></div>'+
         '<div class="ifx-panel" id="ifx-panel-loops">'+this.renderLoops()+'</div>'+
+        '<div class="ifx-panel" id="ifx-panel-costs"><div class="ifx-empty">Cargando costos…</div></div>'+
         '<div class="ifx-panel" id="ifx-panel-system">'+this.renderSystem()+'</div>'+
       '</div>';
     },
@@ -15735,6 +15767,7 @@ function studioAttachFile(file){
           view.querySelectorAll('.ifx-subtab').forEach(function(b){ b.classList.toggle('on', b===btn); });
           view.querySelectorAll('.ifx-panel').forEach(function(pn){ pn.classList.toggle('on', pn.id==='ifx-panel-'+p); });
           self.activePanel = p;
+          if(p==='costs'){ self.loadCosts(); }
         });
       });
     },
@@ -15856,6 +15889,221 @@ function studioAttachFile(file){
         '</div>';
       });
       return html;
+    },
+
+    // ===== COSTOS =====
+    costsData: null,
+    costMonth: 'JUNIO',
+    costApi: '',
+    costAct: '',
+    costCharts: {},
+
+    // Datos reales de Google Sheet Finanzas (1rmoA61km6...). Cifras en MXN.
+    // Columnas mensuales Jul-2025 a Jun-2026. Categorizado por API, actividad, agente y skill.
+    COSTS: {
+      currency:'MXN',
+      months:['JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE','ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO'],
+      // API/servicio -> {actividad, agente, skill, gasto por mes [12]}
+      apis:[
+        {n:'Claude',          act:'Desarrollo',     agente:'codigo',        skill:'codex-openrouter',     m:[0,0,0,0,0,0,0,0,0,0,2501.39,3467.60]},
+        {n:'OpenRouter',      act:'Desarrollo',     agente:'codigo',        skill:'openrouter-cliente',   m:[0,0,0,0,0,0,0,0,0,187.98,6103.80,455.50]},
+        {n:'ChatGPT Pro',     act:'Desarrollo',     agente:'codigo',        skill:'agente-maestro',       m:[432.35,422.42,410.56,413.39,403.00,404.29,0,0,0,0,0,0]},
+        {n:'Comet Perplexity',act:'Investigacion',  agente:'investigacion', skill:'deep-research',        m:[0,0,0,0,0,0,0,345.00,361.33,349.90,347.45,347.45]},
+        {n:'ElevenLabs',      act:'Audio',          agente:'voz',           skill:'elevenlabs-api',       m:[414.47,1857.24,1849.32,1820.61,1841.00,1810.75,0,1777.91,1777.91,1777.91,1734.05,1712.55]},
+        {n:'Higgsfield AI',   act:'Imagen/Video',   agente:'imagen',        skill:'higgsfield-supercomputer', m:[0,0,0,902.13,897.98,907.25,882.32,1211.28,2658.42,2935.62,2267.77,2267.77]},
+        {n:'Higgsfield API',  act:'Imagen/Video',   agente:'imagen',        skill:'higgsfield-content-factory', m:[0,0,0,0,0,0,0,0,0,0,0,906.00]},
+        {n:'Runway',          act:'Video',          agente:'video',         skill:'motion-design',        m:[1762.80,1762.80,0,1319.69,1741.00,0,0,0,0,0,0,0]},
+        {n:'LTX Studio',      act:'Video',          agente:'video',         skill:'scroll-cinematic',     m:[2339.25,0,0,0,0,0,0,0,0,0,0,0]},
+        {n:'Hailuo',          act:'Video',          agente:'video',         skill:'motion-design',        m:[0,0,0,0,1473.00,1867.07,1467.22,2250.66,2168.39,0,0,0]},
+        {n:'HeyGen',          act:'Video',          agente:'presentacion',  skill:'hyperframes',          m:[0,0,1826.17,1835.84,1849.46,0,0,0,0,0,0,0]},
+        {n:'Opus Clips',      act:'Video',          agente:'video',         skill:'video-y-medios',       m:[0,0,0,0,0,0,0,0,331.18,0,0,0]},
+        {n:'Adobe Cloud',     act:'Video',          agente:'video',         skill:'video-y-medios',       m:[0,0,0,0,0,1611.29,0,1611.29,1611.29,1611.29,0,0]},
+        {n:'Canva Pro',       act:'Diseno',         agente:'presentacion',  skill:'pixel-perfecto',       m:[0,330.00,0,330.00,330.00,330.00,330.00,330.00,330.00,330.00,330.00,330.00]},
+        {n:'Gamma',           act:'Diseno',         agente:'presentacion',  skill:'hyperframes',          m:[0,0,200.00,200.00,650.00,0,0,0,0,0,0,0]},
+        {n:'n8n',             act:'Automatizacion', agente:'automatizacion',skill:'n8n-ia-local',         m:[0,0,611.68,602.14,597.00,0,0,0,0,0,0,0]},
+        {n:'n8n Soporte India',act:'Automatizacion',agente:'automatizacion',skill:'n8n-ia-local',        m:[0,0,7249.37,7778.06,8120.54,948.20,948.66,0,0,0,0,0]},
+        {n:'Zapier',          act:'Automatizacion', agente:'automatizacion',skill:'n8n-ia-local',         m:[560.14,573.53,520.50,565.86,563.00,0,0,0,0,0,0,0]},
+        {n:'Apify',           act:'Automatizacion', agente:'scraping',      skill:'fingerprint-scrapper-navegador', m:[0,0,716.04,717.99,715.00,700.05,655.26,669.23,0,0,0,0]},
+        {n:'Blotato',         act:'Automatizacion', agente:'automatizacion',skill:'n8n-ia-local',         m:[0,0,534.94,0,0,534.99,534.99,0,0,0,0,0]},
+        {n:'Airtable',        act:'Automatizacion', agente:'datos',         skill:'analytics',            m:[0,0,0,442.32,0,1840.46,0,0,0,0,0,0]},
+        {n:'Jotform',         act:'Automatizacion', agente:'datos',         skill:'integrations',         m:[0,0,915.28,901.12,912.00,0,0,0,0,0,0,0]},
+        {n:'Nokodo/GHL Bot',  act:'Automatizacion', agente:'automatizacion',skill:'crm',                  m:[0,0,0,0,0,0,18475.40,0,1018.35,1046.71,1046.71,1010.44]},
+        {n:'HubSpot CRM',     act:'CRM',            agente:'crm',           skill:'crm',                  m:[279.89,279.89,278.35,278.35,275.00,270.81,0,257.70,268.50,368.50,0,258.40]},
+        {n:'GHL CRM',         act:'CRM',            agente:'crm',           skill:'crm',                  m:[0,0,0,0,648.00,648.00,0,0,0,0,0,0]},
+        {n:'Retell AI',       act:'Audio',          agente:'voz',           skill:'elevenlabs-api',       m:[0,0,0,0,222.00,0,0,0,0,0,0,0]},
+        {n:'VidIQ',           act:'SEO',            agente:'seo',           skill:'seo-audit-tecnico',    m:[0,0,0,0,0,0,0,0,0,0,0,0]},
+        {n:'Hosting + SSL',   act:'Infraestructura',agente:'infra',         skill:'web-assets-deploy',    m:[485.55,0,0,315.99,315.99,490.99,315.99,490.99,490.99,0,490.99,490.99]},
+        {n:'Nord VPN',        act:'Infraestructura',agente:'infra',         skill:'it-y-tecnologia',      m:[315.52,315.52,0,0,170.00,169.36,490.99,480.98,971.97,480.98,180.90,180.90]},
+        {n:'Google Cloud',    act:'Infraestructura',agente:'infra',         skill:'web-assets-deploy',    m:[0,0,1415.08,0,0,0,0,0,0,0,0,108.50]}
+      ]
+    },
+
+    loadCosts: function(){
+      var self = this;
+      var panel = document.getElementById('ifx-panel-costs');
+      if(!panel) return;
+      if(this.costsData){ this.renderCosts(); return; }
+      // Fuente: Google Sheet Finanzas 1rmoA61km... (snapshot integrado).
+      this.costsData = this.COSTS;
+      var cc = document.getElementById('ifx-cost-count');
+      if(cc) cc.textContent = this.costsData.apis.length;
+      this.renderCosts();
+    },
+
+    // suma de un array de meses respetando filtro de mes
+    _monthIdx: function(){ return this.COSTS.months.indexOf(this.costMonth); },
+    _spentFor: function(api){
+      var i = this._monthIdx();
+      return i<0 ? api.m.reduce(function(a,b){return a+b;},0) : (api.m[i]||0);
+    },
+
+    renderCosts: function(){
+      var self = this;
+      var d = this.costsData;
+      var panel = document.getElementById('ifx-panel-costs');
+      var mi = this._monthIdx();
+
+      // aplicar filtros
+      var rows = d.apis.filter(function(a){
+        if(self.costApi && a.n !== self.costApi) return false;
+        if(self.costAct && a.act !== self.costAct) return false;
+        return true;
+      });
+
+      var total = 0, byApi={}, byAct={}, byAgent={}, bySkill={};
+      rows.forEach(function(a){
+        var v = self._spentFor(a);
+        if(v<=0) return;
+        total += v;
+        byApi[a.n] = (byApi[a.n]||0)+v;
+        byAct[a.act] = (byAct[a.act]||0)+v;
+        byAgent[a.agente] = (byAgent[a.agente]||0)+v;
+        bySkill[a.skill] = bySkill[a.skill] || {cost:0,uses:0};
+        bySkill[a.skill].cost += v; bySkill[a.skill].uses += 1;
+      });
+
+      // proyeccion: si es mes especifico = ese mismo; si "todos" = promedio mensual con datos
+      var monthsWithData = d.months.filter(function(_,i){ return d.apis.some(function(a){return (a.m[i]||0)>0;}); }).length || 1;
+      var grandTotal = d.apis.reduce(function(s,a){ return s + a.m.reduce(function(x,y){return x+y;},0); },0);
+      var projection = mi<0 ? (grandTotal/monthsWithData) : total;
+
+      // top API mas cara
+      var apiArr = Object.keys(byApi).map(function(k){return [k,byApi[k]];}).sort(function(a,b){return b[1]-a[1];});
+      var topApi = apiArr.length ? apiArr[0] : ['—',0];
+
+      var fmt = function(n){ return '$'+ (n||0).toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0}); };
+
+      // selects de filtro
+      var monthOpts = '<option value="ALL"'+(mi<0?' selected':'')+'>Todos los meses</option>';
+      d.months.forEach(function(m){ monthOpts += '<option value="'+m+'"'+(m===self.costMonth?' selected':'')+'>'+m.charAt(0)+m.slice(1).toLowerCase()+'</option>'; });
+      var apiNames = d.apis.map(function(a){return a.n;}).sort();
+      var apiOpts = '<option value="">Todas las APIs</option>';
+      apiNames.forEach(function(n){ apiOpts += '<option value="'+esc(n)+'"'+(n===self.costApi?' selected':'')+'>'+esc(n)+'</option>'; });
+      var actNames = Object.keys(d.apis.reduce(function(o,a){o[a.act]=1;return o;},{})).sort();
+      var actOpts = '<option value="">Todas las actividades</option>';
+      actNames.forEach(function(n){ actOpts += '<option value="'+esc(n)+'"'+(n===self.costAct?' selected':'')+'>'+esc(n)+'</option>'; });
+
+      // tabla por skill
+      var skillArr = Object.keys(bySkill).map(function(k){return [k,bySkill[k].cost,bySkill[k].uses];}).sort(function(a,b){return b[1]-a[1];});
+      var skillRows = skillArr.map(function(s){
+        var pct = total>0 ? (s[1]/total*100) : 0;
+        return '<tr>'+
+          '<td class="cst-skname">'+esc(s[0])+'</td>'+
+          '<td class="cst-num">'+fmt(s[1])+'</td>'+
+          '<td class="cst-num">'+s[2]+'</td>'+
+          '<td><div class="cst-bar"><span style="width:'+pct.toFixed(1)+'%"></span></div><i>'+pct.toFixed(1)+'%</i></td>'+
+        '</tr>';
+      }).join('') || '<tr><td colspan="4" class="cst-empty">Sin datos para el filtro seleccionado.</td></tr>';
+
+      var monthLabel = mi<0 ? 'Acumulado (todos los meses)' : (self.costMonth.charAt(0)+self.costMonth.slice(1).toLowerCase()+' 2026');
+
+      panel.innerHTML = ''+
+        '<div class="cst-demo">Fuente: Google Sheet Finanzas (1rmoA61km…) · snapshot integrado · cifras en MXN · '+monthLabel+'</div>'+
+        // filtros
+        '<div class="cst-filters">'+
+          '<div class="cst-fg"><label>Mes</label><select id="cst-month">'+monthOpts+'</select></div>'+
+          '<div class="cst-fg"><label>API</label><select id="cst-api">'+apiOpts+'</select></div>'+
+          '<div class="cst-fg"><label>Actividad</label><select id="cst-act">'+actOpts+'</select></div>'+
+          (self.costApi||self.costAct||mi>=0 ? '<button class="cst-clear" id="cst-clear">Limpiar filtros</button>' : '')+
+        '</div>'+
+        // KPIs
+        '<div class="ifx-stats">'+
+          '<div class="ifx-stat"><div class="v">'+fmt(total)+'</div><div class="l">Gasto '+(mi<0?'total':self.costMonth.toLowerCase())+'</div></div>'+
+          '<div class="ifx-stat"><div class="v">'+fmt(projection)+'</div><div class="l">Proyeccion mensual</div></div>'+
+          '<div class="ifx-stat"><div class="v">'+esc(topApi[0])+'</div><div class="l">API mas cara ('+fmt(topApi[1])+')</div></div>'+
+          '<div class="ifx-stat"><div class="v">'+apiArr.length+'</div><div class="l">Servicios con gasto</div></div>'+
+        '</div>'+
+        // charts
+        '<div class="cst-charts">'+
+          '<div class="cst-chart-card"><h4>Gasto por API</h4><div class="cst-cwrap"><canvas id="cst-pie-api"></canvas></div></div>'+
+          '<div class="cst-chart-card"><h4>Gasto por actividad</h4><div class="cst-cwrap"><canvas id="cst-bar-act"></canvas></div></div>'+
+        '</div>'+
+        '<div class="cst-charts">'+
+          '<div class="cst-chart-card"><h4>Gasto por agente</h4><div class="cst-cwrap"><canvas id="cst-bar-agent"></canvas></div></div>'+
+          '<div class="cst-chart-card"><h4>Tendencia mensual (acumulado)</h4><div class="cst-cwrap"><canvas id="cst-line-trend"></canvas></div></div>'+
+        '</div>'+
+        // tabla skills
+        '<div class="cst-table-card">'+
+          '<h4>Desglose por skill</h4>'+
+          '<table class="cst-table"><thead><tr><th>Skill</th><th>Costo</th><th>Servicios</th><th>% del total</th></tr></thead>'+
+          '<tbody>'+skillRows+'</tbody></table>'+
+        '</div>';
+
+      // bind filtros
+      var ms=document.getElementById('cst-month'), as=document.getElementById('cst-api'), cs=document.getElementById('cst-act'), cl=document.getElementById('cst-clear');
+      if(ms) ms.addEventListener('change', function(){ self.costMonth = ms.value==='ALL'?'__ALL__':ms.value; self.renderCosts(); });
+      if(as) as.addEventListener('change', function(){ self.costApi = as.value; self.renderCosts(); });
+      if(cs) cs.addEventListener('change', function(){ self.costAct = cs.value; self.renderCosts(); });
+      if(cl) cl.addEventListener('click', function(){ self.costMonth='__ALL__'; self.costApi=''; self.costAct=''; self.renderCosts(); });
+
+      this.drawCostCharts(byApi, byAct, byAgent);
+    },
+
+    drawCostCharts: function(byApi, byAct, byAgent){
+      var self = this;
+      if(!window.Chart) return;
+      // destruir previos
+      Object.keys(this.costCharts).forEach(function(k){ try{ self.costCharts[k].destroy(); }catch(e){} });
+      this.costCharts = {};
+      var PAL = ['#FFAA17','#3b82f6','#34d399','#f472b6','#a78bfa','#f59e0b','#22d3ee','#fb7185','#84cc16','#e879f9','#60a5fa','#fbbf24','#2dd4bf','#c084fc','#fca5a5'];
+      var bone = 'rgba(245,241,232,.7)', boneDim='rgba(245,241,232,.45)', grid='rgba(245,241,232,.06)';
+      var fmt = function(v){ return '$'+Number(v).toLocaleString('es-MX',{maximumFractionDigits:0}); };
+      var tip = { callbacks:{ label:function(c){ return ' '+(c.label||c.dataset.label||'')+': '+fmt(c.parsed.y!=null?c.parsed.y:c.parsed); } } };
+
+      // Pie por API (top 12)
+      var apiE = Object.keys(byApi).map(function(k){return [k,byApi[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0,12);
+      var pc = document.getElementById('cst-pie-api');
+      if(pc && apiE.length) this.costCharts.api = new Chart(pc,{type:'doughnut',
+        data:{labels:apiE.map(function(e){return e[0];}),datasets:[{data:apiE.map(function(e){return Math.round(e[1]);}),backgroundColor:PAL,borderWidth:0}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:bone,font:{size:10},boxWidth:10}},tooltip:tip}}});
+
+      // Bar por actividad
+      var actE = Object.keys(byAct).map(function(k){return [k,byAct[k]];}).sort(function(a,b){return b[1]-a[1];});
+      var bc = document.getElementById('cst-bar-act');
+      if(bc && actE.length) this.costCharts.act = new Chart(bc,{type:'bar',
+        data:{labels:actE.map(function(e){return e[0];}),datasets:[{data:actE.map(function(e){return Math.round(e[1]);}),backgroundColor:'rgba(255,170,23,.6)',borderRadius:4}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tip},scales:{x:{ticks:{color:boneDim,font:{size:9}},grid:{display:false}},y:{ticks:{color:boneDim,font:{size:9}},grid:{color:grid}}}}});
+
+      // Bar por agente
+      var agE = Object.keys(byAgent).map(function(k){return [k,byAgent[k]];}).sort(function(a,b){return b[1]-a[1];});
+      var gc = document.getElementById('cst-bar-agent');
+      if(gc && agE.length) this.costCharts.agent = new Chart(gc,{type:'bar',
+        data:{labels:agE.map(function(e){return e[0];}),datasets:[{data:agE.map(function(e){return Math.round(e[1]);}),backgroundColor:'rgba(59,130,246,.6)',borderRadius:4}]},
+        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tip},scales:{x:{ticks:{color:boneDim,font:{size:9}},grid:{color:grid}},y:{ticks:{color:bone,font:{size:10}},grid:{display:false}}}}});
+
+      // Linea tendencia (acumulado mensual de todo, ignora filtro mes pero respeta API/act)
+      var d = this.costsData;
+      var trend = d.months.map(function(_,i){
+        return d.apis.reduce(function(s,a){
+          if(self.costApi && a.n!==self.costApi) return s;
+          if(self.costAct && a.act!==self.costAct) return s;
+          return s + (a.m[i]||0);
+        },0);
+      });
+      var lc = document.getElementById('cst-line-trend');
+      if(lc) this.costCharts.trend = new Chart(lc,{type:'line',
+        data:{labels:d.months.map(function(m){return m.slice(0,3);}),datasets:[{data:trend.map(function(v){return Math.round(v);}),borderColor:'#34d399',backgroundColor:'rgba(52,211,153,.12)',fill:true,tension:.3,pointRadius:3,pointBackgroundColor:'#34d399'}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tip},scales:{x:{ticks:{color:boneDim,font:{size:9}},grid:{display:false}},y:{ticks:{color:boneDim,font:{size:9}},grid:{color:grid}}}}});
     },
 
     renderSystem: function(){
