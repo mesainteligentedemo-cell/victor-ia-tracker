@@ -16699,17 +16699,83 @@ function studioAttachFile(file){
   #via-tour-spot.pulse::before{ animation:none; display:none; }
 }
 
-/* ── TOUR MINIMALISTA · solo marco + voz · sin panel, sin texto, sin controles ── */
+/* ── TOUR · solo marco + voz + 5 controles · sin texto, sin progreso, sin velocidad, sin badge ── */
 /* Estado activo del botón en topbar mientras el tour corre */
 .btn-tour-cta.tour-active{
   background:var(--amber); color:#070809; border-color:var(--amber);
   box-shadow:0 0 0 1px rgba(255,170,23,.6),0 0 22px rgba(255,170,23,.4);
+}
+
+/* ── Barra de controles del tour: 5 botones limpios abajo y centrados ── */
+#via-tour-controls{
+  position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(12px);
+  z-index:99995; display:none; gap:10px; align-items:center;
+  padding:10px 14px; border-radius:16px; pointer-events:auto;
+  background:rgba(14,16,20,.82);
+  border:1px solid rgba(255,170,23,.32);
+  box-shadow:0 10px 40px rgba(0,0,0,.55),0 0 0 1px rgba(255,170,23,.12),0 0 30px rgba(255,170,23,.12);
+  backdrop-filter:blur(14px) saturate(140%); -webkit-backdrop-filter:blur(14px) saturate(140%);
+  opacity:0; transition:opacity .35s ease, transform .35s cubic-bezier(.4,0,.2,1);
+}
+#via-tour-root.on ~ #via-tour-controls,
+#via-tour-controls.on{ display:flex; opacity:1; transform:translateX(-50%) translateY(0); }
+.via-tc-btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  height:42px; padding:0 16px; border-radius:11px; cursor:pointer;
+  font:600 13px/1 'Inter',system-ui,sans-serif; letter-spacing:.2px;
+  color:#e9edf2; background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);
+  transition:background .2s ease, border-color .2s ease, color .2s ease, transform .12s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.via-tc-btn:hover{ background:rgba(255,170,23,.16); border-color:rgba(255,170,23,.45); color:#fff; transform:translateY(-1px); }
+.via-tc-btn:active{ transform:translateY(0); }
+.via-tc-btn svg{ flex-shrink:0; }
+/* Play/Reanudar destacado en ámbar */
+.via-tc-btn.primary{ background:rgba(255,170,23,.22); border-color:rgba(255,170,23,.5); color:#ffd27a; }
+.via-tc-btn.primary:hover{ background:rgba(255,170,23,.34); color:#fff; }
+/* Detener en rojo sutil */
+.via-tc-btn.danger:hover{ background:rgba(239,68,68,.2); border-color:rgba(239,68,68,.5); color:#ffd9d9; }
+/* solo-ícono en pantallas chicas */
+@media (max-width:640px){
+  #via-tour-controls{ bottom:16px; gap:6px; padding:8px 10px; }
+  .via-tc-btn{ padding:0 12px; height:44px; }
+  .via-tc-btn .via-tc-label{ display:none; }
+}
+@media (prefers-reduced-motion: reduce){
+  #via-tour-controls{ transition:opacity .2s ease; transform:translateX(-50%); }
+  #via-tour-root.on ~ #via-tour-controls,
+  #via-tour-controls.on{ transform:translateX(-50%); }
 }
 </style>
 
 <div id="via-tour-root" role="dialog" aria-modal="true" aria-label="Tour guiado del tracker">
   <div id="via-tour-backdrop"></div>
   <div id="via-tour-spot"></div>
+</div>
+
+<!-- Controles del tour: 5 botones limpios (Play, Pausa, Anterior, Siguiente, Detener) -->
+<div id="via-tour-controls" role="toolbar" aria-label="Controles del tour guiado">
+  <button type="button" class="via-tc-btn" id="via-tc-prev" onclick="ViaTour.prev()" aria-label="Paso anterior" title="Anterior">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="19 4 9 12 19 20 19 4"/><rect x="5" y="4" width="3" height="16" rx="1"/></svg>
+    <span class="via-tc-label">Anterior</span>
+  </button>
+  <button type="button" class="via-tc-btn primary" id="via-tc-play" onclick="ViaTour.play()" aria-label="Reproducir o reanudar narración" title="Play">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+    <span class="via-tc-label">Play</span>
+  </button>
+  <button type="button" class="via-tc-btn" id="via-tc-pause" onclick="ViaTour.pause()" aria-label="Pausar narración" title="Pausa">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+    <span class="via-tc-label">Pausa</span>
+  </button>
+  <button type="button" class="via-tc-btn" id="via-tc-next" onclick="ViaTour.next()" aria-label="Paso siguiente" title="Siguiente">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"/><rect x="16" y="4" width="3" height="16" rx="1"/></svg>
+    <span class="via-tc-label">Siguiente</span>
+  </button>
+  <button type="button" class="via-tc-btn danger" id="via-tc-stop" onclick="ViaTour.stop()" aria-label="Detener y cerrar tour" title="Detener">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+    <span class="via-tc-label">Detener</span>
+  </button>
 </div>
 
 <script>
@@ -16720,8 +16786,8 @@ function studioAttachFile(file){
   var EL_VOICE = 'iDEmt5MnqUotdwCIVplo';
   var EL_MODEL = 'eleven_multilingual_v2';
 
-  var ICON_PAUSE = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
-  var ICON_PLAY  = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
+  var ICON_PAUSE = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
+  var ICON_PLAY  = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
 
   // ── Definición del tour completo (cobertura total: topbar, controles, 12 módulos, infra 4 sub-paneles, interacciones reales) ──
   // tab: pestaña principal a activar · ifx: subpanel de Infra · sel: elemento a resaltar
@@ -16918,7 +16984,8 @@ function studioAttachFile(file){
 
   var T = {
     idx: 0,
-    playing: false,
+    playing: false,    // tour abierto y narrando/avanzando
+    paused: false,     // tour abierto pero en pausa
     speed: 1,
     audio: null,
     stepTimer: null,
@@ -16927,38 +16994,107 @@ function studioAttachFile(file){
 
     el: function(id){ return document.getElementById(id); },
 
-    // un solo botón: si está corriendo, detiene; si no, arranca
+    // botón del topbar: si está abierto, detiene; si no, arranca
     toggle: function(){
-      if(this.playing) this.stop();
+      if(this.playing || this.paused) this.stop();
       else this.start();
     },
 
     start: function(){
       // siempre desde el inicio (experiencia limpia, sin "paso X de Y")
       this.idx = 0;
+      this.paused = false;
       this.el('via-tour-root').classList.add('on');
+      this.el('via-tour-controls').classList.add('on');
       var btn = this.el('tour-start-btn'); if(btn) btn.classList.add('tour-active');
       /* sin bloquear scroll ni oscurecer: la pantalla queda 100% visible y usable */
       this.playing = true;
+      this._syncPlayBtn();
       this.go(this.idx, true);
     },
 
     stop: function(){
       this.playing = false;
+      this.paused = false;
       this._cancelSpeech();
       clearTimeout(this.stepTimer);
       clearTimeout(this._actTimer);
       this.el('via-tour-root').classList.remove('on','speaking');
+      this.el('via-tour-controls').classList.remove('on');
       this.el('via-tour-spot').classList.remove('show','pulse');
       var btn = this.el('tour-start-btn'); if(btn) btn.classList.remove('tour-active');
       this._clearTarget();
+      this._syncPlayBtn();
+    },
+
+    // Pausa: detiene la voz pero mantiene el marco y el tour abierto
+    pause: function(){
+      if(!this.playing) return;
+      this.playing = false;
+      this.paused = true;
+      this._cancelSpeech();
+      clearTimeout(this.stepTimer);
+      clearTimeout(this._actTimer);
+      this._syncPlayBtn();
+    },
+
+    // Reanuda: vuelve a narrar el paso actual desde el inicio del paso
+    resume: function(){
+      if(this.playing) return;
+      this.paused = false;
+      this.playing = true;
+      this.el('via-tour-root').classList.add('on');
+      this.el('via-tour-controls').classList.add('on');
+      var btn = this.el('tour-start-btn'); if(btn) btn.classList.add('tour-active');
+      this._syncPlayBtn();
+      // re-narra el paso actual (re-resalta su marco)
+      this.go(this.idx, true);
+    },
+
+    // Play: arranca desde cero si está cerrado; reanuda si está en pausa; ignora si ya reproduce
+    play: function(){
+      if(this.playing) return;
+      if(this.paused){ this.resume(); }
+      else { this.start(); }
     },
 
     next: function(){
+      var wasPlaying = this.playing || this.paused;
       this._cancelSpeech();
       clearTimeout(this.stepTimer);
-      if(this.idx < TOTAL - 1){ this.idx++; this.go(this.idx, this.playing); }
-      else { this.stop(); }
+      clearTimeout(this._actTimer);
+      if(this.idx < TOTAL - 1){
+        this.idx++;
+        // al navegar manualmente, reanuda reproducción
+        if(this.paused){ this.paused = false; this.playing = true; this._syncPlayBtn(); }
+        this.go(this.idx, this.playing || wasPlaying);
+      } else {
+        this.stop();
+      }
+    },
+
+    // Anterior: retrocede un paso (sin cerrar el tour)
+    prev: function(){
+      this._cancelSpeech();
+      clearTimeout(this.stepTimer);
+      clearTimeout(this._actTimer);
+      if(this.idx > 0){
+        this.idx--;
+        if(this.paused){ this.paused = false; this.playing = true; this._syncPlayBtn(); }
+        this.go(this.idx, this.playing);
+      } else {
+        // ya en el primer paso: re-narra el primero
+        if(this.paused){ this.paused = false; this.playing = true; this._syncPlayBtn(); }
+        this.go(0, this.playing);
+      }
+    },
+
+    // Resalta el botón activo (Play mientras reproduce, Pausa cuando está pausado)
+    _syncPlayBtn: function(){
+      var playBtn = this.el('via-tc-play');
+      var pauseBtn = this.el('via-tc-pause');
+      if(playBtn){ playBtn.classList.toggle('primary', this.playing); }
+      if(pauseBtn){ pauseBtn.classList.toggle('primary', this.paused); }
     },
 
     // navigate to a step: switch tab, scroll, highlight, narrate
