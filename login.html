@@ -174,12 +174,12 @@
   <script>
     // Firebase config
     const firebaseConfig = {
-      apiKey: "AIzaSyDxxx...", // Replace with your Firebase config
-      authDomain: "your-project.firebaseapp.com",
-      projectId: "your-project",
-      storageBucket: "your-project.appspot.com",
-      messagingSenderId: "xxx",
-      appId: "1:xxx:web:xxx"
+      apiKey: "AIzaSyBciNfVGjH5l3szzGVgatXlZvLvaoNsp14",
+      authDomain: "victor-ia-tracker.firebaseapp.com",
+      projectId: "victor-ia-tracker",
+      storageBucket: "victor-ia-tracker.firebasestorage.app",
+      messagingSenderId: "475376340371",
+      appId: "1:475376340371:web:caaf70c5c4063edfcb6c66"
     };
 
     // Initialize Firebase
@@ -189,7 +189,7 @@
     // Check if already logged in
     auth.onAuthStateChanged((user) => {
       if (user) {
-        window.location.href = '/dashboard.html';
+        window.location.href = '/';
       }
     });
 
@@ -208,7 +208,7 @@
       try {
         const result = await auth.signInWithEmailAndPassword(email, password);
         console.log('✅ Logged in:', result.user.email);
-        window.location.href = '/tracker_live.html';
+        window.location.href = '/';
       } catch (err) {
         console.error('Login error:', err);
         error.classList.add('show');
@@ -223,7 +223,7 @@
       try {
         const provider = new firebase.auth.GoogleAuthProvider();
         await auth.signInWithPopup(provider);
-        window.location.href = '/tracker_live.html';
+        window.location.href = '/';
       } catch (err) {
         console.error('Google login error:', err);
         document.getElementById('errorMsg').classList.add('show');
@@ -236,7 +236,7 @@
       try {
         const provider = new firebase.auth.GithubAuthProvider();
         await auth.signInWithPopup(provider);
-        window.location.href = '/tracker_live.html';
+        window.location.href = '/';
       } catch (err) {
         console.error('GitHub login error:', err);
         document.getElementById('errorMsg').classList.add('show');
