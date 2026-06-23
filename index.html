@@ -5904,9 +5904,29 @@ body.client-mode #main { margin-left: 0 !important; }
 <div id="ham-backdrop" onclick="closeHamMenu()"></div>
 <div id="ham-panel" role="dialog" aria-label="Menú de herramientas">
   <div class="ham-header">
-    <span class="ham-header-title">Herramientas</span>
+    <span class="ham-header-title">Menú</span>
     <button class="ham-close" onclick="closeHamMenu()" aria-label="Cerrar menú"></button>
   </div>
+
+  <!-- NAVEGACIÓN DE MÓDULOS — reemplaza al <select> en mobile -->
+  <div class="ham-section">
+    <div class="ham-section-label">Módulos</div>
+    <div class="ham-nav-grid" id="ham-nav-grid">
+      <button class="ham-nav-btn active" data-tab="dashboard" onclick="hamGoTab('dashboard')"><span class="ham-nav-dot"></span> Dashboard</button>
+      <button class="ham-nav-btn" data-tab="analytics" onclick="hamGoTab('analytics')"><span class="ham-nav-dot"></span> Analytics</button>
+      <button class="ham-nav-btn" data-tab="finanzas" onclick="hamGoTab('finanzas')"><span class="ham-nav-dot"></span> Finanzas</button>
+      <button class="ham-nav-btn" data-tab="organigrama" onclick="hamGoTab('organigrama')"><span class="ham-nav-dot"></span> Organigrama</button>
+      <button class="ham-nav-btn" data-tab="software" onclick="hamGoTab('software')"><span class="ham-nav-dot"></span> Software &amp; APIs</button>
+      <button class="ham-nav-btn" data-tab="entradas" onclick="hamGoTab('entradas')"><span class="ham-nav-dot"></span> Entradas</button>
+      <button class="ham-nav-btn" data-tab="reportes" onclick="hamGoTab('reportes')"><span class="ham-nav-dot"></span> Reportes</button>
+      <button class="ham-nav-btn" data-tab="crm" onclick="hamGoTab('crm')"><span class="ham-nav-dot"></span> CRM</button>
+      <button class="ham-nav-btn" data-tab="apollo" onclick="hamGoTab('apollo')"><span class="ham-nav-dot"></span> Prospección</button>
+      <button class="ham-nav-btn" data-tab="telemetria" onclick="hamGoTab('telemetria')"><span class="ham-nav-dot"></span> Telemetría IoT</button>
+      <button class="ham-nav-btn" data-tab="graphify" onclick="hamGoTab('graphify')"><span class="ham-nav-dot"></span> Observabilidad</button>
+      <button class="ham-nav-btn" data-tab="infrastructure" onclick="hamGoTab('infrastructure')"><span class="ham-nav-dot"></span> Infra</button>
+    </div>
+  </div>
+
   <button class="ham-btn ham-btn-primary" onclick="openAdd();closeHamMenu()" aria-label="Nueva entrada">
     + Nueva Entrada
   </button>
@@ -8172,6 +8192,10 @@ function setTab(tab){
   // Sincronizar select móvil con tab activo
   const mobileSelect=document.getElementById('mobile-tab-select');
   if(mobileSelect) mobileSelect.value=tab;
+  // Sincronizar navegación del menú hamburguesa (mobile)
+  document.querySelectorAll('#ham-nav-grid .ham-nav-btn').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-tab')===tab);
+  });
 
   document.querySelectorAll('#content > div').forEach(d=>d.classList.add('hidden'));
   document.getElementById('view-'+tab).classList.remove('hidden');
@@ -8226,6 +8250,19 @@ function closeHamMenu(){
   btn.classList.remove('open');
   btn.setAttribute('aria-expanded','false');
   document.body.style.overflow='';
+}
+
+/* Navegar a un módulo desde el menú hamburguesa (mobile) */
+function hamGoTab(tab){
+  try{ if(typeof setTab==='function') setTab(tab); }catch(e){ console.warn('[ham] setTab error',e); }
+  // Marcar botón activo dentro del panel
+  document.querySelectorAll('#ham-nav-grid .ham-nav-btn').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-tab')===tab);
+  });
+  // Sincronizar el viejo select por si algún flujo lo lee
+  var sel=document.getElementById('mobile-tab-select');
+  if(sel) sel.value=tab;
+  closeHamMenu();
 }
 
 document.addEventListener('keydown',function(e){
@@ -17305,6 +17342,129 @@ function studioAttachFile(file){
   #via-tour-controls{ transition:opacity .2s ease; transform:translateX(-50%); }
   #via-tour-root.on ~ #via-tour-controls,
   #via-tour-controls.on{ transform:translateX(-50%); }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MOBILE MASTER OVERRIDE — Rediseño mobile total (2026-06-22)
+   Va al FINAL del CSS: gana siempre por orden de cascada.
+   Gobierna TODOS los módulos. Cero scroll horizontal. Cero corte.
+   Desktop (>768px) intacto: nada de esto aplica.
+════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px){
+  /* ── 0. Anti-overflow horizontal absoluto ── */
+  html, body{
+    max-width:100vw !important;
+    overflow-x:hidden !important;
+  }
+  *{
+    /* nada puede empujar el viewport hacia los lados */
+    max-width:100vw;
+  }
+  #main, #content, #content > *{
+    width:100% !important;
+    max-width:100vw !important;
+    overflow-x:hidden !important;
+    box-sizing:border-box;
+  }
+
+  /* ── 1. TODOS los grids → una sola columna ── */
+  [class*="grid"],
+  [class*="-grid"],
+  .kpi-grid, .chart-grid, .rep-dept-grid, .tpl-grid,
+  .peff-grid, .cp-exec-row, .cp-kpi-grid, .add-grid,
+  .ifx-grid, .ifx-sys-grid, .ifx-stats, .lpf-meta{
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+  }
+
+  /* ── 2. TODOS los flex → wrap, sin desbordar ── */
+  [class*="row"], [class*="flex"], [class*="cols"],
+  .gh-strip, .idf-nodes{
+    flex-wrap:wrap !important;
+  }
+
+  /* ── 3. Anchos fijos → fluidos (paneles, sidebars, columnas) ── */
+  .studio-panel, .studio-sidebar, .apo-filters-panel,
+  .apollo-nav, .k-col, #sidebar{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+  }
+  .gh-item{ min-width:0 !important; flex:1 1 50% !important; }
+
+  /* ── 4. Contenedores con scroll DENTRO de sí mismos (no en la página) ── */
+  .table-wrap, .kanban-wrap, .crm-sub-nav, .studio-tabs-bar,
+  .lpf-flow, #project-bar, #proj-btns, .apo-filters-panel{
+    max-width:100% !important;
+    overflow-x:auto !important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* ── 5. Tipografía y espaciado compactos pero legibles ── */
+  #content{ padding:10px !important; }
+  [class*="-card"], [class*="card-"]{
+    width:100% !important;
+    max-width:100% !important;
+    padding:12px !important;
+    box-sizing:border-box;
+  }
+  table{ font-size:11.5px !important; }
+
+  /* ── 6. Imágenes/canvas/charts nunca rebasan ── */
+  img, canvas, svg, video, iframe{
+    max-width:100% !important;
+    height:auto;
+  }
+  canvas{ height:auto !important; }
+
+  /* ── 7. El viejo <select> de módulos: lo ocultamos.
+         La navegación de módulos ahora vive en el menú hamburguesa. ── */
+  #tabs-mobile{ display:none !important; }
+}
+
+/* ── 8. Menú hamburguesa: panel de NAVEGACIÓN de módulos ── */
+.ham-nav-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:2px;
+  padding:0 12px 8px;
+}
+.ham-nav-btn{
+  display:flex; align-items:center; gap:10px;
+  width:100%;
+  padding:12px 14px;
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:3px;
+  color:rgba(248,247,245,0.8);
+  font-family:'Inter',sans-serif;
+  font-size:13.5px;
+  font-weight:500;
+  letter-spacing:0.02em;
+  cursor:pointer;
+  text-align:left;
+  transition:background .16s, border-color .16s, color .16s, transform .14s;
+}
+.ham-nav-btn:hover{
+  background:rgba(255,170,23,0.06);
+  border-color:rgba(255,170,23,0.18);
+  color:#F8F7F5;
+  transform:translateX(2px);
+}
+.ham-nav-btn.active{
+  background:rgba(255,170,23,0.1);
+  border-color:rgba(255,170,23,0.32);
+  color:#FFAA17;
+}
+.ham-nav-btn .ham-nav-dot{
+  width:6px; height:6px; border-radius:50%;
+  background:rgba(248,247,245,0.25);
+  flex-shrink:0;
+  transition:background .16s, box-shadow .16s;
+}
+.ham-nav-btn.active .ham-nav-dot{
+  background:#FFAA17;
+  box-shadow:0 0 8px rgba(255,170,23,0.6);
 }
 </style>
 
