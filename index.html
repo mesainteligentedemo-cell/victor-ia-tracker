@@ -3510,8 +3510,117 @@ body.light .top-item { border-bottom-color: rgba(14,15,18,0.06); }
 
 /* ── Mostrar hamburger en mobile (unificado a 768px — sin zona muerta) ── */
 @media (max-width: 768px) {
-  #ham-btn { display: flex; }
   .btn-desktop { display: none !important; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MOBILE NAV RADICAL (2026-06-22) — sistema aislado, gana toda cascada
+   Desktop (>768px): todo oculto. Mobile (<=768px): topbar mínimo + overlay.
+════════════════════════════════════════════════════════════════ */
+
+/* Por defecto (desktop) el sistema mobile NO se ve */
+#mobile-topbar { display: none; }
+#mobile-menu-overlay { display: none; }
+
+.mobile-topbar {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 60px;
+  background: var(--surface, #14151a);
+  border-bottom: 1px solid var(--border, #2a2b31);
+  align-items: center; justify-content: space-between;
+  padding: 0 16px; z-index: 1200;
+  box-sizing: border-box;
+}
+.mobile-topbar-brand { display: flex; align-items: center; gap: 9px; }
+.mobile-topbar-name {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.14em;
+  color: var(--bone, #F8F7F5);
+}
+.mobile-topbar-live {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.12em;
+  color: #0E0F12; background: #FFAA17;
+  padding: 2px 6px; border-radius: 4px;
+}
+.mobile-hamburger {
+  font-size: 30px; line-height: 1;
+  width: 52px; height: 52px;
+  background: rgba(255,170,23,0.10);
+  border: 1px solid var(--border, #2a2b31);
+  border-radius: 12px;
+  color: var(--amber, #FFAA17);
+  cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-hamburger:active { transform: scale(0.94); }
+
+.mobile-menu-overlay {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.78);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  z-index: 2000;
+  flex-direction: column;
+}
+.mobile-menu-overlay.open { display: flex !important; }
+
+.mobile-menu-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 20px;
+  background: var(--surface, #14151a);
+  border-bottom: 1px solid var(--border, #2a2b31);
+}
+.mobile-menu-header span {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--bone, #F8F7F5);
+}
+.mobile-menu-close {
+  font-size: 24px; line-height: 1;
+  width: 44px; height: 44px;
+  background: none; border: none;
+  color: var(--bone, #F8F7F5); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.mobile-menu-list {
+  display: flex; flex-direction: column;
+  background: var(--surface, #14151a);
+  overflow-y: auto; flex: 1;
+}
+.mobile-menu-btn {
+  padding: 17px 22px;
+  background: transparent; border: none;
+  border-bottom: 1px solid var(--border, #2a2b31);
+  color: var(--bone, #F8F7F5);
+  text-align: left; cursor: pointer;
+  font-size: 15px; font-weight: 500; letter-spacing: 0.02em;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-menu-btn:active { background: rgba(255,170,23,0.10); color: var(--amber, #FFAA17); }
+.mobile-menu-actions {
+  padding: 16px 20px;
+  background: var(--surface, #14151a);
+  border-top: 1px solid var(--border, #2a2b31);
+}
+.mobile-menu-action {
+  width: 100%; padding: 14px;
+  background: var(--amber, #FFAA17); color: #0E0F12;
+  border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 700; letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+/* ── Activación del sistema mobile y silencio del viejo en <=768px ── */
+@media (max-width: 768px) {
+  /* Ocultar TODO el topbar/tabs viejo — gana con !important */
+  #topbar { display: none !important; }
+  #tabs, #tabs-mobile, .tabs-mobile { display: none !important; }
+  #ham-btn, #ham-panel, #ham-backdrop { display: none !important; }
+
+  /* Mostrar el sistema nuevo */
+  #mobile-topbar { display: flex !important; }
+
+  /* Empujar el contenido bajo el topbar fijo de 60px */
+  body { padding-top: 60px !important; }
 }
 
 /* ── Logo TRACKER wordmark — más visible en mobile ── */
@@ -5902,6 +6011,53 @@ body.client-mode #main { margin-left: 0 !important; }
   <!-- Las acciones IA viven en la barra única #via-quick-actions (abajo del topbar).
        Se eliminó la .ai-agents-bar duplicada para evitar botones repetidos. -->
 </div>
+<!-- /#topbar -->
+
+<!-- ════════════════════════════════════════════════════════════════
+     MOBILE NAV RADICAL (2026-06-22) — solución definitiva <768px
+     Topbar minimalista + overlay full-screen. CSS aislado, sin cascada.
+════════════════════════════════════════════════════════════════ -->
+
+<!-- MOBILE TOPBAR — aparece solo en <768px (logo + hamburguesa ENORME) -->
+<div id="mobile-topbar" class="mobile-topbar">
+  <div class="mobile-topbar-brand">
+    <svg width="26" height="26" viewBox="0 0 38 38" fill="none" aria-label="VICTOR IA Tracker">
+      <rect width="38" height="38" fill="#0E0F12"/>
+      <path d="M8 9L19 29.5L30 9" stroke="#F8F7F5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="15.2" y="17.5" width="2.2" height="6" fill="#FFAA17"/>
+      <rect x="18.9" y="14.5" width="2.2" height="9" fill="#FFAA17"/>
+      <rect x="22.6" y="18.5" width="2.2" height="5" fill="#FFAA17"/>
+    </svg>
+    <span class="mobile-topbar-name">VICTOR IA</span>
+    <span class="mobile-topbar-live">LIVE</span>
+  </div>
+  <button onclick="openMobileMenu()" class="mobile-hamburger" aria-label="Abrir menú de módulos">&#9776;</button>
+</div>
+
+<!-- MOBILE MENU OVERLAY — full-screen, 12 módulos verticales -->
+<div id="mobile-menu-overlay" class="mobile-menu-overlay">
+  <div class="mobile-menu-header">
+    <span>Módulos</span>
+    <button onclick="closeMobileMenu()" class="mobile-menu-close" aria-label="Cerrar menú">&#10005;</button>
+  </div>
+  <div class="mobile-menu-list">
+    <button class="mobile-menu-btn" onclick="goToModule('dashboard')">Dashboard</button>
+    <button class="mobile-menu-btn" onclick="goToModule('analytics')">Analytics</button>
+    <button class="mobile-menu-btn" onclick="goToModule('finanzas')">Finanzas</button>
+    <button class="mobile-menu-btn" onclick="goToModule('organigrama')">Organigrama</button>
+    <button class="mobile-menu-btn" onclick="goToModule('software')">Software &amp; APIs</button>
+    <button class="mobile-menu-btn" onclick="goToModule('entradas')">Entradas</button>
+    <button class="mobile-menu-btn" onclick="goToModule('reportes')">Reportes</button>
+    <button class="mobile-menu-btn" onclick="goToModule('crm')">CRM</button>
+    <button class="mobile-menu-btn" onclick="goToModule('apollo')">Prospección</button>
+    <button class="mobile-menu-btn" onclick="goToModule('telemetria')">Telemetría IoT</button>
+    <button class="mobile-menu-btn" onclick="goToModule('graphify')">Observabilidad</button>
+    <button class="mobile-menu-btn" onclick="goToModule('infrastructure')">Infra</button>
+  </div>
+  <div class="mobile-menu-actions">
+    <button class="mobile-menu-action" onclick="openAdd();closeMobileMenu()">+ Nueva entrada</button>
+  </div>
+</div>
 
 <!-- HAMBURGER BACKDROP + PANEL -->
 <div id="ham-backdrop" onclick="closeHamMenu()"></div>
@@ -8253,6 +8409,20 @@ function closeHamMenu(){
   btn.classList.remove('open');
   btn.setAttribute('aria-expanded','false');
   document.body.style.overflow='';
+}
+
+/* ════════ MOBILE NAV RADICAL (2026-06-22) — funciones simples ════════ */
+function openMobileMenu(){
+  var o=document.getElementById('mobile-menu-overlay');
+  if(o){ o.classList.add('open'); document.body.style.overflow='hidden'; }
+}
+function closeMobileMenu(){
+  var o=document.getElementById('mobile-menu-overlay');
+  if(o){ o.classList.remove('open'); document.body.style.overflow=''; }
+}
+function goToModule(tab){
+  try{ if(typeof setTab==='function') setTab(tab); }catch(e){ console.warn('[mobileNav] setTab',e); }
+  closeMobileMenu();
 }
 
 /* Navegar a un módulo desde el menú hamburguesa (mobile) */
@@ -17421,11 +17591,12 @@ function studioAttachFile(file){
   canvas{ height:auto !important; }
 
   /* ── 7. El viejo <select> de módulos: lo ocultamos.
-         La navegación de módulos ahora vive en el menú hamburguesa. ── */
+         La navegación de módulos ahora vive en el MOBILE NAV RADICAL. ── */
   #tabs-mobile, .tabs-mobile{ display:none !important; }
 
-  /* ── 9. Botón hamburguesa SIEMPRE visible en mobile (gana al breakpoint 860) ── */
-  #ham-btn{ display:flex !important; }
+  /* ── 9. Viejo botón hamburguesa: ELIMINADO en mobile (reemplazado por
+         #mobile-topbar > .mobile-hamburger). NO mostrarlo. ── */
+  #ham-btn{ display:none !important; }
   .btn-desktop{ display:none !important; }
 }
 
