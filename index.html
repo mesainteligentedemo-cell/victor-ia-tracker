@@ -566,12 +566,16 @@ body::before {
 
 /* ── TABS MOBILE SELECT ── */
 .tabs-mobile {
+  display: none;            /* oculto en desktop; el media query lo muestra */
   padding: 12px clamp(1.2rem,3vw,2.5rem);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   position: sticky;
-  top: 130px;
+  top: var(--ta-top, 130px);  /* sigue el stack dinámico, igual que #tabs */
   z-index: 98;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 #mobile-tab-select {
@@ -612,8 +616,20 @@ body::before {
 
 /* ── RESPONSIVE: Show/Hide tabs ── */
 @media (max-width: 768px) {
-  .tabs-desktop { display: none; }
-  .tabs-mobile { display: block; }
+  .tabs-desktop { display: none !important; }
+  .tabs-mobile { display: block !important; }
+
+  /* ── Anti-overflow horizontal global ── */
+  html, body { max-width: 100vw; overflow-x: hidden; }
+  #main { width: 100%; max-width: 100vw; overflow-x: hidden; overflow-y: visible; }
+  #content { width: 100%; max-width: 100vw; overflow-x: hidden; overflow-y: visible; }
+  /* Cualquier hijo directo del contenido no debe rebasar el viewport */
+  #content > * { max-width: 100%; }
+  /* Las tablas y bloques anchos hacen scroll DENTRO de su contenedor, no de la página */
+  .table-wrap, .kanban-wrap, .crm-sub-nav { max-width: 100%; overflow-x: auto; }
+
+  /* El select móvil ocupa el ancho real disponible (sin rebasar por padding) */
+  #mobile-tab-select { width: 100%; max-width: 100%; }
 
   /* Hacer todos los grids single-column en mobile */
   .idf-nodes { flex-direction: column; }
@@ -2925,6 +2941,25 @@ tr:nth-child(even) td { background: rgba(248,247,245,0.008); }
                max-height: calc(100vh - var(--stack-h, 180px)) !important; }
 #content     { max-height: calc(100vh - var(--stack-h, 180px)) !important; }
 #main        { min-height: calc(100vh - var(--stack-h, 180px)) !important; }
+
+/* ── MOBILE: el documento entero hace scroll, NO cada panel ──
+   En desktop #content/#sidebar tienen su propio scroll (max-height fijo).
+   En mobile eso recorta los módulos. Liberamos altura y dejamos que la
+   página crezca con su contenido. ── */
+@media (max-width: 768px) {
+  #content {
+    max-height: none !important;
+    overflow-y: visible !important;
+    overflow-x: hidden !important;
+  }
+  #main {
+    min-height: auto !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
+  /* #tabs oculto en mobile: que su sticky no estorbe */
+  #tabs { position: static !important; }
+}
 
 /* ── Sidebar drawer en tablet/móvil ── */
 @media (max-width: 960px) {
@@ -6241,7 +6276,7 @@ body.client-mode #main { margin-left: 0 !important; }
 </div>
 
 <!-- TABS MOBILE SELECT — Dropdown en pantallas < 768px -->
-<div id="tabs-mobile" class="tabs-mobile" style="display:none">
+<div id="tabs-mobile" class="tabs-mobile">
   <select id="mobile-tab-select" onchange="setTab(this.value)" aria-label="Seleccionar módulo">
     <option value="dashboard" selected>Dashboard</option>
     <option value="analytics">Analytics</option>
@@ -7864,10 +7899,15 @@ function init(){
     var tb=document.getElementById('topbar'),
         pb=document.getElementById('period-bar'),
         pj=document.getElementById('project-bar'),
-        ta=document.getElementById('tabs');
-    if(!tb||!pb||!pj||!ta) return;
-    var tbH=tb.offsetHeight, pbH=pb.offsetHeight,
-        pjH=pj.offsetHeight, taH=ta.offsetHeight;
+        ta=document.getElementById('tabs'),
+        tam=document.getElementById('tabs-mobile');
+    if(!tb||!pb||!pj) return;
+    var tbH=tb?tb.offsetHeight:0,
+        pbH=pb?pb.offsetHeight:0,
+        pjH=pj?pj.offsetHeight:0;
+    /* En mobile #tabs está oculto (offsetHeight=0) y el visible es #tabs-mobile.
+       Tomamos la altura del que realmente esté renderizado. */
+    var taH=(ta&&ta.offsetHeight)?ta.offsetHeight:(tam?tam.offsetHeight:0);
     var r=document.documentElement.style;
     r.setProperty('--pb-top',  tbH+'px');
     r.setProperty('--pj-top',  (tbH+pbH)+'px');
