@@ -617,7 +617,10 @@ body::before {
 /* ── RESPONSIVE: Show/Hide tabs ── */
 @media (max-width: 768px) {
   .tabs-desktop { display: none !important; }
-  .tabs-mobile { display: block !important; }
+  /* El <select> viejo de módulos se oculta: la navegación ahora vive en el
+     menú hamburguesa (ham-nav-grid). Antes tenía display:block !important y
+     por eso seguía visible pese al MOBILE MASTER OVERRIDE. */
+  .tabs-mobile { display: none !important; }
 
   /* ── Anti-overflow horizontal global ── */
   html, body { max-width: 100vw; overflow-x: hidden; }
@@ -3505,8 +3508,8 @@ body.light .top-item { border-bottom-color: rgba(14,15,18,0.06); }
 #period-bar::-webkit-scrollbar { display: none; }
 .period-btn { flex-shrink: 0; }
 
-/* ── Mostrar hamburger a partir de 860px ── */
-@media (max-width: 860px) {
+/* ── Mostrar hamburger en mobile (unificado a 768px — sin zona muerta) ── */
+@media (max-width: 768px) {
   #ham-btn { display: flex; }
   .btn-desktop { display: none !important; }
 }
@@ -17419,7 +17422,11 @@ function studioAttachFile(file){
 
   /* ── 7. El viejo <select> de módulos: lo ocultamos.
          La navegación de módulos ahora vive en el menú hamburguesa. ── */
-  #tabs-mobile{ display:none !important; }
+  #tabs-mobile, .tabs-mobile{ display:none !important; }
+
+  /* ── 9. Botón hamburguesa SIEMPRE visible en mobile (gana al breakpoint 860) ── */
+  #ham-btn{ display:flex !important; }
+  .btn-desktop{ display:none !important; }
 }
 
 /* ── 8. Menú hamburguesa: panel de NAVEGACIÓN de módulos ── */
