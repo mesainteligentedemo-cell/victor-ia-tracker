@@ -1,7 +1,11 @@
-// /api/chat.js — Vercel serverless: proxy streaming a OpenRouter (Claude Haiku)
-// Frontend: POST { messages: [{role:'user'|'assistant', content:'...'}] }
-// Respuesta: SSE → data: {"text":"..."} ... data: [DONE]
+// /api/chat.js — Vercel serverless: chat con OpenRouter (Claude Haiku 4.5)
+// Frontend: POST { message: "...", conversationHistory: [{role, content}, ...] }
+// Respuesta: { ok: true, response: "...", id: "..." }
+// Error:     { ok: false, error: "..." }
 // Requiere env var OPENROUTER_API_KEY en Vercel.
+//
+// Compat: también acepta el formato antiguo { messages: [...] } por si algún
+// cliente lo sigue usando.
 
 export const config = { maxDuration: 60 };
 
@@ -11,34 +15,54 @@ const MODEL = 'anthropic/claude-haiku-4.5';
 const SYSTEM_PROMPT =
   'Eres Victor IA, asistente experto de la plataforma Victor IA. ' +
   'Tienes acceso a datos de 10 sitios, 135 posts de blog, y todo sobre la ' +
-  'infraestructura de Victor IA. Responde con autoridad y ayuda al usuario.';
+  'infraestructura de Victor IA. Responde con autoridad, en español, de forma ' +
+  'clara y útil. Si no sabes algo, dilo honestamente.';
+
+function makeId() {
+  return 'msg_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
   const key = process.env.OPENROUTER_API_KEY;
-  if (!key) return res.status(500).json({ error: 'OPENROUTER_API_KEY no configurada' });
+  if (!key) {
+    return res.status(500).json({ ok: false, error: 'OPENROUTER_API_KEY no configurada' });
+  }
 
-  // Sanitizar historial: solo user/assistant con contenido string, máx 30 turnos
-  const history = (Array.isArray(req.body?.messages) ? req.body.messages : [])
+  // --- Parsear body (puede llegar como objeto ya parseado o como string) ---
+  let body = req.body;
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); } catch { body = {}; }
+  }
+  body = body || {};
+
+  // --- Construir historial de mensajes ---
+  let history = [];
+
+  if (Array.isArray(body.messages)) {
+    // Formato antiguo: { messages: [{role, content}, ...] }
+    history = body.messages;
+  } else {
+    // Formato nuevo: { message, conversationHistory }
+    const prior = Array.isArray(body.conversationHistory) ? body.conversationHistory : [];
+    history = [...prior];
+    if (typeof body.message === 'string' && body.message.trim()) {
+      history.push({ role: 'user', content: body.message });
+    }
+  }
+
+  // Sanitizar: solo user/assistant con contenido string, máx 30 turnos
+  history = history
     .filter(m => (m?.role === 'user' || m?.role === 'assistant') && typeof m?.content === 'string')
+    .map(m => ({ role: m.role, content: m.content }))
     .slice(-30);
 
   if (!history.length || history[history.length - 1].role !== 'user') {
-    return res.status(400).json({ error: 'Se requiere al menos un mensaje de usuario' });
+    return res.status(400).json({ ok: false, error: 'Se requiere al menos un mensaje de usuario' });
   }
-
-  // Headers SSE
-  res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-  res.setHeader('Cache-Control', 'no-cache, no-transform');
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no');
-  res.status(200);
-
-  const send = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`);
-  const done = () => { res.write('data: [DONE]\n\n'); res.end(); };
 
   try {
     const upstream = await fetch(OR_URL, {
@@ -52,41 +76,35 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 2048,
-        stream: true,
+        stream: false,
         messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...history],
       }),
     });
 
     if (!upstream.ok) {
-      const err = await upstream.text().catch(() => '');
-      send({ error: `OpenRouter ${upstream.status}: ${err.slice(0, 300)}` });
-      return done();
+      const errText = await upstream.text().catch(() => '');
+      return res.status(502).json({
+        ok: false,
+        error: `OpenRouter ${upstream.status}: ${errText.slice(0, 300)}`,
+      });
     }
 
-    const reader = upstream.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
+    const data = await upstream.json();
+    const response = data?.choices?.[0]?.message?.content;
 
-    while (true) {
-      const { done: finished, value } = await reader.read();
-      if (finished) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
-
-      for (const line of lines) {
-        const t = line.trim();
-        if (!t.startsWith('data: ')) continue; // ignora comentarios/keep-alive
-        const raw = t.slice(6).trim();
-        if (raw === '[DONE]') return done();
-        let chunk;
-        try { chunk = JSON.parse(raw); } catch { continue; }
-        const text = chunk.choices?.[0]?.delta?.content;
-        if (typeof text === 'string' && text) send({ text });
-      }
+    if (typeof response !== 'string' || !response.trim()) {
+      return res.status(502).json({
+        ok: false,
+        error: 'Respuesta vacía del modelo',
+      });
     }
-    done();
+
+    return res.status(200).json({
+      ok: true,
+      response: response.trim(),
+      id: data?.id || makeId(),
+    });
   } catch (e) {
-    try { send({ error: `Error de conexión: ${e.message}` }); done(); } catch (_) {}
+    return res.status(500).json({ ok: false, error: `Error de conexión: ${e.message}` });
   }
 }

@@ -161,6 +161,35 @@
             margin-top: 4px;
         }
 
+        /* Typing indicator */
+        .message-content.typing {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            padding: 14px 16px;
+        }
+
+        .message-content.typing .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--bone2);
+            animation: typingBlink 1.2s infinite ease-in-out;
+        }
+
+        .message-content.typing .dot:nth-child(2) { animation-delay: 0.2s; }
+        .message-content.typing .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBlink {
+            0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+            40% { opacity: 1; transform: translateY(-3px); }
+        }
+
+        input[type="text"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .input-section {
             padding: 24px;
             border-top: 1px solid var(--border);
@@ -507,6 +536,8 @@
         let isPaused = false;
         let recordingStartTime;
         let timerInterval;
+        let recognition = null;
+        let recognizedText = '';
 
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
@@ -573,23 +604,115 @@
             }
         });
 
-        function sendMessage() {
+        // ====== Conversation state (persisted in localStorage) ======
+        const HISTORY_KEY = 'victoria_chat_history';
+        let conversationHistory = [];
+        let isSending = false;
+
+        try {
+            const saved = localStorage.getItem(HISTORY_KEY);
+            if (saved) conversationHistory = JSON.parse(saved) || [];
+        } catch (_) { conversationHistory = []; }
+
+        function persistHistory() {
+            try {
+                // keep last 30 turns in storage
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(conversationHistory.slice(-30)));
+            } catch (_) {}
+        }
+
+        // Re-render previously saved messages on load (after the welcome bubble)
+        function renderSavedHistory() {
+            if (!conversationHistory.length) return;
+            conversationHistory.forEach(m => {
+                if (m.role === 'user') addMessage(m.content, 'user', false);
+                else if (m.role === 'assistant') addMessage(m.content, 'assistant', false);
+            });
+        }
+
+        async function sendMessage() {
+            if (isSending) return;
             const text = messageInput.value.trim();
             if (!text) return;
 
-            // Add user message
+            // Add user message to UI + history
             addMessage(text, 'user');
-            messageInput.value = '';
-            messageInput.focus();
+            conversationHistory.push({ role: 'user', content: text });
+            persistHistory();
 
-            // Simulate assistant response
-            setTimeout(() => {
-                addMessage('Entendido. Tu mensaje fue registrado correctamente.', 'assistant');
-                statusEl.textContent = 'Listo';
-            }, 500);
+            messageInput.value = '';
+            setInputEnabled(false);
+
+            const typingEl = showTyping();
+            statusEl.textContent = 'Escribiendo...';
+
+            try {
+                const resp = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        // send prior history WITHOUT the message we just pushed
+                        conversationHistory: conversationHistory.slice(0, -1).slice(-30)
+                    })
+                });
+
+                let data;
+                try { data = await resp.json(); }
+                catch (_) { data = null; }
+
+                removeTyping(typingEl);
+
+                if (!resp.ok || !data || data.ok === false || !data.response) {
+                    const msg = (data && data.error) ? data.error : `HTTP ${resp.status}`;
+                    addMessage('⚠️ Error: ' + msg, 'assistant');
+                    statusEl.textContent = 'Error';
+                } else {
+                    addMessage(data.response, 'assistant');
+                    conversationHistory.push({ role: 'assistant', content: data.response });
+                    persistHistory();
+                    statusEl.textContent = 'Listo';
+                }
+            } catch (err) {
+                removeTyping(typingEl);
+                addMessage('⚠️ Error de conexión: ' + err.message, 'assistant');
+                statusEl.textContent = 'Error';
+            } finally {
+                setInputEnabled(true);
+                messageInput.focus();
+            }
         }
 
-        function addMessage(text, sender) {
+        function setInputEnabled(enabled) {
+            isSending = !enabled;
+            messageInput.disabled = !enabled;
+            sendBtn.disabled = !enabled;
+        }
+
+        // Typing indicator ("escribiendo...")
+        function showTyping() {
+            const el = document.createElement('div');
+            el.className = 'message assistant';
+            el.id = 'typingIndicator';
+            el.innerHTML = `
+                <div>
+                    <div class="message-content typing">
+                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </div>
+                </div>
+            `;
+            messagesDiv.appendChild(el);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            return el;
+        }
+
+        function removeTyping(el) {
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+            const stray = document.getElementById('typingIndicator');
+            if (stray && stray.parentNode) stray.parentNode.removeChild(stray);
+        }
+
+        function addMessage(text, sender, doScroll = true) {
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${sender}`;
 
@@ -606,7 +729,7 @@
             `;
 
             messagesDiv.appendChild(msgDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            if (doScroll) messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
         function escapeHtml(text) {
@@ -623,6 +746,7 @@
         });
 
         pauseBtn.addEventListener('click', () => {
+            if (recognition) { try { recognition.stop(); } catch (_) {} }
             if (mediaRecorder) {
                 mediaRecorder.pause();
                 isPaused = true;
@@ -635,6 +759,7 @@
         });
 
         stopBtn.addEventListener('click', () => {
+            if (recognition) { try { recognition.stop(); } catch (_) {} recognition = null; }
             if (mediaRecorder) {
                 mediaRecorder.stop();
                 isRecording = false;
@@ -658,12 +783,43 @@
                 });
         }
 
+        function startSpeechRecognition(reset = true) {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (reset) recognizedText = '';
+            if (!SR) return; // sin soporte: solo se graba audio, sin transcripción
+            try {
+                recognition = new SR();
+                recognition.lang = 'es-MX';
+                recognition.continuous = true;
+                recognition.interimResults = true;
+
+                recognition.onresult = (event) => {
+                    let finalT = '';
+                    let interimT = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const t = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) finalT += t;
+                        else interimT += t;
+                    }
+                    if (finalT) recognizedText += finalT;
+                    transcriptEl.textContent = '🎙️ ' + (recognizedText + interimT || 'Escuchando...');
+                };
+                recognition.onerror = (e) => {
+                    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+                        statusEl.textContent = 'Micrófono bloqueado';
+                    }
+                };
+                recognition.start();
+            } catch (_) { recognition = null; }
+        }
+
         function startRecording(stream) {
             mediaRecorder = new MediaRecorder(stream);
             audioChunks = [];
             isRecording = true;
             isPaused = false;
             recordingStartTime = Date.now();
+            startSpeechRecognition();
 
             micBtn.style.display = 'none';
             pauseBtn.style.display = 'inline-flex';
@@ -686,19 +842,22 @@
             };
 
             mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                const audioUrl = URL.createObjectURL(audioBlob);
-
-                // Simulate transcription
-                transcriptEl.textContent = '✓ Audio procesado correctamente';
-                addMessage('[Grabación de voz enviada]', 'user');
-                addMessage('Tu grabación de voz fue recibida y procesada.', 'assistant');
+                // Texto transcrito (Web Speech API). Fallback si no hay nada.
+                const finalText = (recognizedText || '').trim();
 
                 statusEl.textContent = 'Listo';
                 transcriptEl.style.display = 'none';
                 timeEl.textContent = '00:00';
 
                 stream.getTracks().forEach(track => track.stop());
+
+                if (finalText) {
+                    // Coloca el texto transcrito en el input y lo envía al chat real
+                    messageInput.value = finalText;
+                    sendMessage();
+                } else {
+                    statusEl.textContent = 'No se detectó voz';
+                }
             };
 
             mediaRecorder.onpause = () => {
@@ -714,6 +873,7 @@
         micBtn.addEventListener('click', () => {
             if (isRecording && isPaused && mediaRecorder) {
                 mediaRecorder.resume();
+                startSpeechRecognition(false);
                 isPaused = false;
                 pauseBtn.style.display = 'inline-flex';
                 micBtn.textContent = '🎤 Grabar';
@@ -731,10 +891,11 @@
             }
         });
 
-        // Close button
+        // Close button — limpia el historial al cerrar
         closeBtn.addEventListener('click', () => {
             chatPanel.style.display = 'none';
-            // Optionally: setTimeout(() => { chatPanel.style.display = 'flex'; }, 5000);
+            conversationHistory = [];
+            try { localStorage.removeItem(HISTORY_KEY); } catch (_) {}
         });
 
         // Minimize button
@@ -750,7 +911,8 @@
             }
         });
 
-        // Focus input on load
+        // Render historial guardado (después de la burbuja de bienvenida) y enfocar
+        renderSavedHistory();
         messageInput.focus();
     </script>
 </body>
