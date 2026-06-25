@@ -435,6 +435,46 @@
             overflow-y: auto;
         }
 
+        /* Asset bubbles (images / videos / audio) */
+        .asset-content {
+            max-width: 88% !important;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .asset-caption {
+            font-size: 11px;
+            color: var(--bone2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .asset-caption.gen {
+            color: var(--amber);
+            animation: pulse 1.4s infinite;
+        }
+        .asset-media {
+            width: 100%;
+            max-width: 320px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            display: block;
+        }
+        .asset-media.dim { opacity: 0.4; filter: grayscale(0.3); }
+        .asset-audio {
+            width: 100%;
+            max-width: 320px;
+            height: 36px;
+        }
+        .asset-link {
+            font-size: 11px;
+            color: var(--amber);
+            text-decoration: none;
+            font-weight: 600;
+            width: fit-content;
+        }
+        .asset-link:hover { text-decoration: underline; }
+
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -473,7 +513,7 @@
                 <div class="message assistant">
                     <div>
                         <div class="message-content">
-                            Hola 👋 Soy Victor IA. Puedes escribir tu pregunta o usar el micrófono para hablar. ¿En qué puedo ayudarte?
+                            Hola 👋 Soy Victor IA. Puedo conversar y también <strong>generar imágenes, videos y voice overs</strong> en tiempo real. Pídeme por ejemplo: "genera una imagen de…", "crea un video de…" o "hazme un voice over diciendo…".
                         </div>
                         <div class="message-time">Ahora</div>
                     </div>
@@ -663,12 +703,15 @@
 
                 removeTyping(typingEl);
 
-                if (!resp.ok || !data || data.ok === false || !data.response) {
+                if (!resp.ok || !data || data.ok === false || (!data.response && !(data.assets || []).length)) {
                     const msg = (data && data.error) ? data.error : `HTTP ${resp.status}`;
                     addMessage('⚠️ Error: ' + msg, 'assistant');
                     statusEl.textContent = 'Error';
                 } else {
                     addMessage(data.response, 'assistant');
+                    if (Array.isArray(data.assets) && data.assets.length) {
+                        renderAssets(data.assets);
+                    }
                     conversationHistory.push({ role: 'assistant', content: data.response });
                     persistHistory();
                     statusEl.textContent = 'Listo';
@@ -736,6 +779,122 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // ====== Asset rendering (images / videos / voice overs) ======
+        function makeAssetBubble() {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message assistant';
+            const inner = document.createElement('div');
+            const content = document.createElement('div');
+            content.className = 'message-content asset-content';
+            inner.appendChild(content);
+            msgDiv.appendChild(inner);
+            messagesDiv.appendChild(msgDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            return content;
+        }
+
+        function renderAssets(assets) {
+            assets.forEach(asset => {
+                const box = makeAssetBubble();
+                if (asset.kind === 'image') {
+                    if (asset.url) {
+                        box.innerHTML = `<div class="asset-caption">🖼️ Imagen generada</div>`;
+                        const img = document.createElement('img');
+                        img.className = 'asset-media';
+                        img.src = asset.url;
+                        img.alt = asset.description || 'imagen generada';
+                        box.appendChild(img);
+                        addAssetLink(box, asset.url, 'Abrir imagen');
+                    } else {
+                        box.innerHTML = `<div class="asset-caption gen">⏳ Generando imagen…</div>`;
+                        if (asset.request_id) pollAsset(asset.request_id, box, 'image');
+                    }
+                } else if (asset.kind === 'video') {
+                    if (asset.url) {
+                        renderVideoInto(box, asset.url, asset.poster);
+                    } else {
+                        box.innerHTML = `<div class="asset-caption gen">🎬 Creando video… (puede tardar ~1 min)</div>`;
+                        if (asset.poster) {
+                            const p = document.createElement('img');
+                            p.className = 'asset-media dim';
+                            p.src = asset.poster;
+                            box.appendChild(p);
+                        }
+                        if (asset.request_id) pollAsset(asset.request_id, box, 'video', asset.poster);
+                    }
+                } else if (asset.kind === 'voice') {
+                    box.innerHTML = `<div class="asset-caption">🔊 Voice over</div>`;
+                    if (asset.dataUrl) {
+                        const audio = document.createElement('audio');
+                        audio.className = 'asset-audio';
+                        audio.controls = true;
+                        audio.src = asset.dataUrl;
+                        box.appendChild(audio);
+                        addAssetLink(box, asset.dataUrl, 'Descargar MP3', 'voiceover.mp3');
+                    } else {
+                        box.innerHTML += `<div class="asset-caption gen">⏳ Generando voz…</div>`;
+                    }
+                }
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            });
+        }
+
+        function renderVideoInto(box, url, poster) {
+            box.innerHTML = `<div class="asset-caption">🎬 Video generado</div>`;
+            const v = document.createElement('video');
+            v.className = 'asset-media';
+            v.src = url;
+            v.controls = true;
+            v.playsInline = true;
+            if (poster) v.poster = poster;
+            box.appendChild(v);
+            addAssetLink(box, url, 'Abrir video');
+        }
+
+        function addAssetLink(box, url, label, download) {
+            const a = document.createElement('a');
+            a.className = 'asset-link';
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            if (download) a.download = download;
+            a.textContent = label + ' ↗';
+            box.appendChild(a);
+        }
+
+        // Poll /api/asset-status until the asset (usually video) is ready.
+        function pollAsset(requestId, box, kind, poster) {
+            let attempts = 0;
+            const maxAttempts = 60; // ~3 min @ 3s
+            const tick = async () => {
+                attempts++;
+                try {
+                    const r = await fetch('/api/asset-status?id=' + encodeURIComponent(requestId));
+                    const d = await r.json();
+                    if (d && d.url) {
+                        if (kind === 'video') renderVideoInto(box, d.url, poster);
+                        else {
+                            box.innerHTML = `<div class="asset-caption">🖼️ Imagen generada</div>`;
+                            const img = document.createElement('img');
+                            img.className = 'asset-media';
+                            img.src = d.url;
+                            box.appendChild(img);
+                            addAssetLink(box, d.url, 'Abrir imagen');
+                        }
+                        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                        return;
+                    }
+                    if (d && (d.status === 'failed' || d.status === 'nsfw' || d.status === 'error')) {
+                        box.innerHTML = `<div class="asset-caption" style="color:var(--red)">⚠️ La generación falló (${d.status}).</div>`;
+                        return;
+                    }
+                } catch (_) {}
+                if (attempts < maxAttempts) setTimeout(tick, 3000);
+                else box.innerHTML = `<div class="asset-caption" style="color:var(--red)">⚠️ Tiempo de espera agotado. Intenta de nuevo.</div>`;
+            };
+            setTimeout(tick, 3000);
         }
 
         // Microphone functions
