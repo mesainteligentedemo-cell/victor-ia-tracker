@@ -111,7 +111,13 @@ async function runTool(name, args) {
     }
     if (name === 'generate_video') {
       const r = await generateVideo({ description: args.description, duration: args.duration || 5 });
-      const asset = { kind: 'video', url: r.url, poster: r.poster, request_id: r.request_id, status: r.status, description: args.description };
+      // If only the source image is still rendering, expose it as an image asset
+      // so the client polls the correct job-set (it would otherwise treat the
+      // image job-set id as a video).
+      const isVideoJob = r.stage !== 'image_pending';
+      const asset = isVideoJob
+        ? { kind: 'video', url: r.url, poster: r.poster, request_id: r.request_id, status: r.status, description: args.description }
+        : { kind: 'image', url: null, request_id: r.request_id, status: 'in_progress', description: args.description };
       const summary = r.url
         ? `Video generado: ${r.url}`
         : `Video en proceso (request_id ${r.request_id}). El cliente lo mostrará al completarse.`;

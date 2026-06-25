@@ -99,7 +99,7 @@ async function hfWait(requestId, { timeoutMs = 45000, intervalMs = 2500 } = {}) 
 }
 
 // ---- Public: generate image (inline, waits up to timeout) --------------------
-async function generateImage({ description, aspect = 'landscape' }) {
+async function generateImage({ description, aspect = 'landscape', timeoutMs = 40000 }) {
   const input = {
     prompt: description,
     width_and_height: HF_WH[aspect] || HF_WH.landscape,
@@ -110,7 +110,7 @@ async function generateImage({ description, aspect = 'landscape' }) {
   };
   const { request_id } = await hfSubmit('/v1/text2image/soul', input);
   if (!request_id) throw new Error('Higgsfield no devolvió request_id (imagen)');
-  const res = await hfWait(request_id, { timeoutMs: 40000 });
+  const res = await hfWait(request_id, { timeoutMs });
   return { type: 'image', request_id, status: res.status, url: res.url };
 }
 
@@ -118,10 +118,15 @@ async function generateImage({ description, aspect = 'landscape' }) {
 // DoP needs a source image. We first make an image from the description,
 // then animate it. Returns request_id so the client can poll to completion.
 async function generateVideo({ description, duration = 5 }) {
-  const img = await generateImage({ description, aspect: 'landscape' });
+  // Shorter image wait so the whole request fits within Vercel's 60s limit.
+  const img = await generateImage({ description, aspect: 'landscape', timeoutMs: 28000 });
   if (!img.url) {
-    // image not ready in time — still return its id so client can retry chain
-    return { type: 'video', stage: 'image', status: img.status, request_id: img.request_id, url: null };
+    // Image (source frame) not ready yet -> client polls its job-set, then
+    // can request the video. We return the image request_id as a fallback asset.
+    return {
+      type: 'video', stage: 'image_pending',
+      status: 'in_progress', request_id: img.request_id, url: null, poster: null,
+    };
   }
   const input = {
     prompt: description,
@@ -133,14 +138,13 @@ async function generateVideo({ description, duration = 5 }) {
   };
   const { request_id } = await hfSubmit('/v1/image2video/dop', input);
   if (!request_id) throw new Error('Higgsfield no devolvió request_id (video)');
-  // try a short wait; video usually needs longer -> client polls /api/asset-status
-  const res = await hfWait(request_id, { timeoutMs: 20000 });
+  // DoP rendering takes minutes -> return immediately, client polls /api/asset-status.
   return {
     type: 'video',
     request_id,
     poster: img.url,
-    status: res.url ? 'completed' : 'in_progress',
-    url: res.url || null,
+    status: 'in_progress',
+    url: null,
   };
 }
 
