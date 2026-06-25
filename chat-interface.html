@@ -32,28 +32,47 @@
 
         body {
             font-family: 'Inter', 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg);
+            background: transparent;
             height: 100vh;
             display: flex;
             color: var(--warm);
             overflow: hidden;
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding: 20px;
         }
 
         .container {
             display: flex;
-            width: 100%;
-            height: 100%;
+            width: auto;
+            height: auto;
         }
 
         .chat-panel {
-            flex: 1;
             display: flex;
             flex-direction: column;
-            background: var(--bg);
-            border: none;
-            border-radius: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
             overflow: hidden;
-            position: relative;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 420px;
+            height: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            z-index: 9999;
+            cursor: move;
+        }
+
+        .chat-panel.minimized {
+            height: 56px;
+        }
+
+        .chat-panel.minimized .messages,
+        .chat-panel.minimized .input-section,
+        .chat-panel.minimized .status-bar {
+            display: none !important;
         }
 
         .chat-header {
@@ -504,6 +523,46 @@
         const chatPanel = document.getElementById('chatPanel');
 
         let isMinimized = false;
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let dragStartRight = 0;
+        let dragStartBottom = 0;
+
+        // Draggable functionality
+        const header = document.querySelector('.chat-header');
+
+        header.addEventListener('mousedown', (e) => {
+            // Don't drag if clicking on buttons
+            if (e.target.closest('.btn-icon')) return;
+
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            dragStartRight = chatPanel.offsetLeft + chatPanel.offsetWidth - window.innerWidth;
+            dragStartBottom = chatPanel.offsetTop + chatPanel.offsetHeight - window.innerHeight;
+            header.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            const deltaX = e.clientX - dragStartX;
+            const deltaY = e.clientY - dragStartY;
+
+            const newRight = dragStartRight - deltaX;
+            const newBottom = dragStartBottom - deltaY;
+
+            chatPanel.style.right = newRight + 'px';
+            chatPanel.style.bottom = newBottom + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            header.style.cursor = 'move';
+        });
+
+        header.style.cursor = 'move';
 
         // Send message
         sendBtn.addEventListener('click', sendMessage);
@@ -681,16 +740,11 @@
         // Minimize button
         minimizeBtn.addEventListener('click', () => {
             isMinimized = !isMinimized;
+            chatPanel.classList.toggle('minimized');
             if (isMinimized) {
-                messagesDiv.style.display = 'none';
-                document.querySelector('.input-section').style.display = 'none';
-                document.querySelector('.status-bar').style.display = 'none';
                 minimizeBtn.textContent = '▲';
                 minimizeBtn.title = 'Expandir';
             } else {
-                messagesDiv.style.display = 'flex';
-                document.querySelector('.input-section').style.display = 'block';
-                document.querySelector('.status-bar').style.display = 'flex';
                 minimizeBtn.textContent = '−';
                 minimizeBtn.title = 'Minimizar';
             }
