@@ -6083,6 +6083,7 @@ body.client-mode #main { margin-left: 0 !important; }
       <button class="ham-nav-btn" data-tab="telemetria" onclick="hamGoTab('telemetria')"><span class="ham-nav-dot"></span> Telemetría IoT</button>
       <button class="ham-nav-btn" data-tab="graphify" onclick="hamGoTab('graphify')"><span class="ham-nav-dot"></span> Observabilidad</button>
       <button class="ham-nav-btn" data-tab="infrastructure" onclick="hamGoTab('infrastructure')"><span class="ham-nav-dot"></span> Infra</button>
+      <button class="ham-nav-btn" data-tab="actividad" onclick="hamGoTab('actividad')"><span class="ham-nav-dot"></span> Actividad en Vivo</button>
     </div>
   </div>
 
@@ -6452,6 +6453,7 @@ body.client-mode #main { margin-left: 0 !important; }
   <button class="tab-btn team-tab" onclick="setTab('telemetria')">Telemetría IoT</button>
   <button class="tab-btn" onclick="setTab('graphify')" style="color:#4ade80">Observabilidad</button>
   <button class="tab-btn" onclick="setTab('infrastructure')" style="color:#FFAA17">Infra</button>
+  <button class="tab-btn" onclick="setTab('actividad')" style="color:#60a5fa">● Actividad en Vivo</button>
 </div>
 
 <!-- TABS MOBILE SELECT — Dropdown en pantallas < 768px -->
@@ -6469,6 +6471,7 @@ body.client-mode #main { margin-left: 0 !important; }
     <option value="telemetria">Telemetría IoT</option>
     <option value="graphify">Observabilidad</option>
     <option value="infrastructure">Infra</option>
+    <option value="actividad">● Actividad en Vivo</option>
   </select>
 </div>
 
@@ -7237,6 +7240,7 @@ body.client-mode #main { margin-left: 0 !important; }
     <div id="view-telemetria" class="hidden"></div>
     <div id="view-graphify" class="hidden"></div>
     <div id="view-infrastructure" class="hidden"></div>
+    <div id="view-actividad" class="hidden"></div>
   </div>
 </div>
 
@@ -8003,6 +8007,8 @@ function setProject(proj){
   activeProject=proj;
   applyAllFilters();
   updateProjectBar();
+  // PROTOCOLO: registrar cambio de filtro de proyecto
+  try{ viaLogActivity('click','Usuario filtró proyecto: '+(proj||'Todos'),{source:'Tracker',cat:'Tracker',tags:['tracker','filtro','proyecto']}); }catch(_){}
 }
 
 function updateProjectBar(){
@@ -8145,6 +8151,9 @@ function init(){
   // Auto-tracking: carga entradas desde n8n y refresca cada 60 min
   loadAutoEntries();
   setInterval(loadAutoEntries, 60*60*1000);
+
+  // PROTOCOLO DE VACIADO TOTAL: registrar inicio de sesión en el tracker
+  try{ viaLogActivity('event','Sesión iniciada en el tracker',{source:'Tracker',cat:'Tracker',tags:['tracker','sesion','inicio']}); }catch(_){}
 }
 
 async function loadAutoEntries(){
@@ -8407,6 +8416,8 @@ function setTab(tab){
   document.getElementById('sidebar').classList.toggle('hidden',!showSb);
   destroyCharts();
   renderCurrentView();
+  // PROTOCOLO: registrar navegación de pestaña (excepto la propia Actividad para evitar ruido)
+  if(tab!=='actividad'){ try{ viaLogActivity('click','Usuario abrió pestaña: '+tab,{source:'Tracker',cat:'Tracker',tags:['tracker','nav',tab]}); }catch(_){} }
 }
 function toggleSidebar(){
   sidebarVisible=!sidebarVisible;
@@ -8733,9 +8744,137 @@ function resetAccSettings(){
   setColorblind(cb);
 })();
 function renderCurrentView(){
-  const renders={dashboard:renderDashboard,analytics:renderAnalytics,finanzas:renderFinanzas,organigrama:renderOrganigrama,software:renderSoftware,entradas:renderEntradas,reportes:renderReportes,crm:renderCrm,apollo:renderApollo,telemetria:renderTelemetria};
+  const renders={dashboard:renderDashboard,analytics:renderAnalytics,finanzas:renderFinanzas,organigrama:renderOrganigrama,software:renderSoftware,entradas:renderEntradas,reportes:renderReportes,crm:renderCrm,apollo:renderApollo,telemetria:renderTelemetria,actividad:renderActividad};
   const fn=renders[currentTab];if(fn) fn();
 }
+
+/* ============================================================
+   PROTOCOLO DE VACIADO TOTAL — ACTIVIDAD EN VIVO
+   ============================================================ */
+const VIA_LOG_ENDPOINT='/api/log-activity';
+let _actFilter='all';        // all | VSC | Tracker | Chat | CLI
+let _actTimer=null;
+let _actData=[];
+
+// Helper global: registra cualquier acción del tracker en el backend.
+function viaLogActivity(action,description,opts){
+  opts=opts||{};
+  try{
+    fetch(VIA_LOG_ENDPOINT,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        action:action,
+        description:description,
+        details:opts.details||'',
+        source:opts.source||'Tracker',
+        timestamp:new Date().toISOString(),
+        user:(localStorage.getItem('via_access_name')||'Pablo'),
+        project:opts.project||activeProject||'Tracker Meta',
+        client:opts.client||'Victor IA',
+        cat:opts.cat||'Tracker',
+        sw:opts.sw||'Tracker',
+        tags:opts.tags||['tracker',action]
+      })
+    }).catch(function(){});
+  }catch(e){}
+}
+window.viaLogActivity=viaLogActivity;
+
+function _actSourceBadge(src){
+  const map={VSC:{c:'#a78bfa',l:'VSC'},CLI:{c:'#f59e0b',l:'CLI'},Git:{c:'#f59e0b',l:'GIT'},Chat:{c:'#60a5fa',l:'CHAT'},Tracker:{c:'#4ade80',l:'TRACKER'}};
+  const m=map[src]||{c:'#9ca3af',l:(src||'?').toUpperCase()};
+  return `<span style="background:${m.c}22;color:${m.c};border:1px solid ${m.c}55;font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;letter-spacing:.5px">${m.l}</span>`;
+}
+
+function _actIcon(action){
+  const m={commit:'⎌',edit:'✎',create:'＋',generate:'✦',message:'💬',click:'⊙',record:'🎙',event:'•'};
+  return m[action]||'•';
+}
+
+async function loadActividad(){
+  try{
+    const url=VIA_LOG_ENDPOINT+'?limit=50'+(_actFilter!=='all'?'&source='+encodeURIComponent(_actFilter):'');
+    const res=await fetch(url,{cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    _actData=(d.activities||[]);
+  }catch(e){
+    _actData=[];
+  }
+  if(currentTab==='actividad') _renderActList();
+}
+
+function _renderActList(){
+  const wrap=document.getElementById('act-list');
+  if(!wrap) return;
+  if(!_actData.length){
+    wrap.innerHTML='<div style="padding:48px 16px;text-align:center;color:rgba(245,241,232,.4)">Sin actividad registrada aún. Escribe en el chat, haz un commit o usa el tracker — todo aparecerá aquí en tiempo real.</div>';
+    return;
+  }
+  const rows=_actData.map(function(a){
+    const date=(a.dateKey||'')+' '+(a.hora||'');
+    const det=a.details?`<div style="font-size:11px;color:rgba(245,241,232,.4);margin-top:3px">${_esc(String(a.details).slice(0,160))}</div>`:'';
+    return `<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid rgba(245,241,232,.06)">
+      <div style="font-size:18px;line-height:1.2;width:24px;text-align:center;flex-shrink:0">${_actIcon(a.action)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          ${_actSourceBadge(a.source)}
+          <span style="font-size:13px;font-weight:600;color:rgba(245,241,232,.92)">${_esc(a.desc||'')}</span>
+        </div>
+        ${det}
+      </div>
+      <div style="font-size:11px;color:rgba(245,241,232,.45);white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums">${_esc(date)}</div>
+    </div>`;
+  }).join('');
+  wrap.innerHTML=rows;
+}
+
+function _esc(s){const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML;}
+
+function setActFilter(f){
+  _actFilter=f;
+  document.querySelectorAll('.act-filter-btn').forEach(function(b){
+    b.style.background=(b.getAttribute('data-f')===f)?'#60a5fa':'transparent';
+    b.style.color=(b.getAttribute('data-f')===f)?'#000':'rgba(245,241,232,.7)';
+  });
+  loadActividad();
+}
+
+function renderActividad(){
+  const v=document.getElementById('view-actividad');
+  if(!v) return;
+  v.innerHTML=`
+    <div style="max-width:1100px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <div>
+          <h2 style="font-size:22px;font-weight:800;margin:0;display:flex;align-items:center;gap:10px">
+            <span style="width:10px;height:10px;border-radius:50%;background:#4ade80;box-shadow:0 0 10px #4ade80;animation:viaPulse 1.6s infinite"></span>
+            Actividad en Vivo
+          </h2>
+          <div style="font-size:12px;color:rgba(245,241,232,.5);margin-top:4px">Protocolo de vaciado total — toda acción de VSC, Tracker y Chat queda registrada automáticamente con timestamp exacto.</div>
+        </div>
+        <button onclick="loadActividad()" style="background:transparent;border:1px solid rgba(245,241,232,.15);color:rgba(245,241,232,.8);padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer">↻ Refrescar</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+        ${['all','VSC','CLI','Chat','Tracker'].map(function(f){
+          const lbl={all:'Todo',VSC:'VSCode',CLI:'CLI / Git',Chat:'Chat',Tracker:'Tracker'}[f];
+          return `<button class="act-filter-btn" data-f="${f}" onclick="setActFilter('${f}')" style="background:${f===_actFilter?'#60a5fa':'transparent'};color:${f===_actFilter?'#000':'rgba(245,241,232,.7)'};border:1px solid rgba(245,241,232,.15);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">${lbl}</button>`;
+        }).join('')}
+      </div>
+      <div style="background:rgba(255,255,255,.02);border:1px solid rgba(245,241,232,.08);border-radius:12px;overflow:hidden">
+        <div id="act-list" style="max-height:calc(100vh - 320px);overflow-y:auto"></div>
+      </div>
+    </div>
+    <style>@keyframes viaPulse{0%,100%{opacity:1}50%{opacity:.3}}</style>`;
+  _renderActList();
+  loadActividad();
+  // Auto-refresh cada 8s mientras la pestaña esté activa
+  if(_actTimer) clearInterval(_actTimer);
+  _actTimer=setInterval(function(){ if(currentTab==='actividad') loadActividad(); else { clearInterval(_actTimer); _actTimer=null; } },8000);
+}
+window.loadActividad=loadActividad;
+window.setActFilter=setActFilter;
 
 // ===== KPIs =====
 function calcKPIs(entries){
@@ -10198,7 +10337,7 @@ function sortTable(col){
 function goPage(p){page=p;renderEntradas();}
 
 // ===== FILTERS =====
-function applyFilters(){applyAllFilters();}
+function applyFilters(){applyAllFilters();try{ viaLogActivity('click','Usuario aplicó filtros',{source:'Tracker',cat:'Tracker',tags:['tracker','filtro']}); }catch(_){}}
 function clearFilters(){
   ['f-search','f-dur-min'].forEach(id=>{const el=document.getElementById(id);if(el) el.value=id==='f-dur-min'?'0':'';});
   document.getElementById('dur-min-val').textContent='0m';
@@ -10329,6 +10468,8 @@ function saveEntry(){
   populateDatalistOptions();
   applyAllFilters();
   closeModal('entry-modal');
+  // PROTOCOLO: registrar creación/edición de entrada en el tracker
+  try{ viaLogActivity(editingId?'edit':'create','Usuario '+(editingId?'editó':'creó')+' entrada: '+(entry.desc||'').slice(0,120),{source:'Tracker',cat:'Tracker',details:'Proyecto: '+(entry.project||'')+' · '+(entry.cat||''),tags:['tracker','entrada',entry.id]}); }catch(_){}
 }
 
 // ===== SETTINGS =====

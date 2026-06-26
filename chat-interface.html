@@ -644,6 +644,30 @@
             }
         });
 
+        // ====== PROTOCOLO DE VACIADO TOTAL — Activity Logger ======
+        // Registra automáticamente toda acción del chat en el tracker.
+        function logActivity(action, description, details) {
+            try {
+                fetch('/api/log-activity', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: action,
+                        description: description,
+                        details: details || '',
+                        source: 'Chat',
+                        timestamp: new Date().toISOString(),
+                        user: 'Pablo',
+                        project: 'Tracker Meta',
+                        client: 'Victor IA',
+                        cat: 'Chat',
+                        sw: 'Tracker',
+                        tags: ['chat', action]
+                    })
+                }).catch(function(){ /* fallo silencioso, nunca bloquea el chat */ });
+            } catch (_) {}
+        }
+
         // ====== Conversation state (persisted in localStorage) ======
         const HISTORY_KEY = 'victoria_chat_history';
         let conversationHistory = [];
@@ -679,6 +703,8 @@
             addMessage(text, 'user');
             conversationHistory.push({ role: 'user', content: text });
             persistHistory();
+            // PROTOCOLO: registrar mensaje enviado
+            logActivity('message', 'Usuario escribió: ' + text.slice(0, 200), text);
 
             messageInput.value = '';
             setInputEnabled(false);
@@ -798,6 +824,11 @@
         function renderAssets(assets) {
             assets.forEach(asset => {
                 const box = makeAssetBubble();
+                // PROTOCOLO: registrar generación de asset
+                const _aid = asset.request_id || asset.url || '(local)';
+                if (asset.kind === 'image') logActivity('generate', 'Usuario generó imagen ' + _aid, asset.description || '');
+                else if (asset.kind === 'video') logActivity('generate', 'Usuario generó video ' + _aid, asset.description || '');
+                else if (asset.kind === 'voice') logActivity('generate', 'Usuario generó voice over', asset.text || '');
                 if (asset.kind === 'image') {
                     if (asset.url) {
                         box.innerHTML = `<div class="asset-caption">🖼️ Imagen generada</div>`;
@@ -984,6 +1015,8 @@
             pauseBtn.style.display = 'inline-flex';
             stopBtn.style.display = 'inline-flex';
             statusEl.textContent = 'Grabando...';
+            // PROTOCOLO: registrar uso del micrófono
+            logActivity('record', 'Usuario grabó audio', 'Inicio de grabación de voz en el chat');
             transcriptEl.style.display = 'block';
             transcriptEl.textContent = '🎙️ Escuchando...';
 
@@ -1052,6 +1085,8 @@
 
         // Close button — limpia el historial al cerrar
         closeBtn.addEventListener('click', () => {
+            // PROTOCOLO: registrar cierre del chat
+            logActivity('click', 'Usuario cerró chat', 'Botón cerrar — historial limpiado');
             chatPanel.style.display = 'none';
             conversationHistory = [];
             try { localStorage.removeItem(HISTORY_KEY); } catch (_) {}
@@ -1064,9 +1099,12 @@
             if (isMinimized) {
                 minimizeBtn.textContent = '▲';
                 minimizeBtn.title = 'Expandir';
+                // PROTOCOLO: registrar minimizar
+                logActivity('click', 'Usuario minimizó chat', 'Botón minimizar');
             } else {
                 minimizeBtn.textContent = '−';
                 minimizeBtn.title = 'Minimizar';
+                logActivity('click', 'Usuario expandió chat', 'Botón expandir');
             }
         });
 

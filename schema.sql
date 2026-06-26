@@ -341,6 +341,41 @@ CREATE INDEX idx_context_tokens ON context_tracking(tokens_used, recorded_at DES
 CREATE INDEX idx_audit_user_action ON audit_log(user_id, action, created_at DESC);
 
 -- ==========================================
+-- ACTIVITY LOG — PROTOCOLO DE VACIADO TOTAL
+-- Registro automático de TODA actividad (VSC, Tracker, CLI, Chat)
+-- Usado por /api/log-activity.js
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS activity_log (
+  id         TEXT PRIMARY KEY,
+  "dateKey"  TEXT NOT NULL,
+  hora       TEXT NOT NULL,
+  desc       TEXT,
+  cat        TEXT,
+  source     TEXT,              -- VSC | Tracker | CLI | Chat | Git
+  action     TEXT,              -- commit|edit|create|generate|message|click|record|event
+  project    TEXT DEFAULT 'Tracker Meta',
+  client     TEXT DEFAULT 'Victor IA',
+  status     TEXT DEFAULT 'Completado',
+  priority   TEXT DEFAULT 'Media',
+  dur        TEXT DEFAULT 'instantáneo',
+  "durSec"   INTEGER DEFAULT 0,
+  details    TEXT,
+  tags       JSONB DEFAULT '[]'::jsonb,
+  "user"     TEXT DEFAULT 'Pablo',
+  sw         TEXT,
+  rework     INTEGER DEFAULT 0,
+  obs        TEXT,
+  notes      TEXT,
+  auto       BOOLEAN DEFAULT TRUE,
+  ts         TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_activity_ts     ON activity_log(ts DESC);
+CREATE INDEX IF NOT EXISTS idx_activity_source ON activity_log(source);
+CREATE INDEX IF NOT EXISTS idx_activity_date   ON activity_log("dateKey");
+
+-- ==========================================
 -- SCHEMA COMPLETE
 -- ==========================================
 
