@@ -37,7 +37,7 @@ param(
     [string]$Project = "Tracker Meta",
     [string]$Client = "Victor IA",
     [string]$RepoPath = (Get-Location).Path,
-    [string]$Endpoint = "https://victor-ia-tracker.vercel.app/api/log-activity"
+    [string]$Endpoint = "https://tracker.victor-ia.xyz/api/log-activity"
 )
 
 function Send-Activity {
