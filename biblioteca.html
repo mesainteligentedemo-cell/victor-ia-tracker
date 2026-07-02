@@ -302,6 +302,7 @@
 
         updateStats(allAssets.length);
         renderAssets(allAssets);
+        pollPendingVideos(allAssets);
       } catch (err) {
         console.error('Error cargando biblioteca:', err);
         content.innerHTML = `<div class="empty" style="grid-column: 1/-1;"><div class="empty-icon">📭</div><p>Error cargando biblioteca</p><p style="font-size:12px;margin-top:8px;color:rgba(248,247,245,0.35)">${(err && err.message) ? err.message : 'Revisa que SUPABASE_URL y SUPABASE_SERVICE_KEY esten configuradas en Vercel'}</p></div>`;
@@ -333,12 +334,14 @@
       content.innerHTML = assets.map((asset, idx) => {
         const isImage = isImageAsset(asset);
         const isVideo = isVideoAsset(asset);
+        const isAudio = isAudioAsset(asset);
         return `
         <div class="asset-card">
-          <div class="asset-preview ${!asset.url ? 'no-media' : ''}" onclick="openModal(${idx})" style="cursor: pointer;">
+          <div class="asset-preview ${(!asset.url || isAudio) ? 'no-media' : ''}" onclick="openModal(${idx})" style="cursor: pointer;">
             ${isImage && asset.url ? `<img src="${asset.url}" alt="preview" onerror="this.style.display='none'">` : ''}
             ${isVideo && asset.url ? `<video src="${asset.url}"></video>` : ''}
-            ${!asset.url ? ICONS[asset.action] || '📦' : ''}
+            ${isAudio ? '🎤' : ''}
+            ${!asset.url && !isAudio ? ICONS[asset.action] || '📦' : ''}
             <div class="asset-icon">${asset.action}</div>
           </div>
           <div class="asset-info">
@@ -371,9 +374,21 @@
       const t = (asset.type || '').toLowerCase();
       const a = (asset.action || '').toLowerCase();
       const u = (asset.url || '').toLowerCase();
-      if (t.includes('video')) return true;
-      if (a === 'video') return true;
+      // Un video en render todavía muestra su POSTER (imagen); trátalo como imagen.
+      if (u.startsWith('data:audio')) return false;
       if (/\.(mp4|webm|mov|m4v)(\?|$)/.test(u)) return true;
+      if (/\.(png|jpe?g|webp|gif|avif)(\?|$)/.test(u)) return false; // poster
+      if (t.includes('video') && !u) return true;
+      return false;
+    }
+
+    function isAudioAsset(asset) {
+      const t = (asset.type || '').toLowerCase();
+      const a = (asset.action || '').toLowerCase();
+      const u = (asset.url || '').toLowerCase();
+      if (t.includes('audio') || t.includes('voice')) return true;
+      if (a === 'voice') return true;
+      if (u.startsWith('data:audio') || /\.(mp3|wav|ogg|m4a)(\?|$)/.test(u)) return true;
       return false;
     }
 
@@ -382,10 +397,22 @@
       if (!asset) return;
 
       const modalBody = document.getElementById('modal-body');
-      if (isImageAsset(asset)) {
-        modalBody.innerHTML = `<img src="${asset.url}" alt="preview" class="modal-media" onerror="this.replaceWith(document.createTextNode('No se pudo cargar la imagen'))">`;
+      const md = asset.metadata || {};
+      if (isAudioAsset(asset)) {
+        modalBody.innerHTML = `<div style="padding:40px;text-align:center"><div style="font-size:48px;margin-bottom:16px">🎤</div><audio src="${asset.url}" controls autoplay style="width:100%;max-width:480px"></audio></div>`;
       } else if (isVideoAsset(asset)) {
         modalBody.innerHTML = `<video src="${asset.url}" controls class="modal-media"></video>`;
+      } else if (isImageAsset(asset)) {
+        // Para presentación/web/capacitación mostramos la imagen + el bundle (metadata).
+        let extra = '';
+        if (md.outline || md.blueprint || md.lesson) {
+          const obj = md.outline || md.blueprint || md.lesson;
+          extra = `<pre style="text-align:left;max-height:220px;overflow:auto;background:rgba(0,0,0,.3);padding:12px;border-radius:8px;font-size:11px;color:rgba(248,247,245,.7);margin-top:12px">${JSON.stringify(obj, null, 2).slice(0, 4000)}</pre>`;
+        }
+        if (md.audio_intro) {
+          extra += `<audio src="${md.audio_intro}" controls style="width:100%;margin-top:12px"></audio>`;
+        }
+        modalBody.innerHTML = `<img src="${asset.url}" alt="preview" class="modal-media" onerror="this.replaceWith(document.createTextNode('No se pudo cargar la imagen'))">${extra}`;
       } else {
         modalBody.innerHTML = `<div style="padding: 40px; text-align: center; color: rgba(248,247,245,0.5);">Sin preview disponible</div>`;
       }
@@ -433,6 +460,25 @@
         closeModal();
       }
     });
+
+    // Videos en render: el poster (imagen) está guardado como result_url y el
+    // request_id del MP4 vive en metadata.hf_video_request_id. Consultamos
+    // /api/asset-status para que el backend reemplace poster -> MP4 al terminar.
+    const _polled = {};
+    function pollPendingVideos(assets) {
+      (assets || []).forEach(a => {
+        const md = a.metadata || {};
+        const reqId = md.hf_video_request_id;
+        const stillPoster = a.url && md.poster && a.url === md.poster; // aún es el poster
+        if (a.action === 'video' && reqId && stillPoster && !_polled[a.jobId]) {
+          _polled[a.jobId] = true;
+          fetch(`/api/asset-status?id=${encodeURIComponent(reqId)}&job=${encodeURIComponent(a.jobId)}`)
+            .then(r => r.json())
+            .then(d => { if (d && d.status === 'completed' && d.url) loadAssets(currentFilter); })
+            .catch(() => { _polled[a.jobId] = false; });
+        }
+      });
+    }
 
     // Load on init
     loadAssets();

@@ -3,6 +3,8 @@
 
 const HF_BASE = 'https://platform.higgsfield.ai';
 const EL_BASE = 'https://api.elevenlabs.io';
+const OR_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OR_MODEL = 'anthropic/claude-opus-4-8';
 
 // ---- Higgsfield defaults (verified against platform.higgsfield.ai) ----------
 // Soul text2image: prompt + width_and_height (fixed enum) + enhance_prompt.
@@ -176,4 +178,71 @@ async function generateVoice({ text, language = 'es' }) {
   return { type: 'voice', mime: 'audio/mpeg', dataUrl: `data:audio/mpeg;base64,${buf.toString('base64')}`, bytes: buf.length };
 }
 
-export { generateImage, generateVideo, generateVoice, hfPoll };
+// ---- Public: OpenRouter text (outlines, quiz JSON, copy) ---------------------
+// Returns the assistant text string. Throws if the key is missing or the call fails.
+async function generateText({ system, prompt, maxTokens = 1500, json = false }) {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) throw new Error('OPENROUTER_API_KEY no configurada');
+  const messages = [];
+  if (system) messages.push({ role: 'system', content: system });
+  messages.push({ role: 'user', content: prompt });
+  const resp = await fetch(OR_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${key}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://tracker.victor-ia.xyz',
+      'X-Title': 'Victor IA Tracker',
+    },
+    body: JSON.stringify({
+      model: OR_MODEL,
+      max_tokens: maxTokens,
+      stream: false,
+      messages,
+      ...(json ? { response_format: { type: 'json_object' } } : {}),
+    }),
+  });
+  if (!resp.ok) {
+    const t = await resp.text().catch(() => '');
+    throw new Error(`OpenRouter ${resp.status}: ${t.slice(0, 240)}`);
+  }
+  const data = await resp.json();
+  return (data?.choices?.[0]?.message?.content || '').trim();
+}
+
+// Best-effort JSON parse: strips ```json fences and trailing prose.
+function safeJson(str, fallback = null) {
+  if (!str) return fallback;
+  let s = str.trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+  try { return JSON.parse(s); } catch {}
+  const m = s.match(/[\{\[][\s\S]*[\}\]]/);
+  if (m) { try { return JSON.parse(m[0]); } catch {} }
+  return fallback;
+}
+
+// ---- Public: submit a Higgsfield video (image->video) WITHOUT waiting --------
+// Given an existing source image URL, kicks off DoP and returns { request_id }.
+// The client / poller upgrades poster -> final MP4 via /api/asset-status.
+async function submitVideoFromImage({ description, imageUrl, duration = 5 }) {
+  const input = {
+    prompt: description,
+    model: duration >= 8 ? 'dop-preview' : 'dop-turbo',
+    enhance_prompt: true,
+    seed: randSeed(),
+    input_images: [{ type: 'image_url', image_url: imageUrl }],
+    check_nsfw: true,
+  };
+  const { request_id } = await hfSubmit('/v1/image2video/dop', input);
+  if (!request_id) throw new Error('Higgsfield no devolvió request_id (video)');
+  return { request_id };
+}
+
+export {
+  generateImage,
+  generateVideo,
+  generateVoice,
+  generateText,
+  submitVideoFromImage,
+  safeJson,
+  hfPoll,
+};

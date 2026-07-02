@@ -7,7 +7,13 @@
  * Returns: { jobId, status, message }
  */
 
-import { generateImage, generateVoice } from './_lib/generators.js';
+import {
+  generateImage,
+  generateVoice,
+  generateText,
+  submitVideoFromImage,
+  safeJson,
+} from './_lib/generators.js';
 
 // Permite polling server-side de Higgsfield hasta ~60s (limite Vercel Pro/Hobby).
 export const config = { maxDuration: 60 };
@@ -148,54 +154,144 @@ async function dispatchImagen({ voice_input, config, files, jobId }) {
 }
 
 async function dispatchVideo({ voice_input, config, files, jobId }) {
-  const n8nPayload = {
-    jobId,
-    type: 'video',
-    prompt: voice_input,
-    duracion: config.duracion || '10',
-    aspect_ratio: config.aspect_ratio || '16:9',
-    resolucion: config.resolucion || '1080p',
-    velocidad: config.velocidad || 'normal',
-    extras: config.extras || [],
-    tipo_seleccionado: config.tipo_seleccionado || 'general',
-    ref_images: files.length
+  // Higgsfield image2video (DoP). 1) crear un frame con Soul, 2) animarlo.
+  // El render de video tarda minutos -> guardamos el POSTER como result_url para
+  // que aparezca YA en la biblioteca, y dejamos el request_id del video en
+  // metadata para que /api/asset-status lo actualice al MP4 final.
+  const duration = parseInt(config.duracion) || 5;
+
+  // Frame origen: usa la primera imagen de referencia si viene; si no, genera una.
+  let posterUrl = null;
+  const firstRef = Array.isArray(files) && files[0];
+  if (typeof firstRef === 'string' && /^https?:\/\//.test(firstRef)) {
+    posterUrl = firstRef; // ya es URL usable
+  } else {
+    const img = await generateImage({ description: voice_input, aspect: 'landscape', timeoutMs: 26000 });
+    posterUrl = img.url || null;
+  }
+
+  if (!posterUrl) {
+    // El frame origen aún renderiza: no bloqueamos. Queda en proceso.
+    await sbUpdate(jobId, { result_type: 'pending', status: 'processing' });
+    return { message: 'Video en proceso (preparando frame origen)', status: 'processing' };
+  }
+
+  // Lanzar el video (no esperamos el render completo — no cabe en 60s).
+  let videoReqId = null;
+  try {
+    const v = await submitVideoFromImage({ description: voice_input, imageUrl: posterUrl, duration });
+    videoReqId = v.request_id;
+  } catch (e) {
+    console.warn('[create] video submit falló, se guarda solo poster:', e.message);
+  }
+
+  await sbUpdate(jobId, {
+    result_url: posterUrl,               // visible YA en biblioteca (poster)
+    result_type: 'video',
+    status: videoReqId ? 'processing' : 'completed',
+    metadata: {
+      prompt: voice_input.slice(0, 200),
+      config,
+      poster: posterUrl,
+      hf_video_request_id: videoReqId,   // asset-status upgrade poster -> MP4
+    },
+  });
+
+  return {
+    message: videoReqId ? `Video en render (~${duration}s) · aparece en Biblioteca` : 'Poster listo (video no disponible)',
+    url: posterUrl,
+    poster: posterUrl,
+    request_id: videoReqId,
+    status: 'processing',
   };
-  await notifyN8n('video', n8nPayload);
-  return { message: `Generando video ${n8nPayload.duracion}s · ${n8nPayload.resolucion}` };
 }
 
 async function dispatchPresentacion({ voice_input, config, files, jobId }) {
-  const n8nPayload = {
-    jobId,
-    type: 'presentacion',
-    prompt: voice_input,
-    formato: config.formato || '16:9',
-    slides: parseInt(config.slides) || 10,
-    idioma: config.idioma || 'es',
-    diseno: config.diseno || 'luxury-dark',
-    color_primario: config.color_primario || '#FFAA17',
-    extras: config.extras || [],
-    tipo_seleccionado: config.tipo_seleccionado || 'propuesta',
-    ref_assets: files.length
+  // MVP: outline de slides (OpenRouter) + portada visual (Higgsfield).
+  // El artefacto visible es la portada; el guion de slides va en metadata.
+  const slides = parseInt(config.slides) || 8;
+  const idioma = config.idioma || 'es';
+  const diseno = config.diseno || 'luxury-dark';
+
+  const [outline, cover] = await Promise.all([
+    generateText({
+      system: 'Eres un experto en presentaciones ejecutivas. Devuelve SOLO JSON válido.',
+      prompt: `Crea el esqueleto de una presentación de ${slides} slides en ${idioma} sobre: "${voice_input}". ` +
+        `Formato JSON: {"titulo":"...","slides":[{"titulo":"...","puntos":["...","..."]}]}. Exactamente ${slides} slides.`,
+      maxTokens: 1800,
+      json: true,
+    }).catch(e => { console.warn('[create] presentacion outline:', e.message); return null; }),
+    generateImage({
+      description: `Elegant ${diseno} presentation cover slide about ${voice_input}, cinematic, premium, minimalist typography space`,
+      aspect: 'landscape',
+      timeoutMs: 40000,
+    }).catch(e => { console.warn('[create] presentacion cover:', e.message); return { url: null }; }),
+  ]);
+
+  const outlineObj = typeof outline === 'string' ? safeJson(outline) : outline;
+
+  await sbUpdate(jobId, {
+    result_url: cover?.url || '',
+    result_type: 'presentacion',
+    status: cover?.url ? 'completed' : 'processing',
+    metadata: {
+      prompt: voice_input.slice(0, 200),
+      config,
+      cover: cover?.url || null,
+      cover_request_id: cover?.request_id || null,
+      outline: outlineObj || { titulo: voice_input.slice(0, 80), slides: [] },
+      slides_count: slides,
+    },
+  });
+
+  return {
+    message: `Presentación creada · ${slides} slides · ${diseno}`,
+    url: cover?.url || null,
+    status: cover?.url ? 'completed' : 'processing',
   };
-  await notifyN8n('presentacion', n8nPayload);
-  return { message: `Creando presentación de ${n8nPayload.slides} slides · ${n8nPayload.diseno}` };
 }
 
 async function dispatchWeb({ voice_input, config, files, jobId }) {
-  const n8nPayload = {
-    jobId,
-    type: 'web',
-    prompt: voice_input,
-    diseno: config.diseno || 'luxury-dark',
-    stack: config.stack || 'nextjs',
-    paginas: config.paginas || '',
-    features: config.features || [],
-    tipo_seleccionado: config.tipo_seleccionado || 'landing',
-    ref_assets: files.length
+  // MVP: copy/estructura del sitio (OpenRouter) + hero visual (Higgsfield).
+  // El artefacto visible es el hero; el blueprint (secciones, copy) va en metadata.
+  const diseno = config.diseno || 'luxury-dark';
+  const tipo = config.tipo_seleccionado || 'landing';
+
+  const [blueprint, hero] = await Promise.all([
+    generateText({
+      system: 'Eres un diseñador web y copywriter. Devuelve SOLO JSON válido.',
+      prompt: `Diseña la estructura de una ${tipo} estilo ${diseno} para: "${voice_input}". ` +
+        `Formato JSON: {"nombre":"...","tagline":"...","secciones":[{"titulo":"...","copy":"..."}],"cta":"...","paleta":["#..","#.."]}.`,
+      maxTokens: 1800,
+      json: true,
+    }).catch(e => { console.warn('[create] web blueprint:', e.message); return null; }),
+    generateImage({
+      description: `${diseno} website hero section mockup for ${voice_input}, modern UI, premium, high fidelity, dribbble quality`,
+      aspect: 'landscape',
+      timeoutMs: 40000,
+    }).catch(e => { console.warn('[create] web hero:', e.message); return { url: null }; }),
+  ]);
+
+  const bp = typeof blueprint === 'string' ? safeJson(blueprint) : blueprint;
+
+  await sbUpdate(jobId, {
+    result_url: hero?.url || '',
+    result_type: 'web',
+    status: hero?.url ? 'completed' : 'processing',
+    metadata: {
+      prompt: voice_input.slice(0, 200),
+      config,
+      hero: hero?.url || null,
+      hero_request_id: hero?.request_id || null,
+      blueprint: bp || { nombre: voice_input.slice(0, 60), secciones: [] },
+    },
+  });
+
+  return {
+    message: `Blueprint + hero de ${tipo} listos · ${diseno}`,
+    url: hero?.url || null,
+    status: hero?.url ? 'completed' : 'processing',
   };
-  await notifyN8n('web', n8nPayload);
-  return { message: `Creando sitio ${n8nPayload.tipo_seleccionado} con ${n8nPayload.stack}` };
 }
 
 async function dispatchVoice({ voice_input, config, jobId }) {
@@ -211,20 +307,64 @@ async function dispatchVoice({ voice_input, config, jobId }) {
 }
 
 async function dispatchCapacitacion({ voice_input, config, files, jobId }) {
-  const n8nPayload = {
-    jobId,
-    type: 'capacitacion',
-    prompt: voice_input,
-    nivel: config.nivel || 'intermedio',
-    idioma: config.idioma || 'es',
-    duracion: config.duracion || '45min',
-    publico: config.publico || 'vendedores',
-    extras: config.extras || [],
-    tipo_seleccionado: config.tipo_seleccionado || 'modulo',
-    ref_docs: files.length
+  // MVP bundle: portada visual + guion+quiz (OpenRouter) + narración de intro (ElevenLabs).
+  // Artefacto visible: portada. El bundle (guion, quiz, audio) va en metadata.
+  const nivel = config.nivel || 'intermedio';
+  const idioma = (config.idioma || 'es-MX').slice(0, 2);
+  const publico = config.publico || 'equipo';
+
+  // 1) Guion + quiz en paralelo con la portada.
+  const [lesson, cover] = await Promise.all([
+    generateText({
+      system: 'Eres un diseñador instruccional experto. Devuelve SOLO JSON válido.',
+      prompt: `Crea un módulo de capacitación nivel ${nivel} para ${publico} en idioma ${idioma} sobre: "${voice_input}". ` +
+        `Formato JSON: {"titulo":"...","intro":"un párrafo de introducción para narrar en voz alta (max 60 palabras)",` +
+        `"objetivos":["...","..."],"secciones":[{"titulo":"...","contenido":"..."}],` +
+        `"quiz":[{"pregunta":"...","opciones":["a","b","c","d"],"correcta":0}]}. Incluye 4 preguntas de quiz.`,
+      maxTokens: 2200,
+      json: true,
+    }).catch(e => { console.warn('[create] capacitacion lesson:', e.message); return null; }),
+    generateImage({
+      description: `Professional training course cover about ${voice_input}, ${nivel} level, clean educational design, premium`,
+      aspect: 'landscape',
+      timeoutMs: 34000,
+    }).catch(e => { console.warn('[create] capacitacion cover:', e.message); return { url: null }; }),
+  ]);
+
+  const lessonObj = (typeof lesson === 'string' ? safeJson(lesson) : lesson) || {
+    titulo: voice_input.slice(0, 80), intro: voice_input.slice(0, 200), objetivos: [], secciones: [], quiz: [],
   };
-  await notifyN8n('capacitacion', n8nPayload);
-  return { message: `Creando ${n8nPayload.tipo_seleccionado} de capacitación · ${n8nPayload.nivel}` };
+
+  // 2) Narración de la intro (best-effort; no bloquea el bundle si falla).
+  let audioDataUrl = null;
+  const introText = (lessonObj.intro || voice_input).slice(0, 500);
+  try {
+    const voice = await generateVoice({ text: introText, language: idioma });
+    audioDataUrl = voice.dataUrl;
+  } catch (e) {
+    console.warn('[create] capacitacion voz:', e.message);
+  }
+
+  await sbUpdate(jobId, {
+    result_url: cover?.url || '',
+    result_type: 'capacitacion',
+    status: cover?.url ? 'completed' : 'processing',
+    metadata: {
+      prompt: voice_input.slice(0, 200),
+      config,
+      cover: cover?.url || null,
+      cover_request_id: cover?.request_id || null,
+      lesson: lessonObj,
+      quiz: lessonObj.quiz || [],
+      audio_intro: audioDataUrl,   // base64 mp3 de la introducción
+    },
+  });
+
+  return {
+    message: `Capacitación creada · ${nivel} · ${(lessonObj.quiz || []).length} preguntas`,
+    url: cover?.url || null,
+    status: cover?.url ? 'completed' : 'processing',
+  };
 }
 
 async function dispatchAdmin({ voice_input, config, jobId }) {
