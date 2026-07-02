@@ -467,16 +467,20 @@
     const _polled = {};
     function pollPendingVideos(assets) {
       (assets || []).forEach(a => {
+        if (_polled[a.jobId] || a.status === 'completed') return;
         const md = a.metadata || {};
-        const reqId = md.hf_video_request_id;
-        const stillPoster = a.url && md.poster && a.url === md.poster; // aún es el poster
-        if (a.action === 'video' && reqId && stillPoster && !_polled[a.jobId]) {
-          _polled[a.jobId] = true;
-          fetch(`/api/asset-status?id=${encodeURIComponent(reqId)}&job=${encodeURIComponent(a.jobId)}`)
-            .then(r => r.json())
-            .then(d => { if (d && d.status === 'completed' && d.url) loadAssets(currentFilter); })
-            .catch(() => { _polled[a.jobId] = false; });
-        }
+        // Video en render: su poster ya está guardado; buscamos el MP4 final.
+        // Presentación/web/capacitación en 'processing': su imagen (cover/hero)
+        // aún renderiza; recuperamos su request_id para completarla.
+        const isVid = !!md.hf_video_request_id;
+        const reqId = md.hf_video_request_id || md.cover_request_id || md.hero_request_id;
+        if (!reqId) return;
+        _polled[a.jobId] = true;
+        const typeParam = isVid ? '&type=video' : '';
+        fetch(`/api/asset-status?id=${encodeURIComponent(reqId)}&job=${encodeURIComponent(a.jobId)}${typeParam}`)
+          .then(r => r.json())
+          .then(d => { if (d && d.status === 'completed' && d.url) loadAssets(currentFilter); })
+          .catch(() => { _polled[a.jobId] = false; });
       });
     }
 
