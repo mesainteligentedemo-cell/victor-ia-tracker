@@ -166,8 +166,22 @@ async function dispatchVideo({ voice_input, config, files, jobId }) {
   if (typeof firstRef === 'string' && /^https?:\/\//.test(firstRef)) {
     posterUrl = firstRef; // ya es URL usable
   } else {
-    const img = await generateImage({ description: voice_input, aspect: 'landscape', timeoutMs: 26000 });
+    const img = await generateImage({ description: voice_input, aspect: 'landscape', timeoutMs: 42000 });
     posterUrl = img.url || null;
+    // Si el frame no terminó dentro del cap, guardamos su request_id para poder
+    // recuperarlo por polling (el frame ES una imagen válida) y no perdemos el job.
+    if (!posterUrl && img.request_id) {
+      await sbUpdate(jobId, {
+        result_type: 'video',
+        status: 'processing',
+        metadata: {
+          prompt: voice_input.slice(0, 200),
+          config,
+          hf_video_request_id: img.request_id, // el poller mostrará el frame al terminar
+        },
+      });
+      return { message: 'Video en proceso (frame origen en render)', status: 'processing', request_id: img.request_id };
+    }
   }
 
   if (!posterUrl) {
