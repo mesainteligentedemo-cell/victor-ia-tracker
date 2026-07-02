@@ -274,41 +274,39 @@
       content.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando...</p></div>`;
 
       try {
-        // Leer a través del endpoint seguro del servidor (/api/biblioteca).
-        // Este endpoint usa las variables de entorno de Vercel (SUPABASE_URL +
-        // SUPABASE_SERVICE_KEY), asi que NO exponemos ninguna clave en el navegador
-        // y siempre apunta al proyecto de Supabase correcto.
-        let apiUrl = `/api/biblioteca?limit=200`;
+        // Leer directamente de Supabase
+        const SUPABASE_URL = 'https://jlcfgvlyqzswmdvxsdhp.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpsY2Zndmx5cXpzd21kdnhzZGhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTk5NTU4ODAsImV4cCI6MjAzNTUzMTg4MH0.sb_publishable_qCN8yH5VohQrc9weY_L2set';
+
+        let url = `${SUPABASE_URL}/rest/v1/tracker_results?select=*&order=created_at.desc&limit=200`;
         if (filter !== 'todos') {
-          apiUrl += `&filter=${encodeURIComponent(filter)}`;
+          url += `&action=eq.${filter}`;
         }
 
-        const resp = await fetch(apiUrl, {
-          headers: { 'Accept': 'application/json' }
+        const resp = await fetch(url, {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+          }
         });
 
-        if (!resp.ok) {
-          throw new Error(`El servidor respondio ${resp.status}`);
-        }
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const rows = await resp.json();
 
-        const payload = await resp.json();
-        const rows = payload.assets || [];
-
-        // El endpoint ya devuelve los campos con nombres de vista (jobId, url, type...)
-        allAssets = rows.map(row => ({
-          jobId: row.jobId,
-          url: row.url,
-          type: row.type,
+        allAssets = (rows || []).map(row => ({
+          jobId: row.job_id,
+          url: row.result_url,
+          type: row.result_type,
           action: row.action,
-          createdAt: row.createdAt,
+          createdAt: row.created_at,
           metadata: row.metadata
-        }));
+        })).filter(a => a.url);
 
         updateStats(allAssets.length);
         renderAssets(allAssets);
       } catch (err) {
-        console.error('Error loading assets:', err);
-        content.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>Error cargando biblioteca (revisa la consola del navegador)</p></div>`;
+        console.error('Error:', err);
+        content.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>Error cargando biblioteca</p></div>`;
       }
     }
 
