@@ -28,10 +28,14 @@ export default async function handler(req, res) {
 
     if (!supabaseUrl || !supabaseKey) {
       return res.status(200).json({
-        ok: true,
+        ok: false,
         assets: [],
         total: 0,
-        message: 'Supabase not configured'
+        message: 'Faltan variables SUPABASE_URL y/o SUPABASE_SERVICE_KEY en Vercel',
+        missing: {
+          SUPABASE_URL: !supabaseUrl,
+          SUPABASE_SERVICE_KEY: !supabaseKey
+        }
       });
     }
 
@@ -61,10 +65,12 @@ export default async function handler(req, res) {
       const err = await resp.text();
       console.error('[biblioteca] Supabase query failed:', resp.status, err);
       return res.status(200).json({
-        ok: true,
+        ok: false,
         assets: [],
         total: 0,
-        message: 'Error fetching from database'
+        message: `Supabase respondio ${resp.status}. Revisa SUPABASE_URL (proyecto correcto) y SUPABASE_SERVICE_KEY.`,
+        supabaseStatus: resp.status,
+        supabaseError: (err || '').slice(0, 300)
       });
     }
 

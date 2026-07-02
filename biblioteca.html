@@ -274,39 +274,37 @@
       content.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando...</p></div>`;
 
       try {
-        // Leer directamente de Supabase
-        const SUPABASE_URL = 'https://oemegqzcdxzfctxbizyna.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lbWVncXpjZHh6ZmN0eGJpenlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTk5NTU4OTEsImV4cCI6MjAzNTUzMTg5MX0.sb_publishable_qCN8yH5VohQrc9weY_L2set';
-
-        let url = `${SUPABASE_URL}/rest/v1/tracker_results?select=*&order=created_at.desc&limit=200`;
-        if (filter !== 'todos') {
-          url += `&action=eq.${filter}`;
+        // Leer a traves del endpoint seguro /api/biblioteca.
+        // Ese endpoint usa las credenciales reales de Supabase (SUPABASE_URL +
+        // SUPABASE_SERVICE_KEY) que viven en Vercel, asi no exponemos llaves en el
+        // navegador ni dependemos de una URL escrita a mano.
+        let url = `/api/biblioteca?limit=200`;
+        if (filter && filter !== 'todos') {
+          url += `&filter=${encodeURIComponent(filter)}`;
         }
 
-        const resp = await fetch(url, {
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`
-          }
-        });
-
+        const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const rows = await resp.json();
 
-        allAssets = (rows || []).map(row => ({
-          jobId: row.job_id,
-          url: row.result_url,
-          type: row.result_type,
+        const data = await resp.json();
+        const rows = data.assets || [];
+
+        // El endpoint ya normaliza los campos (jobId, url, type, action, createdAt...).
+        // Aceptamos tambien el formato crudo de Supabase por si acaso.
+        allAssets = rows.map(row => ({
+          jobId: row.jobId || row.job_id,
+          url: row.url || row.result_url,
+          type: row.type || row.result_type,
           action: row.action,
-          createdAt: row.created_at,
+          createdAt: row.createdAt || row.created_at,
           metadata: row.metadata
         })).filter(a => a.url);
 
         updateStats(allAssets.length);
         renderAssets(allAssets);
       } catch (err) {
-        console.error('Error:', err);
-        content.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>Error cargando biblioteca</p></div>`;
+        console.error('Error cargando biblioteca:', err);
+        content.innerHTML = `<div class="empty" style="grid-column: 1/-1;"><div class="empty-icon">📭</div><p>Error cargando biblioteca</p><p style="font-size:12px;margin-top:8px;color:rgba(248,247,245,0.35)">${(err && err.message) ? err.message : 'Revisa que SUPABASE_URL y SUPABASE_SERVICE_KEY esten configuradas en Vercel'}</p></div>`;
       }
     }
 
