@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Config Dashboard — Victor IA</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Space Grotesk', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #070809 0%, #0E0F12 100%);
+      color: #F8F7F5;
+      padding: 30px;
+      min-height: 100vh;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    header {
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(248, 247, 245, 0.1);
+    }
+
+    h1 { font-size: 32px; margin-bottom: 8px; }
+    .subtitle { color: rgba(248, 247, 245, 0.6); font-size: 14px; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; }
+
+    .card {
+      background: linear-gradient(135deg, rgba(14, 15, 18, 0.8) 0%, rgba(20, 22, 30, 0.6) 100%);
+      border: 1px solid rgba(248, 247, 245, 0.1);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 170, 23, 0.3);
+      background: linear-gradient(135deg, rgba(14, 15, 18, 0.95) 0%, rgba(20, 22, 30, 0.8) 100%);
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-left: auto;
+    }
+
+    .status-ok {
+      background: rgba(100, 200, 100, 0.2);
+      color: #64c864;
+    }
+
+    .status-missing {
+      background: rgba(255, 100, 100, 0.2);
+      color: #ff6464;
+    }
+
+    .status-warning {
+      background: rgba(255, 170, 23, 0.2);
+      color: #FFAA17;
+    }
+
+    .config-item {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: rgba(248, 247, 245, 0.05);
+      border-radius: 6px;
+      border-left: 3px solid rgba(255, 170, 23, 0.3);
+    }
+
+    .config-label {
+      font-size: 12px;
+      color: rgba(248, 247, 245, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+
+    .config-value {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: rgba(248, 247, 245, 0.8);
+      word-break: break-all;
+    }
+
+    .config-value.masked {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px 8px;
+      border-radius: 3px;
+      color: rgba(255, 170, 23, 0.8);
+    }
+
+    .workflow-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .workflow-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      background: rgba(248, 247, 245, 0.05);
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .workflow-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 3px;
+      background: rgba(100, 200, 100, 0.15);
+      color: #64c864;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .workflow-status.inactive {
+      background: rgba(255, 100, 100, 0.15);
+      color: #ff6464;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #FFAA17 0%, #FF8800 100%);
+      border: none;
+      border-radius: 6px;
+      color: #070809;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 170, 23, 0.3);
+    }
+
+    .btn.secondary {
+      background: transparent;
+      border: 1px solid rgba(248, 247, 245, 0.2);
+      color: rgba(248, 247, 245, 0.7);
+    }
+
+    .btn.secondary:hover {
+      border-color: rgba(255, 170, 23, 0.5);
+      color: #FFAA17;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 40px 0 20px 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(248, 247, 245, 0.1);
+    }
+
+    .alert {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid;
+    }
+
+    .alert-success {
+      background: rgba(100, 200, 100, 0.1);
+      border-color: #64c864;
+      color: #a8d5a8;
+    }
+
+    .alert-warning {
+      background: rgba(255, 170, 23, 0.1);
+      border-color: #FFAA17;
+      color: #ffc966;
+    }
+
+    .alert-error {
+      background: rgba(255, 100, 100, 0.1);
+      border-color: #ff6464;
+      color: #ffaaaa;
+    }
+
+    .copy-btn {
+      background: none;
+      border: none;
+      color: rgba(255, 170, 23, 0.6);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 170, 23, 0.1);
+      color: #FFAA17;
+    }
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .card-title { flex-direction: column; align-items: flex-start; }
+      .status-badge { margin-left: 0; margin-top: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>⚙️ Configuration Dashboard</h1>
+      <p class="subtitle">Victor IA Content Generation System Setup Status</p>
+    </header>
+
+    <!-- System Status -->
+    <div id="system-status"></div>
+
+    <!-- Section: APIs -->
+    <div class="section-title">🔌 API Configuration</div>
+    <div class="grid" id="apis-grid"></div>
+
+    <!-- Section: N8N Workflows -->
+    <div class="section-title">🔄 N8N Workflows</div>
+    <div id="workflows-container"></div>
+
+    <!-- Section: Endpoints -->
+    <div class="section-title">🌐 Live Endpoints</div>
+    <div class="grid" id="endpoints-grid"></div>
+
+    <!-- Section: Quick Actions -->
+    <div class="section-title">⚡ Quick Actions</div>
+    <div class="grid" id="actions-grid"></div>
+
+    <!-- Section: Debug -->
+    <div class="section-title">🐛 Debug & Testing</div>
+    <div class="grid" id="debug-grid"></div>
+  </div>
+
+  <script>
+    const config = {
+      apis: {
+        higgsfield: {
+          name: 'Higgsfield',
+          icon: '🖼️',
+          vars: ['HIGGSFIELD_ID', 'HIGGSFIELD_SECRET'],
+          description: 'Generación de imágenes y videos IA'
+        },
+        elevenlabs: {
+          name: 'ElevenLabs',
+          icon: '🎤',
+          vars: ['ELEVENLABS_API_KEY', 'ELEVENLABS_VOICE_ID'],
+          description: 'Síntesis de voz de alta calidad'
+        },
+        supabase: {
+          name: 'Supabase',
+          icon: '💾',
+          vars: ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY'],
+          description: 'Base de datos y almacenamiento'
+        },
+        n8n: {
+          name: 'N8N',
+          icon: '🤖',
+          vars: ['N8N_WEBHOOK_URL'],
+          description: 'Orquestador de flujos'
+        }
+      },
+      workflows: [
+        { name: 'Generador de Imágenes', status: 'pending', icon: '🖼️' },
+        { name: 'Generador de Videos', status: 'pending', icon: '🎬' },
+        { name: 'Voice Over (ElevenLabs)', status: 'pending', icon: '🎤' },
+        { name: 'Presentaciones', status: 'pending', icon: '📊' },
+        { name: 'Landing Pages', status: 'pending', icon: '🌐' },
+        { name: 'Capacitación', status: 'pending', icon: '📚' }
+      ],
+      endpoints: {
+        'Control Maestro': '/control-maestro.html',
+        'Biblioteca': '/biblioteca.html',
+        'API Create': '/api/create',
+        'API Biblioteca': '/api/biblioteca'
+      }
+    };
+
+    // Render System Status
+    const systemStatus = document.getElementById('system-status');
+    const envVarsPresent = checkEnvVars();
+    const apiStatus = envVarsPresent ? 'active' : 'warning';
+
+    systemStatus.innerHTML = `
+      <div class="alert alert-${apiStatus === 'active' ? 'success' : 'warning'}">
+        <strong>System Status: ${apiStatus === 'active' ? '✅ READY' : '⚠️ CONFIGURATION NEEDED'}</strong>
+        ${apiStatus === 'warning' ? '<br>Algunas variables de entorno no están configuradas. Revisa la sección APIs abajo.' : '<br>Todos los APIs están configurados y listos para usar.'}
+      </div>
+    `;
+
+    // Render APIs
+    const apisGrid = document.getElementById('apis-grid');
+    Object.entries(config.apis).forEach(([key, api]) => {
+      const configured = api.vars.every(v => checkEnvVar(v));
+      apisGrid.innerHTML += `
+        <div class="card">
+          <div class="card-title">
+            <span>${api.icon}</span>
+            <span>${api.name}</span>
+            <span class="status-badge ${configured ? 'status-ok' : 'status-missing'}">
+              <span>${configured ? '✓' : '✗'}</span>
+              ${configured ? 'Configurado' : 'Falta'}
+            </span>
+          </div>
+          <p style="font-size: 13px; color: rgba(248,247,245,0.6); margin-bottom: 16px;">${api.description}</p>
+          <div class="config-item">
+            <div class="config-label">Variables Requeridas</div>
+            <div class="config-value" style="color: rgba(248,247,245,0.7);">
+              ${api.vars.map(v => `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span>${v}</span>
+                  <span style="font-size: 11px; font-weight: 600; ${checkEnvVar(v) ? 'color: #64c864;' : 'color: #ff6464;'}">
+                    ${checkEnvVar(v) ? '✓' : '✗'}
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="action-buttons">
+            <button class="btn secondary" onclick="openDocs('${key}')">Docs</button>
+            <button class="btn" onclick="configurar('${key}')">Configurar</button>
+          </div>
+        </div>
+      `;
+    });
+
+    // Render Workflows
+    const workflowsContainer = document.getElementById('workflows-container');
+    workflowsContainer.innerHTML = `
+      <div class="card">
+        <div class="card-title">
+          🔄 N8N Workflows Status
+          <span class="status-badge status-warning">6 Pendientes</span>
+        </div>
+        <p style="font-size: 13px; color: rgba(248,247,245,0.6); margin-bottom: 16px;">Workflows necesarios para procesar cada tipo de contenido</p>
+        <div class="workflow-list">
+          ${config.workflows.map((w, i) => `
+            <div class="workflow-item">
+              <span><strong>${w.icon} ${w.name}</strong></span>
+              <span class="workflow-status inactive">Crear en N8N</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="action-buttons">
+          <button class="btn secondary" onclick="openN8NDocs()">Ver Guía Setup</button>
+          <button class="btn" onclick="openN8N()">Ir a N8N</button>
+        </div>
+      </div>
+    `;
+
+    // Render Endpoints
+    const endpointsGrid = document.getElementById('endpoints-grid');
+    Object.entries(config.endpoints).forEach(([name, path]) => {
+      const url = window.location.origin + path;
+      endpointsGrid.innerHTML += `
+        <div class="card">
+          <div class="card-title">${name}</div>
+          <div class="config-item">
+            <div class="config-label">URL</div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <div class="config-value" style="flex: 1; word-break: break-all;">${url}</div>
+              <button class="copy-btn" onclick="copyToClipboard('${url}')">📋</button>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <button class="btn" onclick="window.open('${url}', '_blank')">Abrir</button>
+          </div>
+        </div>
+      `;
+    });
+
+    // Quick Actions
+    const actionsGrid = document.getElementById('actions-grid');
+    actionsGrid.innerHTML = `
+      <div class="card">
+        <div class="card-title">📋 Próximos Pasos</div>
+        <ol style="font-size: 13px; color: rgba(248,247,245,0.7); padding-left: 20px; line-height: 1.8;">
+          <li>✅ Revisar y configurar todas las API keys</li>
+          <li>✅ Crear 6 workflows en N8N (ver guía)</li>
+          <li>✅ Verificar tabla tracker_results en Supabase</li>
+          <li>✅ Test primera generación (Control Maestro)</li>
+          <li>✅ Verificar resultado en Biblioteca</li>
+        </ol>
+        <div class="action-buttons" style="margin-top: 16px;">
+          <button class="btn secondary" onclick="openGuide()">Ver Guía Completa</button>
+          <button class="btn" onclick="testSystem()">Test del Sistema</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📚 Documentación</div>
+        <div class="workflow-list">
+          <a href="/SETUP-COMPLETE-SYSTEM.md" style="color: #FFAA17; text-decoration: none; padding: 10px; display: block; border-radius: 4px; border: 1px solid rgba(255,170,23,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,170,23,0.1)'" onmouseout="this.style.background=''">
+            📖 Setup Completo del Sistema
+          </a>
+          <a href="/n8n-orchestrator-setup.md" style="color: #FFAA17; text-decoration: none; padding: 10px; display: block; border-radius: 4px; border: 1px solid rgba(255,170,23,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,170,23,0.1)'" onmouseout="this.style.background=''">
+            🔄 Arquitectura N8N
+          </a>
+          <a href="/n8n-workflows-setup-guide.md" style="color: #FFAA17; text-decoration: none; padding: 10px; display: block; border-radius: 4px; border: 1px solid rgba(255,170,23,0.2); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,170,23,0.1)'" onmouseout="this.style.background=''">
+            🛠️ Setup Workflows (Paso a Paso)
+          </a>
+        </div>
+      </div>
+    `;
+
+    // Debug Grid
+    const debugGrid = document.getElementById('debug-grid');
+    debugGrid.innerHTML = `
+      <div class="card">
+        <div class="card-title">🧪 Test API /api/create</div>
+        <textarea id="test-payload" style="width: 100%; height: 150px; padding: 10px; background: rgba(248,247,245,0.05); border: 1px solid rgba(248,247,245,0.1); border-radius: 4px; color: #F8F7F5; font-family: monospace; font-size: 12px; margin-bottom: 12px;" placeholder="JSON payload aquí">{
+  "action": "imagen",
+  "voice_input": "Un gato durmiendo al sol",
+  "config": {
+    "imagen-aspect": "square",
+    "imagen-estilo": "realista",
+    "imagen-cantidad": "1"
+  }
+}</textarea>
+        <div class="action-buttons">
+          <button class="btn secondary" onclick="loadTestPayload('imagen')">Imagen</button>
+          <button class="btn secondary" onclick="loadTestPayload('video')">Video</button>
+          <button class="btn" onclick="runTest()">Ejecutar Test</button>
+        </div>
+        <div id="test-result" style="margin-top: 12px;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 Check Supabase</div>
+        <p style="font-size: 13px; color: rgba(248,247,245,0.6); margin-bottom: 16px;">Verifica estado de tabla tracker_results</p>
+        <div class="action-buttons">
+          <button class="btn secondary" onclick="checkSupabase('count')">Contar Registros</button>
+          <button class="btn secondary" onclick="checkSupabase('latest')">Ver Últimos</button>
+          <button class="btn" onclick="window.open('https://app.supabase.com', '_blank')">Supabase Console</button>
+        </div>
+        <div id="supabase-result" style="margin-top: 12px; font-size: 13px;"></div>
+      </div>
+    `;
+
+    // Functions
+    function checkEnvVar(varName) {
+      // En producción, verificaría desde backend
+      const stored = localStorage.getItem(`env_${varName}`);
+      return stored !== null;
+    }
+
+    function checkEnvVars() {
+      return Object.values(config.apis).some(api =>
+        api.vars.some(v => checkEnvVar(v))
+      );
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copiado al portapapeles');
+      });
+    }
+
+    function configurar(apiKey) {
+      const val = prompt(`Configurar ${apiKey}:\nIngresa la API Key o Secret:`);
+      if (val) {
+        localStorage.setItem(`env_${apiKey}`, val);
+        alert('Configuración guardada (local).\n⚠️ Para producción, usar variables de entorno en Vercel.');
+      }
+    }
+
+    function openN8N() {
+      window.open('https://n8n.srv1013903.hstgr.cloud', '_blank');
+    }
+
+    function openN8NDocs() {
+      window.open('/n8n-workflows-setup-guide.md', '_blank');
+    }
+
+    function openGuide() {
+      window.open('/SETUP-COMPLETE-SYSTEM.md', '_blank');
+    }
+
+    function openDocs(key) {
+      const docsMap = {
+        higgsfield: 'https://platform.higgsfield.ai/docs',
+        elevenlabs: 'https://elevenlabs.io/docs',
+        supabase: 'https://supabase.com/docs',
+        n8n: 'https://docs.n8n.io'
+      };
+      window.open(docsMap[key], '_blank');
+    }
+
+    function loadTestPayload(type) {
+      const payloads = {
+        imagen: JSON.stringify({
+          "action": "imagen",
+          "voice_input": "Un atardecer en la playa con palmeras",
+          "config": {
+            "imagen-aspect": "landscape",
+            "imagen-estilo": "realista",
+            "imagen-cantidad": "1"
+          }
+        }, null, 2),
+        video: JSON.stringify({
+          "action": "video",
+          "voice_input": "Un paracaidista saltando de un avión",
+          "config": {
+            "video-duracion": "10",
+            "video-resolucion": "1080p"
+          }
+        }, null, 2)
+      };
+      document.getElementById('test-payload').value = payloads[type] || '';
+    }
+
+    async function runTest() {
+      const payload = JSON.parse(document.getElementById('test-payload').value);
+      const resultEl = document.getElementById('test-result');
+      resultEl.innerHTML = '<div class="alert alert-warning">⏳ Ejecutando test...</div>';
+
+      try {
+        const resp = await fetch('/api/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await resp.json();
+        resultEl.innerHTML = `
+          <div class="alert alert-success">
+            ✅ Test exitoso<br>
+            <strong>jobId:</strong> ${result.jobId}<br>
+            <strong>status:</strong> ${result.status}
+          </div>
+        `;
+      } catch (err) {
+        resultEl.innerHTML = `<div class="alert alert-error">❌ Error: ${err.message}</div>`;
+      }
+    }
+
+    function checkSupabase(type) {
+      const resultEl = document.getElementById('supabase-result');
+      resultEl.innerHTML = '⏳ Verificando...';
+
+      fetch('/api/biblioteca').then(r => r.json()).then(data => {
+        if (type === 'count') {
+          resultEl.innerHTML = `<div class="alert alert-success">Total registros: <strong>${data.total}</strong></div>`;
+        } else {
+          resultEl.innerHTML = `<div class="alert alert-success">Últimos registros: <strong>${data.count}</strong> • Hoy: <strong>${data.assets?.filter(a => {
+            const d = new Date(a.createdAt);
+            d.setHours(0,0,0,0);
+            return d.getTime() === new Date().getTime();
+          }).length || 0}</strong></div>`;
+        }
+      }).catch(err => {
+        resultEl.innerHTML = `<div class="alert alert-error">❌ Error: ${err.message}</div>`;
+      });
+    }
+
+    function testSystem() {
+      alert(`✅ Configuration Dashboard Loaded\n\nSiguientes pasos:\n1. Configurar APIs (arriba)\n2. Crear workflows en N8N\n3. Abrir Control Maestro\n4. Generar primera imagen\n5. Ver resultado en Biblioteca`);
+    }
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Configuration Dashboard initialized');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                          VICTOR IA — SISTEMA INTEGRADO DE GENERACIÓN DE CONTENIDOS                          ║
+║                                          ARQUITECTURA COMPLETA v1.0                                          ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                         CAPA 1: INTERFAZ DE USUARIO                                         ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    ┌─────────────────────────────────────┐   ┌──────────────────────────┐   ┌──────────────────────────┐
+    │   CONTROL MAESTRO                   │   │   BIBLIOTECA             │   │   CONFIG DASHBOARD       │
+    │  (Panel de Generación)              │   │  (Galería de Activos)    │   │  (Setup & Monitoreo)     │
+    │                                     │   │                          │   │                          │
+    │  ┌─────────────────────────────┐   │   │  • Lista de generaciones │   │  • Estado de APIs        │
+    │  │ 🖼️ Generar Imagen          │   │   │  • Filtros por tipo      │   │  • Workflows N8N         │
+    │  │ 🎬 Generar Video           │   │   │  • Preview y descarga    │   │  • Tests rápidos         │
+    │  │ 🎤 Generar Voice Over      │   │   │  • Stats (hoy/total)     │   │  • Links útiles          │
+    │  │ 📊 Crear Presentación      │   │   │  • Auto-refresh 30s      │   │  • Debugging tools       │
+    │  │ 🌐 Crear Landing Page      │   │   │                          │   │                          │
+    │  │ 📚 Crear Capacitación      │   │   └──────────────────────────┘   └──────────────────────────┘
+    │  └─────────────────────────────┘   │
+    │  • Cola de trabajos en tiempo real  │
+    │  • Stats instantáneas               │
+    │  • Notificaciones de progreso       │
+    └─────────────────────────────────────┘
+
+           https://tracker.victor-ia.xyz/control-maestro.html (MAIN)
+           https://tracker.victor-ia.xyz/biblioteca.html
+           https://tracker.victor-ia.xyz/config-dashboard.html
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                    CAPA 2: API GATEWAY (Vercel Functions)                                   ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    ┌────────────────────────────────────────────────────────────────────────────────────────┐
+    │                                                                                        │
+    │  POST /api/create                          GET /api/biblioteca                         │
+    │  ├─ action: "imagen|video|voice|..."       ├─ filter: "imagen|video|..."             │
+    │  ├─ voice_input: "descripción"             ├─ limit: 50                              │
+    │  ├─ config: {...}                          ├─ offset: 0                              │
+    │  └─ files: []                              └─ Responde con activos                   │
+    │                                                                                        │
+    │  Genera jobId único:                       Retorna:                                   │
+    │  "imagen-1719999999999-abc12"              { assets: [...], total: 245 }             │
+    │                                                                                        │
+    │  → Guarda initial record en Supabase       → Auto-refresh cada 30s en UI             │
+    │  → Webhook POST a n8n                                                                 │
+    │                                                                                        │
+    └────────────────────────────────────────────────────────────────────────────────────────┘
+
+           /api/create.js (Vercel Function)
+           /api/biblioteca.js (Vercel Function)
+           /api/_lib/generators.js (Shared helpers)
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                  CAPA 3: ORQUESTADOR N8N (6 Workflows)                                     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    Webhook Base: https://n8n.srv1013903.hstgr.cloud/webhook/c285fc03-6b3a.../
+
+    ┌─────────────────────────────────────────────────────────────────────────────────────────┐
+    │                                     WORKFLOW 1: IMAGEN                                  │
+    │  POST /imagen                                                                           │
+    │  ├─ Trigger: Webhook JSON                                                              │
+    │  ├─ Validate payload (jobId, prompt)                                                   │
+    │  ├─ HTTP Request → Higgsfield /v1/text2image/soul                                      │
+    │  │  ├─ params: { prompt, width_and_height, enhance_prompt, seed }                     │
+    │  │  └─ headers: Authorization Key HIGGSFIELD_ID:HIGGSFIELD_SECRET                      │
+    │  ├─ Poll status (max 20 loops, interval 2.5s)                                          │
+    │  │  └─ GET /v1/job-sets/{request_id}                                                   │
+    │  ├─ Save to Supabase tracker_results                                                   │
+    │  │  ├─ job_id, action="imagen", result_url, status="completed", metadata              │
+    │  │  └─ HTTP POST → SUPABASE_URL/rest/v1/tracker_results                               │
+    │  └─ Response: { ok: true, jobId, status, url }                                         │
+    └─────────────────────────────────────────────────────────────────────────────────────────┘
+    Time: ~45s | Cost: ~$0.02
+
+    ┌─────────────────────────────────────────────────────────────────────────────────────────┐
+    │                                    WORKFLOW 2: VIDEO                                    │
+    │  POST /video                                                                            │
+    │  ├─ Trigger: Webhook JSON                                                              │
+    │  ├─ Generate base image (text2image, similar to Workflow 1)                            │
+    │  ├─ Poll image until ready                                                             │
+    │  ├─ HTTP Request → Higgsfield /v1/image2video/dop                                      │
+    │  │  ├─ params: { prompt, model, input_images[{image_url}], enhance_prompt, seed }    │
+    │  │  └─ Select model: 'dop-turbo' (rápido) o 'dop-preview' (calidad)                   │
+    │  ├─ Poll video (max 30 loops, interval 5s) ← TARDA MÁS TIEMPO                         │
+    │  ├─ Save to Supabase                                                                   │
+    │  └─ Response: { ok: true, jobId, status, url }                                         │
+    └─────────────────────────────────────────────────────────────────────────────────────────┘
+    Time: ~5-10m | Cost: ~$0.50-2.00
+
+    ┌─────────────────────────────────────────────────────────────────────────────────────────┐
+    │                                   WORKFLOW 3: VOICE                                     │
+    │  POST /voice                                                                            │
+    │  ├─ Trigger: Webhook JSON                                                              │
+    │  ├─ Validate texto, idioma, voz                                                        │
+    │  ├─ HTTP Request → ElevenLabs /v1/text-to-speech/{voice_id}                           │
+    │  │  ├─ headers: xi-api-key, Accept: audio/mpeg                                         │
+    │  │  └─ body: { text, model_id="eleven_multilingual_v2", voice_settings }              │
+    │  ├─ Receive MP3 binary (base64 encode)                                                 │
+    │  ├─ Save to Supabase (data URL)                                                        │
+    │  └─ Response: { ok: true, jobId, status, url (base64 dataURL) }                        │
+    └─────────────────────────────────────────────────────────────────────────────────────────┘
+    Time: ~5-10s | Cost: ~$0.01
+
+    ┌─────────────────────────────────────────────────────────────────────────────────────────┐
+    │                               WORKFLOW 4: PRESENTACIÓN                                  │
+    │  POST /presentacion                                                                     │
+    │  ├─ Trigger: Webhook JSON                                                              │
+    │  ├─ Parse prompt → slides structure                                                    │
+    │  ├─ Loop (generar cada slide):                                                         │
+    │  │  ├─ Generate slide content (Claude API si needed)                                   │
+    │  │  ├─ Generate slide image (Higgsfield text2image)                                    │
+    │  │  └─ Compile slide HTML (HyperFrames template)                                       │
+    │  ├─ Merge todas las slides en HTML completo                                            │
+    │  ├─ Save HTML → Supabase Storage                                                       │
+    │  ├─ Save metadata → tracker_results                                                    │
+    │  └─ Response: { ok: true, jobId, status, url (HTML storage) }                          │
+    └─────────────────────────────────────────────────────────────────────────────────────────┘
+    Time: ~2-5m | Cost: variable
+
+    ┌─────────────────────────────────────────────────────────────────────────────────────────┐
+    │                                 WORKFLOW 5: WEB                                         │
+    │  POST /web                                                                              │
+    │  ├─ Trigger: Webhook JSON                                                              │
+    │  ├─ Call web-4o API (o generador custom)                                               │
+    │  │  └─ Genera estructura Next.js con componentes React                                 │
+    │  ├─ Generate assets (imágenes via Higgsfield)                                          │
+    │  ├─ Compilar proyecto                                                                  │
+    │  ├─ Deploy to Vercel (opcional)                                                        │
+    │  │  └─ Retorna URL viva del deployment                                                 │
+    │  ├─ Save URL → Supabase                                                                │
+    │  └─ Response: { ok: true, jobId, status, url (Vercel deployment) }                     │
+    └─────────────────────────────────────────────────────────────────────────────────────────┘
+    Time: ~5-15m | Cost: variable
+
+    ┌─────────────────────────────────────────────────────────────────────────────────────────┐
+    │                               WORKFLOW 6: CAPACITACIÓN                                  │
+    │  POST /capacitacion                                                                     │
+    │  ├─ Trigger: Webhook JSON                                                              │
+    │  ├─ Generate educational outline                                                       │
+    │  ├─ Loop (crear cada sección):                                                         │
+    │  │  ├─ Contenido + diapositivas                                                        │
+    │  │  ├─ Generar video intro (Higgsfield)                                                │
+    │  │  └─ Generar voice narrado (ElevenLabs)                                              │
+    │  ├─ Compilar HTML interactivo (quizzes, certificado)                                   │
+    │  ├─ Save → Supabase Storage                                                            │
+    │  └─ Response: { ok: true, jobId, status, url }                                         │
+    └─────────────────────────────────────────────────────────────────────────────────────────┘
+    Time: ~5-20m | Cost: variable
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                     CAPA 4: APIs EXTERNOS (Paralelos)                                      ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    ┌──────────────────────────────┐   ┌──────────────────────────────┐   ┌──────────────────────────────┐
+    │  HIGGSFIELD                  │   │  ELEVENLABS                  │   │  web-4o / CUSTOM             │
+    │  (Imagen + Video)            │   │  (Voice)                     │   │  (Presentación + Web)        │
+    │                              │   │                              │   │                              │
+    │  • API: platform.higgsfield  │   │  • API: api.elevenlabs.io    │   │  • API: web-4o skill         │
+    │  • Models:                   │   │  • Model:                    │   │  • Support:                  │
+    │    - text2image (Soul)       │   │    - eleven_multilingual_v2  │   │    - Next.js (primario)      │
+    │    - image2video (DoP)       │   │  • Voice: iDEmt5MnqUotdwCI.. │   │    - React + Tailwind        │
+    │  • Status polling built-in   │   │  • Languages: 30+            │   │    - Shaders + Three.js      │
+    │  • Output: CDN URL           │   │  • Output: MP3 binary        │   │    - Custom components       │
+    │                              │   │  • Sync with timestamps      │   │    - Deploy via Vercel       │
+    └──────────────────────────────┘   └──────────────────────────────┘   └──────────────────────────────┘
+
+    Auth: HIGGSFIELD_ID:SECRET         Auth: xi-api-key header         Auth: Varies (custom)
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                   CAPA 5: ALMACENAMIENTO (Supabase)                                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    Tabla: tracker_results (PostgreSQL)
+
+    ┌────────────────────────────────────────────────────────────────────────────┐
+    │ Columnas:                                                                   │
+    │  • id: BIGINT (auto)                                                       │
+    │  • job_id: VARCHAR(100) UNIQUE ← Referencia única del trabajo             │
+    │  • action: VARCHAR(50) ← imagen|video|voice|presentacion|web|capacitacion │
+    │  • result_url: TEXT ← CDN URL (Higgsfield) o Storage URL (Supabase)       │
+    │  • result_type: VARCHAR(50) ← image|video|audio|html|web                 │
+    │  • metadata: JSONB ← Config original {prompt, estilo, aspect, ...}        │
+    │  • status: VARCHAR(50) ← processing|completed|failed|nsfw                 │
+    │  • created_at: TIMESTAMP (default NOW)                                     │
+    │  • updated_at: TIMESTAMP (auto on update)                                  │
+    │                                                                             │
+    │ Índices:                                                                    │
+    │  • idx_job_id ON (job_id)                                                 │
+    │  • idx_action ON (action)                                                 │
+    │  • idx_created_at ON (created_at DESC)                                    │
+    │  • idx_status ON (status)                                                 │
+    └────────────────────────────────────────────────────────────────────────────┘
+
+    Storage Buckets (Supabase):
+    ├─ presentations/ (HTML presentations)
+    ├─ websites/ (Generated next.js projects)
+    ├─ capacitacion/ (Training modules)
+    └─ assets/ (Images, videos cached)
+
+    Endpoint: https://[SUPABASE_URL]/rest/v1/tracker_results
+    Auth: Authorization: Bearer [SERVICE_KEY]
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                      CAPA 6: VISUALIZACIÓN (Biblioteca)                                    ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    ┌─────────────────────────────────────────────────────────────────────────────────┐
+    │                                  BIBLIOTECA.HTML                                │
+    │                                                                                 │
+    │  • Fetches /api/biblioteca cada 30 segundos                                    │
+    │  • Filtra por tipo: Todos | Imágenes | Videos | Presentaciones | Web | Voice  │
+    │  • Preview de cada activo                                                      │
+    │  • Botones: Ver | Copiar URL | Descargar                                      │
+    │  • Stats: Total + Generados Hoy                                                │
+    │  • Responsive grid (mobile-friendly)                                           │
+    │                                                                                 │
+    │  Flujo:                                                                         │
+    │  1. Load page → fetch /api/biblioteca                                          │
+    │  2. Render assets grid                                                         │
+    │  3. Auto-refresh cada 30s                                                      │
+    │  4. Click → open URL en nueva ventana                                          │
+    │  5. Copy → navigator.clipboard.writeText()                                     │
+    │                                                                                 │
+    └─────────────────────────────────────────────────────────────────────────────────┘
+
+    https://tracker.victor-ia.xyz/biblioteca.html
+
+
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                           FLUJO COMPLETO EJEMPLO                                           ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+User: "Quiero generar una imagen de un atardecer en la playa"
+
+    1️⃣ USUARIO abre Control Maestro
+       https://tracker.victor-ia.xyz/control-maestro.html
+
+    2️⃣ Click "🖼️ Generar Imagen"
+       Modal abierto
+
+    3️⃣ Completa formulario
+       Descripción: "Atardecer en la playa con palmeras, fotografía 8K realista"
+       Proporción: Horizontal (landscape)
+       Estilo: Realista
+       Cantidad: 1
+       Click "Generar Imagen"
+
+    4️⃣ API /api/create recibe POST
+       {
+         "action": "imagen",
+         "voice_input": "Atardecer en la playa...",
+         "config": {
+           "imagen-aspect": "landscape",
+           "imagen-estilo": "realista",
+           "imagen-cantidad": "1"
+         }
+       }
+
+    5️⃣ Genera jobId único
+       "imagen-1726087234567-abc12"
+
+    6️⃣ Guarda record inicial en Supabase
+       INSERT INTO tracker_results (job_id, action, status, metadata)
+       VALUES ('imagen-1726087234567-abc12', 'imagen', 'processing', {...})
+
+    7️⃣ Envía webhook a N8N
+       POST https://n8n.srv1013903.hstgr.cloud/webhook/.../imagen
+       Body: { jobId, prompt, aspect_ratio, estilo, cantidad, ... }
+
+    8️⃣ N8N Workflow "Generador de Imágenes" ejecuta
+       ├─ Validate ✓
+       ├─ HTTP POST → Higgsfield /v1/text2image/soul
+       ├─ Recibe request_id: "1726087234567"
+       ├─ Poll /v1/job-sets/1726087234567 (x15 loops, 2.5s cada una)
+       │  Loop 1: status = "in_progress" → espera
+       │  Loop 2: status = "in_progress" → espera
+       │  ...
+       │  Loop 14: status = "completed", url = "https://cdn.higgsfield.ai/img/xyz.png"
+       ├─ HTTP POST → Supabase /rest/v1/tracker_results
+       │  UPDATE tracker_results
+       │  SET result_url = "https://cdn...",
+       │      status = "completed",
+       │      updated_at = NOW()
+       │  WHERE job_id = 'imagen-1726087234567-abc12'
+       └─ Webhook response: { ok: true, jobId, status: "completed", url: "..." }
+
+    9️⃣ Control Maestro recibe respuesta
+       ├─ Actualiza cola (status = "completed")
+       ├─ Toast: "✅ Imagen lista!"
+       └─ Limpia form
+
+    🔟 Usuario abre Biblioteca
+       https://tracker.victor-ia.xyz/biblioteca.html
+
+    1️⃣1️⃣ Biblioteca fetches /api/biblioteca
+       SELECT * FROM tracker_results ORDER BY created_at DESC
+
+    1️⃣2️⃣ Resultado aparece en grid
+       Card con:
+       ├─ Thumbnail de imagen (preview)
+       ├─ Timestamp: 2026-07-01 14:23
+       ├─ Action: "imagen"
+       ├─ Botones: [Ver] [Copiar] [Descargar]
+       └─ Click → abre URL en Higgsfield CDN
+
+    ✅ ÉXITO
+
+
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                            TABLA DE VARIABLES                                              ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────┬─────────────────────────────────┬────────────────────────────────────────┐
+│ VARIABLE                     │ DÓNDE SE CONFIGURA              │ DESCRIPCIÓN                            │
+├──────────────────────────────┼─────────────────────────────────┼────────────────────────────────────────┤
+│ HIGGSFIELD_ID                │ Vercel → Environment Variables  │ ID del workspace en Higgsfield        │
+│ HIGGSFIELD_SECRET            │ Vercel → Environment Variables  │ Secret/API key de Higgsfield         │
+│ ELEVENLABS_API_KEY           │ Vercel → Environment Variables  │ sk_87d5a7899d6c489c9423...          │
+│ ELEVENLABS_VOICE_ID          │ Vercel → Environment Variables  │ iDEmt5MnqUotdwCIVplo                │
+│ SUPABASE_URL                 │ Vercel → Environment Variables  │ https://[project].supabase.co       │
+│ SUPABASE_SERVICE_KEY         │ Vercel → Environment Variables  │ eyJhbGciOiJIUzI1NiIsInR5cCI...    │
+│ N8N_WEBHOOK_URL              │ Vercel → Environment Variables  │ https://n8n.srv1013903.../webhook  │
+└──────────────────────────────┴─────────────────────────────────┴────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                           CHECKLIST RÁPIDO                                                 ║
+╚════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+
+✅ Capa 1: Interfaz
+   □ control-maestro.html funciona
+   □ biblioteca.html carga activos
+   □ config-dashboard.html muestra estado
+
+✅ Capa 2: API Gateway
+   □ POST /api/create responde con jobId
+   □ GET /api/biblioteca retorna activos
+   □ Status codes correctos (200, 400, 500)
+
+✅ Capa 3: N8N Workflows
+   □ 6 workflows creados
+   □ 6 workflows activos (toggle ON)
+   □ Cada webhook tiene URL válida
+
+✅ Capa 4: APIs Externos
+   □ Higgsfield: test generación imagen
+   □ ElevenLabs: test generación audio
+   □ web-4o: test generación estructura
+
+✅ Capa 5: Supabase
+   □ Tabla tracker_results existe
+   □ Service key tiene permisos
+   □ Registros se guardan correctamente
+
+✅ Capa 6: Visualización
+   □ Biblioteca carga desde BD
+   □ Auto-refresh cada 30s funciona
+   □ Filtros funcionan
+
+→ Si todo está ✅, estás listo para PRODUCCIÓN
+
+
+Documento generado: 2026-07-01
+Version: 1.0 Production Ready
+Última actualización: 2026-07-01

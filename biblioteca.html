@@ -175,6 +175,51 @@
       margin-bottom: 16px;
       opacity: 0.3;
     }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      position: relative;
+      max-width: 90%;
+      max-height: 90%;
+      background: #0E0F12;
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid rgba(248,247,245,0.1);
+    }
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255,170,23,0.2);
+      border: none;
+      color: #FFAA17;
+      width: 36px;
+      height: 36px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-media {
+      max-width: 100%;
+      max-height: 70vh;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -202,6 +247,14 @@
     <div id="content" class="grid"></div>
   </div>
 
+  <!-- Modal Viewer -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
   <script>
     let allAssets = [];
     let currentFilter = 'todos';
@@ -221,19 +274,41 @@
       content.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando...</p></div>`;
 
       try {
-        const url = filter === 'todos'
-          ? '/api/biblioteca'
-          : `/api/biblioteca?filter=${filter}`;
+        // Leer a través del endpoint seguro del servidor (/api/biblioteca).
+        // Este endpoint usa las variables de entorno de Vercel (SUPABASE_URL +
+        // SUPABASE_SERVICE_KEY), asi que NO exponemos ninguna clave en el navegador
+        // y siempre apunta al proyecto de Supabase correcto.
+        let apiUrl = `/api/biblioteca?limit=200`;
+        if (filter !== 'todos') {
+          apiUrl += `&filter=${encodeURIComponent(filter)}`;
+        }
 
-        const resp = await fetch(url);
-        const data = await resp.json();
+        const resp = await fetch(apiUrl, {
+          headers: { 'Accept': 'application/json' }
+        });
 
-        allAssets = data.assets || [];
-        updateStats(data.total);
+        if (!resp.ok) {
+          throw new Error(`El servidor respondio ${resp.status}`);
+        }
+
+        const payload = await resp.json();
+        const rows = payload.assets || [];
+
+        // El endpoint ya devuelve los campos con nombres de vista (jobId, url, type...)
+        allAssets = rows.map(row => ({
+          jobId: row.jobId,
+          url: row.url,
+          type: row.type,
+          action: row.action,
+          createdAt: row.createdAt,
+          metadata: row.metadata
+        }));
+
+        updateStats(allAssets.length);
         renderAssets(allAssets);
       } catch (err) {
         console.error('Error loading assets:', err);
-        content.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>Error cargando biblioteca</p></div>`;
+        content.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>Error cargando biblioteca (revisa la consola del navegador)</p></div>`;
       }
     }
 
@@ -259,11 +334,14 @@
         return;
       }
 
-      content.innerHTML = assets.map(asset => `
+      content.innerHTML = assets.map((asset, idx) => {
+        const isImage = isImageAsset(asset);
+        const isVideo = isVideoAsset(asset);
+        return `
         <div class="asset-card">
-          <div class="asset-preview ${!asset.url ? 'no-media' : ''}">
-            ${asset.type?.includes('image') && asset.url ? `<img src="${asset.url}" alt="preview">` : ''}
-            ${asset.type?.includes('video') && asset.url ? `<video src="${asset.url}" controls></video>` : ''}
+          <div class="asset-preview ${!asset.url ? 'no-media' : ''}" onclick="openModal(${idx})" style="cursor: pointer;">
+            ${isImage && asset.url ? `<img src="${asset.url}" alt="preview" onerror="this.style.display='none'">` : ''}
+            ${isVideo && asset.url ? `<video src="${asset.url}"></video>` : ''}
             ${!asset.url ? ICONS[asset.action] || '📦' : ''}
             <div class="asset-icon">${asset.action}</div>
           </div>
@@ -271,13 +349,56 @@
             <div class="asset-action">${asset.action}</div>
             <div class="asset-date">${new Date(asset.createdAt).toLocaleDateString('es')} ${new Date(asset.createdAt).toLocaleTimeString('es')}</div>
             <div class="asset-actions">
-              <a href="${asset.url}" target="_blank" class="btn">Ver</a>
+              <button class="btn" onclick="openModal(${idx})">Ver</button>
               <button class="btn" onclick="copyUrl('${asset.url}')">Copiar</button>
               <button class="btn" onclick="downloadAsset('${asset.url}', '${asset.jobId}')">Descargar</button>
             </div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
+    }
+
+    // Detecta si un activo es imagen: revisa el tipo, la accion y la extension de la URL.
+    // Asi mostramos la imagen aunque result_type venga como "image", "imagen", vacio, etc.
+    function isImageAsset(asset) {
+      const t = (asset.type || '').toLowerCase();
+      const a = (asset.action || '').toLowerCase();
+      const u = (asset.url || '').toLowerCase();
+      if (t.includes('image') || t.includes('imagen')) return true;
+      if (a === 'imagen' || a === 'image') return true;
+      if (/\.(png|jpe?g|webp|gif|avif)(\?|$)/.test(u)) return true;
+      return false;
+    }
+
+    function isVideoAsset(asset) {
+      const t = (asset.type || '').toLowerCase();
+      const a = (asset.action || '').toLowerCase();
+      const u = (asset.url || '').toLowerCase();
+      if (t.includes('video')) return true;
+      if (a === 'video') return true;
+      if (/\.(mp4|webm|mov|m4v)(\?|$)/.test(u)) return true;
+      return false;
+    }
+
+    function openModal(idx) {
+      const asset = allAssets[idx];
+      if (!asset) return;
+
+      const modalBody = document.getElementById('modal-body');
+      if (isImageAsset(asset)) {
+        modalBody.innerHTML = `<img src="${asset.url}" alt="preview" class="modal-media" onerror="this.replaceWith(document.createTextNode('No se pudo cargar la imagen'))">`;
+      } else if (isVideoAsset(asset)) {
+        modalBody.innerHTML = `<video src="${asset.url}" controls class="modal-media"></video>`;
+      } else {
+        modalBody.innerHTML = `<div style="padding: 40px; text-align: center; color: rgba(248,247,245,0.5);">Sin preview disponible</div>`;
+      }
+
+      document.getElementById('modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
     }
 
     function copyUrl(url) {
@@ -301,6 +422,20 @@
         currentFilter = e.target.dataset.filter;
         loadAssets(currentFilter);
       });
+    });
+
+    // Close modal on background click
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') {
+        closeModal();
+      }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
     });
 
     // Load on init

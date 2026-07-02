@@ -1,0 +1,189 @@
+{
+  "name": "Victor IA — Generador de Imágenes",
+  "description": "Genera imágenes usando Higgsfield text2image soul",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "imagen",
+        "httpMethod": "POST",
+        "options": {}
+      },
+      "id": "webhook_trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://platform.higgsfield.ai/v1/text2image/soul",
+        "method": "POST",
+        "headers": {
+          "Authorization": "Key HIGGSFIELD_ID:HIGGSFIELD_SECRET",
+          "Content-Type": "application/json"
+        },
+        "bodyParametersJson": "{\"params\": {\"prompt\": \"{{ $json.prompt }}\", \"width_and_height\": \"2048x1536\", \"enhance_prompt\": true, \"seed\": {{ Math.floor(Math.random() * 1000000) }} }}"
+      },
+      "id": "http_higgsfield",
+      "name": "Higgsfield Text2Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "loop": {
+          "type": "while",
+          "condition": {
+            "operator": "notEqual",
+            "value": "completed"
+          },
+          "value": "={{ $json.status }}"
+        },
+        "options": {
+          "maxIterations": 20,
+          "timeout": 45000
+        }
+      },
+      "id": "loop_poll",
+      "name": "Loop: Poll until Complete",
+      "type": "n8n-nodes-base.loop",
+      "typeVersion": 1,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://platform.higgsfield.ai/v1/job-sets/{{ $json.id }}",
+        "method": "GET",
+        "headers": {
+          "Authorization": "Key HIGGSFIELD_ID:HIGGSFIELD_SECRET"
+        },
+        "options": {}
+      },
+      "id": "http_poll",
+      "name": "Poll Higgsfield Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "waitBetweenIterations": 2500
+      },
+      "id": "wait_node",
+      "name": "Wait 2.5s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "url": "{{ $env.SUPABASE_URL }}/rest/v1/tracker_results",
+        "method": "POST",
+        "headers": {
+          "apikey": "{{ $env.SUPABASE_SERVICE_KEY }}",
+          "Authorization": "Bearer {{ $env.SUPABASE_SERVICE_KEY }}",
+          "Content-Type": "application/json",
+          "Prefer": "return=representation"
+        },
+        "bodyParametersJson": "{\"job_id\": \"{{ $json.id }}\", \"action\": \"imagen\", \"result_url\": \"{{ ($json.jobs && $json.jobs[0] && $json.jobs[0].results && ($json.jobs[0].results.raw ? $json.jobs[0].results.raw.url : $json.jobs[0].results[0].url)) || ($json.results && ($json.results[0].raw ? $json.results[0].raw.url : $json.results[0].url)) }}\", \"result_type\": \"image\", \"status\": \"completed\", \"metadata\": {\"prompt\": \"{{ $json.prompt }}\", \"style\": \"{{ $json.estilo }}\", \"aspect_ratio\": \"{{ $json.aspect_ratio }}\"}}"
+      },
+      "id": "http_supabase",
+      "name": "Save to Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "statusCode": 200,
+        "responseBody": "{\"ok\": true, \"jobId\": \"{{ $json.jobId }}\", \"status\": \"completed\", \"url\": \"{{ $json.results[0].raw.url }}\"}"
+      },
+      "id": "webhook_response",
+      "name": "Return Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1150, 300]
+    }
+  ],
+  "connections": {
+    "webhook_trigger": {
+      "main": [
+        [
+          {
+            "node": "http_higgsfield",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "http_higgsfield": {
+      "main": [
+        [
+          {
+            "node": "loop_poll",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "loop_poll": {
+      "main": [
+        [
+          {
+            "node": "http_poll",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "http_poll": {
+      "main": [
+        [
+          {
+            "node": "wait_node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "wait_node": {
+      "main": [
+        [
+          {
+            "node": "loop_poll",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "loop_poll_end": {
+      "main": [
+        [
+          {
+            "node": "http_supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "http_supabase": {
+      "main": [
+        [
+          {
+            "node": "webhook_response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

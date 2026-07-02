@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Control Maestro — Victor IA</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Space Grotesk', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #070809 0%, #0E0F12 100%);
+      color: #F8F7F5;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container { max-width: 1600px; margin: 0 auto; }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 50px;
+      padding: 20px;
+      background: rgba(255, 170, 23, 0.05);
+      border: 1px solid rgba(255, 170, 23, 0.2);
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+    }
+
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #FFAA17 0%, #FF8800 100%);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #070809;
+      font-size: 20px;
+    }
+
+    h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.5px; }
+    .status { font-size: 12px; color: rgba(248, 247, 245, 0.5); }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 20px;
+      font-size: 12px;
+    }
+
+    .stat-item {
+      padding: 10px 16px;
+      background: rgba(255, 170, 23, 0.08);
+      border: 1px solid rgba(255, 170, 23, 0.15);
+      border-radius: 4px;
+    }
+
+    .stat-value { font-weight: 600; color: #FFAA17; }
+    .stat-label { color: rgba(248, 247, 245, 0.6); }
+
+    /* Grid principal */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 50px;
+    }
+
+    /* Cards de acciones */
+    .action-card {
+      background: linear-gradient(135deg, rgba(14, 15, 18, 0.8) 0%, rgba(20, 22, 30, 0.6) 100%);
+      border: 1px solid rgba(248, 247, 245, 0.07);
+      border-radius: 12px;
+      padding: 32px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 170, 23, 0.1) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .action-card:hover {
+      border-color: rgba(255, 170, 23, 0.5);
+      background: linear-gradient(135deg, rgba(14, 15, 18, 0.95) 0%, rgba(20, 22, 30, 0.8) 100%);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(255, 170, 23, 0.15);
+    }
+
+    .action-card:hover::before {
+      opacity: 1;
+    }
+
+    .action-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .action-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .action-desc {
+      font-size: 13px;
+      color: rgba(248, 247, 245, 0.6);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #FFAA17 0%, #FF8800 100%);
+      border: none;
+      border-radius: 6px;
+      color: #070809;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(255, 170, 23, 0.4);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(7, 8, 9, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background: linear-gradient(135deg, #0E0F12 0%, #131418 100%);
+      border: 1px solid rgba(248, 247, 245, 0.1);
+      border-radius: 12px;
+      padding: 40px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(248, 247, 245, 0.1);
+    }
+
+    .modal-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .modal-icon { font-size: 32px; }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: rgba(248, 247, 245, 0.6);
+      font-size: 24px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover { color: #FFAA17; }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(248, 247, 245, 0.8);
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(248, 247, 245, 0.05);
+      border: 1px solid rgba(248, 247, 245, 0.1);
+      border-radius: 6px;
+      color: #F8F7F5;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #FFAA17;
+      background: rgba(248, 247, 245, 0.08);
+      box-shadow: 0 0 0 3px rgba(255, 170, 23, 0.1);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    /* Options grid */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .option-btn {
+      padding: 12px 16px;
+      background: transparent;
+      border: 1px solid rgba(248, 247, 245, 0.15);
+      border-radius: 6px;
+      color: rgba(248, 247, 245, 0.7);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover,
+    .option-btn.active {
+      border-color: #FFAA17;
+      color: #FFAA17;
+      background: rgba(255, 170, 23, 0.1);
+    }
+
+    /* Action buttons */
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      flex: 1;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #FFAA17 0%, #FF8800 100%);
+      color: #070809;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 170, 23, 0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid rgba(248, 247, 245, 0.2);
+      color: rgba(248, 247, 245, 0.7);
+    }
+
+    .btn-secondary:hover {
+      border-color: rgba(248, 247, 245, 0.4);
+    }
+
+    /* Loading state */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 30px;
+    }
+
+    .loading.active { display: block; }
+
+    .spinner {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(255, 170, 23, 0.2);
+      border-top-color: #FFAA17;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      padding: 16px 24px;
+      background: rgba(255, 170, 23, 0.95);
+      color: #070809;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      animation: slideIn 0.3s ease;
+      z-index: 2000;
+    }
+
+    .toast.error {
+      background: rgba(255, 50, 50, 0.95);
+      color: #F8F7F5;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Queue section */
+    .queue-section {
+      background: rgba(20, 22, 30, 0.5);
+      border: 1px solid rgba(248, 247, 245, 0.07);
+      border-radius: 12px;
+      padding: 30px;
+      margin-top: 50px;
+    }
+
+    .queue-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .queue-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      background: rgba(14, 15, 18, 0.5);
+      border: 1px solid rgba(248, 247, 245, 0.05);
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    .queue-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .queue-id { color: rgba(248, 247, 245, 0.6); }
+    .queue-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: rgba(255, 170, 23, 0.1);
+      border: 1px solid rgba(255, 170, 23, 0.3);
+      border-radius: 3px;
+      color: #FFAA17;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .empty-queue {
+      text-align: center;
+      padding: 40px;
+      color: rgba(248, 247, 245, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .header { flex-direction: column; gap: 20px; }
+      .modal-content { padding: 20px; }
+      .options-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="header-left">
+      <div class="logo">V</div>
+      <div>
+        <h1>Control Maestro</h1>
+        <div class="status">Victor IA · Generador Integrado</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-label">Hoy</div>
+          <div class="stat-value" id="stat-today">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Total</div>
+          <div class="stat-value" id="stat-total">0</div>
+        </div>
+      </div>
+      <a href="biblioteca.html" style="padding: 10px 20px; background: rgba(255,170,23,0.15); border: 1px solid rgba(255,170,23,0.3); border-radius: 6px; color: #FFAA17; text-decoration: none; font-size: 12px; font-weight: 600;">Ver Biblioteca</a>
+    </div>
+  </header>
+
+  <!-- Grid de acciones -->
+  <div class="grid">
+    <!-- Imagen -->
+    <div class="action-card" onclick="openModal('imagen')">
+      <span class="action-icon">🖼️</span>
+      <div class="action-title">Generar Imagen</div>
+      <div class="action-desc">Crea imágenes únicas con IA usando prompts detallados</div>
+      <button class="action-btn">Comenzar</button>
+    </div>
+
+    <!-- Video -->
+    <div class="action-card" onclick="openModal('video')">
+      <span class="action-icon">🎬</span>
+      <div class="action-title">Generar Video</div>
+      <div class="action-desc">Produce videos dinámicos desde descripciones</div>
+      <button class="action-btn">Comenzar</button>
+    </div>
+
+    <!-- Presentación -->
+    <div class="action-card" onclick="openModal('presentacion')">
+      <span class="action-icon">📊</span>
+      <div class="action-title">Crear Presentación</div>
+      <div class="action-desc">Diseña decks profesionales animados automáticamente</div>
+      <button class="action-btn">Comenzar</button>
+    </div>
+
+    <!-- Landing -->
+    <div class="action-card" onclick="openModal('web')">
+      <span class="action-icon">🌐</span>
+      <div class="action-title">Crear Landing Page</div>
+      <div class="action-desc">Genera sitios web responsivos y optimizados</div>
+      <button class="action-btn">Comenzar</button>
+    </div>
+
+    <!-- Voice -->
+    <div class="action-card" onclick="openModal('voice')">
+      <span class="action-icon">🎤</span>
+      <div class="action-title">Generar Voice Over</div>
+      <div class="action-desc">Crea audio profesional con IA en múltiples idiomas</div>
+      <button class="action-btn">Comenzar</button>
+    </div>
+
+    <!-- Capacitación -->
+    <div class="action-card" onclick="openModal('capacitacion')">
+      <span class="action-icon">📚</span>
+      <div class="action-title">Crear Capacitación</div>
+      <div class="action-desc">Diseña módulos educativos interactivos</div>
+      <button class="action-btn">Comenzar</button>
+    </div>
+  </div>
+
+  <!-- Queue section -->
+  <div class="queue-section">
+    <div class="queue-title">
+      <span>⏳</span> Cola de Generación
+    </div>
+    <div id="queue-container">
+      <div class="empty-queue">No hay trabajos en la cola</div>
+    </div>
+  </div>
+
+  <!-- Modales -->
+  <div class="modal" id="modal-imagen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="modal-icon">🖼️</span>
+          <span>Generar Imagen</span>
+        </div>
+        <button class="modal-close" onclick="closeModal('imagen')">✕</button>
+      </div>
+      <div id="form-imagen">
+        <div class="form-group">
+          <label>Descripción de la imagen</label>
+          <textarea id="imagen-prompt" placeholder="Describe en detalle qué imagen deseas generar..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Proporción</label>
+          <div class="options-grid">
+            <button class="option-btn active" data-value="landscape" data-field="imagen-aspect">Horizontal (16:9)</button>
+            <button class="option-btn" data-value="portrait" data-field="imagen-aspect">Vertical (9:16)</button>
+            <button class="option-btn" data-value="square" data-field="imagen-aspect">Cuadrado (1:1)</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Estilo</label>
+          <div class="options-grid">
+            <button class="option-btn active" data-value="realista" data-field="imagen-estilo">Realista</button>
+            <button class="option-btn" data-value="ilustracion" data-field="imagen-estilo">Ilustración</button>
+            <button class="option-btn" data-value="3d" data-field="imagen-estilo">3D</button>
+            <button class="option-btn" data-value="conceptual" data-field="imagen-estilo">Conceptual</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Cantidad</label>
+          <input type="number" id="imagen-cantidad" value="1" min="1" max="4">
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal('imagen')">Cancelar</button>
+          <button class="btn-primary" onclick="submitForm('imagen')">Generar Imagen</button>
+        </div>
+      </div>
+      <div class="loading" id="loading-imagen">
+        <div class="spinner"></div>
+        <p>Generando imagen...</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-video">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="modal-icon">🎬</span>
+          <span>Generar Video</span>
+        </div>
+        <button class="modal-close" onclick="closeModal('video')">✕</button>
+      </div>
+      <div id="form-video">
+        <div class="form-group">
+          <label>Descripción del video</label>
+          <textarea id="video-prompt" placeholder="Describe el video que deseas crear..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Duración</label>
+          <div class="options-grid">
+            <button class="option-btn" data-value="5" data-field="video-duracion">5 segundos</button>
+            <button class="option-btn active" data-value="10" data-field="video-duracion">10 segundos</button>
+            <button class="option-btn" data-value="15" data-field="video-duracion">15 segundos</button>
+            <button class="option-btn" data-value="30" data-field="video-duracion">30 segundos</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Resolución</label>
+          <div class="options-grid">
+            <button class="option-btn" data-value="720p" data-field="video-resolucion">720p</button>
+            <button class="option-btn active" data-value="1080p" data-field="video-resolucion">1080p</button>
+            <button class="option-btn" data-value="4k" data-field="video-resolucion">4K</button>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal('video')">Cancelar</button>
+          <button class="btn-primary" onclick="submitForm('video')">Generar Video</button>
+        </div>
+      </div>
+      <div class="loading" id="loading-video">
+        <div class="spinner"></div>
+        <p>Generando video (esto puede tomar algunos minutos)...</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-presentacion">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="modal-icon">📊</span>
+          <span>Crear Presentación</span>
+        </div>
+        <button class="modal-close" onclick="closeModal('presentacion')">✕</button>
+      </div>
+      <div id="form-presentacion">
+        <div class="form-group">
+          <label>Tema de la presentación</label>
+          <textarea id="presentacion-prompt" placeholder="Describe el contenido y objetivo de la presentación..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Número de slides</label>
+          <input type="number" id="presentacion-slides" value="10" min="5" max="50">
+        </div>
+        <div class="form-group">
+          <label>Diseño</label>
+          <div class="options-grid">
+            <button class="option-btn active" data-value="luxury-dark" data-field="presentacion-diseno">Luxury Dark</button>
+            <button class="option-btn" data-value="minimalista" data-field="presentacion-diseno">Minimalista</button>
+            <button class="option-btn" data-value="corporate" data-field="presentacion-diseno">Corporate</button>
+            <button class="option-btn" data-value="creativo" data-field="presentacion-diseno">Creativo</button>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal('presentacion')">Cancelar</button>
+          <button class="btn-primary" onclick="submitForm('presentacion')">Crear Presentación</button>
+        </div>
+      </div>
+      <div class="loading" id="loading-presentacion">
+        <div class="spinner"></div>
+        <p>Creando presentación...</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-web">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="modal-icon">🌐</span>
+          <span>Crear Landing Page</span>
+        </div>
+        <button class="modal-close" onclick="closeModal('web')">✕</button>
+      </div>
+      <div id="form-web">
+        <div class="form-group">
+          <label>Descripción del sitio</label>
+          <textarea id="web-prompt" placeholder="Describe qué debería hacer y verse tu landing page..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Tipo de sitio</label>
+          <div class="options-grid">
+            <button class="option-btn active" data-value="landing" data-field="web-tipo">Landing Page</button>
+            <button class="option-btn" data-value="producto" data-field="web-tipo">Página Producto</button>
+            <button class="option-btn" data-value="servicio" data-field="web-tipo">Página Servicio</button>
+            <button class="option-btn" data-value="portafolio" data-field="web-tipo">Portafolio</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Diseño</label>
+          <div class="options-grid">
+            <button class="option-btn active" data-value="luxury-dark" data-field="web-diseno">Luxury Dark</button>
+            <button class="option-btn" data-value="colorido" data-field="web-diseno">Colorido</button>
+            <button class="option-btn" data-value="minimalista" data-field="web-diseno">Minimalista</button>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal('web')">Cancelar</button>
+          <button class="btn-primary" onclick="submitForm('web')">Crear Landing</button>
+        </div>
+      </div>
+      <div class="loading" id="loading-web">
+        <div class="spinner"></div>
+        <p>Creando sitio web...</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-voice">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="modal-icon">🎤</span>
+          <span>Generar Voice Over</span>
+        </div>
+        <button class="modal-close" onclick="closeModal('voice')">✕</button>
+      </div>
+      <div id="form-voice">
+        <div class="form-group">
+          <label>Texto para leer</label>
+          <textarea id="voice-prompt" placeholder="Escribe el texto que deseas que lea la IA..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Idioma</label>
+          <div class="options-grid">
+            <button class="option-btn active" data-value="es-MX" data-field="voice-idioma">Español MX</button>
+            <button class="option-btn" data-value="es-ES" data-field="voice-idioma">Español EU</button>
+            <button class="option-btn" data-value="en-US" data-field="voice-idioma">Inglés USA</button>
+            <button class="option-btn" data-value="en-GB" data-field="voice-idioma">Inglés UK</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tono</label>
+          <div class="options-grid">
+            <button class="option-btn active" data-value="profesional" data-field="voice-tono">Profesional</button>
+            <button class="option-btn" data-value="amigable" data-field="voice-tono">Amigable</button>
+            <button class="option-btn" data-value="energico" data-field="voice-tono">Enérgico</button>
+            <button class="option-btn" data-value="solemne" data-field="voice-tono">Solemne</button>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal('voice')">Cancelar</button>
+          <button class="btn-primary" onclick="submitForm('voice')">Generar Audio</button>
+        </div>
+      </div>
+      <div class="loading" id="loading-voice">
+        <div class="spinner"></div>
+        <p>Generando audio...</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-capacitacion">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="modal-icon">📚</span>
+          <span>Crear Capacitación</span>
+        </div>
+        <button class="modal-close" onclick="closeModal('capacitacion')">✕</button>
+      </div>
+      <div id="form-capacitacion">
+        <div class="form-group">
+          <label>Tema de capacitación</label>
+          <textarea id="capacitacion-prompt" placeholder="Describe el tema y objetivos de la capacitación..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Nivel</label>
+          <div class="options-grid">
+            <button class="option-btn" data-value="basico" data-field="capacitacion-nivel">Básico</button>
+            <button class="option-btn active" data-value="intermedio" data-field="capacitacion-nivel">Intermedio</button>
+            <button class="option-btn" data-value="avanzado" data-field="capacitacion-nivel">Avanzado</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Duración estimada</label>
+          <div class="options-grid">
+            <button class="option-btn" data-value="15min" data-field="capacitacion-duracion">15 min</button>
+            <button class="option-btn active" data-value="45min" data-field="capacitacion-duracion">45 min</button>
+            <button class="option-btn" data-value="2h" data-field="capacitacion-duracion">2 horas</button>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeModal('capacitacion')">Cancelar</button>
+          <button class="btn-primary" onclick="submitForm('capacitacion')">Crear Capacitación</button>
+        </div>
+      </div>
+      <div class="loading" id="loading-capacitacion">
+        <div class="spinner"></div>
+        <p>Creando módulo de capacitación...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let queue = [];
+    let selectedOptions = {};
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadStats();
+      setupOptionButtons();
+      loadQueue();
+      // Refresh cada 10 segundos
+      setInterval(loadStats, 10000);
+      setInterval(loadQueue, 15000);
+    });
+
+    // Modal
+    function openModal(action) {
+      document.getElementById(`modal-${action}`)?.classList.add('active');
+    }
+
+    function closeModal(action) {
+      document.getElementById(`modal-${action}`)?.classList.remove('active');
+      document.getElementById(`form-${action}`)?.style.display = 'block';
+      document.getElementById(`loading-${action}`)?.classList.remove('active');
+    }
+
+    // Option buttons
+    function setupOptionButtons() {
+      document.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const field = e.target.dataset.field;
+          const value = e.target.dataset.value;
+
+          // Deselect others in same group
+          document.querySelectorAll(`[data-field="${field}"]`).forEach(b => {
+            b.classList.remove('active');
+          });
+
+          e.target.classList.add('active');
+          selectedOptions[field] = value;
+        });
+      });
+    }
+
+    // Submit form
+    async function submitForm(action) {
+      const promptId = `${action}-prompt`;
+      const prompt = document.getElementById(promptId)?.value?.trim();
+
+      if (!prompt) {
+        showToast('Por favor completa la descripción', 'error');
+        return;
+      }
+
+      const formEl = document.getElementById(`form-${action}`);
+      const loadingEl = document.getElementById(`loading-${action}`);
+
+      formEl.style.display = 'none';
+      loadingEl.classList.add('active');
+
+      try {
+        // Collect config
+        const config = {
+          ...selectedOptions
+        };
+
+        // Additional fields by action
+        if (action === 'imagen') {
+          config.cantidad = document.getElementById('imagen-cantidad')?.value || '1';
+        }
+        if (action === 'presentacion') {
+          config.slides = document.getElementById('presentacion-slides')?.value || '10';
+        }
+
+        // Send to API
+        const resp = await fetch('/api/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action,
+            voice_input: prompt,
+            config,
+            files: []
+          })
+        });
+
+        if (!resp.ok) {
+          throw new Error(`Error ${resp.status}`);
+        }
+
+        const result = await resp.json();
+        const jobId = result.jobId;
+
+        // Add to queue
+        queue.unshift({
+          jobId,
+          action,
+          prompt: prompt.slice(0, 60),
+          status: 'processing',
+          createdAt: new Date().toISOString()
+        });
+
+        renderQueue();
+        closeModal(action);
+        showToast(`✅ Trabajo creado: ${jobId}`);
+
+        // Reset form
+        document.getElementById(promptId).value = '';
+
+      } catch (err) {
+        showToast(`Error: ${err.message}`, 'error');
+        formEl.style.display = 'block';
+        loadingEl.classList.remove('active');
+      }
+    }
+
+    // Queue management
+    function renderQueue() {
+      const container = document.getElementById('queue-container');
+
+      if (!queue.length) {
+        container.innerHTML = '<div class="empty-queue">No hay trabajos en la cola</div>';
+        return;
+      }
+
+      container.innerHTML = queue.slice(0, 8).map(job => `
+        <div class="queue-item">
+          <div class="queue-info">
+            <strong>${job.action.toUpperCase()}</strong>
+            <div class="queue-id">${job.jobId}</div>
+          </div>
+          <div class="queue-status">${job.status}</div>
+        </div>
+      `).join('');
+    }
+
+    function loadQueue() {
+      // Load from localStorage
+      const saved = localStorage.getItem('victor-queue');
+      if (saved) {
+        queue = JSON.parse(saved);
+        renderQueue();
+      }
+    }
+
+    // Stats
+    async function loadStats() {
+      try {
+        const resp = await fetch('/api/biblioteca');
+        const data = await resp.json();
+
+        const total = data.total || 0;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const todayCount = (data.assets || []).filter(a => {
+          const assetDate = new Date(a.createdAt);
+          assetDate.setHours(0, 0, 0, 0);
+          return assetDate.getTime() === today.getTime();
+        }).length;
+
+        document.getElementById('stat-total').textContent = total;
+        document.getElementById('stat-today').textContent = todayCount;
+      } catch (err) {
+        console.error('Error loading stats:', err);
+      }
+    }
+
+    // Toast
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Save queue on change
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem('victor-queue', JSON.stringify(queue));
+    });
+  </script>
+</body>
+</html>
