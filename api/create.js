@@ -7,6 +7,11 @@
  * Returns: { jobId, status, message }
  */
 
+import { generateImage, generateVoice } from './_lib/generators.js';
+
+// Permite polling server-side de Higgsfield hasta ~60s (limite Vercel Pro/Hobby).
+export const config = { maxDuration: 60 };
+
 export default async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -45,30 +50,15 @@ export default async function handler(req, res) {
   console.log(`[create] config=`, JSON.stringify(config));
   console.log(`[create] files=${files.length}`);
 
-  // Guardar estado inicial en Supabase (mientras n8n procesa)
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-
-  if (supabaseUrl && supabaseKey) {
-    const initialRecord = {
-      job_id: jobId,
-      action,
-      result_url: '',
-      result_type: 'pending',
-      metadata: { prompt: voice_input.slice(0, 200), config },
-      status: 'processing'
-    };
-
-    fetch(`${supabaseUrl}/rest/v1/tracker_results`, {
-      method: 'POST',
-      headers: {
-        'apikey': supabaseKey,
-        'Authorization': `Bearer ${supabaseKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(initialRecord)
-    }).catch(e => console.warn('[create] Could not save initial record:', e.message));
-  }
+  // Guardar estado inicial en Supabase (mientras se genera)
+  await sbInsert({
+    job_id: jobId,
+    action,
+    result_url: '',
+    result_type: 'pending',
+    metadata: { prompt: voice_input.slice(0, 200), config },
+    status: 'processing'
+  });
 
   // ── Routing por acción ─────────────────────────────────────────────
   try {
@@ -124,20 +114,37 @@ export default async function handler(req, res) {
 ─────────────────────────────────────────────────────────────────── */
 
 async function dispatchImagen({ voice_input, config, files, jobId }) {
-  // TODO: llamar a Higgsfield MCP o webhook n8n
-  const n8nPayload = {
-    jobId,
-    type: 'imagen',
-    prompt: voice_input,
-    aspect_ratio: config.aspect_ratio || '1:1',
-    modelo: config.modelo || 'flux-pro',
-    estilo: config.estilo || 'realista',
-    cantidad: parseInt(config.cantidad) || 1,
-    tipo_seleccionado: config.tipo_seleccionado || 'general',
-    ref_images: files.length
-  };
-  await notifyN8n('imagen', n8nPayload);
-  return { message: `Generando ${n8nPayload.cantidad} imagen(es) con ${n8nPayload.modelo}` };
+  // Mapea aspect_ratio del popup -> enum de tamaño de Higgsfield Soul.
+  const ar = String(config.aspect_ratio || '1:1');
+  const aspect = ar.startsWith('16') || ar.startsWith('4:3') || ar.includes('16:9')
+    ? 'landscape'
+    : (ar.startsWith('9') || ar.startsWith('2:3') || ar.includes('9:16'))
+      ? 'portrait'
+      : 'square';
+
+  // Generación REAL server-side vía Higgsfield (submit + poll hasta ~48s).
+  const gen = await generateImage({ description: voice_input, aspect, timeoutMs: 48000 });
+
+  if (gen.url) {
+    // Éxito: guardamos la URL final -> aparece en biblioteca.html de inmediato.
+    await sbUpdate(jobId, {
+      result_url: gen.url,
+      result_type: 'image',
+      status: 'completed'
+    });
+    return { message: 'Imagen generada', url: gen.url, resultUrl: gen.url, status: 'completed' };
+  }
+
+  // No terminó dentro del límite: guardamos el request_id para poder completar
+  // vía /api/asset-status (polling) o /api/webhook-result (n8n). No es un fallo.
+  await sbUpdate(jobId, {
+    result_type: 'pending',
+    status: 'processing',
+    metadata: { prompt: voice_input.slice(0, 200), config, hf_request_id: gen.request_id }
+  });
+  // Aviso opcional a n8n (no bloquea si no responde).
+  notifyN8n('imagen', { jobId, type: 'imagen', prompt: voice_input, hf_request_id: gen.request_id });
+  return { message: 'Imagen en proceso (render largo)', status: 'processing', request_id: gen.request_id };
 }
 
 async function dispatchVideo({ voice_input, config, files, jobId }) {
@@ -192,20 +199,15 @@ async function dispatchWeb({ voice_input, config, files, jobId }) {
 }
 
 async function dispatchVoice({ voice_input, config, jobId }) {
-  const n8nPayload = {
-    jobId,
-    type: 'voice',
-    texto: voice_input,
-    voz: config.voz || 'iDEmt5MnqUotdwCIVplo',
-    idioma: config.idioma || 'es-MX',
-    tono: config.tono || 'profesional',
-    acento: config.acento || 'mx',
-    velocidad: parseFloat(config.velocidad) || 1.0,
-    extras: config.extras || [],
-    tipo_seleccionado: config.tipo_seleccionado || 'vo'
-  };
-  await notifyN8n('voice', n8nPayload);
-  return { message: `Generando audio · voz Victor · ${n8nPayload.idioma}` };
+  // Generación REAL de audio vía ElevenLabs (server-side).
+  const idioma = (config.idioma || 'es-MX').slice(0, 2);
+  const gen = await generateVoice({ text: voice_input, language: idioma });
+  await sbUpdate(jobId, {
+    result_url: gen.dataUrl,
+    result_type: 'audio',
+    status: 'completed'
+  });
+  return { message: 'Audio generado', url: gen.dataUrl, status: 'completed' };
 }
 
 async function dispatchCapacitacion({ voice_input, config, files, jobId }) {
@@ -240,21 +242,67 @@ async function dispatchAdmin({ voice_input, config, jobId }) {
 }
 
 /* ───────────────────────────────────────────────────────────────────
+   SUPABASE — insert / update de tracker_results
+─────────────────────────────────────────────────────────────────── */
+function sbCfg() {
+  return { url: process.env.SUPABASE_URL, key: process.env.SUPABASE_SERVICE_KEY };
+}
+
+async function sbInsert(record) {
+  const { url, key } = sbCfg();
+  if (!url || !key) { console.warn('[create] Supabase no configurado (insert)'); return; }
+  try {
+    const r = await fetch(`${url}/rest/v1/tracker_results`, {
+      method: 'POST',
+      headers: {
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(record)
+    });
+    if (!r.ok) console.warn('[create] Supabase insert', r.status, (await r.text()).slice(0, 200));
+  } catch (e) { console.warn('[create] Supabase insert error:', e.message); }
+}
+
+async function sbUpdate(jobId, patch) {
+  const { url, key } = sbCfg();
+  if (!url || !key) { console.warn('[create] Supabase no configurado (update)'); return; }
+  try {
+    const r = await fetch(`${url}/rest/v1/tracker_results?job_id=eq.${encodeURIComponent(jobId)}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(patch)
+    });
+    if (!r.ok) console.warn('[create] Supabase update', r.status, (await r.text()).slice(0, 200));
+  } catch (e) { console.warn('[create] Supabase update error:', e.message); }
+}
+
+/* ───────────────────────────────────────────────────────────────────
    NOTIFY N8N — Webhook de dispatch (no bloquea si falla)
+   NOTA: el webhook n8n escucha en la URL base (sin subpath). Enviar a
+   `${base}/${action}` da 404 — por eso ahora la imagen se genera
+   directamente en dispatchImagen y n8n queda solo como aviso opcional.
 ─────────────────────────────────────────────────────────────────── */
 async function notifyN8n(action, payload) {
   const webhookBase = process.env.N8N_WEBHOOK_URL ||
     'https://n8n.srv1013903.hstgr.cloud/webhook/c285fc03-6b3a-40be-b605-085e8336d492';
 
   try {
-    const resp = await fetch(`${webhookBase}/${action}`, {
+    const resp = await fetch(webhookBase, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ action, ...payload }),
       signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined
     });
     if (!resp.ok) {
-      console.warn(`[create] n8n webhook ${action} responded ${resp.status}`);
+      console.warn(`[create] n8n webhook responded ${resp.status}`);
     }
   } catch (e) {
     // No bloquear si n8n no responde — el job queda loggeado

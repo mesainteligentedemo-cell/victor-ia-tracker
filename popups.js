@@ -261,26 +261,31 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+      .then(function (res) {
         if (execBtn) { execBtn.disabled = false; execBtn.textContent = originalText; execBtn.style.opacity = ''; }
-        if (data.error) {
-          showToast('Error: ' + data.error, 'error');
+        var data = res.data || {};
+        if (!res.ok || data.error) {
+          showToast('Error: ' + (data.error || 'no se pudo generar'), 'error');
+          return;
+        }
+        var status = data.status || '';
+        if (status === 'completed' && (data.url || data.resultUrl)) {
+          showToast('¡Listo! Generado. Míralo en Biblioteca.', 'success');
+        } else if (status === 'processing') {
+          showToast('En proceso… aparecerá en Biblioteca en ~1 min.', 'success');
         } else {
           var jobId = data.jobId || data.id || data.job_id || '—';
           showToast('Job creado: ' + jobId, 'success');
-          closeAllPopups();
-          // Limpiar archivos
-          _state.uploadedFiles[popupId] = [];
         }
+        closeAllPopups();
+        _state.uploadedFiles[popupId] = [];
       })
       .catch(function (err) {
         if (execBtn) { execBtn.disabled = false; execBtn.textContent = originalText; execBtn.style.opacity = ''; }
-        // En desarrollo (sin backend real) mostramos el payload y un mensaje
-        console.log('[popups] POST payload:', payload);
-        showToast('Agente lanzado: ' + action + ' · ' + prompt.slice(0, 40) + (prompt.length > 40 ? '…' : ''), 'success');
-        closeAllPopups();
-        _state.uploadedFiles[popupId] = [];
+        // Error REAL de red: informar al usuario (nunca simular éxito).
+        console.error('[popups] POST /api/create falló:', err);
+        showToast('Error de conexión al generar. Revisa tu red e intenta de nuevo.', 'error');
       });
   }
 
