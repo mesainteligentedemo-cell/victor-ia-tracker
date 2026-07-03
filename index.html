@@ -8126,7 +8126,7 @@ function renderTabPeriodHeader(tabId,entries){
 }
 
 // ===== STATE =====
-let settings = {rate:1500,goalH:8,goalA:15,apiKey:'',geminiKey:'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',elevenLabsKey:'sk_87d5a7899d6c489c94232248c4880a0c4fe317adb3701e67',voiceId:'EXAVITQu4vr4xnSDxMaL',model:'openai/gpt-4o-mini'};
+let settings = {rate:1500,goalH:8,goalA:15,apiKey:'',geminiKey:'',elevenLabsKey:'',voiceId:'EXAVITQu4vr4xnSDxMaL',model:'openai/gpt-4o-mini'};
 let customEntries = [];
 let autoEntries   = [];   // cargados desde n8n cada 60 min
 let allEntries = [];
@@ -8155,8 +8155,8 @@ function rebuildAllEntries(){
 }
 
 // ===== INIT =====
-function init(){
-  loadSettings();
+async function init(){
+  await loadSettings();
   viaInitFirebase();
   loadCustomEntries();
   rebuildAllEntries();
@@ -8231,33 +8231,58 @@ async function loadAutoEntries(){
   }
 }
 
-function loadSettings(){
+async function loadSettings(){
   try{
-    // Save hardcoded defaults before merging (these should never be overwritten by empty localStorage values)
-    const hardDefaults={
-      geminiKey:'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',
-      elevenLabsKey:'sk_87d5a7899d6c489c94232248c4880a0c4fe317adb3701e67',
+    // Cargar de localStorage primero
+    const s=localStorage.getItem('vit_settings');
+    if(s) settings={...settings,...JSON.parse(s)};
+
+    // Valores por defecto seguros (sin keys reales)
+    const fallbackDefaults={
       voiceId:'EXAVITQu4vr4xnSDxMaL',
       model:'openai/gpt-4o-mini'
     };
-    const s=localStorage.getItem('vit_settings');
-    if(s) settings={...settings,...JSON.parse(s)};
-    // Restore hardcoded defaults if localStorage wiped them empty or has stale key
-    if(!settings.geminiKey) settings.geminiKey=hardDefaults.geminiKey;
-    if(!settings.elevenLabsKey||settings.elevenLabsKey==='sk_e0efba7c54bde483b034296d0cc240d572bd1714740f14e1')
-      settings.elevenLabsKey=hardDefaults.elevenLabsKey;
-    if(!settings.voiceId) settings.voiceId=hardDefaults.voiceId;
-    if(!settings.model) settings.model=hardDefaults.model;
+
+    // Cargar keys desde /api/config (server-side, seguro)
+    try {
+      const token = localStorage.getItem('via_access_token') || '';
+      const res = await fetch('/api/config', {
+        method: 'GET',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : undefined,
+        }
+      });
+
+      if (res.ok) {
+        const config = await res.json();
+        if (config.ok) {
+          settings.geminiKey = config.openrouterApiKey;
+          settings.elevenLabsKey = config.elevenLabsApiKey;
+          settings.voiceId = config.elevenLabsVoiceId || fallbackDefaults.voiceId;
+          settings.model = config.model || fallbackDefaults.model;
+        }
+      }
+    } catch (fetchErr) {
+      console.warn('[tracker] No se pudo cargar config desde /api/config:', fetchErr);
+      // Continuar sin keys — fallback a modo offline
+    }
+
+    // Restore fallback defaults if still empty
+    if(!settings.voiceId) settings.voiceId=fallbackDefaults.voiceId;
+    if(!settings.model) settings.model=fallbackDefaults.model;
+
     // Migrate old Gemini-direct model names
     if(settings.model&&!settings.model.includes('/')) settings.model='google/'+settings.model;
+
     // Reset any invalid/deprecated model IDs to default
-    const validModels=['openai/gpt-4o-mini','google/gemini-3.1-flash-lite-preview','google/gemini-3.1-pro-preview','openai/gpt-4o-mini','openai/gpt-4o','anthropic/claude-haiku-4-5','anthropic/claude-sonnet-4-5'];
-    if(!settings.model||!validModels.includes(settings.model)) settings.model=hardDefaults.model;
-    // Migrate old Gemini key if stored
-    if(settings.geminiKey&&settings.geminiKey.startsWith('AIzaSy')) settings.geminiKey=hardDefaults.geminiKey;
+    const validModels=['openai/gpt-4o-mini','google/gemini-3.1-flash-lite-preview','google/gemini-3.1-pro-preview','openai/gpt-4o','anthropic/claude-haiku-4-5','anthropic/claude-sonnet-4-5'];
+    if(!settings.model||!validModels.includes(settings.model)) settings.model=fallbackDefaults.model;
+
     // Persist corrected settings so next load is already clean
     localStorage.setItem('vit_settings',JSON.stringify(settings));
-  }catch(e){}
+  }catch(e){
+    console.warn('[tracker] Error en loadSettings:', e);
+  }
 }
 function loadCustomEntries(){
   try{const c=localStorage.getItem('vit_entries');if(c) customEntries=JSON.parse(c);}catch(e){}

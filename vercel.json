@@ -4,6 +4,24 @@
   "outputDirectory": ".",
   "cleanUrls": false,
   "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/login.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/:path((?!api|.*\\.\\w+|_next|favicon).*)",
+      "destination": "/404.html",
+      "permanent": false,
+      "statusCode": 404
+    }
+  ],
   "crons": [
     {
       "path": "/api/fetch-gsc",
