@@ -877,7 +877,31 @@ async function loadLibrary(){
       card.onclick=()=>{if(a.url)window.open(a.url,'_blank','noopener');};
       libBody.appendChild(card);
     });
+    reconcileProcessing(assets);
   }catch(e){ console.error('[lib]',e); }
+}
+
+/* Self-heal: videos que quedaron "⟳ Procesando" se re-consultan a
+   /api/asset-status (que finaliza en Supabase). Si alguno termina,
+   se refresca la Biblioteca para reflejar "✓ Listo". */
+let reconciling=false;
+async function reconcileProcessing(assets){
+  if(reconciling) return;
+  const pend=assets.filter(a=>a.status==='processing'
+    && a.metadata && a.metadata.hf_video_request_id).slice(0,4);
+  if(!pend.length) return;
+  reconciling=true;
+  let anyDone=false;
+  await Promise.all(pend.map(async a=>{
+    try{
+      let u='/api/asset-status?id='+encodeURIComponent(a.metadata.hf_video_request_id)+'&type=video';
+      if(a.jobId) u+='&job='+encodeURIComponent(a.jobId);
+      const r=await fetch(u); const d=await r.json();
+      if(d&&d.url) anyDone=true;
+    }catch(e){}
+  }));
+  reconciling=false;
+  if(anyDone){ clearTimeout(libTimer); libTimer=setTimeout(loadLibrary,600); }
 }
 
 /* ══════════ TTS (SpeechSynthesis) ══════════ */
