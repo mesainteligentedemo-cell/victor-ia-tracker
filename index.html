@@ -8208,6 +8208,21 @@ function getPeriodRange(period){
   }
 }
 
+// Normaliza CUALQUIER fecha de entrada a 'YYYY-MM-DD' local comparable.
+// Blinda contra datos del webhook/n8n mal formados que la comparación de
+// strings descartaría silenciosamente de TODOS los períodos:
+//   'YYYY-M-D' sin padding, 'YYYY-MM-DDTHH:MM' con hora, o campo .date en vez
+//   de .dateKey. Para claves ya correctas ('2026-07-04') devuelve idéntico.
+function normDateKey(e){
+  let k = (e && (e.dateKey || e.date)) || '';
+  k = String(k).trim();
+  if(k.includes('T')) k = k.split('T')[0];              // datetime ISO
+  else if(k.includes(' ')) k = k.split(' ')[0];         // 'fecha hora'
+  const m = k.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);   // pad componentes
+  if(m) k = `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
+  return k;
+}
+
 function filterByPeriod(entries, period){
   const range = getPeriodRange(period);
   if(range.type==='all') return entries;
@@ -8221,12 +8236,13 @@ function filterByPeriod(entries, period){
     return entries.filter(e=>{
       const parts=String(e.hora||'00:00').split(':');
       const eMin=(parseInt(parts[0],10)||0)*60+(parseInt(parts[1],10)||0);
-      if(e.dateKey===today) return eMin>=nowMin-60 && eMin<=nowMin;
-      if(e.dateKey===yKey && nowMin<60) return eMin>=nowMin+1380; // ventana que cruza medianoche
+      const dk=normDateKey(e);
+      if(dk===today) return eMin>=nowMin-60 && eMin<=nowMin;
+      if(dk===yKey && nowMin<60) return eMin>=nowMin+1380; // ventana que cruza medianoche
       return false;
     });
   }
-  return entries.filter(e=>e.dateKey>=range.from && e.dateKey<=range.to);
+  return entries.filter(e=>{ const dk=normDateKey(e); return dk>=range.from && dk<=range.to; });
 }
 
 function setPeriod(p){
