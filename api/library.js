@@ -48,7 +48,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const select = 'id,uuid,job_id,action,result_url,result_type,metadata,status,created_at';
+    const select = 'id,job_id,action,result_url,result_type,metadata,status,created_at';
     let url = `${supabaseUrl}/rest/v1/tracker_results` +
       `?select=${encodeURIComponent(select)}` +
       `&status=eq.${encodeURIComponent(status)}` +
@@ -85,7 +85,6 @@ export default async function handler(req, res) {
 
     const assets = (Array.isArray(data) ? data : []).map(item => ({
       id: item.id,
-      uuid: item.uuid,
       jobId: item.job_id,
       action: item.action,
       type: item.result_type,
