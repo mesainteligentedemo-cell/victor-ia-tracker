@@ -6506,8 +6506,8 @@ body.client-mode #main { margin-left: 0 !important; }
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
     Admin &amp; Finanzas
   </button>
-  <button class="via-qa-btn" onclick="if(typeof setTab==='function'){setTab('software')}" title="Biblioteca">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+  <button class="via-qa-btn" onclick="if(typeof setTab==='function'){setTab('biblioteca')}" title="Biblioteca de Assets">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
     Biblioteca
   </button>
 </div>
@@ -7233,6 +7233,7 @@ body.client-mode #main { margin-left: 0 !important; }
     <div id="view-finanzas" class="hidden"></div>
     <div id="view-organigrama" class="hidden"></div>
     <div id="view-software" class="hidden"></div>
+    <div id="view-biblioteca" class="hidden"></div>
     <div id="view-entradas" class="hidden"></div>
     <div id="view-reportes" class="hidden"></div>
     <div id="view-crm" class="hidden"></div>
@@ -8819,7 +8820,7 @@ function resetAccSettings(){
   setColorblind(cb);
 })();
 function renderCurrentView(){
-  const renders={dashboard:renderDashboard,analytics:renderAnalytics,finanzas:renderFinanzas,organigrama:renderOrganigrama,software:renderSoftware,entradas:renderEntradas,reportes:renderReportes,crm:renderCrm,apollo:renderApollo,telemetria:renderTelemetria,actividad:renderActividad};
+  const renders={dashboard:renderDashboard,analytics:renderAnalytics,finanzas:renderFinanzas,organigrama:renderOrganigrama,software:renderSoftware,biblioteca:renderLibrary,entradas:renderEntradas,reportes:renderReportes,crm:renderCrm,apollo:renderApollo,telemetria:renderTelemetria,actividad:renderActividad};
   const fn=renders[currentTab];if(fn) fn();
 }
 
@@ -10322,6 +10323,106 @@ function renderSoftware(){
     const colors=['#FFAA17','#3b82f6','#22c55e','#a855f7','#ef4444','#14b8a6','#f97316','#ec4899','#84cc16','#f59e0b'];
     charts['ch-sw-cost']=new Chart(costCtx,{type:'doughnut',data:{labels:paidSW.map(s=>s.name),datasets:[{data:paidSW.map(s=>s.cost),backgroundColor:colors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'rgba(245,241,232,.7)',font:{size:9},boxWidth:8}}}}});
   }
+}
+
+// ===== BIBLIOTECA VIEW — Assets (Imágenes, Videos, Voces, Presentaciones, Web) =====
+async function renderLibrary(){
+  const container=document.getElementById('view-biblioteca');
+  if(!container) return;
+
+  container.innerHTML='<div style="text-align:center;padding:40px;color:var(--bone2)">Cargando biblioteca...</div>';
+
+  try {
+    const response = await fetch('/api/library?limit=100&status=completed');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const { ok, assets, total, filters } = await response.json();
+    if (!ok || !assets) throw new Error('Invalid response');
+
+    // Agrupar por tipo de acción
+    const byAction = {};
+    assets.forEach(a => {
+      if (!byAction[a.action]) byAction[a.action] = [];
+      byAction[a.action].push(a);
+    });
+
+    const actionLabels = {
+      imagen: '🖼️ Imágenes',
+      video: '🎬 Videos',
+      voz: '🎙️ Voces & Audio',
+      presentacion: '📊 Presentaciones',
+      web: '🌐 Web & Landing',
+      capacitacion: '📚 Capacitación'
+    };
+
+    let html = `
+      ${renderTabPeriodHeader('biblioteca', [])}
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+        <div style="font-size:12px;color:var(--bone2)"><strong>${total}</strong> assets generados</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${Object.keys(byAction).map(action => `
+            <button onclick="filterLibraryByAction('${action}')" class="tab-btn" style="padding:6px 12px;font-size:11px">
+              ${actionLabels[action]} (${byAction[action].length})
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    // Renderizar por tipo
+    Object.entries(byAction).forEach(([action, items]) => {
+      html += `
+        <div class="section-title" style="margin-top:24px;margin-bottom:14px">
+          ${actionLabels[action]}
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px">
+          ${items.map(asset => renderAssetCard(asset)).join('')}
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  } catch (e) {
+    console.error('[biblioteca]', e);
+    container.innerHTML = `
+      <div style="padding:40px;text-align:center">
+        <div style="color:var(--red);margin-bottom:10px">Error cargando biblioteca</div>
+        <div style="font-size:12px;color:var(--bone2)">${e.message}</div>
+      </div>
+    `;
+  }
+}
+
+function renderAssetCard(asset) {
+  const thumb = asset.thumbnailUrl || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"%3E%3Crect fill="%23131418" width="200" height="200"/%3E%3C/svg%3E';
+  const dateStr = new Date(asset.createdAt).toLocaleDateString('es-MX');
+  const statusColor = asset.status === 'completed' ? 'var(--green)' : asset.status === 'processing' ? 'var(--amber)' : 'var(--bone2)';
+
+  return `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;hover: transform: translateY(-2px), box-shadow: 0 8px 16px rgba(0,0,0,0.3)" onclick="previewAsset('${asset.id}')">
+      <div style="width:100%;aspect-ratio:1;background:var(--bg) url('${thumb}') center/cover;position:relative;overflow:hidden">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.6) 100%);display:flex;align-items:flex-end;padding:8px;color:white;font-size:11px;font-weight:700">
+          ${asset.status === 'completed' ? '✓' : '⟳'}
+        </div>
+      </div>
+      <div style="padding:8px;border-top:1px solid var(--border)">
+        <div style="font-size:11px;font-weight:700;color:var(--bone);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${asset.title}">
+          ${asset.title}
+        </div>
+        <div style="font-size:9px;color:var(--bone2);">${dateStr}</div>
+        <div style="font-size:9px;color:${statusColor};font-weight:700;margin-top:2px">${asset.status}</div>
+      </div>
+    </div>
+  `;
+}
+
+function filterLibraryByAction(action) {
+  // TODO: Filtrar por acción
+  alert('Filtro por ' + action + ' (próximamente)');
+}
+
+function previewAsset(id) {
+  alert('Preview de ' + id + ' (próximamente)');
 }
 
 // ===== ENTRADAS VIEW =====
@@ -18008,6 +18109,11 @@ function studioAttachFile(file){
     { tab:'software', sel:'#view-software',
       title:'Software y APIs — Integraciones',
       say:'Estamos ahora en Software y A P Is, el inventario tecnológico de toda tu operación. Aquí encuentras, organizadas y a la vista, todas las herramientas activas de Victor IA: Claude, ElevenLabs, Runway, Adobe Creative Cloud, HubSpot, n ocho n y muchas más. Verás el costo mensual de cada una, su categoría y los agentes especializados asignados a ella. Tener este inventario centralizado te da control total: evita gastos duplicados, te ayuda a renegociar licencias y asegura que sepas, en todo momento, exactamente de qué herramientas depende tu negocio y cuánto te cuesta cada una.' },
+
+    // ── 18.5. BIBLIOTECA ──
+    { tab:'biblioteca', sel:'#view-biblioteca',
+      title:'Biblioteca — Galería de Assets',
+      say:'Aquí está la Biblioteca, la galería completa de todos los assets que has generado con Victor IA: imágenes con Higgsfield, videos, voces con ElevenLabs, presentaciones, websites y más. Es tu historial visual de creaciones, todo organizado, etiquetado y listo para reutilizar. Filtra por tipo, busca por fecha, descarga lo que necesites. Una sola fuente de verdad para todo lo que produces. Aquí no hay pérdida: cada generación queda archivada y disponible.' },
 
     // ── 19. ENTRADAS ──
     { tab:'entradas', sel:'#view-entradas',
