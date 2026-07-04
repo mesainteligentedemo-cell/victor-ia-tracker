@@ -8205,15 +8205,6 @@ async function init(){
 
   // PROTOCOLO DE VACIADO TOTAL: registrar inicio de sesión en el tracker
   try{ viaLogActivity('event','Sesión iniciada en el tracker',{source:'Tracker',cat:'Tracker',tags:['tracker','sesion','inicio']}); }catch(_){}
-
-  // DEBUG: Verificar que biblioteca se puede cargar
-  window.testLibreria=function(){
-    console.log('[DEBUG] Llamando setTab(biblioteca)');
-    currentTab='biblioteca';
-    document.querySelectorAll('#content > div').forEach(d=>d.classList.add('hidden'));
-    document.getElementById('view-biblioteca').classList.remove('hidden');
-    renderLibrary().catch(e=>console.error('[DEBUG] Error en renderLibrary:', e));
-  };
 }
 
 async function loadAutoEntries(){
@@ -10442,6 +10433,19 @@ function filterLibraryByAction(action) {
   // TODO: Filtrar por acción
   alert('Filtro por ' + action + ' (próximamente)');
 }
+
+// ===== DEBUG FUNCTION — Test Biblioteca =====
+window.testLibreria=function(){
+  console.log('[DEBUG] Llamando setTab(biblioteca) directamente...');
+  currentTab='biblioteca';
+  document.querySelectorAll('#content > div').forEach(d=>d.classList.add('hidden'));
+  const el=document.getElementById('view-biblioteca');
+  if(!el) { console.error('[DEBUG] view-biblioteca no existe'); return; }
+  el.classList.remove('hidden');
+  console.log('[DEBUG] Ejecutando renderLibrary()...');
+  renderLibrary().catch(e=>console.error('[DEBUG] Error en renderLibrary:', e));
+};
+window.console.log('[DEBUG] testLibreria disponible - escribe: testLibreria()');
 
 function previewAsset(id) {
   alert('Preview de ' + id + ' (próximamente)');
