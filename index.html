@@ -8821,7 +8821,12 @@ function resetAccSettings(){
 })();
 function renderCurrentView(){
   const renders={dashboard:renderDashboard,analytics:renderAnalytics,finanzas:renderFinanzas,organigrama:renderOrganigrama,software:renderSoftware,biblioteca:renderLibrary,entradas:renderEntradas,reportes:renderReportes,crm:renderCrm,apollo:renderApollo,telemetria:renderTelemetria,actividad:renderActividad};
-  const fn=renders[currentTab];if(fn) fn();
+  const fn=renders[currentTab];
+  if(fn){
+    const result=fn();
+    // Si es una promise (función async), esperar a que termine
+    if(result && typeof result.then==='function') result.catch(e=>console.error('[render]',e));
+  }
 }
 
 /* ============================================================
