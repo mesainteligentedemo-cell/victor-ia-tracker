@@ -18,7 +18,6 @@
     {
       "source": "/:path((?!api|.*\\.\\w+|_next|favicon).*)",
       "destination": "/404.html",
-      "permanent": false,
       "statusCode": 404
     }
   ],
