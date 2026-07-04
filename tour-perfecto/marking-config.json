@@ -555,7 +555,7 @@
     {
       "id": "mark-061",
       "step": 61,
-      "selector": ".tab-actividad-vivo, [onclick*='setTab.*actividad']",
+      "selector": "button[onclick=\"setTab('actividad')\"]",
       "label": "ACTIVIDAD EN VIVO — Stream de Cambios",
       "startTime": 850.0,
       "endTime": 875.0,
@@ -564,7 +564,7 @@
     {
       "id": "mark-062",
       "step": 62,
-      "selector": "#estudio-ia-fab, .estudio-ia-btn, [onclick*='openStudio']",
+      "selector": "#estudio-fab",
       "label": "ESTUDIO IA — IDE Integrado (Botón Principal)",
       "startTime": 875.0,
       "endTime": 900.0,
@@ -573,7 +573,7 @@
     {
       "id": "mark-063",
       "step": 63,
-      "selector": ".chat-panel, #chat-input, .chat-conversacional",
+      "selector": "#estudio-frame",
       "label": "CHAT — Conversación con Claude",
       "startTime": 900.0,
       "endTime": 930.0,
