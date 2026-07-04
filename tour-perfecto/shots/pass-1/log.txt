@@ -1,0 +1,34 @@
+[18:18:44.306] Abriendo https://tracker.victor-ia.xyz  (pass 1)
+[18:18:58.090] SECTION OK  — Carga y auth :: setTab+ViaTour=true authWallDismissed=true
+[18:19:01.371] SHOT 01-intro-dashboard.png
+[18:19:03.372] SHOT 02-s1-header.png
+[18:19:03.372] SECTION OK  — 1. Header / barra superior :: topbar-btns=true
+[18:19:05.245] SHOT 03-s2-periodo-bar.png
+[18:19:07.268] SHOT 04-s2-periodo-month.png
+[18:19:07.294] SECTION OK  — 2. Período de tiempo :: setPeriod month→week aplicado
+[18:19:09.354] SHOT 05-s3-proyectos-bar.png
+[18:19:11.289] SHOT 06-s3-proyectos-filtrado.png
+[18:19:11.290] SECTION OK  — 3. Selector de proyecto :: proyecto=default
+[18:19:16.315] SHOT 07-s4-entradas-tabla.png
+[18:19:19.616] SHOT 08-s4-entradas-detalle.png
+[18:19:22.734] SHOT 09-s4-actividad-vivo.png
+[18:19:22.734] SECTION OK  — 4. Tabla de actividad :: cards=20 detalle=true
+[18:19:26.067] SHOT 10-s5-dashboard-kpis.png
+[18:19:28.893] SHOT 11-s5-dashboard-charts.png
+[18:19:28.896] SECTION OK  — 5. Dashboard KPIs :: kpis=8
+[18:19:33.926] SHOT 12-s6-chat-ia.png
+[18:19:33.932] SECTION OK  — 6. Chat IA (Estudio IDE) :: title=Asistente Victor IA — IDE
+[18:19:38.446] SHOT 13-s7-biblioteca.png
+[18:19:38.450] SECTION OK  — 7. Biblioteca de assets :: view-biblioteca=true
+[18:19:41.799] SHOT 14-s8-exportar-boton.png
+[18:19:41.847] DOWNLOAD: victor-ia-tracker-2026-07-04.csv
+[18:19:41.848] SECTION OK  — 8. Exportar CSV :: download=victor-ia-tracker-2026-07-04.csv
+[18:19:45.072] SHOT 15-popup-nueva-entrada.png
+[18:19:49.605] SHOT 16-popup-filtros-sidebar.png
+[18:19:49.609] SECTION OK  — Pop-ups :: nuevaEntrada=true sidebar=true
+[18:19:53.236] SHOT 17-extra-analytics.png
+[18:19:57.301] SHOT 18-extra-infra-skills.png
+[18:20:00.537] SHOT 19-extra-tema-claro.png
+[18:20:00.539] SECTION OK  — Módulos extra (analytics/infra/tema)
+[18:20:08.481] SHOT 20-sync-viatour-spotlight.png
+[18:20:48.225] SECTION OK  — Sincronización voz↔marco :: pasos=12 repintado(ms) min=77 mediana=165 p95=264 max=264 — reveal en el mismo callback de la voz (drift voz↔visual ~0)

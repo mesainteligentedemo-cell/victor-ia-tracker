@@ -1,0 +1,136 @@
+{
+  "pass": "2",
+  "url": "https://tracker.victor-ia.xyz",
+  "started": "2026-07-04T18:20:48.887Z",
+  "sections": [
+    {
+      "name": "Carga y auth",
+      "ok": true,
+      "detail": "setTab+ViaTour=true authWallDismissed=true"
+    },
+    {
+      "name": "1. Header / barra superior",
+      "ok": true,
+      "detail": "topbar-btns=true"
+    },
+    {
+      "name": "2. Período de tiempo",
+      "ok": true,
+      "detail": "setPeriod month→week aplicado"
+    },
+    {
+      "name": "3. Selector de proyecto",
+      "ok": true,
+      "detail": "proyecto=default"
+    },
+    {
+      "name": "4. Tabla de actividad",
+      "ok": true,
+      "detail": "cards=20 detalle=true"
+    },
+    {
+      "name": "5. Dashboard KPIs",
+      "ok": true,
+      "detail": "kpis=8"
+    },
+    {
+      "name": "6. Chat IA (Estudio IDE)",
+      "ok": true,
+      "detail": "title=Asistente Victor IA — IDE"
+    },
+    {
+      "name": "7. Biblioteca de assets",
+      "ok": true,
+      "detail": "view-biblioteca=true"
+    },
+    {
+      "name": "8. Exportar CSV",
+      "ok": true,
+      "detail": "download=victor-ia-tracker-2026-07-04.csv"
+    },
+    {
+      "name": "Pop-ups",
+      "ok": true,
+      "detail": "nuevaEntrada=true sidebar=true"
+    },
+    {
+      "name": "Módulos extra (analytics/infra/tema)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Sincronización voz↔marco",
+      "ok": true,
+      "detail": "pasos=12 repintado(ms) min=109 mediana=167 p95=299 max=299 — reveal en el mismo callback de la voz (drift voz↔visual ~0)"
+    }
+  ],
+  "screenshots": [
+    "01-intro-dashboard.png",
+    "02-s1-header.png",
+    "03-s2-periodo-bar.png",
+    "04-s2-periodo-month.png",
+    "05-s3-proyectos-bar.png",
+    "06-s3-proyectos-filtrado.png",
+    "07-s4-entradas-tabla.png",
+    "08-s4-entradas-detalle.png",
+    "09-s4-actividad-vivo.png",
+    "10-s5-dashboard-kpis.png",
+    "11-s5-dashboard-charts.png",
+    "12-s6-chat-ia.png",
+    "13-s7-biblioteca.png",
+    "14-s8-exportar-boton.png",
+    "15-popup-nueva-entrada.png",
+    "16-popup-filtros-sidebar.png",
+    "17-extra-analytics.png",
+    "18-extra-infra-skills.png",
+    "19-extra-tema-claro.png",
+    "20-sync-viatour-spotlight.png"
+  ],
+  "syncSamples": [
+    109,
+    125,
+    133,
+    138,
+    150,
+    162,
+    167,
+    170,
+    189,
+    226,
+    230,
+    299
+  ],
+  "popups": [
+    {
+      "name": "Nueva Entrada (openAdd)",
+      "open": true
+    },
+    {
+      "name": "Filtros (toggleSidebar)",
+      "open": true
+    }
+  ],
+  "errors": [],
+  "narration": {
+    "steps": 34,
+    "totalAudioSeconds": 1275.1,
+    "formatted": "21m 15s"
+  },
+  "syncStats": {
+    "min": 109,
+    "median": 167,
+    "p95": 299,
+    "max": 299
+  },
+  "maxDriftMs": 299,
+  "medianDriftMs": 167,
+  "audioEventsCaptured": 0,
+  "spotEventsCaptured": 12,
+  "revealCallsCaptured": 12,
+  "finished": "2026-07-04T18:22:50.454Z",
+  "downloads": [
+    "victor-ia-tracker-2026-07-04.csv"
+  ],
+  "screenshotCount": 20,
+  "allSectionsOk": true
+}

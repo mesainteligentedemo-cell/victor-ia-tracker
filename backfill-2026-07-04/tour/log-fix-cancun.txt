@@ -1,0 +1,8 @@
+[2026-07-04T09:02:40.357Z] OBJETIVO: s465, s466, s467 -> 2026-07-04 04:00 (America/Cancun UTC-5)
+[2026-07-04T09:02:40.590Z] Abriendo https://tracker.victor-ia.xyz
+[2026-07-04T09:02:48.810Z] ANTES: {"total":168,"nuevas":[{"id":"s465","dateKey":"2026-07-04","hora":"03:59","durSec":3600,"dur":1},{"id":"s466","dateKey":"2026-07-04","hora":"03:59","durSec":1800,"dur":0.5},{"id":"s467","dateKey":"2026-07-04","hora":"03:59","durSec":900,"dur":0.25}],"s300":{"id":"s300","dateKey":"2026-04-11","hora":"19:56","durSec":5832,"dur":1.62},"s380":{"id":"s380","dateKey":"2026-06-02","hora":"13:00","durSec":10800,"dur":3},"s464":{"id":"s464","dateKey":"2026-07-04","hora":"04:30","durSec":7200,"dur":2}}
+[2026-07-04T09:02:48.821Z] FIX APLICADO: {"changed":[{"id":"s465","horaAntes":"03:59","horaDespues":"04:00"},{"id":"s466","horaAntes":"03:59","horaDespues":"04:00"},{"id":"s467","horaAntes":"03:59","horaDespues":"04:00"}],"total":168}
+[2026-07-04T09:02:59.287Z] DESPUES: {"total":168,"duplicados":0,"historicasCount":165,"nuevas":[{"id":"s465","dateKey":"2026-07-04","hora":"04:00"},{"id":"s466","dateKey":"2026-07-04","hora":"04:00"},{"id":"s467","dateKey":"2026-07-04","hora":"04:00"}],"s300":{"id":"s300","dateKey":"2026-04-11","hora":"19:56"},"s380":{"id":"s380","dateKey":"2026-06-02","hora":"13:00"},"s464":{"id":"s464","dateKey":"2026-07-04","hora":"04:30"}}
+[2026-07-04T09:02:59.288Z] ERRORES CONSOLA: ninguno
+[2026-07-04T09:02:59.288Z] PROBLEMAS: NINGUNO — validacion OK
+[2026-07-04T09:03:02.651Z] SCREENSHOT: tracker-cancun-fixed.png

@@ -1,0 +1,28 @@
+{
+  "pre": 0,
+  "verif": {
+    "total": 165,
+    "enRango300a464": 165,
+    "faltantes": [],
+    "duplicados": 0,
+    "tieneS300": true,
+    "tieneS464": true
+  },
+  "logRes": {
+    "agregadas": [
+      "s465",
+      "s466",
+      "s467"
+    ],
+    "total": 168
+  },
+  "final": {
+    "total": 168,
+    "duplicados": 0,
+    "s465": true,
+    "s466": true,
+    "s467": true,
+    "s300": true,
+    "s464": true
+  }
+}

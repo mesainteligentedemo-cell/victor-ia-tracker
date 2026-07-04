@@ -1,0 +1,22 @@
+{
+  "hora": "12:45",
+  "result": {
+    "fbReady": true,
+    "remoteCount": 1,
+    "merged": 169,
+    "synced": true,
+    "err": null
+  },
+  "verify": {
+    "remoteCount": 169,
+    "localCount": 169,
+    "hasS471": true,
+    "hasS300": true,
+    "hasS464": true,
+    "hasS465": true,
+    "hasS467": true,
+    "remoteHasS471": true,
+    "remoteHasS300": true
+  },
+  "ts": "2026-07-04T18:46:00.026Z"
+}

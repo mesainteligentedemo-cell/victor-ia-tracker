@@ -1,2 +1,5 @@
 .vercel
 .env*
+
+# Playwright browser profiles (transitorios)
+**/chrome-profile*/

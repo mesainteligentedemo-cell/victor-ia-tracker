@@ -1,0 +1,31 @@
+[2026-07-04T08:48:25.847Z] Abriendo https://tracker.victor-ia.xyz
+  [pagina] [VIA] Firebase conectado  victor-ia-tracker
+[2026-07-04T08:48:37.423Z] Entradas ANTES de importar: 0
+[2026-07-04T08:48:37.423Z] Ejecutando IMPORTAR_EN_CONSOLA.js en la consola de la pagina...
+  [pagina] OK. Existentes: 0  Nuevas agregadas: 165  Total: 165
+[2026-07-04T08:48:37.445Z] DIALOG: Tracker: 165 entradas nuevas agregadas (total 165). Recargando...
+  [pagina] [VIA] Firebase conectado  victor-ia-tracker
+[2026-07-04T08:48:43.469Z] VERIFICACION POST-IMPORT: {"total":165,"enRango300a464":165,"faltantes":[],"duplicados":0,"tieneS300":true,"tieneS464":true}
+[2026-07-04T08:48:48.574Z] SCREENSHOT: 01-insertadas.png
+[2026-07-04T08:48:48.574Z] TOUR 1/8 — Header y navegacion: "Este es el tracker de actividad de Victor IA. Aqui registramos cada accion de trabajo con hora exacta."
+[2026-07-04T08:48:53.471Z] SCREENSHOT: 02-header.png
+[2026-07-04T08:48:53.471Z] TOUR 2/8 — Filtros: PERIODO, PROYECTO, CLIENTE, CATEGORIA y ESTADO permiten aislar cualquier segmento de trabajo.
+[2026-07-04T08:48:58.384Z] SCREENSHOT: 03-filtros.png
+[2026-07-04T08:48:58.384Z] TOUR 3/8 — Grid principal: columnas id, dateKey, hora, desc, cat, project, client, status, priority, dur y tags.
+[2026-07-04T08:49:05.284Z]   (fila no clickeable, continuo)
+[2026-07-04T08:49:09.005Z] SCREENSHOT: 04-grid.png
+[2026-07-04T08:49:09.023Z] TOUR 4/8 — Actividad en Vivo: espejo de Supabase (tabla activity_log) donde se sincronizan los logs via /api/log-activity.
+[2026-07-04T08:49:13.915Z] SCREENSHOT: 05-actividad.png
+[2026-07-04T08:49:13.915Z] TOUR 5/8 — Analytics: total de horas, proyectos activos y categorias de trabajo con KPIs del periodo.
+[2026-07-04T08:49:19.635Z] SCREENSHOT: 06-analytics.png
+[2026-07-04T08:49:19.635Z] TOUR 6/8 — Gestion de datos: boton "+ Entrada" (openAdd) crea; cada fila tiene editar/eliminar.
+[2026-07-04T08:49:24.688Z] SCREENSHOT: 07-gestor.png
+[2026-07-04T08:49:25.499Z] TOUR 7/8 — Sync: los datos se sincronizan a Firestore (doc tracker/vit_entries) y a Supabase via webhook n8n.
+[2026-07-04T08:49:28.595Z] SCREENSHOT: 08-sync.png
+[2026-07-04T08:49:28.595Z] TOUR 8/8 — Configuracion: firebaseConfig, preferencias y estado de conexion.
+[2026-07-04T08:49:31.699Z] SCREENSHOT: 09-settings.png
+[2026-07-04T08:49:31.702Z] Insertando 3 entradas de logging (s465, s466, s467)...
+[2026-07-04T08:49:31.711Z] LOGGING: {"agregadas":["s465","s466","s467"],"total":168}
+  [pagina] [VIA] Firebase conectado  victor-ia-tracker
+[2026-07-04T08:49:45.778Z] SCREENSHOT: 10-logging-s465-467.png
+[2026-07-04T08:49:45.784Z] VALIDACION FINAL: {"total":168,"duplicados":0,"s465":true,"s466":true,"s467":true,"s300":true,"s464":true}

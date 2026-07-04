@@ -1,0 +1,22 @@
+{
+  "pre": 0,
+  "res": {
+    "path": "saveCustomEntries",
+    "before": 0,
+    "after": 1,
+    "existed": false,
+    "firebase": false
+  },
+  "verify": {
+    "total": 1,
+    "hasS471": true,
+    "s471": {
+      "id": "s471",
+      "hora": "12:24",
+      "status": "Completado",
+      "dur": 1.5
+    }
+  },
+  "hora": "12:24",
+  "ts": "2026-07-04T18:24:42.349Z"
+}

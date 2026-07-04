@@ -1,0 +1,4159 @@
+[
+ {
+  "id": "s464",
+  "dateKey": "2026-07-04",
+  "hora": "04:30",
+  "desc": "Sesion: vaciado total de 4 meses de actividad al tracker — recopilacion de 1389 commits git (dedup), 47 actividades de diarios, generacion de dump JSON/CSV cronologia inversa",
+  "cat": "Documentacion",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "tracker",
+   "backfill",
+   "git",
+   "documentacion"
+  ],
+  "rework": 0,
+  "obs": "116 entradas git + 47 diario + 1 sesion = 164 total",
+  "notes": "",
+  "sw": [
+   "claude-code",
+   "git",
+   "powershell",
+   "python"
+  ]
+ },
+ {
+  "id": "s463",
+  "dateKey": "2026-07-04",
+  "hora": "03:07",
+  "desc": "[12 commits] fix: HTTP 200 en /, remover tracker-auth-integration.js fantasma, FAB sobre banner PWA | fix: ripple effect rompia position:fixed del FAB Estudio IA (desaparecia fuera del viewport) | fix(chat): biblioteca auto-reconcilia videos atascados en Procesando | fix: FAB (botón flotante) ahora SIEMPRE permanece visible | refactor: Custom emoji UI + Biblioteca improvements | feat(tracker): ...",
+  "cat": "Feature",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 3.12,
+  "durSec": 11232,
+  "tags": [
+   "fix",
+   "feat",
+   "refactor",
+   "chat",
+   "biblioteca",
+   "fab"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 12 commits git (00:15-03:07)",
+  "notes": "feat: botón flotante Estudio IA que abre el chat completo (/chat) en modal; fix: excluir rutas limpias (chat/asistente/ide/login) del redirect 404 en vercel.json; feat: Rediseño chat ASISTENTE VICTOR IA como IDE integrado (VS Code style); feat(biblioteca): 4 botones (descargar/compartir/recrear/elim",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s462",
+  "dateKey": "2026-07-04",
+  "hora": "03:05",
+  "desc": "[7 commits] feat: Update all 'Iniciar sesión' CTAs to point to tracker.victor-ia.xyz | fix: Make cover images visible in blog index (absolute paths + visibility CSS) | fix: corrige typo 'PDFix' en título del modal de captura del blog (135 artículos) | feat: Victor IA branded popup + real PDF guide + visible covers | feat: JS fallback para portadas + links internos subrayados faltantes en 137 ar...",
+  "cat": "Bug Fix",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 3.03,
+  "durSec": 10908,
+  "tags": [
+   "fix",
+   "feat",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 7 commits git (00:18-03:05)",
+  "notes": "fix: Lenis smooth scroll on all main pages + guard null hdr JS error across blog articles",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s461",
+  "dateKey": "2026-07-03",
+  "hora": "23:46",
+  "desc": "[13 commits] polish: Biblioteca — etiqueta 'voice' y fallback para acciones desconocidas (evita 'undefined' en cabeceras de la galeria) | fix: /api/library quita columna uuid inexistente en tracker_results (fix HTTP 400) | fix: /api/library usa REST directo de Supabase (SUPABASE_SERVICE_KEY) en vez de @supabase/supabase-js no instalado — arregla HTTP 500 de la galeria Biblioteca | fix: vercel.j...",
+  "cat": "Bug Fix",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 5.15,
+  "durSec": 18540,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy",
+   "biblioteca",
+   "supabase",
+   "auth"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 13 commits git (18:52-23:46)",
+  "notes": "fix: Mover testLibreria fuera de init() para que esté siempre disponible en scope global; debug: Agregar función testLibreria para debuggear directamente; fix: Simplificar onclick del botón Biblioteca para que funcione correctamente; debug: Agregar logs y mejorar visualización de errores en renderLi",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s460",
+  "dateKey": "2026-07-03",
+  "hora": "23:28",
+  "desc": "[13 commits] feat: Popup scroll/exit-intent + Victor IA styling + verify linkbuildings | feat: Complete blog with visible linkbuilding, Lenis scroll, internal content links | fix: Rewrite extension-less /blog/:slug to .html so internal linkbuilding links resolve (no 404s) | fix: Add visible cover images to all articles + verify linkbuilding (internal+external) with correct URLs | feat: Apply fu...",
+  "cat": "Bug Fix",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy",
+   "seo",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 13 commits git (13:20-23:28)",
+  "notes": "fix: Complete visual fix - linkbuilding, SVG, images all visible; fix: Restore all SVG animations, fix image paths, repair JavaScript truncation - all 135 articles; feat: Add SVG animations to blog articles; fix(blog): create missing SVG animation layer (fixes 272 404s + animates inline charts); seo",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s459",
+  "dateKey": "2026-07-02",
+  "hora": "14:30",
+  "desc": "Workflow N8N imagen (Higgsfield -> Supabase) + generadores ElevenLabs/OpenRouter configurados y probados en vivo",
+  "cat": "Contenido",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "elevenlabs",
+   "higgsfield",
+   "n8n"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "higgsfield",
+   "elevenlabs"
+  ]
+ },
+ {
+  "id": "s458",
+  "dateKey": "2026-07-02",
+  "hora": "14:00",
+  "desc": "Sistema de 6 CTAs de generacion de contenido (imagen/video/presentacion/web/voz/capacitacion) testeado end-to-end y deployado a produccion en tracker.victor-ia.xyz",
+  "cat": "Deploy",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "video",
+   "voz",
+   "deploy"
+  ],
+  "rework": 1,
+  "obs": "Fuente: diario de memoria | posible solape con commits git mismo dia/proyecto",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s457",
+  "dateKey": "2026-07-02",
+  "hora": "10:30",
+  "desc": "[17 commits] feat: rebuild blog index with all 136 articles, spotlight marble effect, 10 categories | fix(blog): remove duplicate covers/covers subfolder (137 unused files) | feat: rebuild blog with exact brand design match - 135 articles with perfect styling | fix(blog): reemplazar articulos incompletos con versiones completas + covers | feat: activate footer links - move legal pages to root, ...",
+  "cat": "Feature",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 17 commits git (00:18-10:30)",
+  "notes": "feat: update footer on all slugs - 4 column responsive layout with correct links; fix: correct image paths and loading for blog covers; feat: add article cover images to blog cards; feat: complete blog rebuild with 135+ articles, exact design match, footer 3-col; feat: rebuild blog index with spotli",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s456",
+  "dateKey": "2026-07-02",
+  "hora": "02:54",
+  "desc": "[9 commits] docs: registro s146 sistema generacion contenido 6 CTAs - Sesion 2026-07-02 | feat: poller de biblioteca completa cover/hero de presentacion+web+capacitacion al terminar el render (preserva result_type) | fix: video CTA - subir cap del frame origen a 42s y conservar request_id si no termina | feat: los 6 CTAs generan activos reales (video, presentacion, web, capacitacion) | fix: gen...",
+  "cat": "Bug Fix",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 2.28,
+  "durSec": 8208,
+  "tags": [
+   "fix",
+   "feat",
+   "docs",
+   "biblioteca",
+   "supabase"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 9 commits git (00:52-02:54)",
+  "notes": "fix: URL Supabase correcta; fix: biblioteca; fix: biblioteca muestra imágenes correctamente",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s455",
+  "dateKey": "2026-07-01",
+  "hora": "23:38",
+  "desc": "[6 commits] trigger: force Vercel redeploy | feat: restore original design with hover library background effect and correct copy | restore: recover previous version from stash (before git connection) | Revert \"revert: restore previous hero version with 150 agents messaging\" | revert: restore previous hero version with 150 agents messaging | chore: Force cache clear for rewrite",
+  "cat": "Deploy",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "feat",
+   "deploy"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 6 commits git (00:40-23:38)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s454",
+  "dateKey": "2026-07-01",
+  "hora": "20:42",
+  "desc": "[27 commits] fix: ConvAI conexion garantizada (escalera webrtc/websocket + mic release + SDK 1.14) | fix: versión específica del SDK y mejorar manejo de conexión ConvAI | fix: arreglar conexión del widget ConvAI - usar dominio actual en lugar de vtc-capacitacion-deploy | restore: video player fix (029e2d45) | restore: complete rewrite with sidebar Victor (c38a30b0) | restore: hamburger menu + V...",
+  "cat": "Bug Fix",
+  "project": "VTC Capacitacion",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "refactor",
+   "deploy",
+   "chat",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 27 commits git (00:29-20:42)",
+  "notes": "restore: correct version from 83cd3c04; restore: simplify video player (07d73bd4); restore: URLs absolutas para videos (3f586f5f); restore: mobile menu navigation version (16c02d20); restore: original capacitacion.html with sidebar menu (db97425b); restore: oldest stable capacitacion.html (8fd15d2b)",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s453",
+  "dateKey": "2026-06-30",
+  "hora": "16:17",
+  "desc": "[35 commits] trigger: Force Vercel redeploy after connecting to victor-ia-home | feat: Add Vercel rewrites for capacitacion-timeshare slug - final solution | feat: VTC at super-short name | feat: VTC capacitación embedded in iframe at victor-ia-website.vercel.app/vtc/ | feat: VTC capacitación at /vtc/ route | fix: Disable cleanUrls to serve capacitacion.html directly",
+  "cat": "Deploy",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 4.67,
+  "durSec": 16812,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 35 commits git (14:03-16:17)",
+  "notes": "feat: VTC capacitación available at victor-ia-website.vercel.app/capacitacion.html; feat: VTC capacitación fully functional at victor-ia.xyz/archive/capacitacion-timeshare.html; feat: Mount VTC capacitacion at victor-ia.xyz/archive/capacitacion-timeshare.html; fix: Add Vercel redirects for capacitac",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s452",
+  "dateKey": "2026-06-27",
+  "hora": "23:58",
+  "desc": "[4 commits] chore: Trigger Vercel redeploy | chore: Remove temporary test files | test: Unique test file for Vercel verification 1782541007 | chore: Force Vercel rebuild Sat Jun 27 01:13:16 HEM 2026",
+  "cat": "Deploy",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "deploy",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 4 commits git (01:13-23:58)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s451",
+  "dateKey": "2026-06-26",
+  "hora": "23:20",
+  "desc": "[9 commits] feat: Add WhatsApp contact link (wa.me/5219842353159) to CTAs | Recreate como-funciona.html without CTA | Delete como-funciona.html to force rebuild | FINAL TEST: Radical change to verify rebuild | chore: Trigger full Vercel rebuild Fri Jun 26 23:08:42 HEM 2026 | DEBUG: Force real rebuild test",
+  "cat": "UI/UX",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 4.73,
+  "durSec": 17028,
+  "tags": [
+   "feat",
+   "deploy",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 9 commits git (18:51-23:20)",
+  "notes": "Rebuild trigger; chore: Force Vercel redeploy to clear cache; Remove 'Hablar con un especialista' CTAs",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s450",
+  "dateKey": "2026-06-26",
+  "hora": "13:32",
+  "desc": "[1 commits] docs: backfill 50 sesiones de chat reales (29-abr a 17-jun) en SEED - registro completo de actividad",
+  "cat": "Documentacion",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [
+   "docs",
+   "chat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (13:32-13:32)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s449",
+  "dateKey": "2026-06-25",
+  "hora": "21:10",
+  "desc": "[8 commits] fix: agregar redirecciones simples /propuesta a HTML | feat: agregar propuesta a raiz del sitio para acceso directo | feat: propuesta clean html - encoding utf8 puro, responsive, sin caracteres especiales rotos | feat: agregar favicon, metadescripción SEO completa y open graph tags | feat: agregar slug limpio /propuestas/central-alarmas para acceso fácil | refactor: mejorar meta tag...",
+  "cat": "Feature",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 1.13,
+  "durSec": 4067,
+  "tags": [
+   "fix",
+   "feat",
+   "refactor",
+   "seo"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 8 commits git (20:17-21:10)",
+  "notes": "fix: agregar propuestas a vercel.json para servir archivos estáticos correctamente; feat: Propuesta Cliente Central de Alarmas - Sistema WhatsApp + Vigilancia + Tracker",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s448",
+  "dateKey": "2026-06-25",
+  "hora": "20:43",
+  "desc": "[8 commits] fix: apunta auto-logger.ps1 al dominio de producción correcto (tracker.victor-ia.xyz) | feat: Protocolo de Vaciado Total — activity logger automático | fix: reparar SEED corrupto + backfill exhaustivo actividad 18-25 jun (s131-s175) | docs: Registro actividad 18-25 junio en tracker - Sesión 2026-06-25 | fix: video gen ahora retorna request_id de inmediato (cabe en 60s de Vercel); im...",
+  "cat": "Feature",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "docs",
+   "chat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 8 commits git (00:29-20:43)",
+  "notes": "feat: functional floating chat with real OpenRouter (Claude Haiku 4.5); feat: convert chat to floating widget with drag support",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s447",
+  "dateKey": "2026-06-24",
+  "hora": "19:32",
+  "desc": "[4 commits] feat: redesign chat interface with tracker colors, fullscreen, and minimize/close controls | feat: add professional chat interface with voice support | feat: add /api/email/debug to diagnose env var visibility on Vercel | chore: force Vercel redeploy to register /api/email/test function",
+  "cat": "Feature",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 3.08,
+  "durSec": 11088,
+  "tags": [
+   "feat",
+   "deploy",
+   "chat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 4 commits git (16:42-19:32)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s446",
+  "dateKey": "2026-06-22",
+  "hora": "21:02",
+  "desc": "[6 commits] feat: Complete mobile redesign — new topbar + overlay menu (eliminates all cascading conflicts) | fix: CSS cascade issue — hamburger menu now visible, no horizontal scroll (Opus diagnosis) | feat: Complete mobile redesign with hamburger menu + master responsive CSS (Opus) | fix: Complete mobile responsive fix — dropdown visible, modules no longer cut off (Opus audit) | feat: Full mo...",
+  "cat": "Feature",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 3.85,
+  "durSec": 13860,
+  "tags": [
+   "fix",
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 6 commits git (17:26-21:02)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s445",
+  "dateKey": "2026-06-21",
+  "hora": "19:29",
+  "desc": "[10 commits] fix: add data-category to agente-ia-onboarding-clientes card | fix: force redeploy blog index | fix: await Resend send in /api/agenda-confirm (fire-and-forget killed email) | improve: email template with luxury dark design for preparation confirmation | feat: pagina interactiva de preparacion para diagnostico + API de confirmacion | fix: email checkboxes now show ✓ marks + update f...",
+  "cat": "Bug Fix",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 10 commits git (04:15-19:29)",
+  "notes": "fix(agenda): send confirmation from verified domain victor-ia.xyz (was unverified .com.mx → 403, prospect got no email); fix: APIs como CommonJS via api/package.json (extensionless functions); fix: evitar loop de redireccion en /preparacion-diagnostico; feat: pagina de preparacion para diagnostico +",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s444",
+  "dateKey": "2026-06-21",
+  "hora": "18:32",
+  "desc": "[43 commits] feat: expand frame to cover complete module areas - dashboard, analytics, crm, infra sections fully framed with thick golden border | feat: surgical tour synchronization and premium UX - perfect voice-to-frame timing, smooth transitions, ripple effects, and premium controls | feat: restore tour controls (play, pause, prev, next, stop) with clean UI - golden frame marks each step in...",
+  "cat": "Bug Fix",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy",
+   "auth",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 43 commits git (00:04-18:32)",
+  "notes": "VERIFIED: 33-step tour consolidated and deployed; fix: remove old 21-step tour system, consolidate to ViaTour 33-step complete tour - eliminate conflicts; force: vercel cache bust - deploy 33-step complete tour; fix: remove Google OAuth (redirect_uri_mismatch error), add two login options - email an",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s443",
+  "dateKey": "2026-06-20",
+  "hora": "23:28",
+  "desc": "[40 commits] chore: FORCE VERCEL REDEPLOY — Clear CDN cache | fix: CLEAN FIREBASE INIT — Remove duplicate initialization + remove unused Three.js CDN | docs: CONSOLE ERRORS FIXED — Document all fixes (Firebase dup, vi-track.js, CORS) | fix: REMOVE BROKEN REFERENCES — Delete duplicate Firebase SDK + vi-track.js 404 + CORS fetch errors | feat: INFRASTRUCTURE DASHBOARD CSS — Complete styling (620 ...",
+  "cat": "Deploy",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy",
+   "docs",
+   "supabase",
+   "auth"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 40 commits git (00:11-23:28)",
+  "notes": "docs: VERIFY-LIVE — Complete testing guide for live tracker at victor-ia.xyz; feat: PHASE 11 COMPLETE — Mobile PWA (Installable App + Offline + Background Sync); docs: SYSTEM COMPLETE — 🎉 Production-Ready System Summary (10/12 Phases Done); docs: DEPLOY-NOW — Complete 30-minute setup guide (Firebase",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s442",
+  "dateKey": "2026-06-20",
+  "hora": "15:53",
+  "desc": "[10 commits] fix: ensure converter and calendar always visible with clear text | fix: /api/agenda responde 200 no-bloqueante (emailed flag) | fix: confirmacion de email garantizada en agendar videollamada | feat: add 'Agendar videollamada' CTA to all pages | feat: apply victor-ia.xyz look & feel to booking page | feat: wire agendar-videollamada to n8n webhook (Telegram + email)",
+  "cat": "Feature",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 10 commits git (00:12-15:53)",
+  "notes": "feat: create booking page with calendar and n8n automation; feat: update CTA text to 'Agendar videollamada'; Revert \"feat: apply victor-ia.xyz look & feel to booking page\"; feat: agendar-videollamada page wired to n8n booking webhook",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s441",
+  "dateKey": "2026-06-19",
+  "hora": "23:47",
+  "desc": "[26 commits] docs: PHASE 9 COMPLETE — PostgreSQL + Clerk Auth + Enterprise Security (System 75% Done) | feat: PHASE 9 ENTERPRISE — PostgreSQL + Clerk Auth + Security Middleware (Complete) | docs: ROADMAP — What's Missing (Phases 9-12) + Priority Matrix | feat: PHASE 8 COMPLETE — Automated Testing + GitHub Actions CI/CD Pipeline (35 tests, 95% coverage) | docs: PHASE 7 COMPLETE — Video Tutorial ...",
+  "cat": "Documentacion",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy",
+   "docs",
+   "auth",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 26 commits git (00:19-23:47)",
+  "notes": "docs: FINAL SUMMARY — Complete Project Overview (All 6 Phases); feat: PHASE 6 — Historical Analytics with ML Predictions & Trend Analysis; docs: DEPLOYMENT COMPLETE — THE DOOR production system live; feat: Organigrama interactivo con 155 agentes + cadena de mando + matriz decisión; fix: Convert api-",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s440",
+  "dateKey": "2026-06-19",
+  "hora": "18:38",
+  "desc": "[20 commits] fix(hover): refuerza efectos hover visibles + cache-bust v=fx3 (231 HTML) | fix(anim): resolver conflicto hover/animaciones de texto en todas las páginas | feat: apply animations to all site pages | feat: Effects & Animations system (14 categorias) - animations.css + animations.js integrados en 5 paginas | fix: cache-bust water-trail.js?v=dbase60 across all pages | fix: no-cache he...",
+  "cat": "Bug Fix",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 20 commits git (01:15-18:38)",
+  "notes": "feat: water-trail reveal area doubled + faster return to white; fix: hide orphan bg-marble div so hero starts white (reveal on mouse); fix: canvas reveal cubre 100% pantalla — eliminar canvas duplicados en hero sections; fix: canvas blanco 100% opaco cada frame — imagen solo visible con mouse; fix: ",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s439",
+  "dateKey": "2026-06-18",
+  "hora": "17:51",
+  "desc": "[16 commits] fix: Replace scroll-behavior:smooth with auto + add Lenis CSS inline | fix: Add Lenis CSS calibration to global styles | feat: Add rewrites for all 21 service page slugs without .html extension | fix: Specify static site build output for Vercel | fix: Disable cleanUrls to serve .html files directly | fix: Add service page slugs to vercel.json rewrite exclusion",
+  "cat": "Bug Fix",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 16 commits git (00:19-17:51)",
+  "notes": "feat: Add centralized Lenis Apple config for all pages; fix: login redirect to tracker.victor-ia.xyz instead of dashboard; feat: create dashboard with generation buttons (Image, Video, Presentation, Web, Voice) + update login redirect; fix: cursor custom visible siempre en todas las slugs; feat: add",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s438",
+  "dateKey": "2026-06-18",
+  "hora": "15:26",
+  "desc": "[16 commits] docs: formalize mandatory activity dump protocol - all activity VSC + tracker registered | docs: registro sesion s117-s125 - Sesion 2026-06-18 | docs: protocolo obligatorio registro tracker + entrada s117 - Sesion 2026-06-18 | feat(tracker): registrar 19 actividades de madrugada (s098-s116) | docs: add 12 activity entries to tracker bitacora for 2026-06-17/18 session (website redes...",
+  "cat": "Bug Fix",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy",
+   "docs",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 16 commits git (01:41-15:26)",
+  "notes": "fix: bump Service Worker to vit-v4 — fuerza recarga del caché; feat: restore and perfectly arrange ACCIONES IA bar with 8 buttons - no duplicates, no overlap; fix: no-cache header for sw.js + vit-v3 cache name to force SW refresh on all clients; fix: force Vercel CDN cache bust - redeploy sw.js vit-",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s437",
+  "dateKey": "2026-06-17",
+  "hora": "23:51",
+  "desc": "[17 commits] fix: eliminate duplicate guide from blog index, keep only official guide | fix: convert blog to white/black minimalista + ensure cover images on all articles | fix: standardize fonts across Victor IA marketing slugs - same 3 fonts everywhere | fix: standardize visual style - all footer slugs now visually identical | style: forzar tema 100% blanco/negro en todos los slugs del sitio ...",
+  "cat": "Bug Fix",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 17 commits git (02:28-23:51)",
+  "notes": "fix: standardize all 6 pages - identical headers + perfect white/black content; fix: use exact same <head> and header HTML/CSS from index.html - perfect consistency; fix: remove active starfield canvas from agentes.html - match index.html white/black theme exactly; feat: convert all pages to 100% wh",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s436",
+  "dateKey": "2026-06-16",
+  "hora": "19:28",
+  "desc": "[2 commits] Update N8N webhook URL in notifyN8n function | feat: add complete asset library with webhook integration",
+  "cat": "Feature",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 7.47,
+  "durSec": 26892,
+  "tags": [
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 2 commits git (12:15-19:28)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s435",
+  "dateKey": "2026-06-15",
+  "hora": "20:23",
+  "desc": "[11 commits] fix: Remove Dashboard button from Quick Actions panel | fix: Remove deprecated 'public' property from vercel.json | feat: Add 8 visible Quick Actions IA panel to tracker | feat: add multi-tenancy with org_id foundation | docs: Add comprehensive setup guide for Supabase + Cloudinary configuration | feat: Complete Supabase + Cloudinary integration - auth, library with real storage, s...",
+  "cat": "Feature",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.4,
+  "durSec": 8640,
+  "tags": [
+   "fix",
+   "feat",
+   "docs",
+   "supabase",
+   "auth",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 11 commits git (18:14-20:23)",
+  "notes": "feat: Complete library system - store, organize, and download all generated assets; feat: Multi-language voice input, complete file upload (all types), URL references, and enhanced UI; feat: Presentation popup with conditional fields - aspect ratio, output format, visual style, and HyperFrames video",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s434",
+  "dateKey": "2026-06-15",
+  "hora": "17:29",
+  "desc": "[1 commits] feat: Agrega 8 botones de Acciones Rapidas al home del Brain Tracker",
+  "cat": "Feature",
+  "project": "Victor IA Brain Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (17:29-17:29)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s433",
+  "dateKey": "2026-06-15",
+  "hora": "16:51",
+  "desc": "[26 commits] feat: Integrate studio into tracker (create from tracker without losing existing features) | fix: Align route.ts Supabase insert with SQL schema column names | feat: Add /studio module — /api/create endpoint + Supabase schema | feat: Integrate Victor Icons system (40 proprietary icons) in app and website | chore: Clean test files, fix middleware for production | fix: middleware blo...",
+  "cat": "Bug Fix",
+  "project": "Victor IA App",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy",
+   "supabase",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 26 commits git (00:02-16:51)",
+  "notes": "fix: Pre-deploy blockers - public folder, BOM, WEBHOOK_SECRET; fix: Add API health endpoint to verify deployment; fix: Correct React component syntax for test page; fix: Remove CSP header to unblock deployment; test: Simple page to verify deployment; test: Add public status page to verify app is liv",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s432",
+  "dateKey": "2026-06-15",
+  "hora": "16:44",
+  "desc": "[7 commits] feat: Complete 'cómo funciona' page explaining full ecosystem | chore: Suspend non-approved slugs, keep only 6 active pages | feat: Add /studio page with 8 action popups for real content generation | feat: Integrate Victor Icons system (40 proprietary icons) in website | chore: force vercel rebuild for white-first theme | feat: Align website typography with app (Plus Jakarta Sans + ...",
+  "cat": "Feature",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "feat",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 7 commits git (00:49-16:44)",
+  "notes": "feat: Whiteminimal design for website homepage",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s431",
+  "dateKey": "2026-06-15",
+  "hora": "00:43",
+  "desc": "[1 commits] feat: Implement whiteminimal design (step 1) - consolidate app tokens",
+  "cat": "Feature",
+  "project": "Dashboard BI",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (00:43-00:43)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s430",
+  "dateKey": "2026-06-14",
+  "hora": "14:29",
+  "desc": "[21 commits] chore: Force Vercel to rebuild and apply CSP middleware | chore: Force Vercel redeploy - agents dashboard 155 agents | refactor: Replace agents page with 155-agent dashboard using AgentsGrid | fix: Remove UTF-8 BOM from dashboard layout | fix: Relax CSP to allow Google Fonts and Clerk workers | chore: Force Vercel rebuild - agents dashboard",
+  "cat": "UI/UX",
+  "project": "Victor IA App",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "refactor",
+   "deploy",
+   "auth",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 21 commits git (00:11-14:29)",
+  "notes": "feat: Complete redesign - 155 agents dashboard with categories; feat: Redesign dashboard with sidebar layout + metrics + charts; force: Trigger Vercel rebuild; refactor: Transform agents dashboard to pixel-perfect light mode minimal design with enterprise aesthetics; refactor: complete agents dashbo",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s429",
+  "dateKey": "2026-06-13",
+  "hora": "23:58",
+  "desc": "[16 commits] feat: Agregar 163 agentes especializados en dashboard | feat: Web 4.0 Transformation Complete — All 6 Turos | fix: Prevent Stripe build crash on Vercel when STRIPE_SECRET_KEY unset | fix: Strip BOM from vercel.json + remove Node 18.x pin (Next 16 needs Node 20+) | fix: Remove invalid env array from vercel.json (BOM + schema issue) and clean up backup files | fix: Resolve 7 build er...",
+  "cat": "Feature",
+  "project": "Victor IA App",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy",
+   "docs",
+   "auth",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 16 commits git (13:52-23:58)",
+  "notes": "feat: Add Phases 2-4 (Voice, Finance, CRM, Activity) + Graphify; fix: configure Clerk middleware correctly for sign-in redirection; docs: Add Clerk auth setup verification and troubleshooting guide; docs: Add production deployment verification and automated test suite; chore: apply comprehensive sec",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s428",
+  "dateKey": "2026-06-13",
+  "hora": "15:18",
+  "desc": "[7 commits] docs: Add comprehensive security documentation and usage examples | feat: Implement centralized API security with Zod validation and bearer tokens | fix: exclude test infra from Next build type-check to unblock production build | docs: Add TDD deliverable summary | feat: TDD suite for 5 API endpoints with 25+ test cases | fix: token data sync + security audit compliance",
+  "cat": "Feature",
+  "project": "Dashboard BI",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "docs",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 7 commits git (02:37-15:18)",
+  "notes": "security: Add CSP and security headers (OWASP audit)",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s427",
+  "dateKey": "2026-06-13",
+  "hora": "13:22",
+  "desc": "[15 commits] fix: Remove functions config, use buildCommand only | fix: Set outputDirectory to public for static file serving | fix: Remove builds config, use default Vercel routing for static files + API | fix: Add explicit route for index.html on root path | fix: Add static file routing for HTML and assets | fix: Simplify Vercel config with builds pattern, revert to Node 24.x",
+  "cat": "Bug Fix",
+  "project": "Seabird Hotel",
+  "client": "Seabird Ocean Resort",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 9.77,
+  "durSec": 35172,
+  "tags": [
+   "fix",
+   "feat",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 15 commits git (03:51-13:22)",
+  "notes": "fix: Use Vercel Node runtime v3; fix: Use Node 20.x and Vercel Node runtime v4.3.0; fix: Change Node.js version to 18.x for Vercel compatibility; fix: Use correct Vercel Node.js runtime format; feat: Add unified API router in api/index.js for handling all endpoints; fix: Update Vercel config with ex",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s426",
+  "dateKey": "2026-06-13",
+  "hora": "12:44",
+  "desc": "[4 commits] fix: Add static site build config for Vercel deployment | feat: complete security audit + responsive design + accessibility | chore: ignore large video files - use Cloudinary CDN | feat: security + responsive + accessibility complete",
+  "cat": "Feature",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 9.05,
+  "durSec": 32580,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 4 commits git (03:56-12:44)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s425",
+  "dateKey": "2026-06-12",
+  "hora": "14:41",
+  "desc": "[7 commits] feat: Polish phase - Claude API integration, animations, voice improvements, Toast notifications | feat: Implement Phase 3 - Library (tabs, grid, preview) + Advanced Dashboard (KPIs, pipeline, activity) | feat: Implement Phase 2 - Chat with AI, Agents, InputBar with voice, LaserOverlay narrative | feat: Implement Phase 1 Foundation - Design tokens, bottom nav, laser overlay, respons...",
+  "cat": "Feature",
+  "project": "Victor IA App",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "chat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 7 commits git (00:12-14:41)",
+  "notes": "feat: Add advanced analytics (ROI, Team, Recommendations) and A/B testing",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s424",
+  "dateKey": "2026-06-12",
+  "hora": "13:22",
+  "desc": "[5 commits] fix: Arregla estructura de datos mcpData en GraphifyModule | fix: Ensure mcp is always array to prevent render error | fix: Ensure tokens-data.json is included in build | fix: Remove duplicate icon imports in GraphifyModule | feat: Add Graphify module #15 — Token tracking dashboard",
+  "cat": "Bug Fix",
+  "project": "Dashboard BI",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 5 commits git (00:36-13:22)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s423",
+  "dateKey": "2026-06-11",
+  "hora": "16:25",
+  "desc": "[20 commits] fix: install missing dependencies and update middleware | docs: Add comprehensive launch checklist with email templates | feat: Launch landing page and deployment checklist - READY FOR PRODUCTION | feat: Round 3 & 4 Complete - Production Ready + Monetization + Responsive | feat: Add advanced features - search, team, templates, billing, activity | feat: Add advanced features - chart...",
+  "cat": "Feature",
+  "project": "Victor IA App",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "refactor",
+   "deploy",
+   "docs"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 20 commits git (01:55-16:25)",
+  "notes": "feat: Add utilities, configuration, tests, and comprehensive documentation; feat: Complete all dashboard pages with full functionality; feat: Complete Victor IA SaaS application structure; feat: Add complete backend stack (18 services, 10 stores, 32 hooks, 15 API routes); feat: Add 10 backend servic",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s422",
+  "dateKey": "2026-06-11",
+  "hora": "12:00",
+  "desc": "Test end-to-end de componente TrustBadges con skills inclusivo (WCAG AA), web-4o (React) y pixel-perfecto (8pt grid)",
+  "cat": "Auditoria",
+  "project": "Costa Negra",
+  "client": "Costa Negra",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s421",
+  "dateKey": "2026-06-10",
+  "hora": "23:22",
+  "desc": "[17 commits] feat: agregar 2 CTAs abajo de videos - Puerto Aventuras y Pininfarina con links a Google Drive, responsive perfecto para mobile | feat: mover seccion Videos de Muestra al final de la propuesta (antes del footer) | fix: videos con HTML5 video tag directo, URLs correctas de Cloudinary | fix: videos reproducibles con iframe de Cloudinary, 1 por modulo, quitar referencias a jubilados, ...",
+  "cat": "Feature",
+  "project": "Ciudad Mayakoba",
+  "client": "Ciudad Mayakoba",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.48,
+  "durSec": 8928,
+  "tags": [
+   "fix",
+   "feat",
+   "seo",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 17 commits git (21:08-23:22)",
+  "notes": "fix: optimizar mobile vertical - modulos completos sin cortes, overflow-x hidden, animaciones desactivadas en mobile, box-sizing en grids, responsive perfecto sin movimiento; feat: actualizar nav con link a resultados esperados; feat: agregar seccion Expected Outcomes - resultados mes 3/6/9/12, metr",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s420",
+  "dateKey": "2026-06-10",
+  "hora": "23:21",
+  "desc": "[41 commits] feat: Complete premium landing with integrations, newsletter, and chatbot | feat: Add premium landing page with complete sections | fix: Blog grid now uses Cloudinary images and correct slug URLs | feat: Add sitemap.xml and robots.txt for Google indexing optimization | Initial commit: 135 blog articles with SEO/GEO/AEO optimization and Cloudinary images | feat: Migrate 135 blog art...",
+  "cat": "Feature",
+  "project": "Victor IA App",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "refactor",
+   "deploy",
+   "chat",
+   "supabase"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 41 commits git (00:03-23:21)",
+  "notes": "feat: Complete SEO/GEO/AEO optimization for all 135 articles; feat: Add SEO/GEO/AEO audit and Cloudinary image upload tools; fix: Extract and correct 33 missing article titles; feat: Sort blog articles by date (newest first); fix: Clean and validate 135 blog articles; feat: Migrate all 136 blog arti",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s419",
+  "dateKey": "2026-06-10",
+  "hora": "20:08",
+  "desc": "[7 commits] fix: Improve canvas sizing with explicit viewport styling and better dimension calculation | fix: Canvas sizing for proper fullscreen Three.js rendering | feat: Three.js 3D agent network with advanced TSL shader, scroll interactivity, and luxury UI | feat: PRODUCTION-READY — Casos, Testimonios, Integraciones, FAQ, Analytics | refactor: Optimizar para nivel award-winning | feat: Agre...",
+  "cat": "Feature",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 0.93,
+  "durSec": 3348,
+  "tags": [
+   "fix",
+   "feat",
+   "refactor",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 7 commits git (19:50-20:08)",
+  "notes": "feat: Victor IA landing unificada con scroll-cinematic hero",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s418",
+  "dateKey": "2026-06-09",
+  "hora": "23:48",
+  "desc": "[2 commits] fix: isVoiceSupported is boolean, not function | fix: replace require() with ESM import for framer-motion",
+  "cat": "Bug Fix",
+  "project": "Victor IA App",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.62,
+  "durSec": 2232,
+  "tags": [
+   "fix",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 2 commits git (23:26-23:48)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s417",
+  "dateKey": "2026-06-09",
+  "hora": "15:24",
+  "desc": "[2 commits] refactor: Propuesta rediseñada - SIN PRECIOS, enfoque 100% estrategia técnica, flujogramas, roadmap, stack técnico | feat: Propuesta completa GEO/AEO/SEO Ciudad Maya Koba - 5k/mes",
+  "cat": "Feature",
+  "project": "Ciudad Mayakoba",
+  "client": "Ciudad Mayakoba",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.8,
+  "durSec": 2880,
+  "tags": [
+   "feat",
+   "refactor",
+   "seo"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 2 commits git (14:51-15:24)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s416",
+  "dateKey": "2026-06-09",
+  "hora": "12:19",
+  "desc": "[1 commits] chore: add .gitignore to exclude large video files",
+  "cat": "Mantenimiento",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (12:19-12:19)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s415",
+  "dateKey": "2026-06-09",
+  "hora": "02:44",
+  "desc": "[20 commits] fix: Remove duplicate Babylon.js code - keep only Canvas3D implementation | fix: Correct Canvas3D initialization - use offsetWidth/Height and createElement | feat: Replace Babylon.js with working Canvas3D visualization | fix: Add debug logging and timeout to GRAPHIFY 3D initialization | chore: Force cache invalidation and redeploy | feat: Reescribir GRAPHIFY 3D con Babylon.js + Hol...",
+  "cat": "Documentacion",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.98,
+  "durSec": 10728,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy",
+   "docs",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 20 commits git (00:00-02:44)",
+  "notes": "docs: Add main README for GRAPHIFY 3D dashboard; docs: Add delivery summary for GRAPHIFY 3D dashboard project; docs: Add GRAPHIFY documentation index and navigation guide; docs: Add 20 practical examples for GRAPHIFY 3D dashboard usage; docs: Add comprehensive GRAPHIFY 3D dashboard documentation; fe",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s414",
+  "dateKey": "2026-06-08",
+  "hora": "23:58",
+  "desc": "[17 commits] fix: Remove broken inline SVG elements | restore: Revert to previous stable version (ae39d78) | chore: Force Vercel redeploy to clear cache | restore: Keep original desktop design, improve mobile responsiveness | fix: Update tracker with fully responsive design | fix: Remove broken login redirect, grant viewer access by default",
+  "cat": "Bug Fix",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "refactor",
+   "deploy",
+   "auth",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 17 commits git (12:48-23:58)",
+  "notes": "fix: Repair blank page — bulletproof auth-guard reveal logic; fix: Add 66 missing CSS classes for premium luxury formatting (IDF, ADF, FL-modal, feed, export); fix: Convert 866 emojis to premium inline SVG icons + repair corrupted harness diagram SVG; feat: Fully responsive design with mobile cards ",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s413",
+  "dateKey": "2026-06-08",
+  "hora": "17:49",
+  "desc": "[4 commits] feat: Improve blog cards design with premium styling | feat: Ciudad Mayakoba blog v2 - diseño Figma puro | config: Vercel static site configuration | feat: Ciudad Mayakoba blog - bilingue con convertidor",
+  "cat": "Feature",
+  "project": "Ciudad Mayakoba",
+  "client": "Ciudad Mayakoba",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 1.98,
+  "durSec": 7128,
+  "tags": [
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 4 commits git (16:05-17:49)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s412",
+  "dateKey": "2026-06-08",
+  "hora": "13:09",
+  "desc": "[3 commits] feat: Update blog article counter to 135 + integrate auto-counter script | fix: Move daily blog article to featured section - Automatizar Inventario con IA (2026-06-08) | feat: Publish daily blog post - Automatizar Inventario con IA en Retail Mexicano (2026-06-08)",
+  "cat": "Feature",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 0.4,
+  "durSec": 1440,
+  "tags": [
+   "fix",
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 3 commits git (13:00-13:09)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s411",
+  "dateKey": "2026-06-08",
+  "hora": "11:57",
+  "desc": "[6 commits] feat: Complete emoji→SVG conversion (72 más: AGENTES, Publicar, Finanzas, AGENTS, SHARE_CHANNELS, Plans) | EMERGENCY FIX: Arreglar HTML malformado (aria-label sin cerrar + img comillas) + 41 emojis→SVG premium | fix: Close 57 malformed rgba() in styles.css that broke entire layout | fix: Contraste WCAG AAA + avatares premium (iniciales) + sheet modal detail + HTML tags | fix: Arregl...",
+  "cat": "Bug Fix",
+  "project": "Victor IA Brain Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 6 commits git (00:38-11:57)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s410",
+  "dateKey": "2026-06-08",
+  "hora": "02:27",
+  "desc": "[17 commits] test: Ultra-minimal rotating cube to isolate Three.js rendering issue | fix: Add nocache query string to force load test script | test: Switch to minimal canvas test to verify rendering works | chore: Force Vercel redeploy v2 | fix: Prevent double INIT_ULTRA execution; force Vercel redeploy | fix: Set canvas intrinsic size before Three.js renderer creation",
+  "cat": "Bug Fix",
+  "project": "Timeshare Platform",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.27,
+  "durSec": 8172,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 17 commits git (00:44-02:27)",
+  "notes": "debug: Add log to verify render frame loop is executing; debug: Add log before Scene creation; fix: Wrap Engine constructor in try-catch to capture init errors; debug: Add detailed logs to trace Engine creation and canvas setup; debug: Add console logs to trace THREE loading and UltraSpectacle init;",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s408",
+  "dateKey": "2026-06-07",
+  "hora": "23:42",
+  "desc": "[9 commits] feat: Implement Phase 2 Performance Optimization | feat: Add 29 premium SVG icons to tracker.victor-ia.xyz | feat: Add Harness Architecture diagram to ORGANIGRAMA section | docs: Add navigation index for v1.1 launch and v1.2 roadmap documentation | docs: Add v1.1 launch summary, retrospective, and v1.2 strategic roadmap | docs: Add comprehensive documentation index and navigation guide",
+  "cat": "Documentacion",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "feat",
+   "docs",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 9 commits git (03:27-23:42)",
+  "notes": "docs: Add 5-minute quick start guide for Analytics Engine; docs: Add Analytics Engine delivery summary; feat: Implement Advanced Analytics Engine v1.1",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s409",
+  "dateKey": "2026-06-07",
+  "hora": "23:42",
+  "desc": "[9 commits] feat: Add Three.js 3D background + advanced mouse tracking effects | feat: Add premium animations and interactions | feat: Complete pixel-perfect CSS refinements | feat: Add stats, workflow, and testimonials sections | feat: Replace generic emojis with custom SVG icons | refactor: Complete redesign - landing page with luxury layout",
+  "cat": "Feature",
+  "project": "Timeshare Platform",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "refactor",
+   "seo"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 9 commits git (02:10-23:42)",
+  "notes": "feat: Add landing page improvements - hero section, SEO meta tags, footer; fix: Replace index.html with final.html (v6 with 19 SVG icons, Instrument Serif KPI, motion premium); feat: v6 Awwwards upgrade — 19 custom SVG icons, Instrument Serif KPIs, spring physics motion, zero emojis",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s407",
+  "dateKey": "2026-06-07",
+  "hora": "23:36",
+  "desc": "[112 commits] docs: Brain Tracker v1.1.0 public launch coordination — COMPLETE | docs: Add Brain Tracker v1.1 launch overview and reference guide | docs: Add complete Operations Handoff package for Brain Tracker v1.1 | feat: Add complete Analytics & KPI Dashboard for Brain Tracker v1.1 | @ feat: Add 24/7 Crash Monitoring + Incident Response System | feat: Add comprehensive feedback collection s...",
+  "cat": "Feature",
+  "project": "Victor IA Brain Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "refactor",
+   "deploy",
+   "docs",
+   "chat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 112 commits git (01:29-23:36)",
+  "notes": "docs: Add Brain Tracker v1.1 launch ready summary; docs: Add Brain Tracker v1.1 public launch coordination documents; docs: Add final submission readiness document for v1.1.0; feat: Prepare Brain Tracker v1.1.0 for App Store submission; docs: Add RC1 deliverables checklist and manifest; docs: Add da",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s406",
+  "dateKey": "2026-06-07",
+  "hora": "15:00",
+  "desc": "Materiales de lanzamiento v1.1 completos (marketing, in-app, docs, soporte 8150+ lineas) preparados para go-live del 8 de junio",
+  "cat": "Documentacion",
+  "project": "Victor IA Brain Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.5,
+  "durSec": 5400,
+  "tags": [],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s405",
+  "dateKey": "2026-06-07",
+  "hora": "12:00",
+  "desc": "Analisis estadistico de A/B test Chat UI (500 usuarios, 14 dias): Variante B +87% engagement, recomendacion rollout 100%",
+  "cat": "Investigacion",
+  "project": "Victor IA Brain Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.5,
+  "durSec": 5400,
+  "tags": [],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s404",
+  "dateKey": "2026-06-07",
+  "hora": "10:00",
+  "desc": "Ambiente staging configurado (Vercel Next.js 15, GitHub Actions CI/CD, dominio staging.victor-ia.xyz, docs completas)",
+  "cat": "Deploy",
+  "project": "Victor IA Brain Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "vercel"
+  ],
+  "rework": 1,
+  "obs": "Fuente: diario de memoria | posible solape con commits git mismo dia/proyecto",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s403",
+  "dateKey": "2026-06-06",
+  "hora": "21:04",
+  "desc": "[17 commits] V12 Ultimate - Premium SaaS design, stacked layout, todos los 22 módulos perfectamente acomodados | V11 Stacked - Dashboard siempre visible + módulos pegados abajo | chore: V10 actualizado en producción - expandido sin espacios en blanco | V10 Final Expanded - Sin espacios en blanco, todos los módulos completamente llenos de contenido | chore: V9 minificado optimizado - sin espacio...",
+  "cat": "Feature",
+  "project": "Timeshare Platform",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 4.13,
+  "durSec": 14868,
+  "tags": [
+   "feat",
+   "docs"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 17 commits git (17:11-21:04)",
+  "notes": "feat: V8 FINAL - Premium SaaS design + 100% functional + responsive; feat: V7 ULTRA — 100% Funcional con State Management; feat: V6 COMPLETE — Software perfecto con todos los módulos; chore: Update final.html to V5 production version; feat: Add V5 with modular tactical hub and Reps module; feat: Add",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s402",
+  "dateKey": "2026-06-06",
+  "hora": "16:00",
+  "desc": "Explicaciones tecnicas para depto IT: Harness Engineering, ciberseguridad 3 niveles, costos de implementacion (918k MXN/ano)",
+  "cat": "Documentacion",
+  "project": "Timeshare Platform",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.5,
+  "durSec": 5400,
+  "tags": [],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s401",
+  "dateKey": "2026-06-06",
+  "hora": "14:00",
+  "desc": "6 deploys iterativos del landing cube gallery (copy, light mode, H1 FLUJO PERFECTO) a cube-gallery-deploy.vercel.app",
+  "cat": "Deploy",
+  "project": "Timeshare Platform",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "deploy",
+   "vercel"
+  ],
+  "rework": 1,
+  "obs": "Fuente: diario de memoria | posible solape con commits git mismo dia/proyecto",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s400",
+  "dateKey": "2026-06-06",
+  "hora": "12:00",
+  "desc": "Copy de 12 modulos landing timeshare (PNL/neuromarketing, 30 palabras c/u) creado y validado con cliente",
+  "cat": "Contenido",
+  "project": "Timeshare Platform",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "timeshare"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "higgsfield",
+   "elevenlabs"
+  ]
+ },
+ {
+  "id": "s399",
+  "dateKey": "2026-06-06",
+  "hora": "03:25",
+  "desc": "[5 commits] refactor: Update HERO copy to emphasize follow-ups that prevent cancellations - keep 30 words max | refactor: Adjust HERO h1 to fit layout - change CONTROL TOTAL to VICTOR IA and Reverse Creativity to VICTOR IA TIMESHARE | refactor: Optimized HERO module copy with PNL and neuromarketing - VICTOR IA TIMESHARE | trigger: Force Vercel redeploy - VICTOR IA TIMESHARE content update | fea...",
+  "cat": "Refactoring",
+  "project": "Cube Gallery",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 1.6,
+  "durSec": 5760,
+  "tags": [
+   "feat",
+   "refactor",
+   "deploy"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 5 commits git (02:04-03:25)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s398",
+  "dateKey": "2026-06-05",
+  "hora": "23:44",
+  "desc": "[57 commits] fix: Regenerate webp images with original JPG colors | trigger: Force Vercel redeploy with Cloudinary URLs | feat: Serve all images from Cloudinary CDN | fix: Use raw.githubusercontent.com (verified working) | fix: Use jsDelivr CDN to serve images from GitHub | fix: Configure Vercel to serve as pure static site",
+  "cat": "Bug Fix",
+  "project": "Cube Gallery",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 57 commits git (04:13-23:44)",
+  "notes": "fix: Simplify Vercel config to serve all static files; fix: Configure Vercel to serve webp images correctly; fix: Move images to root directory for Vercel static serving; feat: Move images to Vercel CDN + generate dark mode variants; Fix: Add force=true to checkImageSwaps preloads; Fix: Correct IMAG",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s397",
+  "dateKey": "2026-06-05",
+  "hora": "22:57",
+  "desc": "[11 commits] Add USD currency and amount filters for financial fields | Fix BriefData types and utility functions | Simplify cn utility to remove clsx and tailwind-merge dependencies | Simplify postcss config | Fix tsconfig BOM and update package.json with missing devDependencies | Replace @ alias imports with relative paths for Vercel compatibility",
+  "cat": "Bug Fix",
+  "project": "Timeshare Platform",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.77,
+  "durSec": 6372,
+  "tags": [
+   "fix",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 11 commits git (21:26-22:57)",
+  "notes": "Fix tsconfig baseUrl to use node moduleResolution; Remove duplicate config files (next.config.ts, tailwind.config.ts); Fix TypeScript config and BOM issue in package.json; UI improvement: luxury dark design, perfect form styling, improved home page; Initial commit from Create Next App",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s396",
+  "dateKey": "2026-06-05",
+  "hora": "19:38",
+  "desc": "[6 commits] Add cube gallery WebP images | Reescribir todas las páginas (security, help, changelog, settings) con código exacto de patrón establecido | Add 5 new pages: notifications, integrations, security, help, changelog, settings - Complete UI system | Replace with exact design codes from user | Add analytics and reportes pages with luxury dark theme | Initial: setup + login page",
+  "cat": "UI/UX",
+  "project": "VTC Capacitacion",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 6 commits git (00:48-19:38)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s395",
+  "dateKey": "2026-06-05",
+  "hora": "04:09",
+  "desc": "[22 commits] Fix TypeScript errors in cube page | Add /preview page with full landing copy layout | Revert to GridRunShader | Add ParadoxScroll - advanced scroll interface with HUD, navigation dots, and GLSL shader background | Improve mouse interactivity - real-time camera control with cursor movement | Replace hero background with GridRun GLSL shader - advanced ray-marched geometry with inter...",
+  "cat": "UI/UX",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.93,
+  "durSec": 10548,
+  "tags": [
+   "fix",
+   "deploy",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 22 commits git (01:31-04:09)",
+  "notes": "Add @ts-ignore to dynamic Three.js imports in GeometricAura; Replace cloth simulation with 3D geometric aura background; Add ClothSimulation physics background - interactive cloth with mouse collider; Add TubesCursor interactive 3D tubes background animation to Hero section; Remove all animations - ",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s394",
+  "dateKey": "2026-06-04",
+  "hora": "21:56",
+  "desc": "[6 commits] Add Research and Copy tabs to Actividades Repetitivas dashboard with department info | Add automated tasks monitoring API and dashboard - 'Actividades Repetitivas' | Add blog publishing monitor dashboard | Fix blog-status API for Vercel (CommonJS format) | Add blog publishing monitor API endpoint | Initial commit: Victor IA website - Inicio and Cómo Funciona pages",
+  "cat": "Deploy",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 6 commits git (00:13-21:56)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s393",
+  "dateKey": "2026-06-04",
+  "hora": "05:35",
+  "desc": "[16 commits] Force full rebuild v1.0.1 | Trigger rebuild - timeshare page | Force deploy timeshare landing | Add timeshare.html landing with complete system access menu | Force deploy | Update hamburger menu in root landing with absolute URLs to all system modules",
+  "cat": "Deploy",
+  "project": "VTC Capacitacion",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 5.8,
+  "durSec": 20880,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy",
+   "docs",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 16 commits git (00:02-05:35)",
+  "notes": "Force deploy - rebuilt pages; Fix: navigation link in capacitacion.html mobile menu; docs: add post-sleep summary for easy verification; docs: add comprehensive wake-up guide with all next steps and verification; docs: add deployment success confirmation and next steps; fix: add .npmrc to enable leg",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s392",
+  "dateKey": "2026-06-04",
+  "hora": "04:03",
+  "desc": "[2 commits] feat: health checks + firestore live | feat: health checks + Slack alerts for infrastructure monitoring",
+  "cat": "Feature",
+  "project": "Influence IA",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 1.23,
+  "durSec": 4428,
+  "tags": [
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 2 commits git (03:04-04:03)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s391",
+  "dateKey": "2026-06-04",
+  "hora": "03:42",
+  "desc": "[29 commits] Update GSC data with current information and add manual update script | Fix Vercel environment variable configuration | Add Vercel Function for automated GSC data fetching with cron jobs (08:00 AM and 14:00 PM daily) | Fix template literal syntax error in keywords table | Add multi-browser verification: Google + Bing search links, direct URL access, and enhanced AI analysis with po...",
+  "cat": "Deploy",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 3.87,
+  "durSec": 13932,
+  "tags": [
+   "fix",
+   "deploy",
+   "seo",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 29 commits git (00:27-03:42)",
+  "notes": "Add Google Search Console real data integration: Python fetcher + 2x daily automation + live dashboard; Update dashboard styles to match tracker design: new color palette (#FFAA17), Space Grotesk font, grid borders, tracker UI consistency; Add 'Tareas Repetitivas' button to topbar; Restore tracker t",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s390",
+  "dateKey": "2026-06-03",
+  "hora": "23:55",
+  "desc": "[14 commits] Split landing pages: product root + capacitación slug with hamburger menu | Agregar menú hamburguesa con 7 botones de navegación | Deploy forzado | Landing page brutal y específica: problemas reales de salas de venta | Landing page en formato PAS (Problem - Agitate - Solution) | Landing page de producto: Lenguaje timeshare con PNL - Vende membresías como nunca",
+  "cat": "Deploy",
+  "project": "VTC Capacitacion",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 5.27,
+  "durSec": 18972,
+  "tags": [
+   "feat",
+   "deploy"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 14 commits git (18:54-23:55)",
+  "notes": "Landing page de producto: Software SaaS para salas de timeshare con IA 24/7; Menú sticky con 7 botones en la parte superior; Deploy forzado a Vercel; Estructura completa: raíz (timeshare) + /sistema.html (capacitación); Landing page profesional: sistema timeshare con 7 botones de acceso a herramient",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s389",
+  "dateKey": "2026-06-03",
+  "hora": "22:26",
+  "desc": "[1 commits] Publish articles: Day 5 (agente-ia-ventas-b2b) and Day 6 (ia-para-clinicas-medicas-mexico)",
+  "cat": "Deploy",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (22:26-22:26)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s388",
+  "dateKey": "2026-06-03",
+  "hora": "17:24",
+  "desc": "[5 commits] chore: unify brand colors to Navy + Amber + Cyan | Fix: brain-tracker deployment — normalize rewrites | Add HTML landing | Fix vercel config | Initial deploy",
+  "cat": "Deploy",
+  "project": "Victor IA Brain Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "deploy"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 5 commits git (04:52-17:24)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s387",
+  "dateKey": "2026-06-03",
+  "hora": "12:00",
+  "desc": "Propuesta de redesign visual entregada: 5 secciones con mockups en Figma + documento tecnico por fases",
+  "cat": "Propuesta",
+  "project": "Dashboard BI",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "propuesta"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s386",
+  "dateKey": "2026-06-03",
+  "hora": "05:09",
+  "desc": "[1 commits] Add SEO meta tags: description, OG tags, Twitter card",
+  "cat": "Desarrollo",
+  "project": "Mayan Tours",
+  "client": "Mayan Tours",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [
+   "seo"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (05:09-05:09)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s385",
+  "dateKey": "2026-06-02",
+  "hora": "22:29",
+  "desc": "[14 commits] MAYAN TOURS - Complete investment proposal: real SEDETUR data, coloquial explanations, full financial models, risk mitigation | Complete landing page with real SEDETUR data - 28M tourists, 400B pesos market, coloquial explanations | Add tropical Caribbean luxury landing page with complete financial projections | Landing Page Premium Web 4.0 - Datos reales + Financiero + Animaciones...",
+  "cat": "UI/UX",
+  "project": "Mayan Tours",
+  "client": "Mayan Tours",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 3.6,
+  "durSec": 12960,
+  "tags": [
+   "deploy",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 14 commits git (19:08-22:29)",
+  "notes": "Propuesta integrada completa - 23 slides con financiero, roadmap, bots, marketing; Analisis financiero 24 meses detallado - LEAN vs GROWTH; Propuesta profesional 16 slides - Web 4.0 design; Initial commit - Mayan Tours proposal; Deploy: Complete business plan document - Mayan Tours 2026; Update: Com",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s384",
+  "dateKey": "2026-06-02",
+  "hora": "22:12",
+  "desc": "[53 commits] docs: Add specific Voice IDs + complete conversation examples (Spanish & English) | docs: Roleplay protocol v3 — Extended natural conversation, respected turns, real scenarios | fix: Victor icon — bigger font size, favicon added, overflow hidden | fix: Chat API + Avatar icon — correct ElevenLabs endpoint, simple CSS-based icon | docs: Mode 2 roleplay — detailed coordination for nat...",
+  "cat": "Bug Fix",
+  "project": "VTC Capacitacion",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "deploy",
+   "docs",
+   "chat",
+   "seo"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 53 commits git (00:07-22:12)",
+  "notes": "fix: Victor avatar — use base64 SVG data URL for reliable rendering; fix: Victor avatar SVG — gradient, proper scaling, better rendering; docs: Add speed requirement for roleplay + Reynolds voice for English male prospect; docs: Roleplay protocol v2 — Educational pauses, Saúl voice, full 19-step flo",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s383",
+  "dateKey": "2026-06-02",
+  "hora": "22:03",
+  "desc": "[12 commits] 🌌 Ecosistema Interactivo COMPLETO: Agentes, Skills, MCP, Automatizaciones, Softwares - Zoom/Pan funcional, Universe Mode ON | 🚀 SVG Graph FINAL: Nodos orbitando, animaciones CSS fluidas, premium minimalista, 100% funcional y visible | 🎨 Gráfico 2D Canvas: Nodos interactivos, animaciones fluidas, SIN dependencias externas - ¡VISIBLE! | 🎯 3D Graph: Ultra-simplificado, acceso a window...",
+  "cat": "UI/UX",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 3.45,
+  "durSec": 12420,
+  "tags": [
+   "fix",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 12 commits git (18:51-22:03)",
+  "notes": "✨ Graphify 3D: Mejorado significativamente con Three.js CDN, hover interactivo, animaciones suaves y tooltip de datos; 🐛 Fix: Graphify ahora usa datos reales del SEED array, muestra historial y métricas correctamente; ✨ Graphify: Nueva versión premium, moderna y funcional con filtros interactivos, t",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s382",
+  "dateKey": "2026-06-02",
+  "hora": "18:07",
+  "desc": "[10 commits] Configure custom domain tracker.victor-ia.xyz for Graphify Dashboard | fix: Correct icon import (Wave → Waves) | feat: Business Flow Module — Complete BI dashboard with 3D data pipeline visualization, real metrics, and multi-view analytics system | Arreglar tipos de Agent en ArchitectureModule | Arreglar errores de tipos en ArchitectureModule | Agregar módulo Arquitectura IA con vi...",
+  "cat": "Bug Fix",
+  "project": "Dashboard BI",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 10 commits git (00:06-18:07)",
+  "notes": "Agregar controles de velocidad y múltiples vistas 3D (orbital, force, tree, sphere, flow); Arreglar tipos TypeScript en componentes 3D; Arreglar error de tipos en Sidebar; Agregar módulo Orquestador 3D interactivo con visualización de herramientas conectadas",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s381",
+  "dateKey": "2026-06-02",
+  "hora": "13:58",
+  "desc": "[32 commits] Regenerar portadas con diseños visualmente DIFERENTES entre sí | Reemplazar rutas PNG antiguas (/img/blog-covers) por WebP (/blog/covers) | Cambiar loading lazy a eager para cargar imágenes inmediatamente | Remover TODAS las clases .rv para mostrar contenido sin retrasos | Remover clase .rv de blog-cards para mostrar imágenes inmediatamente sin delay | Regenerar portadas 1 y 5 con ...",
+  "cat": "Feature",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 32 commits git (00:26-13:58)",
+  "notes": "Recrear portadas 2 y 5 con patrones visibles (gradiente + líneas); Restaurar articulos completos desde backup (contenido + portadas); Crear portadas placeholder doradas (visibles inmediatamente); Actualizar converter.js para descargar guías HTML; Remover reveal-on-scroll de portadas + generar guías ",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s380",
+  "dateKey": "2026-06-02",
+  "hora": "13:00",
+  "desc": "Script investor pitch 5min + voice-over ElevenLabs v3 (con emociones) + musica producidos para la plataforma",
+  "cat": "Video",
+  "project": "Mayan Tours",
+  "client": "Mayan Tours",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 3.0,
+  "durSec": 10800,
+  "tags": [
+   "elevenlabs"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "higgsfield",
+   "elevenlabs"
+  ]
+ },
+ {
+  "id": "s379",
+  "dateKey": "2026-06-02",
+  "hora": "11:00",
+  "desc": "Plataforma de reserva de tours completada 100% (Next.js, 30 tours reales, calculadora ROI, modelo financiero, 25+ docs, scripts deploy)",
+  "cat": "Documentacion",
+  "project": "Mayan Tours",
+  "client": "Mayan Tours",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.5,
+  "durSec": 5400,
+  "tags": [
+   "deploy"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s378",
+  "dateKey": "2026-06-01",
+  "hora": "23:45",
+  "desc": "[83 commits] feat: Add biometric voice recognition - speaker identification with SpeechBrain ECAPA-TDNN | feat: Real-time video state detection (play/pause/ended) + verificar_video() client tool | fix: Ensure video posters (thumbnails) always visible when not playing | fix: All client tools use instant scroll for perfect sync with Victor's voice narration | fix: Improve scrollAlSiguienteBloque ...",
+  "cat": "Bug Fix",
+  "project": "VTC Capacitacion",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "refactor",
+   "deploy",
+   "docs",
+   "chat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 83 commits git (00:01-23:45)",
+  "notes": "feat: Add iniciarCursoCompleto and scrollAlSiguienteBloque client tools for mandatory Hero-first course flow; docs: Update course execution rules with exact navigation sequence; fix: Implement PANTALLA FIJA - stay on same screen during full course; docs: Add final full course execution rules and REG",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s377",
+  "dateKey": "2026-06-01",
+  "hora": "23:38",
+  "desc": "[1 commits] Agregar módulo Proyectos con visualización interactiva",
+  "cat": "Feature",
+  "project": "Dashboard BI",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (23:38-23:38)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s376",
+  "dateKey": "2026-06-01",
+  "hora": "23:06",
+  "desc": "[3 commits] Add auto-sort script: articles sorted by date (newest first) | Add today's news: IA Today 2026-06-01 | Add today's article: IA para Restaurantes en México",
+  "cat": "Desarrollo",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 2.35,
+  "durSec": 8460,
+  "tags": [],
+  "rework": 0,
+  "obs": "Agregado de 3 commits git (21:00-23:06)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s375",
+  "dateKey": "2026-06-01",
+  "hora": "18:07",
+  "desc": "[1 commits] feat: Complete Biometric Voice Recognition Engine with SpeechBrain ECAPA-TDNN",
+  "cat": "Feature",
+  "project": "Victor Voice Recognition",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (18:07-18:07)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s374",
+  "dateKey": "2026-05-31",
+  "hora": "23:09",
+  "desc": "[7 commits] Fix: Simplify vercel.json for proper static file serving | Fix: Show login form when clicking start button without user session | Fix: Make API_BASE global and accessible from all modules | Fix: Update API_BASE URLs for production Vercel deployment | Add: Vercel configuration for backend and frontend deployment | Deploy: VTC Capacitación - Plataforma de capacitación completa",
+  "cat": "Deploy",
+  "project": "VTC Capacitacion",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 2.2,
+  "durSec": 7920,
+  "tags": [
+   "fix",
+   "deploy",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 7 commits git (21:12-23:09)",
+  "notes": "Arquitectura completa: sincronización API REST + base RAG + prompt optimizado",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s373",
+  "dateKey": "2026-05-31",
+  "hora": "19:29",
+  "desc": "[1 commits] `@remotion/studio`: Add UV effect handles (#7875)",
+  "cat": "Desarrollo",
+  "project": "Remotion Video",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (19:29-19:29)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s372",
+  "dateKey": "2026-05-31",
+  "hora": "16:00",
+  "desc": "[2 commits] feat: vi-track v2 (video tracking + user identity + revisitas) SW v140 | feat: heatmaps VTC+demo+victor-ia-website (screenshots reales)",
+  "cat": "Feature",
+  "project": "Victor IA Brain Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.58,
+  "durSec": 2088,
+  "tags": [
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 2 commits git (15:40-16:00)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s371",
+  "dateKey": "2026-05-30",
+  "hora": "23:34",
+  "desc": "[6 commits] fix: beacon text/plain (CORS cross-origin) + SW v138 | fix: SW no intercepta beacons cross-origin (tracking) ni cachea vi-track | fix: heatmap robusto (default sitio con clics, paint en cache, fallback canvas) | feat: heatmap & analytics page (screenshot + heatmap overlay + journey) | feat: hospedar vi-track.js (tracker universal de comportamiento) | feat(pipeline): sync CRM kanban ...",
+  "cat": "Bug Fix",
+  "project": "Victor IA Brain Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 5.65,
+  "durSec": 20340,
+  "tags": [
+   "fix",
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 6 commits git (18:10-23:34)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s370",
+  "dateKey": "2026-05-29",
+  "hora": "14:00",
+  "desc": "Limpieza masiva de clientes/casos inventados en ambos blogs (home 99 art + website 137 art), reescritura a lenguaje de sector generico",
+  "cat": "Auditoria",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "blog"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s369",
+  "dateKey": "2026-05-29",
+  "hora": "12:00",
+  "desc": "article-enhancer v6.0 (lectura de H1, prompt tono ejecutivo) desplegado + OpenRouter context-fallback configurado",
+  "cat": "Deploy",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s368",
+  "dateKey": "2026-05-28",
+  "hora": "14:00",
+  "desc": "Curso VTC Victorious Travelers Club: 21 videos timeshare en ingles (1-2min c/u) con voz Burt Reynolds ElevenLabs, diseno dark luxury",
+  "cat": "Video",
+  "project": "VTC Capacitacion",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 3.0,
+  "durSec": 10800,
+  "tags": [
+   "video",
+   "voz",
+   "elevenlabs",
+   "timeshare"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "higgsfield",
+   "elevenlabs"
+  ]
+ },
+ {
+  "id": "s367",
+  "dateKey": "2026-05-28",
+  "hora": "12:00",
+  "desc": "Sitio completo migrado a victor-ia.xyz (106 URLs, 97 articulos), automatizacion blog diario 7pm + digest semanal en Task Scheduler",
+  "cat": "Deploy",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "blog"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s366",
+  "dateKey": "2026-05-27",
+  "hora": "23:39",
+  "desc": "[2 commits] feat: generate-article.py — --status, --force, retry logic | feat: blog automation setup — 83 topics, claude-sonnet-4-6, Windows fixes",
+  "cat": "Feature",
+  "project": "Victor IA Marketing",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.35,
+  "durSec": 1260,
+  "tags": [
+   "fix",
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 2 commits git (23:33-23:39)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s365",
+  "dateKey": "2026-05-27",
+  "hora": "23:26",
+  "desc": "[10 commits] feat: batch improvements across all app modules | crm: detail panel, Perdido column, toasts, delete buttons | feat: Actividad IA - audit trail completo con drill-down de prompts | fix: centralizar dispatch de pantallas + renderCapacitacion + renderRrhh | feat: SVG icons + comprehensive responsive layout all devices | fix: JS syntax errors causing blank UI and broken buttons",
+  "cat": "UI/UX",
+  "project": "Victor IA Brain Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "chat",
+   "biblioteca",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 10 commits git (00:23-23:26)",
+  "notes": "fix: encoding 1146 chars + chat model IDs + URL hash routing + Biblioteca nav; feat: luxury UX redesign + neural SVG animated background; fix: chat proxy Gemini routing + SW cache refresh + luxury visual polish; Apply Victor IA brand identity v3.0",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s364",
+  "dateKey": "2026-05-27",
+  "hora": "19:10",
+  "desc": "[7 commits] SEO completo: schemas, title CTR-opt, FAQ, crm-agencias, sitemap | Google Search Console verification meta tag | Hero bug fix en 7 páginas + blog 13 artículos + animación filosófica + SEO completo | Google Search Console verification file | SEO: nueva landing /crm-agencias para keyword \"CRM agencias digitales\" | SEO: Brain Tracker — schemas, FAQ GEO-optimizado, meta tags CTR",
+  "cat": "Bug Fix",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "seo"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 7 commits git (00:09-19:10)",
+  "notes": "Apply brand identity manual v3.0 to main site",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s363",
+  "dateKey": "2026-05-27",
+  "hora": "17:00",
+  "desc": "Propuesta (1120 lineas; opcion A 3250 MXN / opcion B kit completo 37875 MXN) desplegada en victor-ia-website.vercel.app/propuesta-rosa-laura.html",
+  "cat": "Propuesta",
+  "project": "Rosa Laura Ubeda",
+  "client": "Rosa Laura Ubeda",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "propuesta",
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s362",
+  "dateKey": "2026-05-27",
+  "hora": "16:00",
+  "desc": "crm.html mejorado (slide-over contactos, kanban 5 etapas, toasts) desplegado en victor-ia-brain-tracker.vercel.app",
+  "cat": "Deploy",
+  "project": "Victor IA Brain Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "vercel",
+   "crm"
+  ],
+  "rework": 1,
+  "obs": "Fuente: diario de memoria | posible solape con commits git mismo dia/proyecto",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s361",
+  "dateKey": "2026-05-27",
+  "hora": "14:00",
+  "desc": "12 articulos del blog mejorados con 3-4 SVG ilustraciones c/u (800x450) + OG/Twitter meta tags, deploy prod (13 articulos live)",
+  "cat": "Contenido",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "blog",
+   "deploy"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "higgsfield",
+   "elevenlabs"
+  ]
+ },
+ {
+  "id": "s360",
+  "dateKey": "2026-05-27",
+  "hora": "13:00",
+  "desc": "Mejoras masivas (Shelter Club, Photo Gallery lightbox, sticky mobile booking bar, fix ElevenLabs agent ID) desplegadas en seabird-resort-inclusive.vercel.app",
+  "cat": "Deploy",
+  "project": "Seabird Hotel",
+  "client": "Seabird Ocean Resort",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "elevenlabs",
+   "seabird",
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s359",
+  "dateKey": "2026-05-27",
+  "hora": "11:00",
+  "desc": "Blog completo creado: 13 paginas (index + pillar + 12 articulos SEO ~1400 palabras) + sitemap.xml 23 URLs + robots.txt AI-crawlers, deploy Vercel",
+  "cat": "Contenido",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "seo",
+   "blog",
+   "deploy",
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "higgsfield",
+   "elevenlabs"
+  ]
+ },
+ {
+  "id": "s358",
+  "dateKey": "2026-05-27",
+  "hora": "10:00",
+  "desc": "Estrategia SEO aplicada a victor-ia.xyz: GSC verificado, sitemap enviado, indexacion forzada + 2 posts redes (Facebook/Instagram/LinkedIn)",
+  "cat": "Investigacion",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.5,
+  "durSec": 5400,
+  "tags": [
+   "seo"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s357",
+  "dateKey": "2026-05-27",
+  "hora": "09:00",
+  "desc": "Aplicacion de tokens de marca v3.0 (Electric Purple, noise overlay, cursor spotlight, SVG dividers) al sitio principal y Brain Tracker, deploy prod",
+  "cat": "Diseno",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.5,
+  "durSec": 9000,
+  "tags": [
+   "deploy"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s356",
+  "dateKey": "2026-05-26",
+  "hora": "14:00",
+  "desc": "Brandbook v3.0: migracion a estetica Manus iOS (#EBEBEB, pill buttons), tipografia unificada Inter, gold #B8860B, nueva seccion Brain Tracker app",
+  "cat": "Diseno",
+  "project": "Brandbook",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.5,
+  "durSec": 9000,
+  "tags": [
+   "brandbook"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s355",
+  "dateKey": "2026-05-26",
+  "hora": "12:00",
+  "desc": "Manual de identidad Web 4.0 expandido a 1619 lineas (7 secciones nuevas: redes, assets, UI, merch, papeleria, chatbot, propuestas), deploy prod",
+  "cat": "Diseno",
+  "project": "Brandbook",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.5,
+  "durSec": 9000,
+  "tags": [
+   "deploy",
+   "propuesta"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s354",
+  "dateKey": "2026-05-25",
+  "hora": "13:10",
+  "desc": "[2 commits] feat(presentacion): per-slide ElevenLabs narration with perfect audio/visual sync | Rebrand + CRM Pipeline + nuevas pantallas + Gemini fixes",
+  "cat": "Feature",
+  "project": "Victor IA Brain Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.5,
+  "durSec": 1800,
+  "tags": [
+   "fix",
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 2 commits git (12:55-13:10)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s353",
+  "dateKey": "2026-05-25",
+  "hora": "12:00",
+  "desc": "Video LATIVA_PRESENTATION.mp4 producido (55s, 1920x1080, HyperFrames) con VO Burt Reynolds ElevenLabs, aprobado para distribucion",
+  "cat": "Video",
+  "project": "LATIVA",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 3.0,
+  "durSec": 10800,
+  "tags": [
+   "video",
+   "elevenlabs"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "higgsfield",
+   "elevenlabs"
+  ]
+ },
+ {
+  "id": "s352",
+  "dateKey": "2026-05-24",
+  "hora": "22:21",
+  "desc": "[3 commits] refactor: eliminar Higgsfield — todo via Google Cloud directo (Veo 3 + Nano Banana 2) | feat: smart model routing — agente usa su mejor modelo automaticamente | feat: Multi-Agentes Antigravity 2.0 — panel paralelo con fallback Gemini",
+  "cat": "Feature",
+  "project": "Victor IA Brain Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 3.57,
+  "durSec": 12852,
+  "tags": [
+   "feat",
+   "refactor"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 3 commits git (19:02-22:21)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s351",
+  "dateKey": "2026-05-23",
+  "hora": "15:10",
+  "desc": "[18 commits] feat: brokerPlanIA Claude; CFO IA análisis real; patchRRHHTable dinámico desde EMPLOYEES_DATA | feat: chat IA real Claude; evalEmployee API; saveNewEmployee dinámico; patchRRHHTable desde EMPLOYEES_DATA; viewAuditPlan Claude | feat: generateImage real Unsplash photos; generateVideo 2.6s player; Manus real DOM audit; previewVoice TTS API | feat: wire generatePres+runFinalTest to Cla...",
+  "cat": "Feature",
+  "project": "ROES & CO",
+  "client": "ROES & CO",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "chat",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 18 commits git (04:03-15:10)",
+  "notes": "feat: hub con tabs, generador imagenes IA, presentaciones, solicitud videos; feat: onboarding con nombre, personalizacion de agentes, lead capture; fix: clean up api key handling, env var re-seeded without BOM; fix: encode fetch body as Uint8Array to handle non-latin1 chars in system prompts; debug:",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s350",
+  "dateKey": "2026-05-23",
+  "hora": "12:00",
+  "desc": "SPA ROES & CO OS con 18 vistas (recuperado de Google Stitch, Tailwind dark MD3, champagne gold) desplegado en roes-co-os.vercel.app",
+  "cat": "Deploy",
+  "project": "ROES & CO",
+  "client": "ROES & CO",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "roes",
+   "vercel"
+  ],
+  "rework": 1,
+  "obs": "Fuente: diario de memoria | posible solape con commits git mismo dia/proyecto",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s349",
+  "dateKey": "2026-05-23",
+  "hora": "05:22",
+  "desc": "[1 commits] feat: Victor IA App — chat + proyectos + skills",
+  "cat": "Feature",
+  "project": "Victor IA App",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [
+   "feat",
+   "chat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (05:22-05:22)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s348",
+  "dateKey": "2026-05-22",
+  "hora": "16:04",
+  "desc": "[1 commits] feat: add propuesta-rosa-laura — video inmobiliario 2,450 + kit fraccionamiento 56,500",
+  "cat": "Feature",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (16:04-16:04)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s347",
+  "dateKey": "2026-05-22",
+  "hora": "14:00",
+  "desc": "Demo AI Operating System white-label (18 modulos, agente de voz ElevenLabs, model selector 7 LLMs, Google Drive KB) desplegado en roes-co-demo.vercel.app",
+  "cat": "Deploy",
+  "project": "ROES & CO",
+  "client": "ROES & CO",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "voz",
+   "elevenlabs",
+   "roes",
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s346",
+  "dateKey": "2026-05-22",
+  "hora": "12:00",
+  "desc": "Hermes Agent v0.14.0 instalado (OpenRouter claude-sonnet-4-6, 203 skills, ElevenLabs TTS, Telegram bot activo, 8 MCPs)",
+  "cat": "Feature",
+  "project": "Sistema de Skills",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "elevenlabs"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s345",
+  "dateKey": "2026-05-22",
+  "hora": "11:00",
+  "desc": "Videollamada ~1h (meet.google.com): levantamiento de necesidades kit de ventas inmobiliario + pitch del workflow transparente",
+  "cat": "Reunion",
+  "project": "Rosa Laura Ubeda",
+  "client": "Rosa Laura Ubeda",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "video"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s344",
+  "dateKey": "2026-05-21",
+  "hora": "16:00",
+  "desc": "4 paginas nuevas awards-level (nosotros, prime-mystic, proteccion-patrimonial, contacto) + 6 paginas de proyectos con Lenis+GSAP",
+  "cat": "Diseno",
+  "project": "ROES & CO",
+  "client": "ROES & CO",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.5,
+  "durSec": 9000,
+  "tags": [],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s343",
+  "dateKey": "2026-05-21",
+  "hora": "14:00",
+  "desc": "Sitio ROES & CO 1.0 con design system oficial (Tailwind, Playfair+Montserrat) desplegado en roes-co-10.vercel.app",
+  "cat": "Deploy",
+  "project": "ROES & CO",
+  "client": "ROES & CO",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "roes",
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s342",
+  "dateKey": "2026-05-21",
+  "hora": "12:00",
+  "desc": "Blog completo: 10 articulos SEO/GEO/AEO + 2 pillar pages (Riviera Maya, Yucatan) deployados en roes-co-website.vercel.app",
+  "cat": "Contenido",
+  "project": "ROES & CO",
+  "client": "ROES & CO",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "seo",
+   "blog",
+   "deploy",
+   "roes",
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "higgsfield",
+   "elevenlabs"
+  ]
+ },
+ {
+  "id": "s341",
+  "dateKey": "2026-05-21",
+  "hora": "10:00",
+  "desc": "Sitio Web 4.0 completo (Three.js particulas doradas, GSAP, 9 secciones, Schema.org, GEO/AEO) desplegado en roes-co-website.vercel.app",
+  "cat": "Deploy",
+  "project": "ROES & CO",
+  "client": "ROES & CO",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "roes",
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s340",
+  "dateKey": "2026-05-21",
+  "hora": "09:00",
+  "desc": "Agendacion de videollamada para 22 mayo 10:00 AM hora Puebla, compartido link agenda victor-ia-website.vercel.app/agenda",
+  "cat": "Reunion",
+  "project": "Rosa Laura Ubeda",
+  "client": "Rosa Laura Ubeda",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "video",
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s339",
+  "dateKey": "2026-05-21",
+  "hora": "02:56",
+  "desc": "[6 commits] Analytics: descuentos/creditos section + feed Sin costo badge + table price override | CRM personalized per project: ROES + Seabird Hotel contacts/deals/companies/activities + renderCrm project filter | Free SEO audit: price:0, sw:[] on s069-s071 + priceForEntry override support | Fill complete work entries: ROES (8 entries) + Seabird Hotel (6 entries) May 20-21 | Fix project names:...",
+  "cat": "Bug Fix",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "fix",
+   "seo"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 6 commits git (02:11-02:56)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s338",
+  "dateKey": "2026-05-20",
+  "hora": "14:00",
+  "desc": "Propuesta comercial luxury entregada (3 sprints, 68000 MXN + 8500/mo monitoreo) live en victor-ia.xyz/auditoria-seo-roes-co",
+  "cat": "Propuesta",
+  "project": "ROES & CO",
+  "client": "ROES & CO",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "seo",
+   "propuesta",
+   "auditoria",
+   "roes"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s337",
+  "dateKey": "2026-05-20",
+  "hora": "12:00",
+  "desc": "Auditoria SEO integral 9 dimensiones de inversionesconplusvalia.com.mx (PageSpeed movil 36/100, sin schema, 6 hallazgos criticos) + entregables coloquial y tecnico",
+  "cat": "Auditoria",
+  "project": "ROES & CO",
+  "client": "ROES & CO",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "seo",
+   "auditoria"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s336",
+  "dateKey": "2026-05-20",
+  "hora": "11:00",
+  "desc": "Sitio web luxury Web 4.0 construido (paleta oceano, Cormorant Garamond+Inter, GSAP, accesibilidad) para Seabird Ocean Resort, Oceanside CA",
+  "cat": "Diseno",
+  "project": "Seabird Hotel",
+  "client": "Seabird Ocean Resort",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.5,
+  "durSec": 9000,
+  "tags": [
+   "seabird"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s335",
+  "dateKey": "2026-05-20",
+  "hora": "10:00",
+  "desc": "Primer contacto via WhatsApp (referida por Iris Rodriguez): interes en publicidad con IA para vender propiedad en Puebla",
+  "cat": "Reunion",
+  "project": "Rosa Laura Ubeda",
+  "client": "Rosa Laura Ubeda",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s334",
+  "dateKey": "2026-05-19",
+  "hora": "11:45",
+  "desc": "[1 commits] fix: accessibility panel - colorblind filter on body, voice control restart, text zoom, ElevenLabs key",
+  "cat": "Bug Fix",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [
+   "fix"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (11:45-11:45)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s333",
+  "dateKey": "2026-05-18",
+  "hora": "16:29",
+  "desc": "[14 commits] feat: agregar servicio Telemetría IoT (#09) y marquee | fix: always show login on every page load | remove: mobile floating CTA bar | fix: eliminate all mobile horizontal overflow — svg !important, html/body/content overflow-x clip, section width 100% | fix: inicio link also shows login overlay | fix: mobile overflow (flow-diagram-mobile column), table nowrap, logo login, telemetry...",
+  "cat": "Bug Fix",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 3.37,
+  "durSec": 12132,
+  "tags": [
+   "fix",
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 14 commits git (13:22-16:29)",
+  "notes": "fix: mobile responsive audit — hero overflow, 03A negative margins, spacing; alianza-fiscal: expand despacho positioning item with real billing support; alianza-fiscal: add real implementation messaging to cliente final card; alianza-fiscal: remove amounts from Canal A and Canal B SVG boxes; alianza",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s332",
+  "dateKey": "2026-05-17",
+  "hora": "02:23",
+  "desc": "[1 commits] Estacion Pizza — Web 4.0 site",
+  "cat": "Desarrollo",
+  "project": "Estacion Pizza",
+  "client": "Estacion Pizza",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (02:23-02:23)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s331",
+  "dateKey": "2026-05-16",
+  "hora": "03:50",
+  "desc": "[1 commits] feat: panel Telemetría IoT — tab, KPIs, charts, benchmarks, proyectos",
+  "cat": "Feature",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (03:50-03:50)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s330",
+  "dateKey": "2026-05-15",
+  "hora": "19:04",
+  "desc": "[7 commits] feat: replace L-system with hex-grid WebGL2 ray-march — Victor IA gold palette, hover tilt + drag rotate + click flash | feat: L-System Bloom hero — 120k particles, click explosions, mouse trail bursts | feat: spectacular v4 — 10k particles, physics, click shockwave, drag orbit, gyroscope | redesign: full-canvas 3D hero, UMD Three.js, editorial layout — spectacular v3 | polish: SVG ...",
+  "cat": "Feature",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 7 commits git (00:20-19:04)",
+  "notes": "Victor IA v2 — Three.js WebGL + GSAP + Lenis spectacular site",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s329",
+  "dateKey": "2026-05-15",
+  "hora": "03:51",
+  "desc": "[1 commits] Add Browser Use Box editing note",
+  "cat": "Desarrollo",
+  "project": "Victor IA Avatar Video",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (03:51-03:51)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s328",
+  "dateKey": "2026-05-14",
+  "hora": "23:53",
+  "desc": "[2 commits] Revert \"Add Browser Use Box editing note\" | Merge pull request #34 from browser-use/add-bux-video-use-note",
+  "cat": "UI/UX",
+  "project": "Victor IA Avatar Video",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.48,
+  "durSec": 1728,
+  "tags": [],
+  "rework": 0,
+  "obs": "Agregado de 2 commits git (23:39-23:53)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s327",
+  "dateKey": "2026-05-13",
+  "hora": "22:06",
+  "desc": "[3 commits] refactor: star-wars — replace with correct implementation (proper starfield + music + flash) | fix: star-wars loop starts after init (no crash on empty array), clean perspective projection; add: fifa-26 effect | fix: star-wars starfield - stars born at center so perspective projection keeps them on screen",
+  "cat": "Bug Fix",
+  "project": "Efectos Web",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 0.6,
+  "durSec": 2160,
+  "tags": [
+   "fix",
+   "refactor"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 3 commits git (21:45-22:06)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s326",
+  "dateKey": "2026-05-13",
+  "hora": "20:35",
+  "desc": "[3 commits] Fix 9 mobile/UX issues: pills scroll, cards min-height, CTA separator, cardIn scale, count hide 430px, grid 375px, pill glow, hover border anim, agenda URLs unified | login: simplify to plain login/register, remove detection logic | feat: meta tags y OG image actualizados para victor-ia.xyz",
+  "cat": "Bug Fix",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 3 commits git (07:48-20:35)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s325",
+  "dateKey": "2026-05-12",
+  "hora": "23:00",
+  "desc": "[43 commits] Fix 7 broken effects: replace Club GSAP plugins + WebGL float textures | Rework filters: 8 exclusive categories, number-based mapping, counts per category | Sort gallery cards in ascending numerical order (01-134) | Add modules 130-134: Spotlight, Glitch, Neon, Magnetic, Gradient Border + advanced filter system | Add modules 125-129: Count Up, Accordion, Tabs, Confetti Burst, SVG M...",
+  "cat": "Bug Fix",
+  "project": "Efectos Web",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 43 commits git (01:54-23:00)",
+  "notes": "Add modules 116-120: 3D Card Flip, Typewriter, Noise Texture, Split Text, Liquid Button; Add modules 111-115: Marquee, Glassmorphism, Pixel Reveal, Text Stroke, Cursor Trail; Add modules 108-110: Aurora Background, Tilt Cards, Cloth Simulation; Add modules 105/106/107: Magnetic Buttons (GSAP), Neon ",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s324",
+  "dateKey": "2026-05-12",
+  "hora": "03:11",
+  "desc": "[2 commits] Fix integration popups: specific content per tool, no cross-tool mixing | feat: integrar sistema biométrico MediaPipe eye-tracking",
+  "cat": "Bug Fix",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 3.35,
+  "durSec": 12060,
+  "tags": [
+   "fix",
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 2 commits git (00:05-03:11)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s323",
+  "dateKey": "2026-05-12",
+  "hora": "00:24",
+  "desc": "[1 commits] Vista Cliente: sort filter, web-4o polish, comentarios con desglose completo de actividad",
+  "cat": "UI/UX",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (00:24-00:24)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s322",
+  "dateKey": "2026-05-11",
+  "hora": "19:07",
+  "desc": "[4 commits] fix: comandos de voz para daltonismo + tour + animaciones; tour con pre-carga paralela sin latencia | Tour v2: pre-carga paralela de 21 audios, modelo turbo baja latencia, reproduccion instantanea sin gaps | Tour guiado v2: 21 pasos completos, ElevenLabs Enrique Mondragon, pulsante amber, navegacion automatica entre tabs | feat: auth wall Google/Apple/Email + brand alignment",
+  "cat": "Bug Fix",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix",
+   "feat",
+   "auth",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 4 commits git (00:16-19:07)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s321",
+  "dateKey": "2026-05-11",
+  "hora": "12:00",
+  "desc": "Deck de 14 slides enviado y tracking activado como primer cliente externo, victor-ia-website.vercel.app/propuesta-aldo.html",
+  "cat": "Propuesta",
+  "project": "Propuesta Aldo",
+  "client": "Aldo Rendon (Remi Creative)",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "propuesta",
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s320",
+  "dateKey": "2026-05-11",
+  "hora": "11:35",
+  "desc": "[3 commits] Fix logo contrast: OpenAI swirl clean, branded cards for Perplexity/Kling/LTX/Pinecone/Groq/Together/fal/Exa, Midjourney white, DaVinci transparent | Replace all logos with SVG sources — transparent backgrounds, brand colors | Add real logos + rebuild integrations with 12 categories + 150 tools",
+  "cat": "Bug Fix",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 7.08,
+  "durSec": 25488,
+  "tags": [
+   "fix",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 3 commits git (04:45-11:35)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s319",
+  "dateKey": "2026-05-10",
+  "hora": "21:05",
+  "desc": "[3 commits] fix(render): preserve orientation for portrait video sources (#29) | fix(pack_transcripts): write output as UTF-8 to avoid cp1252 encoding errors (#10) | Add MIT license (#32)",
+  "cat": "Bug Fix",
+  "project": "Victor IA Avatar Video",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 9.4,
+  "durSec": 33840,
+  "tags": [
+   "fix"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 3 commits git (11:56-21:05)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s318",
+  "dateKey": "2026-05-10",
+  "hora": "18:40",
+  "desc": "[8 commits] feat: fotos hiperealistas Higgsfield en modal de flota (8 autos) | feat: mobile menu, hero entrance stagger, testimonials stagger, grain fix, og:image | feat: marquee strip, moving border, scramble text, countup, cursor trail | feat: skill web-4o updates — gradient em, CTA shimmer, section glow, Lenis sync | feat: web 4.0 refinements — cursor states, word-reveal, magnetic footer, pa...",
+  "cat": "Feature",
+  "project": "Costa Negra",
+  "client": "Costa Negra",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 1.78,
+  "durSec": 6408,
+  "tags": [
+   "fix",
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 8 commits git (17:08-18:40)",
+  "notes": "Footer Web 4.0: CTAs funcionales, 3 columnas, contacto completo, i18n ES/EN; Costa Negra — Web 4.0 enhancement layer",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s317",
+  "dateKey": "2026-05-10",
+  "hora": "12:00",
+  "desc": "Sitio accesible v4 live en victor-ia-inclusivo.vercel.app (panel a11y, 5 modos daltonismo, control por voz 19 comandos, tour guiado)",
+  "cat": "Deploy",
+  "project": "Victor IA Inclusivo",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "voz",
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s316",
+  "dateKey": "2026-05-09",
+  "hora": "12:00",
+  "desc": "Deck comercial de 14 slides interactivo con 3 planes CAD/MXN desplegado en victor-ia-website.vercel.app/propuesta-aldo.html",
+  "cat": "Propuesta",
+  "project": "Propuesta Aldo",
+  "client": "Aldo Rendon (Remi Creative)",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 2.0,
+  "durSec": 7200,
+  "tags": [
+   "propuesta",
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s315",
+  "dateKey": "2026-05-08",
+  "hora": "15:21",
+  "desc": "[1 commits] feat: CRM + Prospección (Apollo.io clone) — 2 nuevos tabs completos",
+  "cat": "Feature",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (15:21-15:21)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s314",
+  "dateKey": "2026-05-08",
+  "hora": "12:00",
+  "desc": "Agente de voz IA ElevenLabs configurado y embebido en victor-ia-website + victor-ia-inclusivo (Knowledge Base con copy del sitio, webhook)",
+  "cat": "Voz",
+  "project": "ElevenLabs Voz",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "voz",
+   "elevenlabs"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "higgsfield",
+   "elevenlabs"
+  ]
+ },
+ {
+  "id": "s313",
+  "dateKey": "2026-05-07",
+  "hora": "21:16",
+  "desc": "[12 commits] fix: agenda redirect usa VIA_CONFIG.agendaUrl en vez de ruta relativa | feat: WhatsApp deep-link, agenda URL, whatsapp/agenda config | fix: audio quality - noise suppression, echo cancel, farewell false triggers | fix: contact form type mismatch + auto-send for returning visitors | fix: compact icon-only trigger on mobile, no overlap | fix: hide trigger label on mobile, icon only",
+  "cat": "Bug Fix",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 7.73,
+  "durSec": 27828,
+  "tags": [
+   "fix",
+   "feat",
+   "ui"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 12 commits git (13:47-21:16)",
+  "notes": "feat: smart dynamic popup forms (agenda/cotizacion/contacto) with auto intent detection; feat: minimize chevron button in widget header + mobile full-screen layout; fix: widget full-screen on mobile, hide trigger when panel open; feat: auto-tracking hourly — loadAutoEntries() desde n8n, merge en reb",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s312",
+  "dateKey": "2026-05-07",
+  "hora": "19:02",
+  "desc": "[5 commits] feat: replace eye scrub with ciudad aerea 4K — 481 frames 750x1334 webp | remove: awards strip section | fix: footer padding-bottom 88px on mobile for chatbot clearance | fix: remove truncated Playa from og:description | feat: awards optimization v9.5 — Lenis scroll, frame scrub 241 frames, section reveals, sound, magnetic buttons, 3D tilt, loader, kinetic type, easter eggs, 404",
+  "cat": "Bug Fix",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 6.13,
+  "durSec": 22068,
+  "tags": [
+   "fix",
+   "feat",
+   "chat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 5 commits git (13:09-19:02)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s311",
+  "dateKey": "2026-05-07",
+  "hora": "13:00",
+  "desc": "Header con kinetic typography luxury sobre video del ojo desplegado en influence-ia-awards-2027.vercel.app",
+  "cat": "Deploy",
+  "project": "Influence IA",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "video",
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s310",
+  "dateKey": "2026-05-07",
+  "hora": "11:00",
+  "desc": "Sitio web completo con canvas water-trail reveal (481 frames) + 18 paginas de servicios desplegado en victor-ia-website.vercel.app",
+  "cat": "Deploy",
+  "project": "Victor IA Website",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "vercel"
+  ],
+  "rework": 1,
+  "obs": "Fuente: diario de memoria | posible solape con commits git mismo dia/proyecto",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s309",
+  "dateKey": "2026-05-06",
+  "hora": "16:30",
+  "desc": "[5 commits] Add client mode toggle, project phase field, project cost breakdown in Reportes | Add cost vs price vs margin breakdown: feed, dashboard KPIs, reportes timeline | Add Reportes tab: dept reports + daily timeline with costs | Add real SW cost calc from FINANZAS + offline Service Worker | Redesign flowchart: clean HTML layout, click popups with real data",
+  "cat": "Mantenimiento",
+  "project": "Victor IA Tracker",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 0.67,
+  "durSec": 2412,
+  "tags": [],
+  "rework": 0,
+  "obs": "Agregado de 5 commits git (16:12-16:30)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s308",
+  "dateKey": "2026-05-05",
+  "hora": "13:00",
+  "desc": "Dashboard BI Next.js construido y desplegado en victor-ia-dashboard.vercel.app, conectado a Google Sheets",
+  "cat": "Deploy",
+  "project": "Dashboard BI",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s307",
+  "dateKey": "2026-05-05",
+  "hora": "11:00",
+  "desc": "Landing page luxury completa desplegada en HubSpot (dominio victor-ia.com.mx)",
+  "cat": "Deploy",
+  "project": "Costa Negra",
+  "client": "Costa Negra",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s306",
+  "dateKey": "2026-05-04",
+  "hora": "22:16",
+  "desc": "[3 commits] feat: add Gen Z v2 page (15th variant) — Y2K chrome + canvas particles | feat: add spectacular animations and effects to all 14 trend pages | 14 Victor IA design trend pages + gallery index",
+  "cat": "Feature",
+  "project": "Victor IA Marketing",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 0.97,
+  "durSec": 3492,
+  "tags": [
+   "feat"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 3 commits git (21:33-22:16)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s305",
+  "dateKey": "2026-05-04",
+  "hora": "11:06",
+  "desc": "[1 commits] Initial commit — Victor IA Awards 2027 site",
+  "cat": "Desarrollo",
+  "project": "Influence IA",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (11:06-11:06)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s304",
+  "dateKey": "2026-05-04",
+  "hora": "00:08",
+  "desc": "[1 commits] docs: add HyperFrames animation option (#13)",
+  "cat": "Documentacion",
+  "project": "Victor IA Avatar Video",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Normal",
+  "dur": 0.25,
+  "durSec": 900,
+  "tags": [
+   "docs"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 1 commits git (00:08-00:08)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s303",
+  "dateKey": "2026-05-01",
+  "hora": "12:00",
+  "desc": "Brandbook interactivo v2.0 (21 secciones, single-file HTML) live en victor-ia-brandbook.vercel.app",
+  "cat": "Deploy",
+  "project": "Brandbook",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Alta",
+  "dur": 1.0,
+  "durSec": 3600,
+  "tags": [
+   "brandbook",
+   "vercel"
+  ],
+  "rework": 0,
+  "obs": "Fuente: diario de memoria",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s302",
+  "dateKey": "2026-04-23",
+  "hora": "23:40",
+  "desc": "[3 commits] fix(subtitles): raise MarginV to 90 to clear vertical safe zones (#5) | fix(render): tone-map HLG/PQ sources to Rec.709 SDR (#6) | add install.md and one-paste setup prompt (#9)",
+  "cat": "Bug Fix",
+  "project": "Victor IA Avatar Video",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 10.0,
+  "durSec": 36000,
+  "tags": [
+   "fix"
+  ],
+  "rework": 0,
+  "obs": "Agregado de 3 commits git (09:14-23:40)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s301",
+  "dateKey": "2026-04-15",
+  "hora": "16:00",
+  "desc": "[3 commits] add what-it-does section to readme | trim readme — get started first, tighten how-it-works | rename to video-use + readme hero",
+  "cat": "Documentacion",
+  "project": "Victor IA Avatar Video",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 0.47,
+  "durSec": 1692,
+  "tags": [],
+  "rework": 0,
+  "obs": "Agregado de 3 commits git (15:47-16:00)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ },
+ {
+  "id": "s300",
+  "dateKey": "2026-04-11",
+  "hora": "19:56",
+  "desc": "[4 commits] poster | self eval loop | autograde + autosound | v1",
+  "cat": "Desarrollo",
+  "project": "Victor IA Avatar Video",
+  "client": "Victor IA",
+  "status": "Completado",
+  "priority": "Media",
+  "dur": 1.62,
+  "durSec": 5832,
+  "tags": [],
+  "rework": 0,
+  "obs": "Agregado de 4 commits git (18:34-19:56)",
+  "notes": "",
+  "sw": [
+   "vscode",
+   "git",
+   "powershell"
+  ]
+ }
+]
