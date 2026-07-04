@@ -8205,6 +8205,15 @@ async function init(){
 
   // PROTOCOLO DE VACIADO TOTAL: registrar inicio de sesión en el tracker
   try{ viaLogActivity('event','Sesión iniciada en el tracker',{source:'Tracker',cat:'Tracker',tags:['tracker','sesion','inicio']}); }catch(_){}
+
+  // DEBUG: Verificar que biblioteca se puede cargar
+  window.testLibreria=function(){
+    console.log('[DEBUG] Llamando setTab(biblioteca)');
+    currentTab='biblioteca';
+    document.querySelectorAll('#content > div').forEach(d=>d.classList.add('hidden'));
+    document.getElementById('view-biblioteca').classList.remove('hidden');
+    renderLibrary().catch(e=>console.error('[DEBUG] Error en renderLibrary:', e));
+  };
 }
 
 async function loadAutoEntries(){
