@@ -10507,7 +10507,195 @@ function renderAssetCard(asset) {
         <div style="font-size:11.5px;font-weight:700;color:var(--bone,#f5f1e8);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${(asset.title||'').replace(/"/g,'&quot;')}">${asset.title||'—'}</div>
         <div style="font-size:9.5px;color:var(--bone2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${asset.description||''}</div>
       </div>
+      ${asset.action==='imagen' ? renderImageActions(asset) : ''}
     </div>`;
+}
+
+// Botones de acción 2x2 SOLO para imágenes (Descargar · Compartir · Recrear · Eliminar)
+function renderImageActions(asset){
+  const id = String(asset.id);
+  const btn = (icon, label, fn, hover) => `
+    <button onclick="event.stopPropagation();${fn}"
+      style="display:flex;align-items:center;justify-content:center;gap:4px;padding:6px 4px;border-radius:8px;cursor:pointer;
+      font-size:10px;font-weight:700;border:1px solid var(--border);background:var(--bg,#0b0c0e);color:var(--bone2);transition:all .15s"
+      onmouseover="this.style.background='${hover}22';this.style.borderColor='${hover}';this.style.color='${hover}'"
+      onmouseout="this.style.background='var(--bg,#0b0c0e)';this.style.borderColor='var(--border)';this.style.color='var(--bone2)'">
+      <span>${icon}</span><span>${label}</span>
+    </button>`;
+  return `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 10px 10px" onclick="event.stopPropagation()">
+      ${btn('⬇️','Descargar',`downloadAsset('${id}')`,'#3b82f6')}
+      ${btn('🔗','Compartir',`shareAsset('${id}')`,'#22c55e')}
+      ${btn('🔄','Recrear',`recreateAsset('${id}')`,'#a855f7')}
+      ${btn('🗑️','Eliminar',`deleteAsset('${id}')`,'#ef4444')}
+    </div>`;
+}
+
+// Toast reutilizable para la biblioteca
+function libToast(msg, type){
+  const c = { success:['rgba(34,197,94,.15)','#22c55e'], error:['rgba(239,68,68,.15)','#ef4444'], info:['rgba(255,170,23,.15)','#FFAA17'] };
+  const [bg,fg] = c[type] || c.success;
+  const el = document.createElement('div');
+  el.style.cssText = `position:fixed;bottom:24px;right:24px;z-index:10001;background:${bg};border:1px solid ${fg};color:${fg};padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.35)`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 2800);
+}
+
+const _libGetAsset = (id) => LIBRARY_ASSETS.find(a => String(a.id) === String(id));
+
+// ⬇️ Descargar — fuerza descarga directa del archivo (JPG/PNG)
+async function downloadAsset(id){
+  const asset = _libGetAsset(id);
+  if(!asset || !asset.url){ libToast('Sin archivo para descargar', 'error'); return; }
+  const url = asset.url;
+  const ext = (asset.fileType && asset.fileType!=='IMG' ? asset.fileType.toLowerCase() : (url.split('?')[0].match(/\.(jpe?g|png|webp|gif)$/i)?.[1] || 'jpg'));
+  const safeName = (asset.title||'imagen').replace(/[^\w\-]+/g,'_').slice(0,40) || 'imagen';
+  const filename = `${safeName}.${ext}`;
+  try {
+    // data: URLs -> descarga directa; https -> fetch a blob para forzar descarga (evita abrir en pestaña)
+    if (url.startsWith('data:')) {
+      const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    } else {
+      libToast('Descargando…', 'info');
+      const resp = await fetch(url, { mode:'cors' });
+      const blob = await resp.blob();
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = objUrl; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(objUrl), 4000);
+    }
+    libToast('✓ Descarga iniciada', 'success');
+  } catch(e){
+    // Fallback: abrir en pestaña nueva si CORS bloquea el fetch
+    console.warn('[library] download fallback:', e.message);
+    window.open(url, '_blank', 'noopener');
+    libToast('Abriendo archivo en pestaña nueva', 'info');
+  }
+}
+
+// 🔗 Compartir — copia la URL al portapapeles
+async function shareAsset(id){
+  const asset = _libGetAsset(id);
+  if(!asset || !asset.url){ libToast('Sin URL para compartir', 'error'); return; }
+  const url = asset.url;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(url);
+    } else {
+      const ta = document.createElement('textarea'); ta.value = url; ta.style.cssText='position:fixed;opacity:0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    }
+    libToast('✓ ¡URL copiada al portapapeles!', 'success');
+  } catch(e){
+    console.warn('[library] share error:', e.message);
+    libToast('No se pudo copiar la URL', 'error');
+  }
+}
+
+// 🔄 Recrear — modal para regenerar con los mismos parámetros
+function recreateAsset(id){
+  const asset = _libGetAsset(id);
+  if(!asset){ libToast('Asset no encontrado', 'error'); return; }
+  const meta = asset.metadata || {};
+  const cfg = meta.config || {};
+  const prompt = meta.prompt || asset.title || '';
+  const cfgRows = Object.keys(cfg).length
+    ? Object.entries(cfg).map(([k,v])=>`<span style="display:inline-block;background:var(--surface2,#131418);border:1px solid var(--border);color:var(--bone2);font-size:10px;padding:2px 8px;border-radius:8px;margin:0 4px 4px 0"><b style="color:var(--bone,#f5f1e8)">${k}:</b> ${typeof v==='object'?JSON.stringify(v):v}</span>`).join('')
+    : '<span style="font-size:11px;color:var(--bone2)">Sin parámetros guardados — se usarán los predeterminados.</span>';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'lib-recreate-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto';
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeRecreate(); };
+  overlay.innerHTML = `
+    <div style="background:var(--surface,#0f1012);border:1px solid var(--border);border-radius:18px;max-width:560px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.6)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:9px">
+          <span style="font-size:18px">🔄</span>
+          <div style="font-size:14px;font-weight:800;color:var(--bone,#f5f1e8)">Recrear imagen</div>
+        </div>
+        <button onclick="closeRecreate()" style="background:var(--surface2,#131418);border:1px solid var(--border);color:var(--bone,#f5f1e8);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:16px">✕</button>
+      </div>
+      <div style="padding:16px 18px">
+        <div style="font-size:10px;font-weight:800;color:var(--bone2);letter-spacing:.5px;margin-bottom:6px">PROMPT (editable)</div>
+        <textarea id="recreate-prompt" style="width:100%;min-height:90px;padding:11px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg,#0b0c0e);color:var(--bone,#f5f1e8);font-size:13px;line-height:1.5;resize:vertical;outline:none;font-family:inherit">${(prompt||'').replace(/</g,'&lt;')}</textarea>
+        <div style="font-size:10px;font-weight:800;color:var(--bone2);letter-spacing:.5px;margin:14px 0 6px">PARÁMETROS</div>
+        <div>${cfgRows}</div>
+        <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+          <button onclick="closeRecreate()" style="padding:9px 16px;background:var(--surface2,#131418);border:1px solid var(--border);color:var(--bone,#f5f1e8);font-weight:700;font-size:12px;border-radius:8px;cursor:pointer">Cancelar</button>
+          <button id="recreate-go" onclick="submitRecreate('${String(id)}')" style="padding:9px 18px;background:#a855f7;border:none;color:#fff;font-weight:800;font-size:12px;border-radius:8px;cursor:pointer">🔄 Regenerar</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function closeRecreate(){
+  const el = document.getElementById('lib-recreate-modal');
+  if(el) el.remove();
+}
+
+async function submitRecreate(id){
+  const asset = _libGetAsset(id);
+  if(!asset){ libToast('Asset no encontrado', 'error'); return; }
+  const meta = asset.metadata || {};
+  const cfg = meta.config || {};
+  const ta = document.getElementById('recreate-prompt');
+  const prompt = (ta ? ta.value : meta.prompt || '').trim();
+  if(!prompt){ libToast('Escribe un prompt', 'error'); if(ta) ta.focus(); return; }
+
+  const goBtn = document.getElementById('recreate-go');
+  if(goBtn){ goBtn.disabled = true; goBtn.textContent = 'Regenerando…'; goBtn.style.opacity = '.7'; }
+
+  try {
+    const resp = await fetch('/api/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'imagen', voice_input: prompt, config: cfg, files: [] })
+    });
+    const data = await resp.json().catch(()=>({}));
+    if(!resp.ok || data.error){
+      libToast('Error: ' + (data.error || 'no se pudo regenerar'), 'error');
+      if(goBtn){ goBtn.disabled = false; goBtn.textContent = '🔄 Regenerar'; goBtn.style.opacity = ''; }
+      return;
+    }
+    closeRecreate();
+    if(data.status === 'completed'){
+      libToast('✓ ¡Imagen regenerada!', 'success');
+    } else {
+      libToast('En proceso… aparecerá en Biblioteca en ~1 min.', 'info');
+    }
+    // Refrescar la biblioteca para mostrar el nuevo asset
+    setTimeout(()=>renderLibrary(), 1200);
+  } catch(e){
+    console.error('[library] recreate error:', e);
+    libToast('Error de conexión al regenerar', 'error');
+    if(goBtn){ goBtn.disabled = false; goBtn.textContent = '🔄 Regenerar'; goBtn.style.opacity = ''; }
+  }
+}
+
+// 🗑️ Eliminar — confirma y borra de tracker_results (Supabase)
+async function deleteAsset(id){
+  const asset = _libGetAsset(id);
+  if(!asset){ libToast('Asset no encontrado', 'error'); return; }
+  const nombre = asset.title || 'esta imagen';
+  if(!confirm(`¿Eliminar "${nombre}"?\n\nEsto la borra permanentemente de la biblioteca. No se puede deshacer.`)) return;
+
+  try {
+    const resp = await fetch(`/api/library/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    const data = await resp.json().catch(()=>({}));
+    if(!resp.ok || !data.ok){
+      libToast('Error al eliminar: ' + (data.error || resp.status), 'error');
+      return;
+    }
+    // Quitar del estado local y redibujar sin re-fetch
+    LIBRARY_ASSETS = LIBRARY_ASSETS.filter(a => String(a.id) !== String(id));
+    drawLibrary();
+    libToast('✓ Imagen eliminada', 'success');
+  } catch(e){
+    console.error('[library] delete error:', e);
+    libToast('Error de conexión al eliminar', 'error');
+  }
 }
 
 // ===== BIBLIOTECA HANDLER — Eventos directos sin setTab() =====
