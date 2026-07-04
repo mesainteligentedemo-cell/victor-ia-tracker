@@ -15010,7 +15010,13 @@ init();
   document.addEventListener('click',function(e){
     const el=e.target.closest('button,.adf-node,.idf-node,.fl-card,.tab-btn,.kpi-card');
     if(!el) return;
-    if(!el.style.position||el.style.position==='static') el.style.position='relative';
+    // FIX: nunca aplicar ripple al FAB del Estudio IA — inyectar position:relative
+    // inline sobreescribía su position:fixed y lo sacaba del viewport (bug FAB desaparecía)
+    if(el.id==='estudio-fab'||el.closest('#estudio-fab')) return;
+    // FIX: usar computed style — solo forzar relative si realmente es static,
+    // nunca degradar elementos fixed/absolute/sticky
+    const _pos=getComputedStyle(el).position;
+    if(_pos==='static') el.style.position='relative';
     el.style.overflow='hidden';
     const rect=el.getBoundingClientRect();
     const r=Math.max(rect.width,rect.height);
