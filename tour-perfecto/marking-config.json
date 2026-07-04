@@ -1,11 +1,11 @@
 {
   "meta": {
-    "version": "6.0-golden-complete",
-    "created": "2026-07-04T14:50:00Z",
-    "description": "Tour guiado COMPLETO con marking en CUADRO DORADO - Enseña TODOS los botones del tracker",
-    "totalSteps": 60,
-    "totalDuration": 2400,
-    "totalButtons": 60,
+    "version": "6.1-golden-complete-plus-3",
+    "created": "2026-07-04T15:10:00Z",
+    "description": "Tour guiado COMPLETO con marking en CUADRO DORADO - Enseña TODOS los botones del tracker + Actividad en Vivo + Chat + AI Studio",
+    "totalSteps": 63,
+    "totalDuration": 2700,
+    "totalButtons": 63,
     "markingStyle": "BORDER DORADO 3px (#D4AF37) + glow suave",
     "syncTolerance": "±100ms",
     "audioMode": "Sequential MP3 playlist",
@@ -551,6 +551,33 @@
       "startTime": 835.0,
       "endTime": 850.0,
       "narration": "Ver Comandos muestra la lista completa de comandos de voz que puedes usar. 50+ comandos para control total manos libres."
+    },
+    {
+      "id": "mark-061",
+      "step": 61,
+      "selector": ".tab-actividad-vivo, [onclick*='setTab.*actividad']",
+      "label": "ACTIVIDAD EN VIVO — Stream de Cambios",
+      "startTime": 850.0,
+      "endTime": 875.0,
+      "narration": "Actividad en Vivo es un stream en tiempo real de todos los cambios en el tracker: quién hizo qué, cuándo y desde dónde. Transparencia total de tu operación. Cada acción queda registrada automáticamente para auditoría y compliance."
+    },
+    {
+      "id": "mark-062",
+      "step": 62,
+      "selector": "#estudio-ia-fab, .estudio-ia-btn, [onclick*='openStudio']",
+      "label": "ESTUDIO IA — IDE Integrado (Botón Principal)",
+      "startTime": 875.0,
+      "endTime": 900.0,
+      "narration": "El Estudio IA es el corazón creativo del tracker. Es un IDE completo: chat con Claude Opus, generación de imágenes, videos, presentaciones, sitios web, todo integrado en un solo lugar. Todo lo que generas se guarda automáticamente en tu Biblioteca."
+    },
+    {
+      "id": "mark-063",
+      "step": 63,
+      "selector": ".chat-panel, #chat-input, .chat-conversacional",
+      "label": "CHAT — Conversación con Claude",
+      "startTime": 900.0,
+      "endTime": 930.0,
+      "narration": "El Chat es donde conversas directamente con Claude Opus. Puedes pedirle que cree imágenes, videos, código, presentaciones, cualquier cosa. Solo escribe lo que necesitas y Claude se encarga de todo. Los resultados aparecen instantáneamente en la pantalla y se guardan en tu Biblioteca para reutilizar después."
     }
   ]
 }
