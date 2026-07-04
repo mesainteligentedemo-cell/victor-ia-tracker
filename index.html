@@ -2111,43 +2111,62 @@ svg.ic use { stroke: currentColor; }
 }
 
 /* ══════════════════════════════════════════════════════════
-   ESTUDIO IA — botón flotante que abre el chat completo (/chat)
-   Distinto del asistente de analytics; abre modal iframe.
+   ESTUDIO IA — botón flotante ÚNICO (minimizar / maximizar)
+   Sistema visual propio Victor IA · marca V + emojis propios.
+   Sin iconos genéricos. Minimizado = FAB · Maximizado = modal.
 ══════════════════════════════════════════════════════════ */
 #estudio-fab{
-  position:fixed; bottom:24px; right:88px; z-index:9998;
-  width:56px; height:56px; border-radius:50%; border:none; cursor:pointer;
+  position:fixed; bottom:24px; right:24px; z-index:9998;
+  width:60px; height:60px; border-radius:50%; border:none; cursor:pointer;
   background:linear-gradient(145deg,#FFC24D 0%,#FFAA17 55%,#E8940B 100%);
   color:#0b0c10; display:flex; align-items:center; justify-content:center;
   box-shadow:0 6px 22px rgba(255,170,23,.38), 0 0 0 1px rgba(255,170,23,.25);
-  transition:transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s, filter .28s;
+  transition:transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s, filter .3s, opacity .28s;
   animation:estudioPulse 3.2s ease-in-out infinite;
 }
+/* Estado maximizado → el FAB desaparece (el modal muestra ✕ para cerrar) */
+#estudio-fab.is-hidden{
+  opacity:0; transform:scale(.35) translateY(12px); pointer-events:none;
+}
 #estudio-fab:hover{
-  transform:translateY(-3px) scale(1.05);
+  transform:translateY(-3px) scale(1.06);
   box-shadow:0 10px 34px rgba(255,170,23,.55), 0 0 0 1px rgba(255,170,23,.4);
-  filter:brightness(1.06);
+  filter:brightness(1.05);
 }
 #estudio-fab:active{ transform:translateY(-1px) scale(.97); }
-#estudio-fab svg{ width:26px; height:26px; }
+/* Marca "V" de Victor IA (SVG propio, no genérico) */
+#estudio-fab .vmark{ width:27px; height:27px; display:block; }
+/* Emoji orbital propio — bola de cristal (futuro/IA) */
+#estudio-fab .fab-orb{
+  position:absolute; bottom:-3px; left:-5px;
+  font-size:18px; line-height:1;
+  filter:drop-shadow(0 2px 5px rgba(0,0,0,.45));
+  animation:orbFloat 3.6s ease-in-out infinite;
+}
+@keyframes orbFloat{
+  0%,100%{ transform:translateY(0) rotate(-7deg); }
+  50%{ transform:translateY(-3px) rotate(7deg); }
+}
 @keyframes estudioPulse{
   0%,100%{ box-shadow:0 6px 22px rgba(255,170,23,.38), 0 0 0 0 rgba(255,170,23,.32); }
-  50%{ box-shadow:0 6px 26px rgba(255,170,23,.5), 0 0 0 10px rgba(255,170,23,0); }
+  50%{ box-shadow:0 6px 26px rgba(255,170,23,.5), 0 0 0 12px rgba(255,170,23,0); }
 }
 #estudio-fab-badge{
-  position:absolute; top:-5px; right:-5px; min-width:20px; height:20px; padding:0 5px;
-  border-radius:10px; background:#F84954; color:#fff;
-  font:700 11px/20px 'Inter',sans-serif; text-align:center;
-  display:none; align-items:center; justify-content:center;
-  box-shadow:0 2px 8px rgba(248,73,84,.5); border:2px solid #0b0c10;
+  position:absolute; top:-7px; right:-7px; min-width:23px; height:23px; padding:0 5px;
+  border-radius:12px; background:linear-gradient(145deg,#F84954,#c62a34); color:#fff;
+  font:700 10px/23px 'Inter',sans-serif; text-align:center;
+  display:none; align-items:center; justify-content:center; gap:2px;
+  box-shadow:0 2px 9px rgba(248,73,84,.55); border:2px solid #0b0c10;
 }
+#estudio-fab-badge .badge-emoji{ font-size:9px; line-height:1; }
 #estudio-fab-label{
-  position:absolute; right:64px; top:50%;
+  position:absolute; right:70px; top:50%;
   transform:translateY(-50%) translateX(6px);
   white-space:nowrap; background:var(--surface,#14151b); color:var(--bone,#e8e3d8);
-  border:1px solid rgba(255,170,23,.4); padding:6px 11px; border-radius:6px;
+  border:1px solid rgba(255,170,23,.4); padding:7px 12px; border-radius:8px;
   font:600 10px/1 'Inter',sans-serif; letter-spacing:.14em; text-transform:uppercase;
   opacity:0; pointer-events:none; transition:opacity .2s, transform .2s;
+  display:flex; align-items:center; gap:7px;
 }
 #estudio-fab:hover #estudio-fab-label{ opacity:1; transform:translateY(-50%) translateX(0); }
 
@@ -2195,7 +2214,7 @@ svg.ic use { stroke: currentColor; }
 @media (max-width:640px){
   #estudio-fab{
     bottom:max(24px, calc(env(safe-area-inset-bottom) + 12px));
-    right:max(88px, calc(env(safe-area-inset-right) + 76px));
+    right:max(24px, calc(env(safe-area-inset-right) + 12px));
   }
   #estudio-modal{ padding:0; }
   .estudio-shell{ width:100vw; height:100vh; height:100dvh; border-radius:0; border:none; }
@@ -7587,99 +7606,93 @@ body.client-mode #main { margin-left: 0 !important; }
   </div>
 </div>
 
-<!-- CHATBOT -->
-<button id="chatbot-btn" onclick="toggleChat()" title="Hablar con Víctor">
-  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M5 4L19 4M5 4L11 18L17 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="8.5" y="10" width="2" height="4" rx="0.5" fill="currentColor" opacity="0.7"/>
-    <rect x="11" y="9" width="2" height="5" rx="0.5" fill="currentColor" opacity="0.9"/>
-    <rect x="13.5" y="11" width="2" height="3" rx="0.5" fill="currentColor" opacity="0.7"/>
-  </svg>
-</button>
-<div id="chatbot-panel" class="hidden">
-  <div id="chat-header">
-    <h3>Asistente Victor IA</h3>
-    <div style="display:flex;gap:6px;align-items:center">
-      <button id="chat-voice-toggle" onclick="toggleChatVoice()" title="Activar voz" style="background:transparent;border:1px solid var(--border);color:var(--bone2);padding:3px 10px;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif">VOZ</button>
-      <button id="chat-close" onclick="toggleChat()"></button>
-    </div>
-  </div>
-  <div id="chat-messages">
-    <div class="chat-msg system">Hola Victor. Pregúntame lo que quieras sobre el desempeño de la empresa.</div>
-  </div>
-  <div id="chat-quick">
-    <button onclick="quickQ('¿Cómo vamos hoy?')">Hoy</button>
-    <button onclick="quickQ('¿Cuáles son los proyectos más rentables?')">Proyectos</button>
-    <button onclick="quickQ('¿Cuánto se ha invertido en software este mes?')">Software</button>
-    <button onclick="quickQ('¿Qué categoría consume más tiempo?')">Categorías</button>
-    <button onclick="quickQ('¿Cuál es el ROI general?')">ROI</button>
-    <button onclick="quickQ('¿En qué se ha hecho retrabajo?')">Retrabajo</button>
-  </div>
-  <div id="chat-input-row">
-    <button id="chat-mic-btn" onclick="chatVoiceInput()" title="Hablar con el asistente" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:var(--bone2);padding:7px 9px;border-radius:6px;cursor:pointer;font-size:14px;flex-shrink:0"></button>
-    <input id="chat-input" placeholder="Escribe o usa el micrófono..." onkeydown="if(event.key==='Enter')sendChat()">
-    <button id="chat-send" onclick="sendChat()"></button>
-  </div>
-</div>
-
-<!-- ESTUDIO IA — botón flotante: abre el chat completo (/chat) en modal -->
-<button id="estudio-fab" type="button" title="Abrir Estudio IA — chat + generación de contenido">
-  <span id="estudio-fab-label">Estudio IA</span>
-  <span id="estudio-fab-badge"></span>
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <path d="M5 3h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9.8L5 20v-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" fill="#0b0c10"/>
-    <path d="M10 7.2 15.2 10.5 10 13.8V7.2z" fill="#FFC24D"/>
+<!-- ESTUDIO IA — botón flotante ÚNICO (minimizar/maximizar) · marca V + emojis propios -->
+<button id="estudio-fab" type="button" title="Abrir Estudio IA — chat + generación de contenido" aria-label="Abrir Estudio IA">
+  <span id="estudio-fab-label">🔮 Estudio IA</span>
+  <span id="estudio-fab-badge"><span class="badge-emoji">⚡</span><span id="estudio-fab-count">0</span></span>
+  <span class="fab-orb" aria-hidden="true">🔮</span>
+  <!-- Marca "V" de Victor IA (SVG propio, sin librerías de iconos) -->
+  <svg class="vmark" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M4 4L18 4M4 4L11 18L18 4" stroke="#0b0c10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="8" y="9.5" width="2" height="4.5" rx="0.6" fill="#0b0c10" opacity="0.55"/>
+    <rect x="10.5" y="8.5" width="2" height="5.5" rx="0.6" fill="#0b0c10" opacity="0.8"/>
+    <rect x="13" y="10.5" width="2" height="3.5" rx="0.6" fill="#0b0c10" opacity="0.55"/>
   </svg>
 </button>
 <div id="estudio-modal" role="dialog" aria-modal="true" aria-label="Estudio IA">
   <div class="estudio-shell">
     <div class="estudio-bar">
-      <span class="et-title">✦ Estudio IA · Chat + Generación → Biblioteca</span>
+      <span class="et-title">🔮 Estudio IA · Chat + Generación → Biblioteca</span>
       <span class="et-spacer"></span>
-      <a id="estudio-newtab" href="/chat" target="_blank" rel="noopener">Nueva pestaña</a>
-      <button id="estudio-close" type="button">✕ Cerrar</button>
+      <a id="estudio-newtab" href="/chat" target="_blank" rel="noopener" title="Abrir en pestaña nueva">↗️ Nueva pestaña</a>
+      <button id="estudio-min" type="button" title="Minimizar (conserva el chat)">➖ Minimizar</button>
+      <button id="estudio-close" type="button" title="Cerrar Estudio IA">✕ Cerrar</button>
     </div>
     <iframe id="estudio-frame" title="Estudio IA" src="about:blank" allow="microphone; clipboard-write" referrerpolicy="same-origin"></iframe>
   </div>
 </div>
 
 <script>
-/* ── ESTUDIO IA — launcher del chat completo (/chat) ── */
+/* ── ESTUDIO IA — launcher único con minimizar/maximizar + persistencia ── */
 (function(){
   var fab=document.getElementById('estudio-fab');
   var modal=document.getElementById('estudio-modal');
   var frame=document.getElementById('estudio-frame');
   var badge=document.getElementById('estudio-fab-badge');
+  var badgeCount=document.getElementById('estudio-fab-count');
   var closeBtn=document.getElementById('estudio-close');
+  var minBtn=document.getElementById('estudio-min');
   var newtab=document.getElementById('estudio-newtab');
   if(!fab||!modal||!frame) return;
   var CHAT_URL='/chat';
   var SEEN='estudio_lib_seen';
+  var STATE='estudio_ui_state';           // 'max' | 'min'
   var opened=false, lastCount=null;
 
-  function openModal(){
+  function ensureFrame(){
     if(!frame.getAttribute('src')||frame.getAttribute('src')==='about:blank'){ frame.src=CHAT_URL; }
+  }
+  function persist(state){ try{ localStorage.setItem(STATE,state); }catch(e){} }
+  function readState(){ try{ return localStorage.getItem(STATE); }catch(e){ return null; } }
+
+  /* MAXIMIZAR — abre el modal; el FAB desaparece */
+  function maximize(save){
+    ensureFrame();
     modal.classList.add('open');
+    fab.classList.add('is-hidden');
     document.body.style.overflow='hidden';
     opened=true; clearBadge();
+    if(save!==false) persist('max');
   }
-  function closeModal(){
+  /* MINIMIZAR — oculta el modal; reaparece el FAB (conserva el iframe/chat) */
+  function minimize(save){
     modal.classList.remove('open');
+    fab.classList.remove('is-hidden');
     document.body.style.overflow='';
     opened=false;
+    if(save!==false) persist('min');
   }
   function clearBadge(){
     badge.style.display='none';
     if(typeof lastCount==='number'){ try{ localStorage.setItem(SEEN,String(lastCount)); }catch(e){} }
   }
 
-  fab.addEventListener('click',openModal);
-  closeBtn.addEventListener('click',closeModal);
+  fab.addEventListener('click',function(){ maximize(); });
+  minBtn.addEventListener('click',function(){ minimize(); });
+  closeBtn.addEventListener('click',function(){ minimize(); });
   newtab.addEventListener('click',function(e){ e.preventDefault(); window.open(CHAT_URL,'_blank','noopener'); });
-  modal.addEventListener('click',function(e){ if(e.target===modal) closeModal(); });
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&opened) closeModal(); });
+  modal.addEventListener('click',function(e){ if(e.target===modal) minimize(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&opened) minimize(); });
+
+  /* Restaurar estado persistido (por defecto: minimizado = solo FAB) */
+  if(readState()==='max'){ maximize(false); } else { minimize(false); }
 
   /* Badge — nuevas generaciones en la Biblioteca (silencioso si falla el API) */
+  function setBadge(n){
+    if(badgeCount) badgeCount.textContent=(n>9?'9+':String(n));
+    else badge.textContent=(n>9?'9+':String(n));
+    badge.style.display='flex';
+  }
   function checkNew(){
     fetch('/api/library?limit=50&status=all',{cache:'no-store'})
       .then(function(r){ return r.ok?r.json():null; })
@@ -7690,7 +7703,7 @@ body.client-mode #main { margin-left: 0 !important; }
         lastCount=count;
         var seen=parseInt((function(){try{return localStorage.getItem(SEEN);}catch(e){return '0';}})()||'0',10)||0;
         var delta=Math.max(0,count-seen);
-        if(delta>0 && !opened){ badge.textContent=delta>9?'9+':String(delta); badge.style.display='flex'; }
+        if(delta>0 && !opened){ setBadge(delta); }
         else if(delta===0){ badge.style.display='none'; }
       })
       .catch(function(){});
