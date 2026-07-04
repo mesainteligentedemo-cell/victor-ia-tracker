@@ -10333,16 +10333,24 @@ function renderSoftware(){
 // ===== BIBLIOTECA VIEW — Assets (Imágenes, Videos, Voces, Presentaciones, Web) =====
 async function renderLibrary(){
   const container=document.getElementById('view-biblioteca');
-  if(!container) return;
+  if(!container) {
+    console.error('[biblioteca] Container view-biblioteca no encontrado');
+    return;
+  }
 
-  container.innerHTML='<div style="text-align:center;padding:40px;color:var(--bone2)">Cargando biblioteca...</div>';
+  container.innerHTML='<div style="text-align:center;padding:40px;color:var(--bone2)">📚 Cargando biblioteca...</div>';
+  console.log('[biblioteca] Iniciando renderLibrary...');
 
   try {
+    console.log('[biblioteca] Fetch a /api/library');
     const response = await fetch('/api/library?limit=100&status=completed');
+    console.log('[biblioteca] Response status:', response.status);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    const { ok, assets, total, filters } = await response.json();
-    if (!ok || !assets) throw new Error('Invalid response');
+    const data = await response.json();
+    console.log('[biblioteca] Data:', data);
+    const { ok, assets, total, filters } = data;
+    if (!ok || !assets) throw new Error('Invalid response: ' + JSON.stringify(data));
 
     // Agrupar por tipo de acción
     const byAction = {};
@@ -10388,11 +10396,11 @@ async function renderLibrary(){
 
     container.innerHTML = html;
   } catch (e) {
-    console.error('[biblioteca]', e);
+    console.error('[biblioteca] Error:', e);
     container.innerHTML = `
       <div style="padding:40px;text-align:center">
-        <div style="color:var(--red);margin-bottom:10px">Error cargando biblioteca</div>
-        <div style="font-size:12px;color:var(--bone2)">${e.message}</div>
+        <div style="color:var(--red);margin-bottom:10px;font-weight:700">⚠️ Error cargando biblioteca</div>
+        <div style="font-size:12px;color:var(--bone2);white-space:pre-wrap;text-align:left;background:var(--bg);padding:12px;border-radius:6px;border:1px solid var(--border);font-family:monospace;max-height:200px;overflow:auto">${e.stack || e.message}</div>
       </div>
     `;
   }
