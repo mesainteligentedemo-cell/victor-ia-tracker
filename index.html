@@ -8172,8 +8172,8 @@ function getPeriodRange(period){
   const today = fmt(now);
   switch(period){
     case 'hour': {
-      // entries within the current hour (by dateKey + hora)
-      return {type:'hour', h:now.getHours()};
+      // entradas dentro de los últimos 60 minutos (rolling window, por dateKey + hora)
+      return {type:'hour'};
     }
     case 'today': return {type:'range',from:today,to:today};
     case 'yesterday': {
@@ -8182,8 +8182,10 @@ function getPeriodRange(period){
       return {type:'range',from:y,to:y};
     }
     case 'week': {
-      const dow=now.getDay();
-      const mon=new Date(now); mon.setDate(now.getDate()-dow+1);
+      // Semana calendario Lun–Dom. FIX: en domingo getDay()=0 y la fórmula
+      // anterior (getDate()-dow+1) saltaba al lunes de la semana SIGUIENTE.
+      const dow=(now.getDay()+6)%7; // 0=lunes … 6=domingo
+      const mon=new Date(now); mon.setDate(now.getDate()-dow);
       const sun=new Date(mon); sun.setDate(mon.getDate()+6);
       return {type:'range',from:fmt(mon),to:fmt(sun)};
     }
@@ -8195,7 +8197,13 @@ function getPeriodRange(period){
     case 'year': {
       return {type:'range',from:`${now.getFullYear()}-01-01`,to:`${now.getFullYear()}-12-31`};
     }
-    case 'custom': return {type:'range',from:periodFrom,to:periodTo};
+    case 'custom': {
+      // FIX: sin fechas seleccionadas, el rango ''..'' devolvía 0 entradas.
+      if(!periodFrom&&!periodTo) return {type:'all'};
+      let from=periodFrom||'0000-01-01', to=periodTo||'9999-12-31';
+      if(from>to){ const t=from; from=to; to=t; } // validación: swap si vienen invertidas
+      return {type:'range',from,to};
+    }
     default: return {type:'all'};
   }
 }
@@ -8204,10 +8212,18 @@ function filterByPeriod(entries, period){
   const range = getPeriodRange(period);
   if(range.type==='all') return entries;
   if(range.type==='hour'){
+    // Últimos 60 minutos reales (no bloque de reloj). Maneja cruce de medianoche.
+    const now=new Date();
+    const today=localDate(now);
+    const yest=new Date(now); yest.setDate(now.getDate()-1);
+    const yKey=localDate(yest);
+    const nowMin=now.getHours()*60+now.getMinutes();
     return entries.filter(e=>{
-      const today=localDate();
-      const h=parseInt((e.hora||'00:00').split(':')[0]);
-      return e.dateKey===today && h===range.h;
+      const parts=String(e.hora||'00:00').split(':');
+      const eMin=(parseInt(parts[0],10)||0)*60+(parseInt(parts[1],10)||0);
+      if(e.dateKey===today) return eMin>=nowMin-60 && eMin<=nowMin;
+      if(e.dateKey===yKey && nowMin<60) return eMin>=nowMin+1380; // ventana que cruza medianoche
+      return false;
     });
   }
   return entries.filter(e=>e.dateKey>=range.from && e.dateKey<=range.to);
@@ -8227,11 +8243,16 @@ function applyCustomPeriod(){
   periodFrom=document.getElementById('period-from').value;
   periodTo=document.getElementById('period-to').value;
   activePeriod='custom';
+  // FIX: marcar el botón "Rango custom" como activo al aplicar
+  document.querySelectorAll('.period-btn').forEach(b=>{
+    const m=(b.getAttribute('onclick')||'').match(/'([^']+)'/);
+    b.classList.toggle('active',m&&m[1]==='custom');
+  });
   applyAllFilters();
   updatePeriodSummary();
 }
 function updatePeriodSummary(){
-  const labels={hour:`Hora actual (${new Date().getHours()}:00)`,today:'Hoy',yesterday:'Ayer',week:'Esta semana',month:'Este mes',year:'Este año',all:'Todo el período',custom:'Rango custom'};
+  const labels={hour:`Última hora (${localTime()})`,today:'Hoy',yesterday:'Ayer',week:'Esta semana',month:'Este mes',year:'Este año',all:'Todo el período',custom:'Rango custom'};
   let txt=labels[activePeriod]||activePeriod;
   if(activePeriod==='custom'&&periodFrom&&periodTo) txt=`${periodFrom}  ${periodTo}`;
   const el=document.getElementById('period-summary');
@@ -8266,7 +8287,7 @@ function updateProjectBar(){
 }
 
 function getPeriodLabel(){
-  const labels={hour:`Hora actual (${new Date().getHours()}:00)`,today:'Hoy',yesterday:'Ayer',week:'Esta semana',month:'Este mes',year:'Este año',all:'Todo el período',custom:'Rango custom'};
+  const labels={hour:`Última hora (${localTime()})`,today:'Hoy',yesterday:'Ayer',week:'Esta semana',month:'Este mes',year:'Este año',all:'Todo el período',custom:'Rango custom'};
   if(activePeriod==='custom'&&periodFrom&&periodTo) return `${periodFrom}  ${periodTo}`;
   return labels[activePeriod]||activePeriod;
 }
