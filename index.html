@@ -10363,10 +10363,12 @@ async function renderLibrary(){
       imagen: '🖼️ Imágenes',
       video: '🎬 Videos',
       voz: '🎙️ Voces & Audio',
+      voice: '🎙️ Voces & Audio',
       presentacion: '📊 Presentaciones',
       web: '🌐 Web & Landing',
       capacitacion: '📚 Capacitación'
     };
+    const labelFor = (a) => actionLabels[a] || ('📦 ' + (a || 'Otros'));
 
     let html = `
       ${renderTabPeriodHeader('biblioteca', [])}
@@ -10375,7 +10377,7 @@ async function renderLibrary(){
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           ${Object.keys(byAction).map(action => `
             <button onclick="filterLibraryByAction('${action}')" class="tab-btn" style="padding:6px 12px;font-size:11px">
-              ${actionLabels[action]} (${byAction[action].length})
+              ${labelFor(action)} (${byAction[action].length})
             </button>
           `).join('')}
         </div>
@@ -10386,7 +10388,7 @@ async function renderLibrary(){
     Object.entries(byAction).forEach(([action, items]) => {
       html += `
         <div class="section-title" style="margin-top:24px;margin-bottom:14px">
-          ${actionLabels[action]}
+          ${labelFor(action)}
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px">
           ${items.map(asset => renderAssetCard(asset)).join('')}
