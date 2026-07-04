@@ -51,9 +51,10 @@
     prompt.innerHTML = `
       <style>
         #pwa-update-prompt {
-          position: fixed; bottom: 20px; right: 20px;
+          /* bottom: 104px para no tapar el FAB 🔮 (bottom:24px + 60px alto) · z-index < FAB */
+          position: fixed; bottom: 104px; right: 20px;
           background: #0E0F12; border: 1px solid rgba(255,170,23,0.3);
-          border-radius: 4px; padding: 16px; z-index: 9999;
+          border-radius: 4px; padding: 16px; z-index: 9997;
           box-shadow: 0 4px 12px rgba(0,0,0,0.5);
           font-family: 'Space Grotesk', sans-serif;
           color: #F8F7F5;

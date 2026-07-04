@@ -28,7 +28,7 @@
   ],
   "redirects": [
     {
-      "source": "/:path((?!api|chat|asistente|ide|login|.*\\.\\w+|_next|favicon).*)",
+      "source": "/:path((?!api|chat|asistente|ide|login|.*\\.\\w+|_next|favicon).+)",
       "destination": "/404.html",
       "statusCode": 404
     }

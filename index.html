@@ -2116,7 +2116,7 @@ svg.ic use { stroke: currentColor; }
    Sin iconos genéricos. Minimizado = FAB · Maximizado = modal.
 ══════════════════════════════════════════════════════════ */
 #estudio-fab{
-  position:fixed; bottom:24px; right:24px; z-index:9998;
+  position:fixed; bottom:24px; right:24px; z-index:99999; /* SIEMPRE encima de banners PWA */
   width:60px; height:60px; border-radius:50%; border:none; cursor:pointer;
   background:linear-gradient(145deg,#FFC24D 0%,#FFAA17 55%,#E8940B 100%);
   color:#0b0c10; display:flex; align-items:center; justify-content:center;
@@ -18215,7 +18215,7 @@ function studioAttachFile(file){
 })();
 </script>
 <!-- ── FIREBASE AUTH INTEGRATION ── -->
-<script src="tracker-auth-integration.js"></script>
+<!-- tracker-auth-integration.js removido: el archivo no existe en el repo (causaba 404 + MIME error) -->
 <!-- ── PWA INITIALIZATION ── -->
 <script src="pwa-init.js"></script>
 

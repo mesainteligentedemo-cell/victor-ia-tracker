@@ -5,7 +5,7 @@
  * Offline support + background sync + caching
  */
 
-const CACHE_VERSION = 'v2.0';
+const CACHE_VERSION = 'v2.1';
 const CACHE_NAMES = {
   static: `${CACHE_VERSION}-static`,
   dynamic: `${CACHE_VERSION}-dynamic`,
@@ -20,7 +20,6 @@ const STATIC_ASSETS = [
   '/admin-dashboard.html',
   '/manifest.json',
   '/favicon.png',
-  '/tracker-auth-integration.js',
   '/websocket-client.js',
   '/dashboards-the-door-v2.js',
   '/historical-analytics.js',
