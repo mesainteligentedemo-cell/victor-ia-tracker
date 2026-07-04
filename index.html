@@ -6506,7 +6506,7 @@ body.client-mode #main { margin-left: 0 !important; }
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
     Admin &amp; Finanzas
   </button>
-  <button class="via-qa-btn" onclick="(function(){currentTab='biblioteca';document.querySelectorAll('#content > div').forEach(d=>d.classList.add('hidden'));document.getElementById('view-biblioteca').classList.remove('hidden');renderLibrary().catch(e=>console.error(e));})();" title="Biblioteca de Assets">
+  <button class="via-qa-btn" id="btn-biblioteca" title="Biblioteca de Assets">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
     Biblioteca
   </button>
@@ -10434,18 +10434,33 @@ function filterLibraryByAction(action) {
   alert('Filtro por ' + action + ' (próximamente)');
 }
 
-// ===== DEBUG FUNCTION — Test Biblioteca =====
-window.testLibreria=function(){
-  console.log('[DEBUG] Llamando setTab(biblioteca) directamente...');
-  currentTab='biblioteca';
-  document.querySelectorAll('#content > div').forEach(d=>d.classList.add('hidden'));
-  const el=document.getElementById('view-biblioteca');
-  if(!el) { console.error('[DEBUG] view-biblioteca no existe'); return; }
-  el.classList.remove('hidden');
-  console.log('[DEBUG] Ejecutando renderLibrary()...');
-  renderLibrary().catch(e=>console.error('[DEBUG] Error en renderLibrary:', e));
-};
-window.console.log('[DEBUG] testLibreria disponible - escribe: testLibreria()');
+// ===== BIBLIOTECA HANDLER — Eventos directos sin setTab() =====
+document.addEventListener('DOMContentLoaded', function(){
+  const btnBiblioteca = document.getElementById('btn-biblioteca');
+  if(btnBiblioteca){
+    btnBiblioteca.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('[biblioteca] Click en botón Biblioteca');
+      currentTab='biblioteca';
+      document.body.className=document.body.className.replace(/\btab-\S+/g,'').trim();
+      document.body.classList.add('tab-biblioteca');
+      document.querySelectorAll('#content > div').forEach(d=>d.classList.add('hidden'));
+      const view = document.getElementById('view-biblioteca');
+      if(!view){
+        console.error('[biblioteca] view-biblioteca no existe en el DOM');
+        return;
+      }
+      view.classList.remove('hidden');
+      document.getElementById('sidebar').classList.add('hidden');
+      destroyCharts();
+      console.log('[biblioteca] Renderizando biblioteca...');
+      renderLibrary().catch(e=>console.error('[biblioteca] Error:', e));
+      return false;
+    });
+    console.log('[biblioteca] Event listener agregado al botón');
+  }
+});
 
 function previewAsset(id) {
   alert('Preview de ' + id + ' (próximamente)');
