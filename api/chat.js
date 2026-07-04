@@ -76,6 +76,41 @@ function makeId() {
   return 'msg_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
+// ---- Supabase persistence (same table as /api/create → biblioteca) ----------
+function sbCfg() {
+  return { url: process.env.SUPABASE_URL, key: process.env.SUPABASE_SERVICE_KEY };
+}
+async function sbInsert(record) {
+  const { url, key } = sbCfg();
+  if (!url || !key) return;
+  try {
+    await fetch(`${url}/rest/v1/tracker_results`, {
+      method: 'POST',
+      headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify(record),
+    });
+  } catch (e) { console.warn('[chat] sbInsert:', e.message); }
+}
+// Persist a chat-generated asset into tracker_results so it shows in Biblioteca.
+async function persistAsset(kind, asset, prompt) {
+  const action = kind === 'image' ? 'imagen' : kind === 'video' ? 'video' : 'voice';
+  const jobId = `${action}-chat-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const url = asset.url || asset.dataUrl || '';
+  const completed = !!url;
+  const meta = { prompt: String(prompt || asset.description || asset.text || '').slice(0, 200), config: {}, source: 'chat' };
+  if (asset.request_id) meta.hf_request_id = asset.request_id;
+  if (asset.poster) meta.poster = asset.poster;
+  await sbInsert({
+    job_id: jobId,
+    action,
+    result_url: url,
+    result_type: completed ? (kind === 'image' ? 'image' : kind === 'video' ? 'video' : 'audio') : (kind === 'video' ? 'video' : 'pending'),
+    metadata: meta,
+    status: completed ? 'completed' : 'processing',
+  });
+  return jobId;
+}
+
 async function callOpenRouter(key, messages, withTools) {
   const resp = await fetch(OR_URL, {
     method: 'POST',
@@ -187,7 +222,14 @@ export default async function handler(req, res) {
         let args = {};
         try { args = JSON.parse(tc.function?.arguments || '{}'); } catch { args = {}; }
         const { summary, asset } = await runTool(tc.function?.name, args);
-        if (asset) assets.push(asset);
+        if (asset) {
+          // Auto-save every chat-generated asset to the tracker (Biblioteca).
+          try {
+            const jobId = await persistAsset(asset.kind, asset, args.description || args.text);
+            asset.job = jobId; // let the client finalize pending renders via /api/asset-status?job=
+          } catch (e) { /* non-fatal */ }
+          assets.push(asset);
+        }
         messages.push({
           role: 'tool',
           tool_call_id: tc.id,

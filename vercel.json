@@ -12,6 +12,18 @@
     {
       "source": "/login",
       "destination": "/login.html"
+    },
+    {
+      "source": "/chat",
+      "destination": "/chat.html"
+    },
+    {
+      "source": "/asistente",
+      "destination": "/chat.html"
+    },
+    {
+      "source": "/ide",
+      "destination": "/chat.html"
     }
   ],
   "redirects": [
