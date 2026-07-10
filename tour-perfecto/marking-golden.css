@@ -168,10 +168,3 @@
   pointer-events: none;
   z-index: -1;
 }
-
-/* Transiciones suaves entre estados */
-* {
-  transition-property: border, box-shadow;
-  transition-duration: 0.2s;
-  transition-timing-function: ease-out;
-}

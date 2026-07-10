@@ -208,60 +208,66 @@
       // 1) Preparar UI del paso (abrir panel/tab si hace falta)
       this._applyUiState((marking && marking.uiState) || 'default');
 
-      // 2) Marcar el elemento (directo — cero dependencia de timestamps)
-      if (window.tourMarking && marking) {
-        try { window.tourMarking.markStep(step); }
-        catch (e) { console.warn('[TourPlayer] markStep falló:', e.message); }
-      }
-
-      // 3) Actualizar overlay
-      this._updateUI(marking);
-
-      // 4) Reproducir el MP3 del paso
+      // 2) Pequeño delay (150ms) para que el panel/modal termine su slide-in
+      // Esto asegura que scrollIntoView mida el layout correctamente
       const self = this;
-      const src = this._mp3For(step);
-      console.log('[TourPlayer] Paso ' + step + '/' + this.totalSteps + ': ' + src);
+      setTimeout(function () {
+        if (gen !== self.generation || !self.isPlaying) return;
 
-      const onEnded = function () {
-        cleanup();
-        if (gen !== self.generation) return;
-        self.errorStreak = 0;
-        // transición suave de 500ms entre pasos
-        setTimeout(function () {
-          if (gen !== self.generation || !self.isPlaying) return;
-          self._playStep(step + 1, gen);
-        }, 500);
-      };
-      const onError = function () {
-        cleanup();
-        if (gen !== self.generation) return;
-        self.errorStreak++;
-        console.warn('[TourPlayer] MP3 no disponible (paso ' + step + '): ' + src);
-        if (self.errorStreak > 5) {
-          console.error('[TourPlayer] 6 errores consecutivos — abortando tour');
-          self.stop();
-          return;
+        // 2b) Marcar el elemento (directo — cero dependencia de timestamps)
+        if (window.tourMarking && marking) {
+          try { window.tourMarking.markStep(step); }
+          catch (e) { console.warn('[TourPlayer] markStep falló:', e.message); }
         }
-        // saltar el paso tras una pausa corta (el marking queda visible 3s)
-        setTimeout(function () {
-          if (gen !== self.generation || !self.isPlaying) return;
-          self._playStep(step + 1, gen);
-        }, 3000);
-      };
-      function cleanup() {
-        audio.removeEventListener('ended', onEnded);
-        audio.removeEventListener('error', onError);
-      }
 
-      audio.addEventListener('ended', onEnded);
-      audio.addEventListener('error', onError);
-      audio.src = src;
-      audio.currentTime = 0;
-      audio.play().catch(function (e) {
-        console.warn('[TourPlayer] play() bloqueado:', e.message,
-          '— haz clic en ▶ del control del tour para continuar');
-      });
-      this._syncPlayBtn();
+        // 3) Actualizar overlay
+        self._updateUI(marking);
+
+        // 4) Reproducir el MP3 del paso
+        const src = self._mp3For(step);
+        console.log('[TourPlayer] Paso ' + step + '/' + self.totalSteps + ': ' + src);
+
+        const onEnded = function () {
+          cleanup();
+          if (gen !== self.generation) return;
+          self.errorStreak = 0;
+          // transición suave de 500ms entre pasos
+          setTimeout(function () {
+            if (gen !== self.generation || !self.isPlaying) return;
+            self._playStep(step + 1, gen);
+          }, 500);
+        };
+        const onError = function () {
+          cleanup();
+          if (gen !== self.generation) return;
+          self.errorStreak++;
+          console.warn('[TourPlayer] MP3 no disponible (paso ' + step + '): ' + src);
+          if (self.errorStreak > 5) {
+            console.error('[TourPlayer] 6 errores consecutivos — abortando tour');
+            self.stop();
+            return;
+          }
+          // saltar el paso tras una pausa corta (el marking queda visible 3s)
+          setTimeout(function () {
+            if (gen !== self.generation || !self.isPlaying) return;
+            self._playStep(step + 1, gen);
+          }, 3000);
+        };
+        function cleanup() {
+          audio.removeEventListener('ended', onEnded);
+          audio.removeEventListener('error', onError);
+        }
+
+        audio.addEventListener('ended', onEnded);
+        audio.addEventListener('error', onError);
+        audio.src = src;
+        audio.currentTime = 0;
+        audio.play().catch(function (e) {
+          console.warn('[TourPlayer] play() bloqueado:', e.message,
+            '— haz clic en ▶ del control del tour para continuar');
+        });
+        self._syncPlayBtn();
+      }, 150); // cierre del setTimeout(delay para UI slide-in)
     }
 
     pause() {

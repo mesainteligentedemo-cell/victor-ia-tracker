@@ -82,7 +82,8 @@
       "label": "PLANEACIÓN — IA para Propuestas",
       "startTime": 85,
       "endTime": 105,
-      "narration": "Planeación es increíble: usa IA para generar cotizaciones, planear proyectos y crear entregables. Hasta tiene un agente de voz que llena formularios mientras hablas."
+      "narration": "Planeación es increíble: usa IA para generar cotizaciones, planear proyectos y crear entregables. Hasta tiene un agente de voz que llena formularios mientras hablas.",
+      "uiState": "planModal"
     },
     {
       "id": "mark-009",
@@ -406,7 +407,8 @@
       "label": "ESTUDIO IA — IDE Integrado",
       "startTime": 630,
       "endTime": 645,
-      "narration": "El Estudio IA es un IDE completo dentro del tracker: chat, generación de contenido, y todo se guarda automáticamente en la biblioteca."
+      "narration": "El Estudio IA es un IDE completo dentro del tracker: chat, generación de contenido, y todo se guarda automáticamente en la biblioteca.",
+      "uiState": "planModal"
     },
     {
       "id": "mark-045",
@@ -415,7 +417,8 @@
       "label": "Generación de Contenido — Tipos",
       "startTime": 645,
       "endTime": 660,
-      "narration": "En el panel izquierdo: Imágenes, Videos, Loops animados, Voice overs. Cada tipo tiene ejemplos y templates."
+      "narration": "En el panel izquierdo: Imágenes, Videos, Loops animados, Voice overs. Cada tipo tiene ejemplos y templates.",
+      "uiState": "planModal"
     },
     {
       "id": "mark-046",
@@ -424,16 +427,18 @@
       "label": "Chat Conversacional — Claude IA",
       "startTime": 660,
       "endTime": 675,
-      "narration": "El chat central está alimentado por Claude Opus. Pregunta, pide ayuda, diseña, escribe código, todo aquí."
+      "narration": "El chat central está alimentado por Claude Opus. Pregunta, pide ayuda, diseña, escribe código, todo aquí.",
+      "uiState": "planModal"
     },
     {
       "id": "mark-047",
       "step": 47,
-      "selector": "#studio-panel",
+      "selector": ".studio-main",
       "label": "Biblioteca de Assets — Resultados",
       "startTime": 675,
       "endTime": 690,
-      "narration": "La derecha muestra tu biblioteca: todas las imágenes, videos, audios y documentos generados. Descarga, reutiliza, mejora."
+      "narration": "La derecha muestra tu biblioteca: todas las imágenes, videos, audios y documentos generados. Descarga, reutiliza, mejora.",
+      "uiState": "planModal"
     },
     {
       "id": "mark-048",
@@ -442,7 +447,8 @@
       "label": "ACCESIBILIDAD — Panel Personalizado",
       "startTime": 690,
       "endTime": 705,
-      "narration": "La configuración de accesibilidad hace el tracker usable para absolutamente todos, sin excepción."
+      "narration": "La configuración de accesibilidad hace el tracker usable para absolutamente todos, sin excepción.",
+      "uiState": "accPanel"
     },
     {
       "id": "mark-049",
@@ -451,7 +457,8 @@
       "label": "Tamaño Texto — Aa NORMAL",
       "startTime": 705,
       "endTime": 715,
-      "narration": "Tamaño de texto NORMAL es el estándar. Perfectamente legible para la mayoría."
+      "narration": "Tamaño de texto NORMAL es el estándar. Perfectamente legible para la mayoría.",
+      "uiState": "accPanel"
     },
     {
       "id": "mark-050",
@@ -460,7 +467,8 @@
       "label": "Tamaño Texto — Aa GRANDE",
       "startTime": 715,
       "endTime": 725,
-      "narration": "Tamaño GRANDE aumenta todas las letras para mayor comodidad visual."
+      "narration": "Tamaño GRANDE aumenta todas las letras para mayor comodidad visual.",
+      "uiState": "accPanel"
     },
     {
       "id": "mark-051",
@@ -469,7 +477,8 @@
       "label": "Tamaño Texto — Aa EXTRA",
       "startTime": 725,
       "endTime": 735,
-      "narration": "Tamaño EXTRA es el máximo. Ideal para baja visión o uso en pantallas grandes."
+      "narration": "Tamaño EXTRA es el máximo. Ideal para baja visión o uso en pantallas grandes.",
+      "uiState": "accPanel"
     },
     {
       "id": "mark-052",
@@ -478,7 +487,8 @@
       "label": "Alto Contraste — Accesibilidad",
       "startTime": 735,
       "endTime": 750,
-      "narration": "Alto Contraste aumenta la diferencia entre colores. Esencial para baja visión o astigmatismo."
+      "narration": "Alto Contraste aumenta la diferencia entre colores. Esencial para baja visión o astigmatismo.",
+      "uiState": "accPanel"
     },
     {
       "id": "mark-053",
@@ -487,7 +497,8 @@
       "label": "Sin Animaciones — Para Vértigo",
       "startTime": 750,
       "endTime": 765,
-      "narration": "Sin Animaciones desactiva todos los movimientos. Perfecto para personas con sensibilidad al movimiento o vértigo."
+      "narration": "Sin Animaciones desactiva todos los movimientos. Perfecto para personas con sensibilidad al movimiento o vértigo.",
+      "uiState": "accPanel"
     },
     {
       "id": "mark-054",
@@ -496,7 +507,8 @@
       "label": "Daltonismo — Normal",
       "startTime": 765,
       "endTime": 775,
-      "narration": "Paleta Normal para visión de color estándar."
+      "narration": "Paleta Normal para visión de color estándar.",
+      "uiState": "accPanel"
     },
     {
       "id": "mark-055",
@@ -505,7 +517,8 @@
       "label": "Daltonismo — Deuteran Rojo-Verde",
       "startTime": 775,
       "endTime": 785,
-      "narration": "Deuteran es para daltonismo rojo-verde tipo 2. Reajusta automáticamente el color."
+      "narration": "Deuteran es para daltonismo rojo-verde tipo 2. Reajusta automáticamente el color.",
+      "uiState": "accPanel"
     },
     {
       "id": "mark-056",
@@ -514,7 +527,8 @@
       "label": "Daltonismo — Protan Rojo Débil",
       "startTime": 785,
       "endTime": 795,
-      "narration": "Protan es para percepción roja débil. Todos los rojos se ajustan automáticamente."
+      "narration": "Protan es para percepción roja débil. Todos los rojos se ajustan automáticamente.",
+      "uiState": "accPanel"
     },
     {
       "id": "mark-057",
@@ -523,7 +537,8 @@
       "label": "Daltonismo — Tritan Azul-Amarillo",
       "startTime": 795,
       "endTime": 805,
-      "narration": "Tritan es para daltonismo azul-amarillo. Muy raro pero totalmente soportado."
+      "narration": "Tritan es para daltonismo azul-amarillo. Muy raro pero totalmente soportado.",
+      "uiState": "accPanel"
     },
     {
       "id": "mark-058",
@@ -532,7 +547,8 @@
       "label": "Control por Voz — Manos Libres",
       "startTime": 805,
       "endTime": 820,
-      "narration": "Control por Voz permite navegar y usar el tracker completamente con tu voz. Disponible en español e inglés."
+      "narration": "Control por Voz permite navegar y usar el tracker completamente con tu voz. Disponible en español e inglés.",
+      "uiState": "accPanel"
     },
     {
       "id": "mark-059",
@@ -541,7 +557,8 @@
       "label": "Tour Guiado con Voz — Este!",
       "startTime": 820,
       "endTime": 835,
-      "narration": "Tour Guiado con Voz es exactamente lo que estás experimentando ahora. Narración sincronizada, buttons marcados, educación pura."
+      "narration": "Tour Guiado con Voz es exactamente lo que estás experimentando ahora. Narración sincronizada, buttons marcados, educación pura.",
+      "uiState": "accPanel"
     },
     {
       "id": "mark-060",
@@ -550,7 +567,8 @@
       "label": "Ver Comandos de Voz — Referencia",
       "startTime": 835,
       "endTime": 850,
-      "narration": "Ver Comandos muestra la lista completa de comandos de voz que puedes usar. 50+ comandos para control total manos libres."
+      "narration": "Ver Comandos muestra la lista completa de comandos de voz que puedes usar. 50+ comandos para control total manos libres.",
+      "uiState": "accPanel"
     },
     {
       "id": "mark-061",
@@ -568,7 +586,8 @@
       "label": "ESTUDIO IA — IDE Integrado (Botón Principal)",
       "startTime": 863.84,
       "endTime": 879.86,
-      "narration": "El Estudio IA es el corazón creativo del tracker. Es un IDE completo: chat con Claude Opus, generación de imágenes, videos, presentaciones, sitios web, todo integrado en un solo lugar. Todo lo que generas se guarda automáticamente en tu Biblioteca."
+      "narration": "El Estudio IA es el corazón creativo del tracker. Es un IDE completo: chat con Claude Opus, generación de imágenes, videos, presentaciones, sitios web, todo integrado en un solo lugar. Todo lo que generas se guarda automáticamente en tu Biblioteca.",
+      "uiState": "estudio"
     },
     {
       "id": "mark-063",
@@ -577,7 +596,8 @@
       "label": "CHAT — Conversación con Claude",
       "startTime": 879.86,
       "endTime": 898.02,
-      "narration": "El Chat es donde conversas directamente con Claude Opus. Puedes pedirle que cree imágenes, videos, código, presentaciones, cualquier cosa. Solo escribe lo que necesitas y Claude se encarga de todo. Los resultados aparecen instantáneamente en la pantalla y se guardan en tu Biblioteca para reutilizar después."
+      "narration": "El Chat es donde conversas directamente con Claude Opus. Puedes pedirle que cree imágenes, videos, código, presentaciones, cualquier cosa. Solo escribe lo que necesitas y Claude se encarga de todo. Los resultados aparecen instantáneamente en la pantalla y se guardan en tu Biblioteca para reutilizar después.",
+      "uiState": "estudio"
     }
   ],
   "audio-config": {
