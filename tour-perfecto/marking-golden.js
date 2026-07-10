@@ -143,8 +143,50 @@ class TourGoldenMarking {
     return null;
   }
 
+  /**
+   * Resuelve un selector de marking. Primero busca en el documento padre
+   * (caso normal, la gran mayoría de los pasos). Si no aparece ahí, intenta
+   * dentro del iframe de Estudio IA (#estudio-frame → /chat), que es
+   * same-origin. Esto es necesario para los pasos del Chat (dentro del IDE
+   * integrado), cuyos elementos viven en el contentDocument del iframe y
+   * nunca son alcanzables con un document.querySelector() normal.
+   * Devuelve el elemento encontrado o null.
+   */
+  _resolveElement(selector) {
+    // 1) Documento padre — caso normal
+    const el = document.querySelector(selector);
+    if (el) return el;
+
+    // 2) Iframe de Estudio IA (same-origin) — pasos del Chat
+    const frame = document.getElementById('estudio-frame');
+    if (!frame) return null;
+
+    try {
+      const idoc = frame.contentDocument; // lanza SecurityError si es cross-origin
+      if (!idoc) return null;
+      const iel = idoc.querySelector(selector);
+      if (iel) this._ensureIframeMarkingCss(idoc);
+      return iel;
+    } catch (e) {
+      console.warn('[TourMarking] No se pudo acceder al iframe #estudio-frame:', e.message);
+      return null;
+    }
+  }
+
+  /** Inyecta marking-golden.css dentro del <head> del iframe (una sola vez),
+   * para que las clases .tour-marked/.entering/.active tengan efecto visual
+   * también dentro del contentDocument del iframe (tiene su propio scope CSS). */
+  _ensureIframeMarkingCss(idoc) {
+    if (idoc.getElementById('tour-golden-css')) return;
+    const link = idoc.createElement('link');
+    link.id = 'tour-golden-css';
+    link.rel = 'stylesheet';
+    link.href = '/tour-perfecto/marking-golden.css';
+    (idoc.head || idoc.documentElement).appendChild(link);
+  }
+
   markElement(marking) {
-    const el = document.querySelector(marking.selector);
+    const el = this._resolveElement(marking.selector);
     if (!el) {
       console.warn(`[TourMarking] Selector no encontrado: ${marking.selector}`);
       return;
@@ -187,7 +229,7 @@ class TourGoldenMarking {
     // Usar el elemento guardado (el selector podría resolver a otro nodo si
     // la UI se re-renderizó); fallback a querySelector.
     const stored = this.markingStates.get(marking.id);
-    const el = (stored && stored.el) || document.querySelector(marking.selector);
+    const el = (stored && stored.el) || this._resolveElement(marking.selector);
     if (stored && stored.enterTimer) {
       clearTimeout(stored.enterTimer); // evita que 'active' reaparezca post-unmark
       stored.enterTimer = null;
@@ -246,7 +288,7 @@ class TourGoldenMarking {
   jumpToStep(stepId) {
     const marking = this.config.markings?.find(m => m.step === stepId);
     if (marking) {
-      const el = document.querySelector(marking.selector);
+      const el = this._resolveElement(marking.selector);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         this.markElement(marking);
