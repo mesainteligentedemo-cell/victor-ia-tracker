@@ -156,15 +156,16 @@
   scroll-margin-bottom: 100px;
 }
 
-/* Overlay suave detrás del marked element (opcional) */
-.tour-marked.spotlight::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.5) 100%);
-  pointer-events: none;
-  z-index: -1;
+/* ── DURANTE EL TOUR: 100% visible, sin blur ni oscurecimiento ──
+   El spotlight overlay que oscurecía la pantalla fue REMOVIDO: cada elemento
+   marcado debe verse nítido y ser clickeable. Además, mientras el tour está
+   activo (body.tour-active) desactivamos el backdrop-filter de los modales y
+   suavizamos su fondo, para que nada quede difuminado durante la narración. */
+body.tour-active .fm-overlay,
+body.tour-active .settings-panel,
+body.tour-active .modal-overlay,
+body.tour-active .crm-modal-overlay {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(8, 9, 13, 0.55) !important;
 }

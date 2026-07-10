@@ -46,6 +46,7 @@
       this.errorStreak = 0;       // errores consecutivos (abort > 5)
       this.currentUiState = 'default';
       this.ui = null;             // overlay de controles
+      this._actionTimers = [];    // setTimeouts de auto-clicks del paso actual
       this._configReady = this._loadConfig();
       this._bindGlobalGuards();
     }
@@ -169,6 +170,67 @@
       this.currentUiState = target || 'default';
     }
 
+    /* ── Acciones automáticas (clicks) sincronizadas con la voz ──
+     * Cada paso puede declarar en marking-config.json un arreglo "actions":
+     *   [{ "type":"click", "selector":"#acc-txt-lg", "timing": 1500 }]
+     * donde `timing` son milisegundos DESDE EL INICIO del MP3 del paso.
+     * El click se dispara exactamente en ese momento — voz + click + marking
+     * dorado coordinados. Los timers se cancelan al cambiar de paso, pausar
+     * o detener el tour (respetan el token de generación). */
+
+    _clearActionTimers() {
+      if (this._actionTimers && this._actionTimers.length) {
+        for (let i = 0; i < this._actionTimers.length; i++) {
+          clearTimeout(this._actionTimers[i]);
+        }
+      }
+      this._actionTimers = [];
+    }
+
+    /** Resuelve el selector de una acción: primero en el documento padre y,
+     * si no aparece, dentro del iframe same-origin de Estudio IA
+     * (#estudio-frame) — mismo criterio que el sistema de marking. */
+    _resolveActionEl(selector) {
+      const el = document.querySelector(selector);
+      if (el) return el;
+      const frame = document.getElementById('estudio-frame');
+      if (frame) {
+        try {
+          const idoc = frame.contentDocument; // SecurityError si cross-origin
+          if (idoc) {
+            const iel = idoc.querySelector(selector);
+            if (iel) return iel;
+          }
+        } catch (e) { /* cross-origin: ignorar */ }
+      }
+      return null;
+    }
+
+    _executeActions(marking, gen) {
+      if (!marking || !Array.isArray(marking.actions)) return;
+      const self = this;
+      marking.actions.forEach(function (action) {
+        if (!action || action.type !== 'click' || !action.selector) return;
+        const delay = Math.max(0, Number(action.timing) || 0);
+        const timer = setTimeout(function () {
+          // Cancelado (cambio de paso / stop / pause) → no ejecutar
+          if (gen !== self.generation || !self.isPlaying) return;
+          const el = self._resolveActionEl(action.selector);
+          if (el) {
+            try {
+              console.log('[TourPlayer] Auto-click @' + delay + 'ms → ' + action.selector);
+              el.click();
+            } catch (e) {
+              console.warn('[TourPlayer] Auto-click falló (' + action.selector + '): ' + e.message);
+            }
+          } else {
+            console.warn('[TourPlayer] Auto-click: selector no encontrado → ' + action.selector);
+          }
+        }, delay);
+        self._actionTimers.push(timer);
+      });
+    }
+
     /* ── Reproducción ───────────────────────────────────────── */
 
     async play() {
@@ -183,6 +245,9 @@
 
       this._stopViaTourIfRunning();
       this._ensureAudio();
+
+      // Modo tour: desactiva blur/oscurecimiento que oculte elementos marcados
+      document.body.classList.add('tour-active');
 
       // marking-golden: modo control externo (desactiva su time-sync interno)
       if (window.tourMarking) window.tourMarking.externalControl = true;
@@ -211,6 +276,8 @@
       // 2) Pequeño delay (150ms) para que el panel/modal termine su slide-in
       // Esto asegura que scrollIntoView mida el layout correctamente
       const self = this;
+      // Cancelar cualquier auto-click pendiente del paso anterior
+      this._clearActionTimers();
       setTimeout(function () {
         if (gen !== self.generation || !self.isPlaying) return;
 
@@ -267,11 +334,15 @@
             '— haz clic en ▶ del control del tour para continuar');
         });
         self._syncPlayBtn();
+
+        // 5) Programar los auto-clicks del paso (timing = ms desde el inicio del MP3)
+        self._executeActions(marking, gen);
       }, 150); // cierre del setTimeout(delay para UI slide-in)
     }
 
     pause() {
       if (!this.isPlaying) return;
+      this._clearActionTimers();          // no disparar clicks mientras está en pausa
       if (this.audio) this.audio.pause();
       this.isPlaying = false;
       this.isPaused = true;
@@ -296,6 +367,8 @@
 
     stop() {
       this.generation++;                     // cancela cualquier cadena pendiente
+      this._clearActionTimers();             // cancela auto-clicks pendientes
+      document.body.classList.remove('tour-active');
       if (this.audio) {
         this.audio.pause();
         this.audio.removeAttribute('src');
@@ -327,6 +400,7 @@
       if (step < 1) step = 1;
       if (step > this.totalSteps) { this._finish(); return; }
       this.generation++;                     // cancela el paso en curso
+      this._clearActionTimers();             // cancela auto-clicks del paso anterior
       if (this.audio) this.audio.pause();
       this.isPlaying = true;
       this.isPaused = false;

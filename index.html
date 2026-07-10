@@ -6096,7 +6096,7 @@ body.client-mode #main { margin-left: 0 !important; }
     <button class="btn-desktop" onclick="showSettings()" aria-label="Abrir configuración">Config</button>
     <button class="btn-desktop" onclick="window.location.href='./actividades-repetitivas.html'" aria-label="Ver tareas repetitivas y automatizaciones">Tareas Repetitivas</button>
     <button id="theme-btn" onclick="toggleTheme()" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
-      <svg id="theme-icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <svg id="theme-icon-sun" width="20" height="20" viewBox="0 0 16 16" fill="none">
         <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5"/>
         <line x1="8" y1="1" x2="8" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         <line x1="8" y1="13.5" x2="8" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -6107,7 +6107,7 @@ body.client-mode #main { margin-left: 0 !important; }
         <line x1="12" y1="4" x2="13.07" y2="2.93" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         <line x1="2.93" y1="13.07" x2="4" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
-      <svg id="theme-icon-moon" width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:none">
+      <svg id="theme-icon-moon" width="20" height="20" viewBox="0 0 16 16" fill="none" style="display:none">
         <path d="M13.5 10.5A6 6 0 0 1 5.5 2.5a6 6 0 1 0 8 8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
@@ -18625,6 +18625,77 @@ function studioAttachFile(file){
 .ham-nav-btn.active .ham-nav-dot{
   background:#FFAA17;
   box-shadow:0 0 8px rgba(255,170,23,0.6);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   FIX ICONOS TOPBAR (theme / acc / ham) — VISIBILIDAD GARANTIZADA
+   Última regla del stylesheet: gana el cascade. Aplica solo a
+   desktop (>768px); en <=768px manda el #mobile-topbar.
+════════════════════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+  /* Los tres botones SIEMPRE visibles y como flex-box de icono */
+  #topbar #theme-btn,
+  #topbar #acc-btn,
+  #topbar #ham-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    overflow: visible !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(248,247,245,0.14) !important;
+  }
+  #topbar #theme-btn { border-radius: 50% !important; }
+  #topbar #acc-btn,
+  #topbar #ham-btn { border-radius: 8px !important; }
+
+  /* Color explícito de cada icono (no depender solo de currentColor) */
+  #topbar #theme-btn { color: #FFD27A !important; }   /* sol/luna ámbar claro */
+  #topbar #acc-btn   { color: #F8F7F5 !important; }   /* accesibilidad hueso */
+  #topbar #ham-btn   { color: #F8F7F5 !important; }   /* hamburguesa hueso   */
+
+  /* SVGs: tamaño y trazo/relleno forzados a color visible */
+  #topbar #theme-btn svg,
+  #topbar #acc-btn svg,
+  #topbar #ham-btn svg {
+    display: block !important;
+    width: 20px !important;
+    height: 20px !important;
+    overflow: visible !important;
+  }
+  /* theme + ham usan stroke (fill:none); acc usa fill */
+  #topbar #theme-btn svg [stroke],
+  #topbar #ham-btn svg [stroke] {
+    stroke: currentColor !important;
+    stroke-width: 1.75 !important;
+  }
+  #topbar #acc-btn svg,
+  #topbar #acc-btn svg path { fill: currentColor !important; }
+
+  /* Empujar el trío a la derecha y darles separación */
+  #topbar #theme-btn { margin-left: auto !important; }
+  #topbar #acc-btn, #topbar #ham-btn { margin-left: 6px !important; }
+
+  /* El topbar no debe recortar el segundo renglón de iconos */
+  #topbar { overflow: visible !important; }
+}
+
+/* Light mode: recolorear iconos para contraste sobre fondo claro */
+@media (min-width: 769px) {
+  body.light #topbar #theme-btn { color: #B87000 !important; }
+  body.light #topbar #acc-btn,
+  body.light #topbar #ham-btn   { color: rgba(14,15,18,0.82) !important; }
+  body.light #topbar #theme-btn,
+  body.light #topbar #acc-btn,
+  body.light #topbar #ham-btn {
+    background: rgba(14,15,18,0.05) !important;
+    border-color: rgba(14,15,18,0.16) !important;
+  }
 }
 </style>
 
