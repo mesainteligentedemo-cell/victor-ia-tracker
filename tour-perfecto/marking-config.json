@@ -1,15 +1,15 @@
 {
   "meta": {
-    "version": "6.1-golden-complete-plus-3",
+    "version": "7.0-golden-complete-plus-chat",
     "created": "2026-07-04T15:10:00Z",
-    "description": "Tour guiado COMPLETO con marking en CUADRO DORADO - Enseña TODOS los botones del tracker + Actividad en Vivo + Chat + AI Studio",
-    "totalSteps": 63,
-    "totalDuration": 2700,
-    "totalButtons": 63,
+    "description": "Tour guiado COMPLETO con marking en CUADRO DORADO - 70 pasos enseña TODOS los botones del tracker + Chat con todas sus funciones",
+    "totalSteps": 70,
+    "totalDuration": 1120,
+    "totalButtons": 70,
     "markingStyle": "BORDER DORADO 3px (#D4AF37) + glow suave",
     "syncTolerance": "±100ms",
     "audioMode": "Sequential MP3 playlist",
-    "updated": "2026-07-10T03:14:56.508Z"
+    "updated": "2026-07-10T18:00:00Z"
   },
   "markings": [
     {
@@ -598,12 +598,75 @@
       "endTime": 898.02,
       "narration": "El Chat es donde conversas directamente con Claude Opus. Puedes pedirle que cree imágenes, videos, código, presentaciones, cualquier cosa. Solo escribe lo que necesitas y Claude se encarga de todo. Los resultados aparecen instantáneamente en la pantalla y se guardan en tu Biblioteca para reutilizar después.",
       "uiState": "estudio"
+    },
+    {
+      "id": "mark-064",
+      "step": 64,
+      "selector": "#chatbot-btn",
+      "label": "Boton de Chat Flotante — Acceso Instantaneo",
+      "startTime": 898.02,
+      "endTime": 914.02,
+      "narration": "Este es el boton de chat flotante, siempre disponible en la esquina inferior derecha de tu pantalla. Un solo clic y tienes acceso instantaneo a Claude Opus, el asistente mas inteligente que puedes tener a tu lado. Sin abrir otra ventana, sin cambiar de pagina. La inteligencia artificial siempre esta a un clic de distancia."
+    },
+    {
+      "id": "mark-065",
+      "step": 65,
+      "selector": "#chat-header",
+      "label": "Encabezado del Chat — Tu Asistente en Vivo",
+      "startTime": 914.02,
+      "endTime": 930.02,
+      "narration": "En el encabezado del chat veras claramente con quien estas hablando: Claude, tu asistente personal dentro del tracker. Este espacio esta diseniado para que te sientas acompaniado en cada tarea. Aqui empieza cada conversacion que va a ahorrarte horas de trabajo. Todo lo que necesites, sin salir del tracker."
+    },
+    {
+      "id": "mark-066",
+      "step": 66,
+      "selector": "#chat-messages",
+      "label": "Area de Conversacion — Historial Completo",
+      "startTime": 930.02,
+      "endTime": 946.02,
+      "narration": "Esta es el area de conversacion, donde ves todo el dialogo con Claude en tiempo real. Cada pregunta que haces y cada respuesta queda a la vista, ordenada y facil de seguir. Puedes pedir ideas, resolver dudas o generar contenido, y todo el hilo se mantiene aqui para que nunca pierdas el contexto de lo que estas creando."
+    },
+    {
+      "id": "mark-067",
+      "step": 67,
+      "selector": "#chat-quick",
+      "label": "Quick Actions — Botones Rapidos",
+      "startTime": 946.02,
+      "endTime": 962.02,
+      "narration": "Aqui estan los Quick Actions, botones rapidos con las acciones mas usadas listas para un solo toque. En vez de escribir todo desde cero, presionas un boton y Claude entiende al instante lo que quieres. Es productividad pura: menos escritura, mas resultados. Ahorra tiempo en cada tarea repetitiva y enfocate en lo que de verdad importa."
+    },
+    {
+      "id": "mark-068",
+      "step": 68,
+      "selector": "#chat-input",
+      "label": "Campo de Texto — Escribe lo que Necesitas",
+      "startTime": 962.02,
+      "endTime": 978.02,
+      "narration": "Este es el campo de texto donde escribes lo que necesitas, con tus propias palabras. No hay comandos complicados ni sintaxis que memorizar: solo pide en lenguaje natural, como si hablaras con un experto. Desde crear un reporte hasta generar una imagen o un sitio web completo, todo empieza aqui, escribiendo una sola frase clara."
+    },
+    {
+      "id": "mark-069",
+      "step": 69,
+      "selector": "#chat-mic-btn",
+      "label": "Control por Voz — Manos Libres",
+      "startTime": 978.02,
+      "endTime": 994.02,
+      "narration": "Y si prefieres no escribir, aqui esta el boton de microfono para control por voz. Presiona, habla con naturalidad y Claude convierte tu voz en accion al instante. Ideal cuando tienes las manos ocupadas o quieres avanzar mas rapido. Es la forma mas natural de trabajar: solo habla, y el tracker hace el resto por ti."
+    },
+    {
+      "id": "mark-070",
+      "step": 70,
+      "selector": "#chat-send",
+      "label": "Enviar Mensaje — El Poder Total",
+      "startTime": 994.02,
+      "endTime": 1010.02,
+      "narration": "Y aqui llegamos al punto final: el boton Enviar. Presionas aqui y tu pregunta se convierte en accion. Claude procesa, genera, crea, y los resultados aparecen al instante frente a ti. Ese es el poder total del Tracker de Victor IA: medir, crear, compartir, todo en un solo lugar, sin friccion. Ahora tienes el poder total en tus manos. Ahora te toca a ti. Empieza hoy."
     }
   ],
   "audio-config": {
     "directory": "./audio",
     "format": "voz-step-{step:02d}.mp3",
     "sequential": true,
-    "total-files": 63
+    "total-files": 70
   }
 }
