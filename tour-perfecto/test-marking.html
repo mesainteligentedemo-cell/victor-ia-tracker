@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tour Button Marking System — Test & Debug</title>
+  <link rel="stylesheet" href="./tour-marking.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #1a1a1a;
+        color: #e0e0e0;
+      }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .subtitle {
+        color: #aaa;
+      }
+    }
+
+    /* ============================================
+       SECCIÓN: AUDIO PLAYER
+       ============================================ */
+
+    .audio-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .audio-section {
+        background: #222;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    .audio-section h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    .audio-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 16px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.secondary {
+      background: #6b7280;
+    }
+
+    button.secondary:hover {
+      background: #4b5563;
+    }
+
+    .time-display {
+      font-family: monospace;
+      background: #f0f0f0;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #333;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .time-display {
+        background: #333;
+        color: #e0e0e0;
+      }
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 15px;
+      height: 40px;
+    }
+
+    /* ============================================
+       SECCIÓN: GRID DE BOTONES DE PRUEBA
+       ============================================ */
+
+    .buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .test-button {
+      padding: 12px 16px;
+      background: white;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .test-button {
+        background: #222;
+        border-color: #444;
+        color: #e0e0e0;
+      }
+    }
+
+    .test-button:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    }
+
+    .test-button:active {
+      transform: scale(0.98);
+    }
+
+    /* IDs y clases para matching con marking-config.json */
+    #topbar,
+    .topbar-btns,
+    .btn-primary-cta,
+    #client-mode-btn,
+    #theme-btn,
+    #acc-btn,
+    #via-quick-actions,
+    #period-bar,
+    #project-bar,
+    #tabs,
+    .kpi-grid,
+    #view-dashboard,
+    #view-analytics,
+    #view-finanzas,
+    #view-organigrama,
+    #view-software,
+    #view-biblioteca,
+    #view-entradas,
+    #sidebar,
+    #view-reportes,
+    #view-crm,
+    #view-apollo,
+    #view-telemetria,
+    #view-graphify,
+    #ifx-panel-skills,
+    #ifx-search-input,
+    #ifx-panel-loops,
+    #lpf-list,
+    #ifx-panel-costs,
+    #ifx-panel-system {
+      /* Actúan como elementos de prueba */
+    }
+
+    /* ============================================
+       SECCIÓN: STATS & LOGS
+       ============================================ */
+
+    .stats-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .stat-card {
+        background: #222;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .stat-label {
+        color: #999;
+      }
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #3b82f6;
+      font-family: monospace;
+    }
+
+    .logs-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .logs-section {
+        background: #222;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    .logs-section h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    #logs {
+      background: #f5f5f5;
+      border-radius: 4px;
+      padding: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #logs {
+        background: #1a1a1a;
+        color: #0f0;
+      }
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+    }
+
+    .log-success {
+      color: #10b981;
+    }
+
+    .log-warning {
+      color: #f59e0b;
+    }
+
+    .log-error {
+      color: #ef4444;
+    }
+
+    .log-info {
+      color: #3b82f6;
+    }
+
+    /* ============================================
+       FOOTER
+       ============================================ */
+
+    footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      footer {
+        border-top-color: #444;
+        color: #999;
+      }
+    }
+
+    .debug-mode-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 16px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 10000;
+      transition: all 0.2s;
+    }
+
+    .debug-mode-toggle:hover {
+      background: #dc2626;
+    }
+
+    .debug-mode-toggle.active {
+      background: #10b981;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <h1>🎬 Tour Button Marking System — Test & Debug</h1>
+    <p class="subtitle">Interfaz de prueba para verificar sincronización de marking visual con narración de voz</p>
+
+    <!-- AUDIO PLAYER SECTION -->
+    <div class="audio-section">
+      <h2>🔊 Audio Player</h2>
+      <div class="audio-controls">
+        <button onclick="playAudio()">▶ Play</button>
+        <button onclick="pauseAudio()" class="secondary">⏸ Pause</button>
+        <button onclick="stopAudio()" class="secondary">⏹ Stop</button>
+        <button onclick="skipSteps(5)" class="secondary">⏩ +5s</button>
+        <button onclick="skipSteps(-5)" class="secondary">⏪ -5s</button>
+        <div class="time-display">
+          <span id="time-current">00:00</span> / <span id="time-total">21:15</span>
+        </div>
+      </div>
+      <audio id="tour-audio" preload="metadata">
+        <!-- En producción, esto se reemplaza con los 34 MP3s concatenados -->
+        <p>Tu navegador no soporta audio HTML5. Por favor, actualiza.</p>
+      </audio>
+    </div>
+
+    <!-- BUTTONS GRID SECTION -->
+    <div class="audio-section">
+      <h2>🎯 Botones de Prueba (IDs coinciden con marking-config.json)</h2>
+      <div class="buttons-grid">
+        <!-- Generados dinámicamente desde marking-config.json -->
+        <div id="buttons-container"></div>
+      </div>
+    </div>
+
+    <!-- STATS SECTION -->
+    <div class="stats-section">
+      <div class="stat-card">
+        <div class="stat-label">Tiempo Actual</div>
+        <div class="stat-value" id="stat-time">0.00s</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Paso Marcado</div>
+        <div class="stat-value" id="stat-step">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Estado</div>
+        <div class="stat-value" id="stat-status">⏸ Stopped</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Modo</div>
+        <div class="stat-value" id="stat-mode">Normal</div>
+      </div>
+    </div>
+
+    <!-- LOGS SECTION -->
+    <div class="logs-section">
+      <h2>📋 Logs en Tiempo Real</h2>
+      <div id="logs"></div>
+      <div style="margin-top: 15px;">
+        <button onclick="clearLogs()" class="secondary" style="width: 100%;">Limpiar Logs</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEBUG MODE TOGGLE -->
+  <button class="debug-mode-toggle" id="debug-toggle" onclick="toggleDebugMode()">
+    🐛 Debug Mode: OFF
+  </button>
+
+  <!-- SCRIPT PARA TOUR MARKING -->
+  <script defer src="./tour-marking.js"></script>
+
+  <!-- SCRIPT PARA TEST PAGE -->
+  <script>
+    let logsArray = [];
+    const maxLogs = 100;
+
+    // ============================================
+    // LOG SYSTEM
+    // ============================================
+
+    function addLog(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const entry = `[${timestamp}] ${message}`;
+      logsArray.unshift(entry); // Agregar al inicio
+
+      if (logsArray.length > maxLogs) {
+        logsArray.pop();
+      }
+
+      renderLogs(type);
+    }
+
+    function renderLogs(type = 'info') {
+      const logsContainer = document.getElementById('logs');
+      logsContainer.innerHTML = logsArray
+        .map((log) => {
+          let className = 'log-' + type;
+          if (log.includes('✓')) className = 'log-success';
+          else if (log.includes('✗')) className = 'log-error';
+          else if (log.includes('⚠')) className = 'log-warning';
+          else if (log.includes('[')) className = 'log-info';
+
+          return `<div class="log-entry ${className}">${escapeHtml(log)}</div>`;
+        })
+        .join('');
+
+      logsContainer.scrollTop = 0;
+    }
+
+    function clearLogs() {
+      logsArray = [];
+      document.getElementById('logs').innerHTML = '';
+      addLog('Logs cleared');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ============================================
+    // AUDIO CONTROLS
+    // ============================================
+
+    function playAudio() {
+      const audio = document.getElementById('tour-audio');
+      audio.play();
+      addLog('▶ Audio playing', 'info');
+      updateStats();
+    }
+
+    function pauseAudio() {
+      const audio = document.getElementById('tour-audio');
+      audio.pause();
+      addLog('⏸ Audio paused', 'info');
+      updateStats();
+    }
+
+    function stopAudio() {
+      const audio = document.getElementById('tour-audio');
+      audio.pause();
+      audio.currentTime = 0;
+      addLog('⏹ Audio stopped', 'info');
+      updateStats();
+    }
+
+    function skipSteps(seconds) {
+      const audio = document.getElementById('tour-audio');
+      audio.currentTime = Math.max(0, audio.currentTime + seconds);
+      addLog(`⏩ Skipped ${seconds > 0 ? '+' : ''}${seconds}s`, 'info');
+    }
+
+    // ============================================
+    // STATS UPDATES
+    // ============================================
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function updateStats() {
+      const audio = document.getElementById('tour-audio');
+      document.getElementById('stat-time').textContent = audio.currentTime.toFixed(2) + 's';
+      document.getElementById('time-current').textContent = formatTime(audio.currentTime);
+      document.getElementById('time-total').textContent = formatTime(audio.duration || 1275.1);
+
+      const status = audio.paused ? '⏸ Paused' : '▶ Playing';
+      document.getElementById('stat-status').textContent = status;
+
+      if (window.tourMarking) {
+        const stats = window.tourMarking.getStats();
+        document.getElementById('stat-step').textContent = stats.currentlyMarked || '—';
+      }
+
+      const debugActive = document.body.classList.contains('tour-debug');
+      document.getElementById('stat-mode').textContent = debugActive ? '🐛 Debug ON' : 'Normal';
+    }
+
+    // ============================================
+    // DEBUG MODE
+    // ============================================
+
+    function toggleDebugMode() {
+      const toggle = document.getElementById('debug-toggle');
+      document.body.classList.toggle('tour-debug');
+
+      if (document.body.classList.contains('tour-debug')) {
+        toggle.textContent = '🐛 Debug Mode: ON';
+        toggle.classList.add('active');
+        addLog('🐛 Debug mode ACTIVATED', 'warning');
+      } else {
+        toggle.textContent = '🐛 Debug Mode: OFF';
+        toggle.classList.remove('active');
+        addLog('Debug mode deactivated', 'info');
+      }
+
+      updateStats();
+    }
+
+    // ============================================
+    // BUTTON GRID GENERATION
+    // ============================================
+
+    async function generateButtonsGrid() {
+      try {
+        const response = await fetch('./marking-config.json');
+        const config = await response.json();
+
+        const container = document.getElementById('buttons-container');
+        container.innerHTML = '';
+
+        config.buttonMarking.forEach((marking) => {
+          const btn = document.createElement('button');
+          btn.id = marking.id;
+          btn.className = 'test-button';
+          btn.innerHTML = `
+            <strong>Paso ${marking.step}</strong><br>
+            <small>${marking.label}</small><br>
+            <small>${marking.durationSeconds.toFixed(1)}s</small>
+          `;
+
+          btn.addEventListener('click', () => {
+            window.tourMarking.jumpToStep(marking.step);
+            window.tourMarking.markStep(marking.step);
+            addLog(`🎯 Marcado: Paso ${marking.step} - ${marking.label}`, 'success');
+          });
+
+          container.appendChild(btn);
+        });
+
+        addLog(`✓ Grid generado: ${config.buttonMarking.length} botones`, 'success');
+      } catch (error) {
+        addLog(`✗ Error cargando marking-config.json: ${error.message}`, 'error');
+      }
+    }
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+
+    document.addEventListener('DOMContentLoaded', () => {
+      addLog('🚀 Test page initialized', 'info');
+      generateButtonsGrid();
+
+      const audio = document.getElementById('tour-audio');
+      audio.addEventListener('play', updateStats);
+      audio.addEventListener('pause', updateStats);
+      audio.addEventListener('timeupdate', updateStats);
+      audio.addEventListener('ended', () => {
+        addLog('✓ Audio ended', 'success');
+        updateStats();
+      });
+
+      addLog('✓ Audio events listener registered', 'success');
+
+      // Wait for TourMarkingSystem to initialize
+      const checkInterval = setInterval(() => {
+        if (window.tourMarking) {
+          clearInterval(checkInterval);
+          addLog('✓ TourMarkingSystem ready', 'success');
+          updateStats();
+        }
+      }, 100);
+
+      addLog('✓ Ready for testing!', 'success');
+    });
+
+    // Update stats every 100ms
+    setInterval(updateStats, 100);
+  </script>
+</body>
+</html>

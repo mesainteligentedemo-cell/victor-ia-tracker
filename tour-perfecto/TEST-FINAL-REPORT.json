@@ -1,0 +1,82 @@
+{
+  "test-date": "2026-07-09",
+  "test-method": "Playwright headless Chromium 1920x1080, localhost:8765, auth bypass via localStorage via_access_authenticated, external network blocked",
+  "steps-tested": 63,
+  "results": {
+    "all-selectors-valid": true,
+    "all-elements-found": true,
+    "all-elements-visible": false,
+    "ambiguous-selectors": 0,
+    "hidden-elements": 19,
+    "hidden-elements-recoverable-with-ui-action": 16,
+    "hidden-elements-unresolved": 3,
+    "iframe-elements": 1,
+    "dynamic-elements": 1,
+    "audio-files-present": 63,
+    "audio-files-expected": 63,
+    "js-errors-on-load": 0
+  },
+  "test-status": "FAIL",
+  "ready-for-production": false,
+  "critical-issues": [
+    {
+      "id": "CRIT-1",
+      "title": "Nada reproduce #tour-audio — el sistema de 63 pasos NUNCA se activa",
+      "detail": "El boton TOUR (#tour-start-btn) ejecuta ViaTour.toggle(), un motor DISTINTO embebido en index.html (linea 18658) con 33 pasos propios y TTS ElevenLabs en tiempo real (new Audio(blob)). marking-golden.js escucha #tour-audio, pero ningun codigo en index.html llama a play() sobre #tour-audio (autoplay=false). El sistema golden de 63 pasos esta cargado (window.tourGoldenMarking OK, 63 markings, audio attached) pero permanece inerte para siempre."
+    },
+    {
+      "id": "CRIT-2",
+      "title": "No existe la 'Sequential MP3 playlist' — #tour-audio solo tiene voz-step-01.mp3",
+      "detail": "index.html linea 19359-19363: el <audio> tiene UNA sola <source> (voz-step-01.mp3, 48.5s). El config declara audioMode 'Sequential MP3 playlist' pero no hay codigo que encadene los 63 MP3s ni que acumule offset de tiempo. Aunque se reprodujera, currentTime llega maximo a 48.5s: solo dispararian los pasos 1-4 (ventanas 0-45s), desincronizados."
+    },
+    {
+      "id": "CRIT-3",
+      "title": "Timestamps del config NO corresponden a las duraciones reales de los MP3s",
+      "detail": "Config timeline total: 898.02s. Suma real de los 63 MP3s (ffprobe): 1487.24s. Pasos 1-34: ventanas de 7.5-20s vs archivos de 26-56s (ej. paso 1: ventana 15s, archivo 48.53s; paso 34: ventana 15s, archivo 55.96s). Pasos 35-60: ventanas 10-15s vs archivos de 2.3-8.7s. SOLO los pasos 61 (13.84s), 62 (16.02s) y 63 (18.16s) coinciden exactamente con sus archivos. En una reproduccion concatenada el marcado dorado quedaria desfasado desde el paso 2."
+    },
+    {
+      "id": "CRIT-4",
+      "title": "marking-golden.js no ejecuta acciones de UI — 19 pasos marcarian elementos invisibles",
+      "detail": "A diferencia de ViaTour (que hace setTab, abre sidebar, etc.), marking-golden.js solo agrega clases CSS y hace scrollIntoView. Los pasos 3, 44-60 y 63 apuntan a elementos ocultos en el estado por defecto y quedarian marcados sin que el usuario vea nada."
+    }
+  ],
+  "per-step-issues": [
+    { "step": 3, "selector": "#auto-live-indicator", "problem": "display:none por CSS (.auto-live-indicator linea 1898); solo se muestra si existen auto-entries de HOY (linea 8456). Elemento dinamico data-dependent: no garantizado visible durante el tour." },
+    { "step": 44, "selector": ".studio-window", "problem": "Oculto dentro de #file-modal. Se vuelve visible con openFileModal() (verificado). NOTA: clic en #estudio-fab NO lo muestra (pertenece al modal Planeacion, no al modal Estudio)." },
+    { "step": 45, "selector": ".studio-sidebar", "problem": "Igual que paso 44: requiere openFileModal()." },
+    { "step": 46, "selector": ".studio-main", "problem": "Igual que paso 44: requiere openFileModal()." },
+    { "step": 47, "selector": "#studio-panel", "problem": "Inline style=\"display:none\" (linea 6464). Sigue oculto INCLUSO con el modal Planeacion abierto; solo aparece al abrir una herramienta (ej. Cotizacion). Sin accion adicional el marcado seria invisible." },
+    { "step": 48, "selector": "#acc-panel", "problem": "Oculto por defecto; visible tras clic en #acc-btn (verificado OK). marking-golden.js no hace ese clic." },
+    { "step": 49, "selector": "#acc-txt-normal", "problem": "Dentro de #acc-panel oculto; visible tras abrir panel (verificado OK)." },
+    { "step": 50, "selector": "#acc-txt-lg", "problem": "Idem paso 49." },
+    { "step": 51, "selector": "#acc-txt-xl", "problem": "Idem paso 49." },
+    { "step": 52, "selector": ".acc-toggle-row:has(#acc-chk-contrast)", "problem": "Idem paso 49. Selector :has() funciona en Chromium/Firefox/Safari modernos." },
+    { "step": 53, "selector": ".acc-toggle-row:has(#acc-chk-anim)", "problem": "Idem paso 49." },
+    { "step": 54, "selector": "#acc-cb-normal", "problem": "Idem paso 49." },
+    { "step": 55, "selector": "#acc-cb-deutan", "problem": "Idem paso 49." },
+    { "step": 56, "selector": "#acc-cb-protan", "problem": "Idem paso 49." },
+    { "step": 57, "selector": "#acc-cb-tritan", "problem": "Idem paso 49." },
+    { "step": 58, "selector": "#acc-voice-btn", "problem": "Idem paso 49." },
+    { "step": 59, "selector": "button[onclick*=\"ViaTour\"][class=\"acc-action-btn\"]", "problem": "Idem paso 49. Ademas [class=\"acc-action-btn\"] es match EXACTO del atributo class: si alguien agrega otra clase al boton, el selector se rompe. Recomendado: button.acc-action-btn[onclick*=\"ViaTour\"]." },
+    { "step": 60, "selector": "button[onclick=\"showVoiceCommands()\"]", "problem": "Idem paso 49." },
+    { "step": 63, "selector": "#estudio-frame", "problem": "Es un IFRAME dentro de #estudio-modal (oculto por defecto). Visible tras clic en #estudio-fab (verificado OK). Marcar el borde del iframe funciona; el CONTENIDO interno del iframe no es marcable (cross-document)." }
+  ],
+  "verified-ok": {
+    "selectors-syntax": "63/63 validos (querySelectorAll sin excepciones, incluidos :has())",
+    "selectors-exist": "63/63 encontrados en el DOM",
+    "selectors-unique": "63/63 retornan exactamente 1 elemento (0 ambiguos)",
+    "audio-files": "63/63 MP3s presentes en tour-perfecto/audio/",
+    "marking-system-loads": "window.tourGoldenMarking inicializa, carga config (63 markings) y se adjunta a #tour-audio",
+    "flow-step-1": "#topbar visible y marcable desde el inicio",
+    "flow-step-13": "#tabs button setTab('dashboard') existe, visible, clic OK",
+    "flow-step-61": "#tabs button setTab('actividad') existe, visible, clic OK",
+    "flow-step-62": "#estudio-fab existe, visible, clic abre #estudio-modal OK",
+    "steps-visible-initial": "44/63 visibles sin ninguna accion",
+    "js-errors": "0 errores JS al cargar la pagina"
+  },
+  "meta-inconsistencies": [
+    "meta.totalDuration=2700 (45 min) pero la timeline termina en 898.02s (15 min) y el audio real suma 1487.24s (24.8 min)",
+    "meta dice 'audioMode: Sequential MP3 playlist' pero no existe implementacion de playlist"
+  ],
+  "recommendation": "NO desplegar el sistema golden de 63 pasos como esta. Opciones: (A) Mantener ViaTour (33 pasos, ya funcional en produccion, hace clics reales y narra con ElevenLabs) y retirar/archivar el sistema golden; o (B) Completar el sistema golden: 1) implementar player secuencial que encadene los 63 MP3s y emita tiempo acumulado, 2) regenerar startTime/endTime desde las duraciones reales (ffprobe), 3) agregar acciones de UI por paso (setTab, acc-btn, openFileModal, estudio-fab, abrir herramienta para #studio-panel), 4) resolver paso 3 (elemento data-dependent) y paso 47 (requiere accion extra)."
+}

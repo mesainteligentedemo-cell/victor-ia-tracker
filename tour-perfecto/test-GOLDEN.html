@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test · Marking GOLDEN · Victor IA Tracker</title>
+<style>
+  :root{ --amber:#FFAA17; --bg:#0E0F12; --surface:#16181d; --border:#2a2d35; --bone:#F8F7F5; --bone2:#9aa0ab; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--bone); font:14px/1.5 'Inter',system-ui,Arial,sans-serif; padding:24px; }
+  h1{ font-size:16px; letter-spacing:.04em; }
+  .hint{ color:var(--bone2); font-size:12px; margin-bottom:16px; }
+  #topbar{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 14px; margin-bottom:14px; }
+  #topbar .badge{ background:rgba(255,170,23,.15); color:var(--amber); border-radius:20px; padding:3px 10px; font-size:11px; font-weight:700; }
+  #auto-live-indicator{ background:rgba(34,197,94,.15); color:#22c55e; border-radius:20px; padding:3px 10px; font-size:11px; font-weight:700; }
+  .topbar-btns{ display:flex; gap:8px; flex-wrap:wrap; }
+  #topbar button{ background:transparent; border:1px solid var(--border); color:var(--bone2); border-radius:8px; padding:7px 12px; font-size:12px; cursor:pointer; }
+  .btn-primary-cta{ background:var(--amber) !important; color:#000 !important; border:none !important; font-weight:800; }
+  #project-bar,#tabs,#via-quick-actions,#sidebar,#acc-panel{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 14px; margin-bottom:14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  #tabs button,#via-quick-actions button,#sidebar select,#sidebar input{ background:transparent; border:1px solid var(--border); color:var(--bone); border-radius:8px; padding:7px 12px; font-size:12px; cursor:pointer; }
+  #sidebar{ flex-direction:column; align-items:stretch; max-width:280px; }
+  .filter-group{ display:flex; flex-direction:column; gap:4px; }
+  .filter-group label{ font-size:11px; color:var(--bone2); }
+  .acc-text-btns{ display:flex; gap:8px; }
+  .acc-text-btn{ background:transparent;border:1px solid var(--border);color:var(--bone);border-radius:8px;padding:6px 12px;cursor:pointer; }
+  .acc-toggle-row{ display:flex; justify-content:space-between; align-items:center; padding:8px; border:1px solid var(--border); border-radius:8px; margin:6px 0; }
+  .acc-cb-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .acc-cb-btn{ background:transparent;border:1px solid var(--border);color:var(--bone);border-radius:8px;padding:8px;cursor:pointer;font-size:11px; }
+  .acc-action-btn{ display:block; width:100%; text-align:left; background:transparent;border:1px solid var(--border);color:var(--bone);border-radius:8px;padding:8px 12px;margin:5px 0;cursor:pointer; }
+  .studio-sidebar,.studio-main,#studio-panel{ background:#101216;border:1px solid var(--border);border-radius:8px;padding:14px;min-height:60px; }
+  .studio-row{ display:grid; grid-template-columns:1fr 1.4fr 1fr; gap:8px; }
+  .sec-label{ color:var(--amber); font-size:11px; letter-spacing:.1em; text-transform:uppercase; margin:18px 0 8px; }
+  .controls{ position:fixed; right:18px; bottom:18px; display:flex; gap:8px; z-index:99; }
+  .controls button{ background:var(--amber); color:#000; border:none; border-radius:8px; padding:10px 16px; font-weight:800; cursor:pointer; }
+  .controls button.ghost{ background:transparent; color:var(--bone); border:1px solid var(--border); }
+  #status{ position:fixed; left:18px; bottom:18px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-size:12px; color:var(--bone2); z-index:99; }
+</style>
+</head>
+<body>
+<h1>Prueba visual · Sistema de marcado GOLDEN</h1>
+<p class="hint">Pulsa <b>▶ Demo rápido</b>. El cuadro dorado saltará de botón en botón usando los MISMOS selectores validados de index.html (reloj acelerado ×6). Abre la consola para ver el log de marcado y validación.</p>
+
+<!-- TOPBAR — selectores reales -->
+<div id="topbar">
+  <span class="badge">v5.11</span>
+  <span id="auto-live-indicator">LIVE</span>
+  <div class="topbar-btns">
+    <button class="btn-primary-cta" onclick="openAdd()">+ Entrada</button>
+    <button class="btn-tour-cta" id="tour-start-btn">▶ Tour</button>
+    <button onclick="exportCSV()">Export CSV</button>
+    <button onclick="toggleSidebar()">Filtros</button>
+    <button onclick="openFileModal()">Planeación</button>
+    <button id="client-mode-btn">Vista Cliente</button>
+    <button onclick="showSettings()">Config</button>
+    <button onclick="window.location.href='./actividades-repetitivas.html'">Tareas Repetitivas</button>
+  </div>
+</div>
+
+<div id="project-bar"><span>📁 Proyecto:</span><span>Todos</span></div>
+
+<div class="sec-label">Pestañas</div>
+<div id="tabs">
+  <button onclick="setTab('dashboard')">Dashboard</button>
+  <button onclick="setTab('analytics')">Analytics</button>
+  <button onclick="setTab('finanzas')">Finanzas</button>
+  <button onclick="setTab('organigrama')">Organigrama</button>
+  <button onclick="setTab('software')">Software &amp; APIs</button>
+  <button onclick="setTab('entradas')">Entradas</button>
+  <button onclick="setTab('reportes')">Reportes</button>
+  <button onclick="setTab('crm')">CRM</button>
+  <button onclick="setTab('apollo')">Prospección</button>
+  <button onclick="setTab('telemetria')">Telemetría IoT</button>
+  <button onclick="setTab('graphify')">Observabilidad</button>
+  <button onclick="setTab('infrastructure')">Infra</button>
+  <button onclick="setTab('actividad')">● Actividad en Vivo</button>
+</div>
+
+<div class="sec-label">Acciones IA</div>
+<div id="via-quick-actions">
+  <button onclick="openPopup('imagen')">Generar Imagen</button>
+  <button onclick="openPopup('video')">Generar Video</button>
+  <button onclick="openPopup('presentacion')">Presentación</button>
+  <button onclick="openPopup('web')">Web / Landing</button>
+  <button onclick="openPopup('voice')">Voice / Speech</button>
+  <button onclick="openPopup('capacitacion')">Capacitación</button>
+  <button onclick="openPopup('admin')">Admin &amp; Finanzas</button>
+  <button id="btn-biblioteca">Biblioteca</button>
+</div>
+
+<div class="sec-label">Filtros avanzados</div>
+<div id="sidebar">
+  <div class="filter-group"><label>Buscar texto</label><input id="f-search" type="text"></div>
+  <div class="filter-group"><label>Categoría</label><select id="f-cat"><option>Todas</option></select></div>
+  <div class="filter-group"><label>Proyecto</label><select id="f-project"><option>Todos</option></select></div>
+  <div class="filter-group"><label>Cliente</label><select id="f-client"><option>Todos</option></select></div>
+  <div class="filter-group"><label>Estado</label><select id="f-status"><option>Todos</option></select></div>
+  <div class="filter-group"><label>Prioridad</label><select id="f-priority"><option>Todas</option></select></div>
+  <div class="filter-group"><label>Duración mínima</label><input id="f-dur-min" type="range"></div>
+  <div class="filter-group"><label>Retrabajo</label><select id="f-rework"><option>Todos</option></select></div>
+</div>
+
+<div class="sec-label">Estudio IA</div>
+<div class="studio-row">
+  <div class="studio-sidebar">Panel de tipos / acciones</div>
+  <div class="studio-main">Chat central</div>
+  <div id="studio-panel">Panel de documento</div>
+</div>
+
+<div class="sec-label">Accesibilidad</div>
+<div id="acc-panel">
+  <div style="width:100%">
+    <div class="acc-text-btns">
+      <button id="acc-txt-normal" class="acc-text-btn">Aa Normal</button>
+      <button id="acc-txt-lg" class="acc-text-btn">Aa Grande</button>
+      <button id="acc-txt-xl" class="acc-text-btn">Aa Extra</button>
+    </div>
+    <div class="acc-toggle-row"><span>Alto contraste</span><input type="checkbox" id="acc-chk-contrast"></div>
+    <div class="acc-toggle-row"><span>Sin animaciones</span><input type="checkbox" id="acc-chk-anim"></div>
+    <div class="acc-cb-grid">
+      <button class="acc-cb-btn">Normal</button><button class="acc-cb-btn">Deuteran</button><button class="acc-cb-btn">Protan</button>
+      <button class="acc-cb-btn">Tritan</button><button class="acc-cb-btn">Grises</button>
+    </div>
+    <button id="acc-voice-btn" class="acc-action-btn">Control por voz</button>
+    <button class="acc-action-btn" onclick="if(window.ViaTour)ViaTour.start()">Tour guiado con voz</button>
+    <button class="acc-action-btn" onclick="showVoiceCommands()">Ver comandos de voz</button>
+  </div>
+</div>
+
+<div id="status">Listo.</div>
+<div class="controls">
+  <button onclick="runDemo()">▶ Demo rápido (×6)</button>
+  <button class="ghost" onclick="GoldenMarkingInstance && GoldenMarkingInstance.validateLive()">Validar selectores</button>
+  <button class="ghost" onclick="GoldenMarkingInstance && GoldenMarkingInstance.stop()">■ Detener</button>
+</div>
+
+<script src="./marking-system-GOLDEN.js"></script>
+<script>
+  // stubs para que los onclick no truenen en la demo
+  ['openAdd','exportCSV','toggleSidebar','openFileModal','showSettings','setTab','openPopup','showVoiceCommands','toggleAccPanel'].forEach(fn=>window[fn]=()=>{});
+  let g;
+  GoldenMarking.init('./tour-narrations-COMPLETO.json',{ scrollIntoView:true, autoContext:false })
+    .then(inst => { g = inst; document.getElementById('status').textContent = `Cargado · ${inst.steps.length} botones · listo para demo`; });
+
+  function runDemo(){
+    if(!g){ alert('Aún cargando config...'); return; }
+    // acelerar ×6 recomprimiendo timestamps para ver el recorrido rápido
+    const orig = g.steps.map(s=>({startTime:s.startTime,endTime:s.endTime}));
+    g.steps.forEach(s=>{ s.startTime=s.startTime/6; s.endTime=s.endTime/6; });
+    g.startSelfTimed();
+    document.getElementById('status').textContent = 'Demo corriendo (×6)...';
+    const total = g.config.meta.totalDurationSec/6*1000 + 800;
+    setTimeout(()=>{ g.stop(); g.steps.forEach((s,i)=>{s.startTime=orig[i].startTime;s.endTime=orig[i].endTime;}); document.getElementById('status').textContent='Demo terminada.'; }, total);
+  }
+</script>
+</body>
+</html>

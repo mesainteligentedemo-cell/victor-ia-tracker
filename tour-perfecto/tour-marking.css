@@ -1,0 +1,348 @@
+/**
+ * TOUR BUTTON MARKING STYLES v1.0
+ * Visual highlighting para botones durante el tour guiado
+ *
+ * Temas soportados:
+ * - Light mode (CSS variable --bg-primary, --text-primary)
+ * - Dark mode (CSS variable --bg-dark, --text-light)
+ */
+
+/* ============================================
+   ANIMACIONES BASE
+   ============================================ */
+
+@keyframes tourGlow {
+  0% {
+    box-shadow:
+      0 0 5px rgba(59, 130, 246, 0.3),
+      0 0 10px rgba(59, 130, 246, 0.2),
+      inset 0 0 10px rgba(59, 130, 246, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 15px rgba(59, 130, 246, 0.6),
+      0 0 25px rgba(59, 130, 246, 0.4),
+      inset 0 0 15px rgba(59, 130, 246, 0.2);
+  }
+  100% {
+    box-shadow:
+      0 0 5px rgba(59, 130, 246, 0.3),
+      0 0 10px rgba(59, 130, 246, 0.2),
+      inset 0 0 10px rgba(59, 130, 246, 0.1);
+  }
+}
+
+@keyframes tourPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes tourBorderPulse {
+  0% {
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow:
+      0 0 0 2px rgba(59, 130, 246, 0.2),
+      0 0 10px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    border-color: rgba(59, 130, 246, 0.8);
+    box-shadow:
+      0 0 0 4px rgba(59, 130, 246, 0.3),
+      0 0 20px rgba(59, 130, 246, 0.5);
+  }
+  100% {
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow:
+      0 0 0 2px rgba(59, 130, 246, 0.2),
+      0 0 10px rgba(59, 130, 246, 0.3);
+  }
+}
+
+@keyframes tourFadeOut {
+  0% {
+    opacity: 1;
+    box-shadow:
+      0 0 15px rgba(59, 130, 246, 0.6),
+      0 0 25px rgba(59, 130, 246, 0.4);
+  }
+  100% {
+    opacity: 0.4;
+    box-shadow:
+      0 0 2px rgba(59, 130, 246, 0.1);
+  }
+}
+
+@keyframes tourSpotlight {
+  0% {
+    filter: brightness(1) drop-shadow(0 0 2px rgba(59, 130, 246, 0.2));
+  }
+  50% {
+    filter: brightness(1.1) drop-shadow(0 0 15px rgba(59, 130, 246, 0.4));
+  }
+  100% {
+    filter: brightness(1) drop-shadow(0 0 2px rgba(59, 130, 246, 0.2));
+  }
+}
+
+/* ============================================
+   CLASE PRINCIPAL: .tour-marked
+   Aplicada SOLO cuando el botón está activo
+   ============================================ */
+
+.tour-marked {
+  position: relative;
+  z-index: 1000;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Efecto de glow base */
+  box-shadow:
+    0 0 10px rgba(59, 130, 246, 0.4),
+    0 0 20px rgba(59, 130, 246, 0.2),
+    inset 0 0 10px rgba(59, 130, 246, 0.1);
+
+  /* Border highlight sutil */
+  border: 1px solid rgba(59, 130, 246, 0.3);
+
+  /* Fondo sutil en light mode */
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.05) 0%,
+    rgba(59, 130, 246, 0.02) 100%
+  );
+
+  /* Escala sutil hacia arriba */
+  transform: scale(1.02);
+
+  /* Filter brightness highlight */
+  filter: brightness(1.05);
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .tour-marked {
+    box-shadow:
+      0 0 15px rgba(96, 165, 250, 0.5),
+      0 0 30px rgba(96, 165, 250, 0.3),
+      inset 0 0 10px rgba(96, 165, 250, 0.1);
+
+    border-color: rgba(96, 165, 250, 0.4);
+
+    background: linear-gradient(
+      135deg,
+      rgba(96, 165, 250, 0.08) 0%,
+      rgba(96, 165, 250, 0.03) 100%
+    );
+
+    filter: brightness(1.08);
+  }
+}
+
+/* Light mode via :root[data-theme="light"] */
+:root[data-theme="light"] .tour-marked {
+  box-shadow:
+    0 0 10px rgba(37, 99, 235, 0.35),
+    0 0 18px rgba(37, 99, 235, 0.18),
+    inset 0 0 8px rgba(37, 99, 235, 0.08);
+
+  border-color: rgba(37, 99, 235, 0.25);
+}
+
+/* ============================================
+   ESTADO ACTIVO: .tour-marked.tour-marked-active
+   Animación completa mientras se menciona
+   ============================================ */
+
+.tour-marked.tour-marked-active {
+  animation: tourGlow 1.2s ease-in-out infinite;
+
+  /* Pulse extra */
+  box-shadow:
+    0 0 15px rgba(59, 130, 246, 0.6),
+    0 0 25px rgba(59, 130, 246, 0.4),
+    0 0 35px rgba(59, 130, 246, 0.2),
+    inset 0 0 15px rgba(59, 130, 246, 0.15);
+
+  border-color: rgba(59, 130, 246, 0.6);
+
+  /* Escala ligeramente mayor */
+  transform: scale(1.03);
+
+  filter: brightness(1.08) drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
+}
+
+@media (prefers-color-scheme: dark) {
+  .tour-marked.tour-marked-active {
+    box-shadow:
+      0 0 20px rgba(96, 165, 250, 0.7),
+      0 0 35px rgba(96, 165, 250, 0.5),
+      0 0 50px rgba(96, 165, 250, 0.25),
+      inset 0 0 15px rgba(96, 165, 250, 0.15);
+
+    border-color: rgba(96, 165, 250, 0.7);
+
+    filter: brightness(1.12) drop-shadow(0 0 12px rgba(96, 165, 250, 0.4));
+  }
+}
+
+/* ============================================
+   FADE OUT: .tour-marked.tour-marked-fadeout
+   Transición suave al desmarcar
+   ============================================ */
+
+.tour-marked.tour-marked-fadeout {
+  animation: tourFadeOut 0.3s ease-out forwards;
+  pointer-events: none;
+}
+
+/* ============================================
+   VARIACIONES POR TIPO DE ELEMENTO
+   ============================================ */
+
+/* Para botones (button, a.btn, etc) */
+button.tour-marked,
+a.btn.tour-marked,
+.btn.tour-marked {
+  cursor: pointer;
+
+  /* Aumentar hover area */
+  padding-left: calc(var(--padding-x, 16px) + 4px);
+  padding-right: calc(var(--padding-x, 16px) + 4px);
+}
+
+button.tour-marked:hover,
+a.btn.tour-marked:hover,
+.btn.tour-marked:hover {
+  animation: none;
+  filter: brightness(1.15);
+}
+
+/* Para inputs (search, filters) */
+input.tour-marked,
+select.tour-marked,
+textarea.tour-marked {
+  box-shadow:
+    0 0 10px rgba(59, 130, 246, 0.4),
+    0 0 20px rgba(59, 130, 246, 0.2),
+    inset 0 0 8px rgba(59, 130, 246, 0.15);
+}
+
+input.tour-marked:focus,
+select.tour-marked:focus,
+textarea.tour-marked:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.6);
+  outline-offset: 2px;
+}
+
+/* Para grillas de tarjetas */
+.kpi-grid.tour-marked {
+  box-shadow:
+    0 0 20px rgba(59, 130, 246, 0.3),
+    inset 0 0 10px rgba(59, 130, 246, 0.05);
+}
+
+/* Para gráficas */
+canvas.tour-marked,
+svg.tour-marked {
+  filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4));
+}
+
+/* Para panels/sidebars */
+.sidebar.tour-marked,
+.panel.tour-marked,
+[role="complementary"].tour-marked {
+  box-shadow:
+    inset 0 0 0 2px rgba(59, 130, 246, 0.4),
+    0 0 20px rgba(59, 130, 246, 0.2);
+
+  border-left: 3px solid rgba(59, 130, 246, 0.6);
+}
+
+/* ============================================
+   MODO SPOTLIGHT PARA ELEMENTOS GRANDES
+   Envueltos por .tour-spotlight
+   ============================================ */
+
+.tour-spotlight {
+  position: relative;
+}
+
+.tour-spotlight::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 2px solid rgba(59, 130, 246, 0.4);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: tourBorderPulse 1.5s ease-in-out infinite;
+}
+
+.tour-spotlight.tour-marked::before {
+  border-color: rgba(59, 130, 246, 0.8);
+  animation: tourBorderPulse 1.2s ease-in-out infinite;
+}
+
+/* ============================================
+   ACCESSIBILITY CONSIDERATIONS
+   ============================================ */
+
+/* Reducir movimiento si prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .tour-marked,
+  .tour-marked.tour-marked-active,
+  .tour-marked.tour-marked-fadeout,
+  .tour-spotlight::before {
+    animation: none !important;
+    transition: opacity 0.2s ease-out !important;
+  }
+
+  .tour-marked {
+    opacity: 0.9;
+  }
+
+  .tour-marked.tour-marked-fadeout {
+    opacity: 0.4;
+  }
+}
+
+/* ============================================
+   DEBUG MODE (opcional)
+   Activar agregando clase .tour-debug al body
+   ============================================ */
+
+body.tour-debug .tour-marked {
+  outline: 3px dashed rgba(59, 130, 246, 0.8);
+  outline-offset: 4px;
+}
+
+body.tour-debug .tour-marked::after {
+  content: attr(data-tour-label);
+  position: absolute;
+  bottom: -24px;
+  left: 0;
+  background: rgba(59, 130, 246, 0.9);
+  color: white;
+  padding: 4px 8px;
+  font-size: 11px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10001;
+  font-weight: 600;
+}
+
+/* ============================================
+   PRINT MEDIA (si se imprime)
+   ============================================ */
+
+@media print {
+  .tour-marked,
+  .tour-marked.tour-marked-active,
+  .tour-marked.tour-marked-fadeout,
+  .tour-spotlight::before {
+    display: none;
+  }
+}

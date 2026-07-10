@@ -1,0 +1,241 @@
+════════════════════════════════════════════════════════════════
+  TOUR GUIADO — NARRACIÓN COMPLETA — Victor IA Tracker v5.11
+  53 botones · 1441 palabras · 9m 57s
+════════════════════════════════════════════════════════════════
+
+
+──────────── INTRO ────────────
+
+[01] Bienvenido al Tracker Victor IA  (0s → 22.69s | marca 0s)
+     selector: #topbar  ✓ validado (línea 6071)
+     Bienvenido al Tracker de Victor IA, tu centro de control inteligente. En los próximos minutos voy a llevarte de la mano por cada botón y cada sección. Relájate, no toques nada: yo voy a resaltar con un marco dorado exactamente el control del que te esté hablando. Empecemos por la barra superior, tu punto de partida en todo momento.
+
+
+──────────── BARRA SUPERIOR ────────────
+
+[02] Versión del sistema  (23.49s → 35.03s | marca 23.39s)
+     selector: #topbar .badge  ✓ validado (línea 6081)
+     Este pequeño distintivo marca la versión del sistema: la cinco punto once. Te sirve para saber que estás en la última versión publicada y para darnos referencia si necesitas soporte.
+
+[03] Estado LIVE  (35.83s → 47.75s | marca 35.73s)
+     selector: #auto-live-indicator  ✓ validado (línea 6082)
+     El indicador LIVE en verde confirma que el auto-registro está activo y trabajando en tiempo real. Mientras lo veas encendido, el sistema está capturando y sincronizando tu actividad de forma automática.
+
+[04] Nueva Entrada — el botón clave  (48.55s → 71.63s | marca 48.45s)
+     selector: .btn-primary-cta  ✓ validado (línea 6087)
+     Este es el botón más importante de todo el tracker: más Entrada. Cada vez que terminas una tarea, un diseño, un video o una llamada con un cliente, la registras aquí. Capturas qué hiciste, cuánto tiempo tomó, a qué proyecto y cliente pertenece, su categoría y prioridad. Recuerda la regla de oro: lo que no se registra, no se mide.
+
+[05] Tour guiado con voz  (72.43s → 88.97s | marca 72.33s)
+     selector: #tour-start-btn  ✓ validado (línea 6088)
+     Este es el botón de Tour, justo el que estás usando ahora. Lanza este recorrido guiado con voz cuando lo necesites. Puedes iniciarlo o detenerlo en cualquier momento; ideal para presentarle el sistema a un cliente o a un nuevo miembro del equipo.
+
+[06] Exportar CSV  (89.77s → 103.62s | marca 89.67s)
+     selector: button[onclick="exportCSV()"]  ✓ validado (línea 6092)
+     El botón Exportar C S V descarga toda tu información en un archivo de hoja de cálculo. Es ideal para respaldos, para compartir con tu contador o para analizar los datos en Excel o Google Sheets.
+
+[07] Filtros avanzados  (104.42s → 116.34s | marca 104.32s)
+     selector: button[onclick="toggleSidebar()"]  ✓ validado (línea 6093)
+     El botón de Filtros abre un panel lateral para segmentar tus datos por cualquier criterio: texto, categoría, proyecto, cliente, estado, prioridad, duración y retrabajo. Más adelante te lo muestro por dentro.
+
+[08] Planeación con IA  (117.14s → 131.76s | marca 117.04s)
+     selector: button[onclick="openFileModal()"]  ✓ validado (línea 6094)
+     Planeación es uno de los módulos más impresionantes: usa inteligencia artificial para generar cotizaciones, planear nuevos proyectos, preparar entregables y hasta pedir dummies de diseño. Incluso tiene un agente de voz que llena los formularios mientras tú hablas.
+
+[09] Vista Cliente  (132.56s → 144.48s | marca 132.46s)
+     selector: #client-mode-btn  ✓ validado (línea 6095)
+     Vista Cliente activa un modo de presentación seguro: oculta tus costos internos y muestra solo los precios de venta. Perfecto para compartir la pantalla con un cliente sin exponer tus márgenes.
+
+[10] Configuración  (145.28s → 152.2s | marca 145.18s)
+     selector: button[onclick="showSettings()"]  ✓ validado (línea 6096)
+     El botón de Configuración abre los ajustes del sistema, donde defines preferencias, integraciones y parámetros generales del tracker.
+
+[11] Tareas Repetitivas  (153s → 167.23s | marca 152.9s)
+     selector: button[onclick*="actividades-repetitivas"]  ✓ validado (línea 6097)
+     Tareas Repetitivas te lleva al módulo de automatizaciones: aquí registras las actividades que se repiten cada día, semana o mes, para que el sistema te ayude a no olvidarlas y a medir su costo real en tiempo.
+
+
+──────────── SELECTOR DE PROYECTO ────────────
+
+[12] Selector de proyecto  (168.03s → 183.41s | marca 167.93s)
+     selector: #project-bar  ✓ validado (línea 6553)
+     Debajo de la barra superior está el selector de proyecto. Con un clic filtras absolutamente todo el tablero para ver solo la actividad, las finanzas y las métricas de un cliente o proyecto en específico. Es tu lente de enfoque.
+
+
+──────────── PESTAÑAS ────────────
+
+[13] Pestaña Dashboard  (184.21s → 197.67s | marca 184.11s)
+     selector: #tabs button[onclick="setTab('dashboard')"]  ✓ validado (línea 6561)
+     Estas son las pestañas principales, el corazón de la navegación. La primera, Dashboard, es tu vista general: aquí ves de un vistazo los indicadores clave, el resumen del día y la salud de tu operación.
+
+[14] Pestaña Analytics  (198.47s → 207.7s | marca 198.37s)
+     selector: #tabs button[onclick="setTab('analytics')"]  ✓ validado (línea 6562)
+     Analytics profundiza en los números: tendencias, comparativas por periodo, distribución por categoría y análisis de productividad. Es donde los datos se convierten en decisiones.
+
+[15] Pestaña Finanzas  (208.5s → 218.12s | marca 208.4s)
+     selector: #tabs button[onclick="setTab('finanzas')"]  ✓ validado (línea 6563)
+     La pestaña Finanzas concentra el dinero: ingresos, egresos, costos por proyecto, márgenes y cuánto te cuesta realmente cada actividad. El pulso económico de tu negocio.
+
+[16] Pestaña Organigrama  (218.92s → 228.54s | marca 218.82s)
+     selector: #tabs button[onclick="setTab('organigrama')"]  ✓ validado (línea 6564)
+     Organigrama muestra la estructura de tu empresa de agentes de inteligencia artificial: quién hace qué, los roles y cómo se coordinan para ejecutar el trabajo.
+
+[17] Pestaña Software & APIs  (229.34s → 240.88s | marca 229.24s)
+     selector: #tabs button[onclick="setTab('software')"]  ✓ validado (línea 6565)
+     Software y A P Is lista todas las herramientas, licencias y conexiones que usa tu operación, con su costo y su estado. Así sabes exactamente en qué software estás invirtiendo.
+
+[18] Pestaña Entradas  (241.68s → 251.68s | marca 241.58s)
+     selector: #tabs button[onclick="setTab('entradas')"]  ✓ validado (línea 6566)
+     Entradas es el registro detallado: la tabla con cada actividad que has capturado, ordenable y filtrable. Es la memoria completa y auditable de todo tu trabajo.
+
+[19] Pestaña Reportes  (252.48s → 262.1s | marca 252.38s)
+     selector: #tabs button[onclick="setTab('reportes')"]  ✓ validado (línea 6567)
+     Reportes genera resúmenes listos para compartir: informes por periodo, por cliente o por proyecto, que puedes presentar o enviar sin tener que armarlos a mano.
+
+[20] Pestaña CRM  (262.9s → 272.52s | marca 262.8s)
+     selector: #tabs button[onclick="setTab('crm')"]  ✓ validado (línea 6568)
+     El C R M gestiona tus relaciones con clientes: prospectos, propuestas, clientes activos y el estado de cada relación comercial, todo en un solo lugar.
+
+[21] Pestaña Prospección  (273.32s → 281.78s | marca 273.22s)
+     selector: #tabs button[onclick="setTab('apollo')"]  ✓ validado (línea 6569)
+     Prospección es tu motor de nuevos clientes: aquí buscas, filtras y calificas leads para llenar tu embudo de ventas con oportunidades reales.
+
+[22] Pestaña Telemetría IoT  (282.58s → 291.81s | marca 282.48s)
+     selector: #tabs button[onclick="setTab('telemetria')"]  ✓ validado (línea 6570)
+     Telemetría I o T conecta sensores y dispositivos en tiempo real, para monitorear datos físicos del mundo real e integrarlos con tu operación digital.
+
+[23] Pestaña Observabilidad  (292.61s → 302.99s | marca 292.51s)
+     selector: #tabs button[onclick="setTab('graphify')"]  ✓ validado (línea 6571)
+     Observabilidad te da rayos equis del sistema: métricas de salud, uso de tokens, rendimiento y grafos de conocimiento. Es cómo vigilamos que todo funcione fino por dentro.
+
+[24] Pestaña Infra  (303.79s → 312.25s | marca 303.69s)
+     selector: #tabs button[onclick="setTab('infrastructure')"]  ✓ validado (línea 6572)
+     Infra muestra la infraestructura técnica: servidores, servicios, despliegues y el estado de cada pieza que mantiene el sistema vivo y en línea.
+
+[25] Pestaña Actividad en Vivo  (313.05s → 322.67s | marca 312.95s)
+     selector: #tabs button[onclick="setTab('actividad')"]  ✓ validado (línea 6573)
+     Actividad en Vivo es el feed en tiempo real: ves las acciones ocurriendo conforme suceden, como un monitor latiendo con el pulso de tu operación.
+
+
+──────────── ACCIONES IA ────────────
+
+[26] Acción IA — Generar Imagen  (323.47s → 333.09s | marca 323.37s)
+     selector: #via-quick-actions button[onclick="openPopup('imagen')"]  ✓ validado (línea 6598)
+     Pasemos a las Acciones de inteligencia artificial. La primera, Generar Imagen, crea visuales profesionales al instante con Higgsfield, desde fotos de producto hasta ilustraciones conceptuales.
+
+[27] Acción IA — Generar Video  (333.89s → 342.35s | marca 333.79s)
+     selector: #via-quick-actions button[onclick="openPopup('video')"]  ✓ validado (línea 6602)
+     Generar Video produce clips y comerciales con inteligencia artificial. Describes lo que quieres y el sistema genera el video listo para usar.
+
+[28] Acción IA — Presentación  (343.15s → 349.3s | marca 343.05s)
+     selector: #via-quick-actions button[onclick="openPopup('presentacion')"]  ✓ validado (línea 6606)
+     Presentación arma decks y diapositivas animadas de forma automática, ideales para propuestas y juntas con clientes.
+
+[29] Acción IA — Web / Landing  (350.1s → 358.95s | marca 350s)
+     selector: #via-quick-actions button[onclick="openPopup('web')"]  ✓ validado (línea 6610)
+     Web y Landing genera sitios y páginas de aterrizaje completas a partir de una descripción, con diseño de nivel profesional listo para publicar.
+
+[30] Acción IA — Voice / Speech  (359.75s → 370.13s | marca 359.65s)
+     selector: #via-quick-actions button[onclick="openPopup('voice')"]  ✓ validado (línea 6614)
+     Voice y Speech convierte texto en voz natural con ElevenLabs, para narraciones, locuciones y agentes de voz como el que me da vida a mí ahora mismo.
+
+[31] Acción IA — Capacitación  (370.93s → 379.39s | marca 370.83s)
+     selector: #via-quick-actions button[onclick="openPopup('capacitacion')"]  ✓ validado (línea 6618)
+     Capacitación crea material de entrenamiento y cursos con inteligencia artificial, para formar a tu equipo o a tus clientes de manera rápida.
+
+[32] Acción IA — Admin & Finanzas  (380.19s → 386.73s | marca 380.09s)
+     selector: #via-quick-actions button[onclick="openPopup('admin')"]  ✓ validado (línea 6622)
+     Admin y Finanzas asiste con tareas administrativas y financieras: cálculos, documentos y gestión, apoyado por inteligencia artificial.
+
+[33] Acción IA — Biblioteca  (387.53s → 395.61s | marca 387.43s)
+     selector: #btn-biblioteca  ✓ validado (línea 6626)
+     Biblioteca guarda todos los activos que has generado: imágenes, videos, presentaciones y más, organizados y listos para reutilizar cuando los necesites.
+
+
+──────────── FILTROS AVANZADOS ────────────
+
+[34] Filtros avanzados — panel  (396.41s → 404.1s | marca 396.31s)
+     selector: #sidebar  ✓ validado (línea 7274)
+     Ahora abrimos el panel de Filtros avanzados. Desde aquí segmentas todos tus datos con precisión quirúrgica. Vamos campo por campo.
+
+[35] Filtro — Buscar texto  (404.9s → 412.98s | marca 404.8s)
+     selector: #f-search  ✓ validado (línea 7278)
+     Buscar texto encuentra cualquier palabra dentro de la descripción, las observaciones o las notas de tus entradas. Es tu buscador universal.
+
+[36] Filtro — Categoría  (413.78s → 421.09s | marca 413.68s)
+     selector: #f-cat  ✓ validado (línea 7282)
+     El filtro de Categoría te deja aislar un tipo de trabajo: desarrollo, diseño, video, marketing, ventas y muchos más.
+
+[37] Filtro — Proyecto  (421.89s → 430.35s | marca 421.79s)
+     selector: #f-project  ✓ validado (línea 7301)
+     El filtro de Proyecto muestra solo las entradas de un proyecto específico, para enfocar tu análisis en un solo frente de trabajo.
+
+[38] Filtro — Cliente  (431.15s → 440.77s | marca 431.05s)
+     selector: #f-client  ✓ validado (línea 7305)
+     El filtro de Cliente aísla toda la actividad de un cliente en particular: ideal para saber cuánto tiempo y costo has dedicado a cada cuenta.
+
+[39] Filtro — Estado  (441.57s → 450.03s | marca 441.47s)
+     selector: #f-status  ✓ validado (línea 7309)
+     El filtro de Estado separa tus tareas por su avance: completado, en progreso o en revisión. Perfecto para ver qué falta cerrar.
+
+[40] Filtro — Prioridad  (450.83s → 458.14s | marca 450.73s)
+     selector: #f-priority  ✓ validado (línea 7318)
+     El filtro de Prioridad ordena por importancia: alta, media o baja, para que enfoques primero lo que más pesa.
+
+[41] Filtro — Duración mínima  (458.94s → 467.4s | marca 458.84s)
+     selector: #f-dur-min  ✓ validado (línea 7327)
+     La barra de Duración mínima filtra por tiempo: arrástrala para ver solo las actividades que tomaron más de cierta cantidad de minutos.
+
+[42] Filtro — Retrabajo  (468.2s → 476.66s | marca 468.1s)
+     selector: #f-rework  ✓ validado (línea 7331)
+     El filtro de Retrabajo aísla las tareas que hubo que repetir. Es una métrica clave de calidad: menos retrabajo significa mejores procesos.
+
+
+──────────── ESTUDIO IA ────────────
+
+[43] Estudio IA — panel izquierdo  (477.46s → 489.77s | marca 477.36s)
+     selector: .studio-sidebar  ✓ validado (línea 6417)
+     El Estudio de inteligencia artificial es un entorno estilo editor de código. En el panel izquierdo eliges el tipo de contenido y las acciones rápidas: cotizar, corregir, planear o pedir un dummy.
+
+[44] Estudio IA — chat central  (490.57s → 501.34s | marca 490.47s)
+     selector: .studio-main  ✓ validado (línea 6448)
+     En el centro está el chat: aquí conversas con la inteligencia artificial, le hablas o le escribes, y ella genera el resultado en vivo mientras dialogas con ella.
+
+[45] Estudio IA — panel derecho  (502.14s → 512.14s | marca 502.04s)
+     selector: #studio-panel  ✓ validado (línea 6464)
+     A la derecha aparece el panel de documento: la cotización, el formulario o la vista previa del entregable que estás generando, listo para revisar y enviar.
+
+
+──────────── ACCESIBILIDAD ────────────
+
+[46] Accesibilidad — panel  (512.94s → 523.71s | marca 512.84s)
+     selector: #acc-panel  ✓ validado (línea 6234)
+     Terminamos con el panel de Accesibilidad, porque este sistema es para todas las personas. Ábrelo desde el ícono de accesibilidad en la barra superior. Vamos por cada opción.
+
+[47] Accesibilidad — Tamaño de texto  (524.51s → 532.97s | marca 524.41s)
+     selector: .acc-text-btns  ✓ validado (línea 6253)
+     Tamaño de texto ajusta la letra en tres niveles: normal, grande y extra grande, para que leas cómodamente sin forzar la vista.
+
+[48] Accesibilidad — Alto contraste  (533.77s → 542.23s | marca 533.67s)
+     selector: .acc-toggle-row:has(#acc-chk-contrast)  ✓ validado (línea 6276)
+     El interruptor de Alto contraste aumenta la diferencia entre colores para mejorar la legibilidad, especialmente útil con poca luz o baja visión.
+
+[49] Accesibilidad — Sin animaciones  (543.03s → 550.34s | marca 542.93s)
+     selector: .acc-toggle-row:has(#acc-chk-anim)  ✓ validado (línea 6288)
+     Sin animaciones desactiva todas las transiciones y movimientos, ideal para personas sensibles al movimiento o para equipos más lentos.
+
+[50] Accesibilidad — Daltonismo  (551.14s → 561.14s | marca 551.04s)
+     selector: .acc-cb-grid  ✓ validado (línea 6297)
+     El bloque de Daltonismo ofrece cinco modos de color: visión normal, deuteranopía, protanopía, tritanopía y escala de grises, adaptando la paleta a cómo ve cada persona.
+
+[51] Accesibilidad — Control por voz  (561.94s → 572.32s | marca 561.84s)
+     selector: #acc-voice-btn  ✓ validado (línea 6331)
+     Control por voz te permite navegar el tracker hablando, sin usar el mouse ni el teclado. Perfecto para manos libres o para quien lo necesita por accesibilidad.
+
+[52] Accesibilidad — Tour guiado  (573.12s → 579.66s | marca 573.02s)
+     selector: button[onclick*="ViaTour"][class="acc-action-btn"]  ✓ validado (línea 6337)
+     Desde aquí también puedes relanzar este Tour guiado con voz cuando quieras volver a escuchar el recorrido.
+
+[53] Accesibilidad — Ver comandos de voz  (580.46s → 595.84s | marca 580.36s)
+     selector: button[onclick="showVoiceCommands()"]  ✓ validado (línea 6342)
+     Y Ver comandos de voz te muestra la lista completa de frases que el sistema entiende, para que domines la navegación por voz. Con esto terminamos el recorrido: ahora conoces cada botón del Tracker de Victor IA. Gracias por acompañarme.
+
