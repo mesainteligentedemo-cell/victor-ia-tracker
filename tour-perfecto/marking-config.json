@@ -606,7 +606,7 @@
       "label": "Boton de Chat Flotante — Acceso Instantaneo",
       "startTime": 898.02,
       "endTime": 914.02,
-      "narration": "Este es el boton de chat flotante, siempre disponible en la esquina inferior derecha de tu pantalla. Un solo clic y tienes acceso instantaneo a Claude Opus, el asistente mas inteligente que puedes tener a tu lado. Sin abrir otra ventana, sin cambiar de pagina. La inteligencia artificial siempre esta a un clic de distancia.",
+      "narration": "Este es el boton de chat flotante, siempre a la mano en la esquina de tu pantalla. Un solo clic y abres a Claude Opus, tu asistente personal, listo para lo que necesites. Sin abrir otra ventana, sin cambiar de pagina: la inteligencia artificial siempre esta a un clic de distancia.",
       "uiState": "estudio"
     },
     {
@@ -616,7 +616,7 @@
       "label": "Encabezado del Chat — Tu Asistente en Vivo",
       "startTime": 914.02,
       "endTime": 930.02,
-      "narration": "En el encabezado del chat veras claramente con quien estas hablando: Claude, tu asistente personal dentro del tracker. Este espacio esta diseniado para que te sientas acompaniado en cada tarea. Aqui empieza cada conversacion que va a ahorrarte horas de trabajo. Todo lo que necesites, sin salir del tracker.",
+      "narration": "En el encabezado del chat ves con claridad con quien hablas: Claude, tu asistente dentro del tracker. Este es tu espacio para unir creatividad y productividad en un solo lugar. Aqui empieza cada conversacion que va a multiplicar tu eficiencia y ahorrarte horas de trabajo.",
       "uiState": "estudio"
     },
     {
@@ -626,7 +626,7 @@
       "label": "Area de Conversacion — Historial Completo",
       "startTime": 930.02,
       "endTime": 946.02,
-      "narration": "Esta es el area de conversacion, donde ves todo el dialogo con Claude en tiempo real. Cada pregunta que haces y cada respuesta queda a la vista, ordenada y facil de seguir. Puedes pedir ideas, resolver dudas o generar contenido, y todo el hilo se mantiene aqui para que nunca pierdas el contexto de lo que estas creando.",
+      "narration": "En esta area fluye toda tu conversacion con Claude en tiempo real. Cada pregunta que haces y cada respuesta que recibes queda a la vista, ordenada y facil de seguir. Aqui construyes ideas, resuelves problemas y generas contenido de clase mundial, sin perder nunca el hilo.",
       "uiState": "estudio"
     },
     {
@@ -636,7 +636,7 @@
       "label": "Quick Actions — Botones Rapidos",
       "startTime": 946.02,
       "endTime": 962.02,
-      "narration": "Aqui estan los Quick Actions, botones rapidos con las acciones mas usadas listas para un solo toque. En vez de escribir todo desde cero, presionas un boton y Claude entiende al instante lo que quieres. Es productividad pura: menos escritura, mas resultados. Ahorra tiempo en cada tarea repetitiva y enfocate en lo que de verdad importa.",
+      "narration": "Aqui estan los accesos rapidos: las acciones mas usadas, listas para un solo toque. En vez de escribir todo desde cero, presionas un boton y Claude entiende al instante lo que quieres. Es productividad pura: menos escritura, mas resultados, y cero friccion en cada tarea.",
       "uiState": "estudio"
     },
     {
@@ -646,7 +646,7 @@
       "label": "Campo de Texto — Escribe lo que Necesitas",
       "startTime": 962.02,
       "endTime": 978.02,
-      "narration": "Este es el campo de texto donde escribes lo que necesitas, con tus propias palabras. No hay comandos complicados ni sintaxis que memorizar: solo pide en lenguaje natural, como si hablaras con un experto. Desde crear un reporte hasta generar una imagen o un sitio web completo, todo empieza aqui, escribiendo una sola frase clara.",
+      "narration": "Este es tu campo de texto, donde escribes en lenguaje natural, como si hablaras con un experto. No hay comandos complicados que memorizar: solo dile lo que quieres. Crear una imagen, un video, un reporte o codigo completo. Claude lo entiende y lo hace por ti.",
       "uiState": "estudio"
     },
     {
@@ -656,7 +656,7 @@
       "label": "Control por Voz — Manos Libres",
       "startTime": 978.02,
       "endTime": 994.02,
-      "narration": "Y si prefieres no escribir, aqui esta el boton de microfono para control por voz. Presiona, habla con naturalidad y Claude convierte tu voz en accion al instante. Ideal cuando tienes las manos ocupadas o quieres avanzar mas rapido. Es la forma mas natural de trabajar: solo habla, y el tracker hace el resto por ti.",
+      "narration": "Y si prefieres hablar en vez de escribir, aqui esta el microfono. Presiona, habla con naturalidad y Claude convierte tu voz en accion al instante. Ideal cuando tienes las manos ocupadas o quieres avanzar mas rapido. Es la forma mas natural de trabajar: tu voz, directo a resultados.",
       "uiState": "estudio"
     },
     {
@@ -666,7 +666,7 @@
       "label": "Enviar Mensaje — El Poder Total",
       "startTime": 994.02,
       "endTime": 1010.02,
-      "narration": "Y aqui llegamos al punto final: el boton Enviar. Presionas aqui y tu pregunta se convierte en accion. Claude procesa, genera, crea, y los resultados aparecen al instante frente a ti. Ese es el poder total del Tracker de Victor IA: medir, crear, compartir, todo en un solo lugar, sin friccion. Ahora tienes el poder total en tus manos. Ahora te toca a ti. Empieza hoy.",
+      "narration": "Y aqui llegamos al punto final: el boton Enviar. Presionas y tu idea se convierte en accion inmediata. Claude procesa, genera y crea los resultados en tiempo real. Ese es el Tracker de Victor IA en su maxima expresion: medir, pensar y crear, todo en un solo lugar. Ahora te toca a ti. Empieza hoy.",
       "uiState": "estudio"
     }
   ],
