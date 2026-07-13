@@ -7274,8 +7274,11 @@ body.client-mode #main { margin-left: 0 !important; }
 
 <!-- MODAL 8: SEGUIMIENTO CAPACITACIÓN -->
 <div class="qa2-overlay" id="qa-capacitaciones" onclick="closeIfBackdrop(event,this)">
-  <div class="qa2-modal" style="max-width: 1300px; height: 90vh; display: flex; flex-direction: column; font-family: 'Space Grotesk', sans-serif;">
-    <button class="qa2-close" onclick="closePopup('capacitaciones')" aria-label="Cerrar">✕</button>
+  <div class="qa2-modal" id="capacitaciones-modal" style="max-width: 1400px; height: 90vh; display: flex; flex-direction: column; font-family: 'Space Grotesk', sans-serif; position: relative;">
+    <div style="display: flex; justify-content: flex-end; gap: 8px; position: absolute; top: 16px; right: 16px; z-index: 10;">
+      <button id="btn-minimize-capacitaciones" onclick="minimizeCapacitaciones()" style="background: rgba(255,170,23,0.2); border: none; padding: 6px 10px; border-radius: 4px; color: var(--bone); cursor: pointer; font-size: 14px; font-family: inherit; transition: background 0.2s;" title="Minimizar">−</button>
+      <button class="qa2-close" onclick="closePopup('capacitaciones')" aria-label="Cerrar" style="position: static;">✕</button>
+    </div>
     <div class="qa2-header">
       <div class="qa2-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 3 20 7.5 20 16.5 12 21 4 16.5 4 7.5 12 3"/><polyline points="12 12.5 20 9 12 5.5 4 9 12 12.5"/><line x1="12" y1="21" x2="12" y2="12.5"/></svg>
@@ -7390,7 +7393,7 @@ body.client-mode #main { margin-left: 0 !important; }
 
       let html = `
         <table style="width: 100%; border-collapse: collapse; color: var(--bone); font-size: 12px;">
-          <thead style="background: rgba(255,170,23,0.08); border-bottom: 1px solid rgba(255,170,23,0.2);">
+          <thead style="background: rgba(255,170,23,0.08); border-bottom: 1px solid rgba(255,170,23,0.2); position: sticky; top: 0;">
             <tr>
               <th style="padding: 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Empleado</th>
               <th style="padding: 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Departamento</th>
@@ -7398,6 +7401,8 @@ body.client-mode #main { margin-left: 0 !important; }
               <th style="padding: 12px; text-align: center; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Progreso</th>
               <th style="padding: 12px; text-align: center; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Duración</th>
               <th style="padding: 12px; text-align: center; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Última Actividad</th>
+              <th style="padding: 12px; text-align: center; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">PDF Reporte</th>
+              <th style="padding: 12px; text-align: center; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Audio Llamada</th>
               <th style="padding: 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Status</th>
             </tr>
           </thead>
@@ -7424,6 +7429,22 @@ body.client-mode #main { margin-left: 0 !important; }
             </td>
             <td style="padding: 12px; text-align: center; color: var(--bone2);">${session.duration_minutes}m</td>
             <td style="padding: 12px; text-align: center; color: var(--bone2);">${lastActivity}</td>
+            <td style="padding: 12px; text-align: center;">
+              <a href="https://victor-ia-training.vercel.app/api/report?session=${session.session_id}"
+                 style="color: #FFAA17; text-decoration: none; font-weight: 500; padding: 4px 8px; display: inline-block; border-radius: 4px; background: rgba(255,170,23,0.1); transition: background 0.2s;"
+                 target="_blank"
+                 title="Descargar PDF del reporte">
+                📄 Descargar
+              </a>
+            </td>
+            <td style="padding: 12px; text-align: center;">
+              <a href="https://victor-ia-training.vercel.app/api/audio?session=${session.session_id}"
+                 style="color: #FFAA17; text-decoration: none; font-weight: 500; padding: 4px 8px; display: inline-block; border-radius: 4px; background: rgba(255,170,23,0.1); transition: background 0.2s;"
+                 target="_blank"
+                 title="Descargar audio de la llamada">
+                🔊 Descargar
+              </a>
+            </td>
             <td style="padding: 12px; text-align: left;">
               <span style="color: ${statusTextColor}; background: ${statusColor}; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 500;">● ${session.status}</span>
             </td>
@@ -7461,6 +7482,38 @@ body.client-mode #main { margin-left: 0 !important; }
   window.openPopup = function(name) {
     originalOpenPopup(name);
     document.dispatchEvent(new CustomEvent('popupOpened', { detail: name }));
+  };
+
+  // Función para minimizar/restaurar modal
+  window.minimizeCapacitaciones = function() {
+    const modal = document.getElementById('capacitaciones-modal');
+    const overlay = document.getElementById('qa-capacitaciones');
+    const btn = document.getElementById('btn-minimize-capacitaciones');
+
+    if (modal.style.display === 'none' || modal._minimized) {
+      // Restaurar
+      modal.style.display = 'flex';
+      modal.style.height = '90vh';
+      modal._minimized = false;
+      btn.textContent = '−';
+      btn.title = 'Minimizar';
+      overlay.style.pointerEvents = 'auto';
+    } else {
+      // Minimizar
+      modal.style.display = 'none';
+      modal._minimized = true;
+      btn.textContent = '+';
+      btn.title = 'Restaurar';
+      // Mostrar solo el botón de minimizar/restaurar
+      const btnContainer = btn.parentElement;
+      btnContainer.style.position = 'fixed';
+      btnContainer.style.bottom = '20px';
+      btnContainer.style.right = '20px';
+      btnContainer.style.zIndex = '9999';
+      overlay.style.pointerEvents = 'none';
+      // Permitir hover en el botón
+      btnContainer.style.pointerEvents = 'auto';
+    }
   };
 </script>
 
