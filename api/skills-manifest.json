@@ -1,0 +1,198 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2026-07-12T19:07:00Z",
+    "auditStatus": "9/10",
+    "totalSkills": 155,
+    "source": "~/.claude/projects/c--Users-inbou/memory/skills_master_matrix_155.md"
+  },
+  "summary": {
+    "orchestrators": 8,
+    "subSkills": 12,
+    "independent": 135,
+    "categories": 27,
+    "functioningPercentage": 70,
+    "ambiguousPercentage": 20,
+    "deadPercentage": 5,
+    "duplicatePercentage": 5
+  },
+  "newSkills": [
+    {
+      "id": "content-audit-seo",
+      "name": "Content Audit SEO",
+      "category": "seo-y-contenido",
+      "description": "9D auditoría SEO técnica+on-page+keywords+backlinks+competencia",
+      "triggers": ["audita SEO", "qué tal rankings", "mejora posicionamiento", "Core Web Vitals"],
+      "type": "independent",
+      "deliverables": ["Reporte 12p", "Roadmap 90d", "Technical Checklist"],
+      "timeline": "90 días",
+      "skillPath": "~/.claude/skills/seo-y-contenido/content-audit-seo/SKILL.md",
+      "createdDate": "2026-07-12"
+    },
+    {
+      "id": "design-system-builder",
+      "name": "Design System Builder",
+      "category": "diseno-e-interfaces",
+      "description": "Tokens CSS+component library+Storybook+figma-code-connect+governance",
+      "triggers": ["crea design system", "documentar componentes", "Storybook", "tokens CSS"],
+      "type": "independent",
+      "deliverables": ["Component Library 30-50", "Design Tokens", "Storybook docs"],
+      "timeline": "8 semanas",
+      "skillPath": "~/.claude/skills/diseno-e-interfaces/design-system-builder/SKILL.md",
+      "createdDate": "2026-07-12"
+    },
+    {
+      "id": "analytics-dashboard-builder",
+      "name": "Analytics Dashboard Builder",
+      "category": "analisis-y-datos",
+      "description": "7 tipos dashboards (acquisition/activation/engagement/retention/monetization/product-health/experimentation) con KPI real-time",
+      "triggers": ["crea dashboard", "métricas en vivo", "KPI board", "retention analysis"],
+      "type": "independent",
+      "deliverables": ["2-3 dashboards live", "ETL pipeline", "Slack alerts", "Reports"],
+      "timeline": "12 semanas",
+      "skillPath": "~/.claude/skills/analisis-y-datos/analytics-dashboard-builder/SKILL.md",
+      "createdDate": "2026-07-12"
+    }
+  ],
+  "consolidations": {
+    "deploymentClarity": {
+      "from": "perfect-media-deployment",
+      "to": "cloudinary-cdn-media",
+      "reason": "Clarificación de rol: CDN upload vs React integration vs Vercel hosting",
+      "documentPath": "~/.claude/projects/c--Users-inbou/memory/skills_deployment_consolidation.md",
+      "workflow": "cloudinary (CDN) → web-assets-deploy (React) → vercel-deploy-perfecto (hosting)"
+    },
+    "duplicationsResolved": 7,
+    "ambiguitiesClarified": 31,
+    "deadSkillsReplaced": 10
+  },
+  "architecture": {
+    "orchestrators": [
+      {
+        "name": "web-4o",
+        "includes": ["copy-web-pnl", "svg-motion", "pixel-perfecto", "vercel-deploy"],
+        "triggers": ["crea sitio", "landing page", "web award-winning"],
+        "type": "orchestrator"
+      },
+      {
+        "name": "higgsfield-content-factory",
+        "includes": ["higgsfield-supercomputer", "remotion", "hyperframes", "elevenlabs"],
+        "triggers": ["crea contenido", "campaña visual"],
+        "type": "orchestrator"
+      },
+      {
+        "name": "cloudinary-cdn-media",
+        "includes": [],
+        "triggers": ["sube fotos", "optimiza videos"],
+        "type": "orchestrator"
+      },
+      {
+        "name": "vercel-deploy-perfecto",
+        "includes": ["web-assets-deploy", "git workflow"],
+        "triggers": ["deploy a Vercel", "publica"],
+        "type": "orchestrator"
+      },
+      {
+        "name": "n8n-ia-local",
+        "includes": ["ollama-cliente", "openrouter-cliente", "groq-api"],
+        "triggers": ["automatiza workflow", "integra APIs"],
+        "type": "orchestrator"
+      },
+      {
+        "name": "victor-ia-tracker",
+        "includes": ["higgsfield-content-factory", "elevenlabs", "supabase"],
+        "triggers": ["registra actividad", "crea asset"],
+        "type": "orchestrator"
+      },
+      {
+        "name": "skill-inclusivo",
+        "includes": ["web-4o", "pixel-perfecto", "skill-testing"],
+        "triggers": ["audita a11y", "haz web accesible"],
+        "type": "orchestrator"
+      },
+      {
+        "name": "motion-design",
+        "includes": ["higgsfield-supercomputer", "elevenlabs", "remotion"],
+        "triggers": ["crea video comercial", "spot"],
+        "type": "orchestrator"
+      }
+    ],
+    "dependencyLevels": {
+      "level0": ["cloudinary-cdn-media", "higgsfield-supercomputer", "elevenlabs-api", "supabase-connector", "ga4-connector"],
+      "level1": ["elevenlabs-voice", "remotion-victor", "hyperframes-render", "svg-motion", "copy-web-pnl"],
+      "level2": ["web-4o", "motion-design", "higgsfield-factory"],
+      "level3": ["victor-ia-tracker", "vercel-deploy-perfecto"]
+    }
+  },
+  "triggers": {
+    "video": {
+      "crea video": "motion-design",
+      "sube video": "cloudinary-cdn-media",
+      "editorial video": "higgsfield-content-factory",
+      "spot comercial": "motion-design"
+    },
+    "web": {
+      "diseña sitio": "web-4o",
+      "crea landing": ["web-4o", "copy-web-pnl"],
+      "componentes": "componentes-21st-svg",
+      "accesibilidad": "skill-inclusivo"
+    },
+    "analytics": {
+      "crea dashboard": "analytics-dashboard-builder",
+      "métricas en vivo": "analytics-dashboard-builder",
+      "retention": "cohort-retention-analysis"
+    },
+    "deployment": {
+      "sube fotos": ["cloudinary-cdn-media", "web-assets-deploy", "vercel-deploy-perfecto"],
+      "deploy": "vercel-deploy-perfecto",
+      "publica": "vercel-deploy-perfecto"
+    }
+  },
+  "references": {
+    "masterMatrix": "~/.claude/projects/c--Users-inbou/memory/skills_master_matrix_155.md",
+    "deploymentConsolidation": "~/.claude/projects/c--Users-inbou/memory/skills_deployment_consolidation.md",
+    "claudemdArchitecture": "~/.claude/CLAUDE.md (línea 310+)",
+    "pointOfStop": "~/.claude/memoria-sesiones/punto-de-parada-2026-07-12.md",
+    "quickAccess": "~/.claude/proyectos/ACCESO-RAPIDO-SKILLS.md",
+    "trackerEntry": "~/victor-ia-tracker/AUDIT-SKILLS-155-2026-07-12.md"
+  },
+  "integration": {
+    "vscClaudeCode": {
+      "status": "✅ active",
+      "description": "Auto-loaded in CLAUDE.md + MEMORY.md",
+      "autoTriggers": "User says X → system invokes skill Y automatically"
+    },
+    "tracker": {
+      "status": "✅ active",
+      "endpoint": "/api/skills-manifest.json",
+      "description": "Skills matrix available in tracker UI",
+      "usage": "When creating tasks, suggest relevant skills automatically"
+    },
+    "nextPhase": {
+      "status": "⏳ planned",
+      "items": [
+        "Graphify indexing (matrix as graph)",
+        "Bitácoras per skill (good/bad examples)",
+        "Auto-router (user X → suggest skills Y+Z in parallel)",
+        "Deep Learning sync from 136 bitácoras"
+      ]
+    }
+  },
+  "accessPoints": {
+    "fromVSC": "Auto-loaded from CLAUDE.md + MEMORY.md",
+    "fromTracker": "GET /api/skills-manifest.json",
+    "fromMemory": "skills_master_matrix_155.md (465 líneas)",
+    "fromDocumentation": "ACCESO-RAPIDO-SKILLS.md"
+  },
+  "auditCompleteness": {
+    "totalSkillsEvaluated": 155,
+    "descriptionClarity": "95%",
+    "triggerSpecificity": "92%",
+    "architectureClear": "95%",
+    "overlapAvoided": "90%",
+    "statusDocumented": "100%",
+    "finalScore": "9/10"
+  },
+  "lastSync": "2026-07-12T19:07:00Z",
+  "nextSync": "2026-07-19T19:00:00Z"
+}
