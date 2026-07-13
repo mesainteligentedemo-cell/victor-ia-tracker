@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard VTC Capacitaciones — Tracker</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0e27;
+      color: #e4e4e7;
+      padding: 20px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(184, 154, 106, 0.2);
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #b89a6a;
+      letter-spacing: 0.05em;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: rgba(184, 154, 106, 0.1);
+      border: 1px solid rgba(184, 154, 106, 0.3);
+      padding: 15px 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #b89a6a;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #9ca3af;
+    }
+
+    .table-container {
+      background: rgba(20, 20, 35, 0.8);
+      border: 1px solid rgba(184, 154, 106, 0.2);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: rgba(184, 154, 106, 0.15);
+      border-bottom: 2px solid rgba(184, 154, 106, 0.3);
+    }
+
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #b89a6a;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(184, 154, 106, 0.1);
+    }
+
+    tbody tr:hover {
+      background: rgba(184, 154, 106, 0.05);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-active {
+      background: rgba(34, 197, 94, 0.2);
+      color: #86efac;
+      border: 1px solid rgba(34, 197, 94, 0.5);
+    }
+
+    .badge-idle {
+      background: rgba(168, 85, 247, 0.2);
+      color: #d8b4fe;
+      border: 1px solid rgba(168, 85, 247, 0.5);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(184, 154, 106, 0.2);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 4px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #b89a6a, #c9aa75);
+      transition: width 0.3s ease;
+    }
+
+    .module-name {
+      font-size: 13px;
+      color: #e4e4e7;
+      margin-bottom: 4px;
+    }
+
+    .progress-text {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    .status-dot.active {
+      background: #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.idle {
+      background: #a855f7;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .refresh-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #b89a6a;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .empty-state {
+      padding: 40px 20px;
+      text-align: center;
+      color: #6b7280;
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>🎓 VTC Capacitaciones Dashboard</h1>
+        <p style="font-size: 12px; color: #9ca3af; margin-top: 4px;">Monitoreo en tiempo real</p>
+      </div>
+      <div class="refresh-indicator">
+        <span class="dot"></span>
+        <span>Actualizando cada 5 segundos</span>
+      </div>
+    </header>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value" id="total-active">0</div>
+        <div class="stat-label">Usuarios activos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="modulo-f-count">0</div>
+        <div class="stat-label">En Módulo F</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="modulo-0-count">0</div>
+        <div class="stat-label">En Módulo 0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="avg-progress">0%</div>
+        <div class="stat-label">Progreso promedio</div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Empleado</th>
+            <th>Departamento</th>
+            <th>Módulo Actual</th>
+            <th>Progreso</th>
+            <th>Tiempo en sesión</th>
+            <th>Última actividad</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="sessions-table">
+          <tr>
+            <td colspan="7" style="text-align: center; color: #6b7280; padding: 40px;">
+              Cargando sesiones...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer">
+      <p>Dashboard VTC Capacitaciones • Datos en vivo desde tracker.victor-ia.xyz • Actualización: <span id="last-update">—</span></p>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://victor-ia-training.vercel.app/api/sessions/active';
+    const REFRESH_INTERVAL = 5000; // 5 segundos
+
+    async function fetchSessions() {
+      try {
+        const response = await fetch(API_URL, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        renderSessions(data.active_sessions || []);
+        updateStats(data.active_sessions || []);
+        updateLastUpdate();
+      } catch (error) {
+        console.error('Error fetching sessions:', error);
+        // Mantener UI actualizado aunque haya error
+      }
+    }
+
+    function formatTime(isoString) {
+      const date = new Date(isoString);
+      return date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    function getModuleDisplay(moduleId) {
+      const map = {
+        'modulo-f': 'Fundamentos',
+        'modulo-0': 'Psicología',
+        'modulo-1': 'Calificación',
+        'modulo-2': 'OPC',
+        'modulo-3': 'Rapport',
+        'modulo-4': 'Tour',
+        'modulo-5': 'Presentación',
+        'modulo-6': 'Cierre',
+        'modulo-7': 'Objeciones',
+        'modulo-8': 'TOC',
+        'modulo-9': 'Manager Close',
+        'modulo-10': 'PNL Avanzado',
+        'modulo-11': 'Nacionalidades',
+        'modulo-12': 'Ética/Legal',
+        'iniciando': 'Iniciando...'
+      };
+      return map[moduleId] || moduleId;
+    }
+
+    function getStatusBadge(session) {
+      const lastActivityTime = new Date(session.last_activity);
+      const nowTime = new Date();
+      const diffSeconds = (nowTime - lastActivityTime) / 1000;
+
+      // Si la última actividad fue hace menos de 30 segundos, está activo
+      const isActive = diffSeconds < 30;
+
+      if (isActive) {
+        return '<span class="badge badge-active"><span class="status-dot active"></span>Activo</span>';
+      } else {
+        return '<span class="badge badge-idle"><span class="status-dot idle"></span>Inactivo</span>';
+      }
+    }
+
+    function renderSessions(sessions) {
+      const tbody = document.getElementById('sessions-table');
+
+      if (!sessions || sessions.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-state-icon">🎓</div>
+                <p>No hay sesiones activas en este momento</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = sessions.map(session => {
+        const moduleDisplay = getModuleDisplay(session.current_module);
+        const progress = session.progress_percent || 0;
+        const statusBadge = getStatusBadge(session);
+
+        return `
+          <tr>
+            <td><strong>${session.user_name || 'Unknown'}</strong></td>
+            <td>${session.department}</td>
+            <td>
+              <div class="module-name">${moduleDisplay}</div>
+            </td>
+            <td style="min-width: 150px;">
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progress}%"></div>
+              </div>
+              <div class="progress-text">${progress}%</div>
+            </td>
+            <td>${session.duration_minutes} min</td>
+            <td>${formatTime(session.last_activity)}</td>
+            <td>${statusBadge}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateStats(sessions) {
+      if (!sessions || sessions.length === 0) {
+        document.getElementById('total-active').textContent = '0';
+        document.getElementById('modulo-f-count').textContent = '0';
+        document.getElementById('modulo-0-count').textContent = '0';
+        document.getElementById('avg-progress').textContent = '0%';
+        return;
+      }
+
+      // Total activos
+      document.getElementById('total-active').textContent = sessions.length;
+
+      // En Módulo F
+      const fCount = sessions.filter(s => s.current_module === 'modulo-f').length;
+      document.getElementById('modulo-f-count').textContent = fCount;
+
+      // En Módulo 0
+      const zeroCount = sessions.filter(s => s.current_module === 'modulo-0').length;
+      document.getElementById('modulo-0-count').textContent = zeroCount;
+
+      // Progreso promedio
+      const avgProgress = Math.round(
+        sessions.reduce((sum, s) => sum + (s.progress_percent || 0), 0) / sessions.length
+      );
+      document.getElementById('avg-progress').textContent = avgProgress + '%';
+    }
+
+    function updateLastUpdate() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('es-MX');
+      document.getElementById('last-update').textContent = timeStr;
+    }
+
+    // Cargar sesiones al iniciar
+    fetchSessions();
+
+    // Actualizar cada 5 segundos
+    setInterval(fetchSessions, REFRESH_INTERVAL);
+  </script>
+</body>
+</html>
