@@ -6627,7 +6627,7 @@ body.client-mode #main { margin-left: 0 !important; }
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
     Biblioteca
   </button>
-  <button class="via-qa-btn" id="btn-capacitaciones" title="Seguimiento de Capacitaciones" onclick="window.open('capacitaciones-dashboard.html','_blank')">
+  <button class="via-qa-btn" onclick="openPopup('capacitaciones')" title="Seguimiento de Capacitaciones">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 3 20 7.5 20 16.5 12 21 4 16.5 4 7.5 12 3"/><polyline points="12 12.5 20 9 12 5.5 4 9 12 12.5"/><line x1="12" y1="21 12" x2="12" y2="12.5"/></svg>
     Seguimiento Capacitación
   </button>
@@ -7271,6 +7271,177 @@ body.client-mode #main { margin-left: 0 !important; }
     </div>
   </div>
 </div>
+
+<!-- MODAL 8: SEGUIMIENTO CAPACITACIÓN -->
+<div class="qa2-overlay" id="qa-capacitaciones" onclick="closeIfBackdrop(event,this)">
+  <div class="qa2-modal" style="max-width: 1200px; height: 85vh; display: flex; flex-direction: column;">
+    <button class="qa2-close" onclick="closePopup('capacitaciones')" aria-label="Cerrar">✕</button>
+    <div class="qa2-header">
+      <div class="qa2-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFAA17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 3 20 7.5 20 16.5 12 21 4 16.5 4 7.5 12 3"/><polyline points="12 12.5 20 9 12 5.5 4 9 12 12.5"/><line x1="12" y1="21" x2="12" y2="12.5"/></svg>
+      </div>
+      <div>
+        <div class="qa2-title">Seguimiento Capacitación VTC</div>
+        <div class="qa2-subtitle">Monitor en tiempo real de sesiones • Actualización cada 5 segundos</div>
+      </div>
+    </div>
+
+    <div id="capacitaciones-container" style="flex: 1; overflow: auto; background: #0a0e27; border-radius: 8px; margin: 16px 0;">
+      <div style="padding: 40px; text-align: center; color: #6b7280;">
+        <div style="font-size: 24px; margin-bottom: 12px;">🎓</div>
+        <p>Cargando datos de sesiones activas...</p>
+      </div>
+    </div>
+
+    <div class="qa2-footer">
+      <button class="qa2-cancel-btn" onclick="closePopup('capacitaciones')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Cargar dashboard de capacitaciones en el modal
+  document.addEventListener('DOMContentLoaded', () => {
+    const loadCapacitacionesData = async () => {
+      try {
+        const response = await fetch('https://victor-ia-training.vercel.app/api/sessions/active');
+        const data = await response.json();
+        renderCapacitacionesDashboard(data.active_sessions || []);
+      } catch (error) {
+        console.error('Error loading capacitaciones data:', error);
+      }
+    };
+
+    const renderCapacitacionesDashboard = (sessions) => {
+      const container = document.getElementById('capacitaciones-container');
+
+      if (!sessions || sessions.length === 0) {
+        container.innerHTML = `
+          <div style="padding: 40px; text-align: center; color: #6b7280;">
+            <div style="font-size: 48px; margin-bottom: 12px;">🎓</div>
+            <p>No hay sesiones activas en este momento</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Stats
+      const fCount = sessions.filter(s => s.current_module === 'modulo-f').length;
+      const zeroCount = sessions.filter(s => s.current_module === 'modulo-0').length;
+      const avgProgress = Math.round(sessions.reduce((sum, s) => sum + (s.progress_percent || 0), 0) / sessions.length);
+
+      // Table
+      let html = `
+        <div style="padding: 20px;">
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px;">
+            <div style="background: rgba(184,154,106,0.1); border: 1px solid rgba(184,154,106,0.3); padding: 12px; border-radius: 6px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #b89a6a;">${sessions.length}</div>
+              <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">Activos</div>
+            </div>
+            <div style="background: rgba(184,154,106,0.1); border: 1px solid rgba(184,154,106,0.3); padding: 12px; border-radius: 6px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #b89a6a;">${fCount}</div>
+              <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">En Módulo F</div>
+            </div>
+            <div style="background: rgba(184,154,106,0.1); border: 1px solid rgba(184,154,106,0.3); padding: 12px; border-radius: 6px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #b89a6a;">${zeroCount}</div>
+              <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">En Módulo 0</div>
+            </div>
+            <div style="background: rgba(184,154,106,0.1); border: 1px solid rgba(184,154,106,0.3); padding: 12px; border-radius: 6px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #b89a6a;">${avgProgress}%</div>
+              <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">Promedio</div>
+            </div>
+          </div>
+
+          <table style="width: 100%; border-collapse: collapse; color: #e4e4e7; font-size: 13px;">
+            <thead style="background: rgba(184,154,106,0.15); border-bottom: 2px solid rgba(184,154,106,0.3);">
+              <tr>
+                <th style="padding: 10px; text-align: left; font-weight: 600;">Empleado</th>
+                <th style="padding: 10px; text-align: left; font-weight: 600;">Módulo</th>
+                <th style="padding: 10px; text-align: center; font-weight: 600;">Progreso</th>
+                <th style="padding: 10px; text-align: center; font-weight: 600;">Tiempo (min)</th>
+                <th style="padding: 10px; text-align: left; font-weight: 600;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      sessions.forEach(session => {
+        const lastActivityTime = new Date(session.last_activity);
+        const nowTime = new Date();
+        const diffSeconds = (nowTime - lastActivityTime) / 1000;
+        const isActive = diffSeconds < 30;
+        const statusBadge = isActive ?
+          '<span style="color: #86efac; background: rgba(34,197,94,0.2); padding: 4px 8px; border-radius: 4px; font-size: 11px;">● Activo</span>' :
+          '<span style="color: #d8b4fe; background: rgba(168,85,247,0.2); padding: 4px 8px; border-radius: 4px; font-size: 11px;">● Inactivo</span>';
+
+        const modules = {
+          'modulo-f': 'Fundamentos',
+          'modulo-0': 'Psicología',
+          'modulo-1': 'Calificación',
+          'modulo-2': 'OPC',
+          'modulo-3': 'Rapport',
+          'modulo-4': 'Tour',
+          'modulo-5': 'Presentación',
+          'modulo-6': 'Cierre',
+          'modulo-7': 'Objeciones',
+          'modulo-8': 'TOC',
+          'modulo-9': 'Manager Close',
+          'modulo-10': 'PNL Avanzado',
+          'modulo-11': 'Nacionalidades',
+          'modulo-12': 'Ética/Legal'
+        };
+
+        const moduleDisplay = modules[session.current_module] || session.current_module;
+        const progress = session.progress_percent || 0;
+
+        html += `
+          <tr style="border-bottom: 1px solid rgba(184,154,106,0.1);">
+            <td style="padding: 12px; text-align: left;"><strong>${session.user_name}</strong></td>
+            <td style="padding: 12px; text-align: left;">${moduleDisplay}</td>
+            <td style="padding: 12px; text-align: center;">
+              <div style="background: rgba(184,154,106,0.2); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 4px;">
+                <div style="background: linear-gradient(90deg, #b89a6a, #c9aa75); height: 100%; width: ${progress}%;"></div>
+              </div>
+              ${progress}%
+            </td>
+            <td style="padding: 12px; text-align: center;">${session.duration_minutes}</td>
+            <td style="padding: 12px; text-align: left;">${statusBadge}</td>
+          </tr>
+        `;
+      });
+
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    };
+
+    // Cargar data al abrir
+    document.addEventListener('popupOpened', (e) => {
+      if (e.detail === 'capacitaciones') {
+        loadCapacitacionesData();
+        // Recargar cada 5 segundos mientras está abierto
+        const interval = setInterval(() => {
+          if (!document.getElementById('qa-capacitaciones').classList.contains('open')) {
+            clearInterval(interval);
+          } else {
+            loadCapacitacionesData();
+          }
+        }, 5000);
+      }
+    });
+  });
+
+  // Disparar evento cuando se abre popup
+  const originalOpenPopup = window.openPopup;
+  window.openPopup = function(name) {
+    originalOpenPopup(name);
+    document.dispatchEvent(new CustomEvent('popupOpened', { detail: name }));
+  };
+</script>
 
 
 <!-- MAIN -->
