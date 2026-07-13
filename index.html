@@ -7494,13 +7494,18 @@ body.client-mode #main { margin-left: 0 !important; }
       // Restaurar
       modal.style.display = 'flex';
       modal.style.height = '90vh';
+      overlay.style.display = 'flex';
+      overlay.style.opacity = '1';
+      overlay.style.pointerEvents = 'auto';
       modal._minimized = false;
       btn.textContent = '−';
       btn.title = 'Minimizar';
-      overlay.style.pointerEvents = 'auto';
     } else {
       // Minimizar
       modal.style.display = 'none';
+      overlay.style.display = 'none';
+      overlay.style.opacity = '0';
+      overlay.style.pointerEvents = 'none';
       modal._minimized = true;
       btn.textContent = '+';
       btn.title = 'Restaurar';
@@ -7510,8 +7515,7 @@ body.client-mode #main { margin-left: 0 !important; }
       btnContainer.style.bottom = '20px';
       btnContainer.style.right = '20px';
       btnContainer.style.zIndex = '9999';
-      overlay.style.pointerEvents = 'none';
-      // Permitir hover en el botón
+      btnContainer.style.display = 'flex';
       btnContainer.style.pointerEvents = 'auto';
     }
   };
