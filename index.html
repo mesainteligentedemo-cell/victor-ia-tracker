@@ -7290,32 +7290,32 @@ body.client-mode #main { margin-left: 0 !important; }
     </div>
 
     <!-- FILTROS -->
-    <div style="padding: 16px; background: rgba(255,170,23,0.05); border-bottom: 1px solid rgba(255,170,23,0.2); display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; font-family: 'Space Grotesk', sans-serif;">
-      <div style="display: flex; flex-direction: column; gap: 4px;">
-        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Empleado</label>
-        <input type="text" id="filter-empleado" placeholder="Buscar nombre..." style="padding: 8px; background: rgba(248,247,245,0.08); border: 1px solid rgba(255,170,23,0.15); border-radius: 4px; color: var(--bone); font-family: inherit; font-size: 12px;">
+    <div style="padding: 20px 24px; background: linear-gradient(180deg, rgba(255,170,23,0.08) 0%, rgba(255,170,23,0.03) 100%); border-bottom: 1px solid rgba(255,170,23,0.25); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; font-family: 'Space Grotesk', sans-serif;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #FFAA17; text-shadow: 0 0 1px rgba(255,170,23,0.3);">Empleado</label>
+        <input type="text" id="filter-empleado" placeholder="Buscar nombre…" style="padding: 10px 12px; background: rgba(248,247,245,0.06); border: 1px solid rgba(255,170,23,0.2); border-radius: 5px; color: var(--bone); font-family: inherit; font-size: 13px; line-height: 1.4; letter-spacing: 0.3px; transition: all 0.2s; outline: none;">
       </div>
-      <div style="display: flex; flex-direction: column; gap: 4px;">
-        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Departamento</label>
-        <select id="filter-depto" style="padding: 8px; background: rgba(248,247,245,0.08); border: 1px solid rgba(255,170,23,0.15); border-radius: 4px; color: var(--bone); font-family: inherit; font-size: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #FFAA17; text-shadow: 0 0 1px rgba(255,170,23,0.3);">Departamento</label>
+        <select id="filter-depto" style="padding: 10px 12px; background: rgba(248,247,245,0.06); border: 1px solid rgba(255,170,23,0.2); border-radius: 5px; color: var(--bone); font-family: inherit; font-size: 13px; line-height: 1.4; letter-spacing: 0.3px; cursor: pointer; transition: all 0.2s; outline: none;">
           <option value="">Todos</option>
           <option value="Dirección">Dirección</option>
           <option value="Ventas">Ventas</option>
           <option value="Gerencia">Gerencia</option>
         </select>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 4px;">
-        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Módulo</label>
-        <select id="filter-modulo" style="padding: 8px; background: rgba(248,247,245,0.08); border: 1px solid rgba(255,170,23,0.15); border-radius: 4px; color: var(--bone); font-family: inherit; font-size: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #FFAA17; text-shadow: 0 0 1px rgba(255,170,23,0.3);">Módulo</label>
+        <select id="filter-modulo" style="padding: 10px 12px; background: rgba(248,247,245,0.06); border: 1px solid rgba(255,170,23,0.2); border-radius: 5px; color: var(--bone); font-family: inherit; font-size: 13px; line-height: 1.4; letter-spacing: 0.3px; cursor: pointer; transition: all 0.2s; outline: none;">
           <option value="">Todos</option>
           <option value="modulo-f">Fundamentos (F)</option>
           <option value="modulo-0">Psicología (0)</option>
           <option value="modulo-1">Calificación (1)</option>
         </select>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 4px;">
-        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Últimos</label>
-        <select id="filter-dias" style="padding: 8px; background: rgba(248,247,245,0.08); border: 1px solid rgba(255,170,23,0.15); border-radius: 4px; color: var(--bone); font-family: inherit; font-size: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #FFAA17; text-shadow: 0 0 1px rgba(255,170,23,0.3);">Últimos</label>
+        <select id="filter-dias" style="padding: 10px 12px; background: rgba(248,247,245,0.06); border: 1px solid rgba(255,170,23,0.2); border-radius: 5px; color: var(--bone); font-family: inherit; font-size: 13px; line-height: 1.4; letter-spacing: 0.3px; cursor: pointer; transition: all 0.2s; outline: none;">
           <option value="7">7 días</option>
           <option value="30" selected>30 días</option>
           <option value="90">90 días</option>
