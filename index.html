@@ -7274,7 +7274,7 @@ body.client-mode #main { margin-left: 0 !important; }
 
 <!-- MODAL 8: SEGUIMIENTO CAPACITACIÓN -->
 <div class="qa2-overlay" id="qa-capacitaciones" onclick="closeIfBackdrop(event,this)">
-  <div class="qa2-modal" style="max-width: 1200px; height: 85vh; display: flex; flex-direction: column;">
+  <div class="qa2-modal" style="max-width: 1300px; height: 90vh; display: flex; flex-direction: column; font-family: 'Space Grotesk', sans-serif;">
     <button class="qa2-close" onclick="closePopup('capacitaciones')" aria-label="Cerrar">✕</button>
     <div class="qa2-header">
       <div class="qa2-icon">
@@ -7282,14 +7282,50 @@ body.client-mode #main { margin-left: 0 !important; }
       </div>
       <div>
         <div class="qa2-title">Seguimiento Capacitación VTC</div>
-        <div class="qa2-subtitle">Monitor en tiempo real de sesiones • Actualización cada 5 segundos</div>
+        <div class="qa2-subtitle">Historial completo de sesiones y interacciones • Actualización automática</div>
       </div>
     </div>
 
-    <div id="capacitaciones-container" style="flex: 1; overflow: auto; background: #0a0e27; border-radius: 8px; margin: 16px 0;">
-      <div style="padding: 40px; text-align: center; color: #6b7280;">
+    <!-- FILTROS -->
+    <div style="padding: 16px; background: rgba(255,170,23,0.05); border-bottom: 1px solid rgba(255,170,23,0.2); display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; font-family: 'Space Grotesk', sans-serif;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Empleado</label>
+        <input type="text" id="filter-empleado" placeholder="Buscar nombre..." style="padding: 8px; background: rgba(248,247,245,0.08); border: 1px solid rgba(255,170,23,0.15); border-radius: 4px; color: var(--bone); font-family: inherit; font-size: 12px;">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Departamento</label>
+        <select id="filter-depto" style="padding: 8px; background: rgba(248,247,245,0.08); border: 1px solid rgba(255,170,23,0.15); border-radius: 4px; color: var(--bone); font-family: inherit; font-size: 12px;">
+          <option value="">Todos</option>
+          <option value="Dirección">Dirección</option>
+          <option value="Ventas">Ventas</option>
+          <option value="Gerencia">Gerencia</option>
+        </select>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Módulo</label>
+        <select id="filter-modulo" style="padding: 8px; background: rgba(248,247,245,0.08); border: 1px solid rgba(255,170,23,0.15); border-radius: 4px; color: var(--bone); font-family: inherit; font-size: 12px;">
+          <option value="">Todos</option>
+          <option value="modulo-f">Fundamentos (F)</option>
+          <option value="modulo-0">Psicología (0)</option>
+          <option value="modulo-1">Calificación (1)</option>
+        </select>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Últimos</label>
+        <select id="filter-dias" style="padding: 8px; background: rgba(248,247,245,0.08); border: 1px solid rgba(255,170,23,0.15); border-radius: 4px; color: var(--bone); font-family: inherit; font-size: 12px;">
+          <option value="7">7 días</option>
+          <option value="30" selected>30 días</option>
+          <option value="90">90 días</option>
+          <option value="365">1 año</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- TABLA DE HISTORIAL -->
+    <div id="capacitaciones-container" style="flex: 1; overflow: auto; padding: 16px; font-family: 'Space Grotesk', sans-serif;">
+      <div style="padding: 40px; text-align: center; color: var(--bone2);">
         <div style="font-size: 24px; margin-bottom: 12px;">🎓</div>
-        <p>Cargando datos de sesiones activas...</p>
+        <p>Cargando historial de sesiones...</p>
       </div>
     </div>
 
@@ -7300,137 +7336,122 @@ body.client-mode #main { margin-left: 0 !important; }
 </div>
 
 <script>
-  // Cargar dashboard de capacitaciones en el modal
   document.addEventListener('DOMContentLoaded', () => {
-    const loadCapacitacionesData = async () => {
+    const loadCapacitacionesHistory = async () => {
       try {
-        const response = await fetch('https://victor-ia-training.vercel.app/api/sessions/active');
+        const empleado = document.getElementById('filter-empleado').value;
+        const depto = document.getElementById('filter-depto').value;
+        const modulo = document.getElementById('filter-modulo').value;
+        const dias = document.getElementById('filter-dias').value;
+
+        const params = new URLSearchParams();
+        if (empleado) params.append('employee_id', empleado);
+        if (depto) params.append('department', depto);
+        if (modulo) params.append('module', modulo);
+        if (dias) params.append('days', dias);
+
+        const response = await fetch(`https://victor-ia-training.vercel.app/api/sessions/history?${params}`);
         const data = await response.json();
-        renderCapacitacionesDashboard(data.active_sessions || []);
+        renderHistoryTable(data.sessions || []);
       } catch (error) {
-        console.error('Error loading capacitaciones data:', error);
+        console.error('Error loading history:', error);
       }
     };
 
-    const renderCapacitacionesDashboard = (sessions) => {
+    const renderHistoryTable = (sessions) => {
       const container = document.getElementById('capacitaciones-container');
 
       if (!sessions || sessions.length === 0) {
         container.innerHTML = `
-          <div style="padding: 40px; text-align: center; color: #6b7280;">
+          <div style="padding: 40px; text-align: center; color: var(--bone2);">
             <div style="font-size: 48px; margin-bottom: 12px;">🎓</div>
-            <p>No hay sesiones activas en este momento</p>
+            <p>No hay sesiones que coincidan con los filtros</p>
           </div>
         `;
         return;
       }
 
-      // Stats
-      const fCount = sessions.filter(s => s.current_module === 'modulo-f').length;
-      const zeroCount = sessions.filter(s => s.current_module === 'modulo-0').length;
-      const avgProgress = Math.round(sessions.reduce((sum, s) => sum + (s.progress_percent || 0), 0) / sessions.length);
+      const modules = {
+        'modulo-f': 'Fundamentos',
+        'modulo-0': 'Psicología',
+        'modulo-1': 'Calificación',
+        'modulo-2': 'OPC',
+        'modulo-3': 'Rapport',
+        'modulo-4': 'Tour',
+        'modulo-5': 'Presentación',
+        'modulo-6': 'Cierre',
+        'modulo-7': 'Objeciones',
+        'modulo-8': 'TOC',
+        'modulo-9': 'Manager Close',
+        'modulo-10': 'PNL Avanzado',
+        'modulo-11': 'Nacionalidades',
+        'modulo-12': 'Ética/Legal'
+      };
 
-      // Table
       let html = `
-        <div style="padding: 20px;">
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px;">
-            <div style="background: rgba(184,154,106,0.1); border: 1px solid rgba(184,154,106,0.3); padding: 12px; border-radius: 6px; text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #b89a6a;">${sessions.length}</div>
-              <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">Activos</div>
-            </div>
-            <div style="background: rgba(184,154,106,0.1); border: 1px solid rgba(184,154,106,0.3); padding: 12px; border-radius: 6px; text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #b89a6a;">${fCount}</div>
-              <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">En Módulo F</div>
-            </div>
-            <div style="background: rgba(184,154,106,0.1); border: 1px solid rgba(184,154,106,0.3); padding: 12px; border-radius: 6px; text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #b89a6a;">${zeroCount}</div>
-              <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">En Módulo 0</div>
-            </div>
-            <div style="background: rgba(184,154,106,0.1); border: 1px solid rgba(184,154,106,0.3); padding: 12px; border-radius: 6px; text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #b89a6a;">${avgProgress}%</div>
-              <div style="font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em;">Promedio</div>
-            </div>
-          </div>
-
-          <table style="width: 100%; border-collapse: collapse; color: #e4e4e7; font-size: 13px;">
-            <thead style="background: rgba(184,154,106,0.15); border-bottom: 2px solid rgba(184,154,106,0.3);">
-              <tr>
-                <th style="padding: 10px; text-align: left; font-weight: 600;">Empleado</th>
-                <th style="padding: 10px; text-align: left; font-weight: 600;">Módulo</th>
-                <th style="padding: 10px; text-align: center; font-weight: 600;">Progreso</th>
-                <th style="padding: 10px; text-align: center; font-weight: 600;">Tiempo (min)</th>
-                <th style="padding: 10px; text-align: left; font-weight: 600;">Status</th>
-              </tr>
-            </thead>
-            <tbody>
+        <table style="width: 100%; border-collapse: collapse; color: var(--bone); font-size: 12px;">
+          <thead style="background: rgba(255,170,23,0.08); border-bottom: 1px solid rgba(255,170,23,0.2);">
+            <tr>
+              <th style="padding: 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Empleado</th>
+              <th style="padding: 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Departamento</th>
+              <th style="padding: 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Módulo</th>
+              <th style="padding: 12px; text-align: center; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Progreso</th>
+              <th style="padding: 12px; text-align: center; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Duración</th>
+              <th style="padding: 12px; text-align: center; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Última Actividad</th>
+              <th style="padding: 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bone2);">Status</th>
+            </tr>
+          </thead>
+          <tbody>
       `;
 
       sessions.forEach(session => {
-        const lastActivityTime = new Date(session.last_activity);
-        const nowTime = new Date();
-        const diffSeconds = (nowTime - lastActivityTime) / 1000;
-        const isActive = diffSeconds < 30;
-        const statusBadge = isActive ?
-          '<span style="color: #86efac; background: rgba(34,197,94,0.2); padding: 4px 8px; border-radius: 4px; font-size: 11px;">● Activo</span>' :
-          '<span style="color: #d8b4fe; background: rgba(168,85,247,0.2); padding: 4px 8px; border-radius: 4px; font-size: 11px;">● Inactivo</span>';
-
-        const modules = {
-          'modulo-f': 'Fundamentos',
-          'modulo-0': 'Psicología',
-          'modulo-1': 'Calificación',
-          'modulo-2': 'OPC',
-          'modulo-3': 'Rapport',
-          'modulo-4': 'Tour',
-          'modulo-5': 'Presentación',
-          'modulo-6': 'Cierre',
-          'modulo-7': 'Objeciones',
-          'modulo-8': 'TOC',
-          'modulo-9': 'Manager Close',
-          'modulo-10': 'PNL Avanzado',
-          'modulo-11': 'Nacionalidades',
-          'modulo-12': 'Ética/Legal'
-        };
-
         const moduleDisplay = modules[session.current_module] || session.current_module;
         const progress = session.progress_percent || 0;
+        const lastActivity = new Date(session.last_activity).toLocaleDateString('es-MX');
+        const statusColor = session.status === 'Activo' ? 'rgba(34,197,94,0.2)' : 'rgba(168,85,247,0.2)';
+        const statusTextColor = session.status === 'Activo' ? '#86efac' : '#d8b4fe';
 
         html += `
-          <tr style="border-bottom: 1px solid rgba(184,154,106,0.1);">
-            <td style="padding: 12px; text-align: left;"><strong>${session.user_name}</strong></td>
-            <td style="padding: 12px; text-align: left;">${moduleDisplay}</td>
+          <tr style="border-bottom: 1px solid rgba(255,170,23,0.1); transition: background 0.2s;">
+            <td style="padding: 12px; text-align: left; color: var(--bone);"><strong>${session.user_name}</strong></td>
+            <td style="padding: 12px; text-align: left; color: var(--bone2);">${session.department}</td>
+            <td style="padding: 12px; text-align: left; color: var(--bone2);">${moduleDisplay}</td>
             <td style="padding: 12px; text-align: center;">
-              <div style="background: rgba(184,154,106,0.2); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 4px;">
-                <div style="background: linear-gradient(90deg, #b89a6a, #c9aa75); height: 100%; width: ${progress}%;"></div>
+              <div style="background: rgba(255,170,23,0.1); height: 4px; border-radius: 2px; overflow: hidden; margin-bottom: 3px; width: 60px; margin-left: auto; margin-right: auto;">
+                <div style="background: #FFAA17; height: 100%; width: ${progress}%;"></div>
               </div>
-              ${progress}%
+              <span style="color: var(--bone2);">${progress}%</span>
             </td>
-            <td style="padding: 12px; text-align: center;">${session.duration_minutes}</td>
-            <td style="padding: 12px; text-align: left;">${statusBadge}</td>
+            <td style="padding: 12px; text-align: center; color: var(--bone2);">${session.duration_minutes}m</td>
+            <td style="padding: 12px; text-align: center; color: var(--bone2);">${lastActivity}</td>
+            <td style="padding: 12px; text-align: left;">
+              <span style="color: ${statusTextColor}; background: ${statusColor}; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 500;">● ${session.status}</span>
+            </td>
           </tr>
         `;
       });
 
       html += `
-            </tbody>
-          </table>
-        </div>
+          </tbody>
+        </table>
       `;
 
       container.innerHTML = html;
     };
 
-    // Cargar data al abrir
+    // Evento al abrir popup
     document.addEventListener('popupOpened', (e) => {
       if (e.detail === 'capacitaciones') {
-        loadCapacitacionesData();
-        // Recargar cada 5 segundos mientras está abierto
-        const interval = setInterval(() => {
-          if (!document.getElementById('qa-capacitaciones').classList.contains('open')) {
-            clearInterval(interval);
-          } else {
-            loadCapacitacionesData();
-          }
-        }, 5000);
+        loadCapacitacionesHistory();
+      }
+    });
+
+    // Filtros en tiempo real
+    ['filter-empleado', 'filter-depto', 'filter-modulo', 'filter-dias'].forEach(filterId => {
+      const element = document.getElementById(filterId);
+      if (element) {
+        element.addEventListener('change', loadCapacitacionesHistory);
+        element.addEventListener('keyup', loadCapacitacionesHistory);
       }
     });
   });
